@@ -1,61 +1,241 @@
 import { Box, Typography, Button } from "@mui/material";
+import { useEffect, useRef } from "react";
 import logo from "../../assets/logo.png";
-import mens from "../../assets/bbd53846cb92a734a26973d3c7cd83699addf233.png"
+import mens from "../../assets/bbd53846cb92a734a26973d3c7cd83699addf233.png";
 
 export const PersonalisedInstant = () => {
+    const contentRef = useRef(null);
+    const imageRef = useRef(null);
+
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            (entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = "1";
+                        entry.target.style.transform = "translateY(0)";
+                    }
+                });
+            },
+            { threshold: 0.1 }
+        );
+
+        if (contentRef.current) observer.observe(contentRef.current);
+        if (imageRef.current) observer.observe(imageRef.current);
+
+        return () => {
+            if (contentRef.current) observer.unobserve(contentRef.current);
+            if (imageRef.current) observer.unobserve(imageRef.current);
+        };
+    }, []);
+
     return (
         <Box
             sx={{
                 width: "100%",
+                maxWidth: "100vw",
                 bgcolor: "#f7f7f7",
                 borderRadius: "0 0 30px 30px",
                 overflow: "hidden",
                 display: "flex",
                 flexDirection: { xs: "column", md: "row" },
                 alignItems: "center",
+                position: "relative",
+                "&::before": {
+                    content: '""',
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    background: "linear-gradient(135deg, rgba(251,199,181,0.1) 0%, rgba(255,181,161,0.05) 100%)",
+                    pointerEvents: "none",
+                },
             }}
         >
-            <Box sx={{ width: { xs: "100%", md: "50%" }, }}>
-                <img
+            {/* Animated Background Elements */}
+            <Box
+                sx={{
+                    position: "absolute",
+                    top: "-50px",
+                    right: "-50px",
+                    width: "200px",
+                    height: "200px",
+                    borderRadius: "50%",
+                    background: "radial-gradient(circle, rgba(255,181,161,0.2) 0%, transparent 70%)",
+                    animation: "float 6s ease-in-out infinite",
+                    "@keyframes float": {
+                        "0%, 100%": { transform: "translateY(0px) rotate(0deg)" },
+                        "50%": { transform: "translateY(-20px) rotate(180deg)" },
+                    },
+                    zIndex: 0,
+                    pointerEvents: "none",
+                }}
+            />
+            <Box
+                sx={{
+                    position: "absolute",
+                    bottom: "-30px",
+                    left: "-30px",
+                    width: "150px",
+                    height: "150px",
+                    borderRadius: "50%",
+                    background: "radial-gradient(circle, rgba(251,199,181,0.15) 0%, transparent 70%)",
+                    animation: "float 8s ease-in-out infinite reverse",
+                    "@keyframes float": {
+                        "0%, 100%": { transform: "translateY(0px) rotate(0deg)" },
+                        "50%": { transform: "translateY(-15px) rotate(-180deg)" },
+                    },
+                    zIndex: 0,
+                    pointerEvents: "none",
+                }}
+            />
+
+            <Box
+                ref={imageRef}
+                sx={{
+                    width: { xs: "100%", md: "50%" },
+                    position: "relative",
+                    opacity: 0,
+                    transform: "translateX(-50px)",
+                    transition: "opacity 0.8s ease-out, transform 0.8s ease-out",
+                    "&::after": {
+                        content: '""',
+                        position: "absolute",
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        background: "linear-gradient(to right, transparent 0%, rgba(247,247,247,0.3) 100%)",
+                        pointerEvents: "none",
+                    },
+                }}
+            >
+                <Box
+                    component="img"
                     src={mens}
                     alt="App Banner"
-                    style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                    sx={{
+                        width: "100%",
+                        height: { xs: "auto", md: "100%" },
+                        minHeight: { xs: "300px", md: "500px" },
+                        objectFit: "cover",
+                        display: "block",
+                    }}
                 />
             </Box>
             <Box
+                ref={contentRef}
                 sx={{
                     width: { xs: "100%", md: "50%" },
-                    px: { xs: 2, md: 6 },
+                    px: { xs: 3, md: 6 },
                     py: { xs: 4, md: 6 },
                     textAlign: { xs: "center", md: "left" },
+                    position: "relative",
+                    zIndex: 2,
+                    opacity: 0,
+                    transform: "translateX(50px)",
+                    transition: "opacity 0.8s ease-out 0.2s, transform 0.8s ease-out 0.2s",
                 }}
             >
-                <img src={logo} alt="logo" style={{ height: 100 }} />
+                <Box
+                    component="img"
+                    src={logo}
+                    alt="logo"
+                    sx={{
+                        height: { xs: 60, sm: 80, md: 100 },
+                        width: "auto",
+                        mb: { xs: 2, md: 3 },
+                        filter: "drop-shadow(0 4px 6px rgba(0,0,0,0.1))",
+                        transition: "transform 0.3s ease",
+                        "&:hover": {
+                            transform: "scale(1.05)",
+                        },
+                    }}
+                />
 
-                <Typography sx={{ mt: 3, fontSize: 36, fontWeight: 800, }}>
-                    <Box component="span" sx={{ backgroundColor: "#0f1b40", color: "#fff", borderRadius: "40px", px: 2, py: "6px", }}>
-                        <strong style={{ color: "#FFB5A1" }} className="fw-bold text-decoration-underline">Personalised</strong> & Instant
+                <Typography
+                    sx={{
+                        mt: { xs: 2, md: 3 },
+                        fontSize: { xs: 24, sm: 28, md: 36 },
+                        fontWeight: 800,
+                        mb: { xs: 2, md: 3 },
+                    }}
+                >
+                    <Box
+                        component="span"
+                        sx={{
+                            backgroundColor: "#0f1b40",
+                            color: "#fff",
+                            borderRadius: "40px",
+                            px: { xs: 2, sm: 2.5, md: 3 },
+                            py: { xs: "8px", md: "10px" },
+                            display: "inline-block",
+                            boxShadow: "0 4px 15px rgba(15,27,64,0.3)",
+                            transition: "all 0.3s ease",
+                            "&:hover": {
+                                transform: "translateY(-2px)",
+                                boxShadow: "0 6px 20px rgba(15,27,64,0.4)",
+                            },
+                        }}
+                    >
+                        <Box
+                            component="strong"
+                            sx={{
+                                color: "#FFB5A1",
+                                textDecoration: "underline",
+                                textDecorationThickness: "2px",
+                                textUnderlineOffset: "4px",
+                            }}
+                        >
+                            Personalised
+                        </Box>{" "}
+                        & Instant
                     </Box>
                 </Typography>
 
-                <Typography sx={{ mt: 2, fontSize: 18, color: "#444" }}>
+                <Typography
+                    sx={{
+                        mt: { xs: 1.5, md: 2 },
+                        fontSize: { xs: 14, sm: 16, md: 18 },
+                        color: "#444",
+                        mb: { xs: 2.5, md: 3 },
+                        fontWeight: 500,
+                    }}
+                >
                     Download the DANBRO app for faster ordering
                 </Typography>
 
                 {/* Store Buttons */}
-                <Box sx={{ mt: 3, display: "flex", gap: 2 }}>
+                <Box
+                    sx={{
+                        mt: { xs: 2, md: 3 },
+                        display: "flex",
+                        flexDirection: { xs: "column", sm: "row" },
+                        gap: { xs: 1.5, md: 2 },
+                        justifyContent: { xs: "center", md: "flex-start" },
+                    }}
+                >
                     <Box
                         sx={{
                             display: "flex",
                             alignItems: "center",
-                            gap: 1,
+                            gap: 1.5,
                             bgcolor: "#000",
                             color: "#fff",
-                            px: 2.5,
-                            py: 1,
-                            borderRadius: "10px",
+                            px: { xs: 2.5, md: 3 },
+                            py: { xs: 1, md: 1.2 },
+                            borderRadius: "12px",
                             cursor: "pointer",
-                            width: 160,
+                            width: { xs: "100%", sm: 180 },
+                            maxWidth: { xs: "280px", sm: "180px" },
+                            transition: "all 0.3s ease",
+                            boxShadow: "0 4px 15px rgba(0,0,0,0.2)",
+                            "&:hover": {
+                                transform: "translateY(-3px)",
+                                boxShadow: "0 6px 20px rgba(0,0,0,0.3)",
+                                bgcolor: "#1a1a1a",
+                            },
                         }}
                     >
                         <svg
@@ -78,14 +258,22 @@ export const PersonalisedInstant = () => {
                         sx={{
                             display: "flex",
                             alignItems: "center",
-                            gap: 1,
+                            gap: 1.5,
                             bgcolor: "#000",
                             color: "#fff",
-                            px: 2.5,
-                            py: 1,
-                            borderRadius: "10px",
+                            px: { xs: 2.5, md: 3 },
+                            py: { xs: 1, md: 1.2 },
+                            borderRadius: "12px",
                             cursor: "pointer",
-                            width: 180,
+                            width: { xs: "100%", sm: 200 },
+                            maxWidth: { xs: "280px", sm: "200px" },
+                            transition: "all 0.3s ease",
+                            boxShadow: "0 4px 15px rgba(0,0,0,0.2)",
+                            "&:hover": {
+                                transform: "translateY(-3px)",
+                                boxShadow: "0 6px 20px rgba(0,0,0,0.3)",
+                                bgcolor: "#1a1a1a",
+                            },
                         }}
                     >
                         <svg width="25" height="25" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">

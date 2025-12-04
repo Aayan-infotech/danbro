@@ -85,18 +85,19 @@ export const Artical = () => {
 
             <Typography
                 sx={{
-                    fontSize: 32,
+                    fontSize: { xs: 22, sm: 26, md: 32 },
                     fontWeight: 800,
                     color: "var(--themeColor)",
-                    mb: 6,
+                    mb: { xs: 4, md: 6 },
+                    px: { xs: 2, md: 0 },
                 }}
             >
                 Check it out, OUR NEW ARTICLES
             </Typography>
             <Container>
-                <Grid container spacing={2}>
+                <Grid container spacing={{ xs: 2, md: 2 }}>
                     {articleList?.map((item, i) => (
-                        <Grid size={4}>
+                        <Grid size={{ xs: 12, sm: 6, md: 4 }} key={i}>
                             <Box
                                 sx={{
                                     bgColor: "#fff",
@@ -104,18 +105,33 @@ export const Artical = () => {
                                     p: 1,
                                     textAlign: "left",
                                     position: "relative",
+                                    cursor: "pointer",
+                                    transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
+                                    boxShadow: "0 2px 10px rgba(0,0,0,0.08)",
+                                    overflow: "hidden",
+                                    "&:hover": {
+                                        transform: "translateY(-8px) scale(1.02)",
+                                        boxShadow: "0 12px 30px rgba(0,0,0,0.15)",
+                                        "& .article-image": {
+                                            transform: "scale(1.1)",
+                                        },
+                                        "& .article-title": {
+                                            color: "var(--themeColor)",
+                                        },
+                                    },
                                 }}
                             >
-
                                 {/* Image */}
                                 <Box
+                                    className="article-image"
                                     component="img"
                                     src={item.image}
                                     sx={{
                                         width: "100%",
-                                        height: 200,
+                                        height: { xs: 180, sm: 200, md: 220 },
                                         objectFit: "cover",
                                         borderRadius: "12px",
+                                        transition: "transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)",
                                     }}
                                 />
 
@@ -132,12 +148,14 @@ export const Artical = () => {
                                     {item.date}
                                 </Typography>
                                 <Typography
+                                    className="article-title"
                                     sx={{
                                         mt: 1,
-                                        fontSize: 16,
+                                        fontSize: { xs: 14, md: 16 },
                                         fontWeight: 600,
                                         lineHeight: 1.4,
                                         color: "#333",
+                                        transition: "color 0.3s ease",
                                     }}
                                 >
                                     {item.title}

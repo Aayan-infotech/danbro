@@ -52,10 +52,10 @@ export const CategoryCarousel = () => {
       sx={{
         width: "100%",
         backgroundColor: "#fbd9d3",
-        borderRadius: "100px",
-        py: 4,
-        px: 5,
-        mb: 5,
+        borderRadius: { xs: "30px", md: "100px" },
+        py: { xs: 2, md: 4 },
+        px: { xs: 2, md: 5 },
+        mb: { xs: 3, md: 5 },
         position: "relative",
       }}
     >
@@ -63,21 +63,63 @@ export const CategoryCarousel = () => {
         onClick={() => sliderRef.slickPrev()}
         sx={{
           position: "absolute",
-          left: 10,
+          left: { xs: 5, md: 10 },
           top: "50%",
           transform: "translateY(-50%)",
           zIndex: 5,
+          backgroundColor: "rgba(255, 255, 255, 0.8)",
+          "&:hover": {
+            backgroundColor: "rgba(255, 255, 255, 1)",
+          },
         }}
       >
-        <ArrowBackIosNewIcon sx={{ color: "var(--themeColor)", fontSize: 28 }} />
+        <ArrowBackIosNewIcon sx={{ color: "var(--themeColor)", fontSize: { xs: 20, md: 28 } }} />
       </IconButton>
 
       {/* Carousel */}
       <Slider ref={(slider) => (sliderRef = slider)} {...settings}>
         {items?.map((item, i) => (
-          <Box key={i} sx={{ px: 5 }}>
-            <img src={item.img} alt="" style={{ height: 85, marginBottom: 8 }} />
-            <Typography sx={{ fontSize: 13, fontWeight: 600, color: "var(--themeColor)", }}>
+          <Box
+            key={i}
+            sx={{
+              px: { xs: 1, sm: 2, md: 5 },
+              cursor: "pointer",
+              transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+              "&:hover": {
+                transform: "translateY(-8px)",
+                "& img": {
+                  transform: "scale(1.15) rotate(5deg)",
+                },
+                "& .category-title": {
+                  color: "var(--specialColor)",
+                  transform: "scale(1.05)",
+                },
+              },
+            }}
+          >
+            <Box
+              component="img"
+              src={item.img}
+              alt=""
+              sx={{
+                height: { xs: 60, md: 85 },
+                width: "100%",
+                objectFit: "contain",
+                mb: 1,
+                transition: "transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
+                filter: "drop-shadow(0 4px 8px rgba(0,0,0,0.1))",
+              }}
+            />
+            <Typography
+              className="category-title"
+              sx={{
+                fontSize: { xs: 10, sm: 11, md: 13 },
+                fontWeight: 600,
+                color: "var(--themeColor)",
+                textAlign: "center",
+                transition: "all 0.3s ease",
+              }}
+            >
               {item.title}
             </Typography>
           </Box>
@@ -89,13 +131,17 @@ export const CategoryCarousel = () => {
         onClick={() => sliderRef.slickNext()}
         sx={{
           position: "absolute",
-          right: 10,
+          right: { xs: 5, md: 10 },
           top: "50%",
           transform: "translateY(-50%)",
           zIndex: 5,
+          backgroundColor: "rgba(255, 255, 255, 0.8)",
+          "&:hover": {
+            backgroundColor: "rgba(255, 255, 255, 1)",
+          },
         }}
       >
-        <ArrowForwardIosIcon sx={{ color: "var(--themeColor)", fontSize: 28 }} />
+        <ArrowForwardIosIcon sx={{ color: "var(--themeColor)", fontSize: { xs: 20, md: 28 } }} />
       </IconButton>
     </Box>
   );
