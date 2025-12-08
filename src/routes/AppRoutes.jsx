@@ -4,6 +4,9 @@ import { AboutUs } from "../pages/home/AboutUs";
 import { Blog } from "../pages/home/Blog";
 import { Contact } from "../pages/home/Contact";
 import { PressandMedia } from "../pages/home/PressandMedia";
+import { Career } from "../pages/home/Career";
+import { Offers } from "../pages/home/Offers";
+import { CateringEvents } from "../pages/home/CateringEvents";
 import { Login } from "../pages/auth/Login";
 import { Register } from "../pages/auth/Register";
 import { UserProfile } from "../pages/user/UserProfile";
@@ -20,6 +23,9 @@ const AppRoutes = () => {
             <Route path="/blog" element={<Blog />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/press-media" element={<PressandMedia />} />
+            <Route path="/career" element={<Career />} />
+            <Route path="/offers" element={<Offers />} />
+            <Route path="/events" element={<CateringEvents />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/user-profile" element={<UserProfile />} />

@@ -103,6 +103,52 @@ export const TopHeader = () => {
                         Track Order
                     </Button>
                 </Link>
+                <Link to="/offers">
+                    <Button
+                        variant="outlined"
+                        size="small"
+                        sx={{
+                            textTransform: "none",
+                            borderRadius: 5,
+                            borderColor: "var(--themeColor)",
+                            color: "var(--themeColor)",
+                            fontWeight: 600,
+                            fontSize: { md: 13, lg: 14 },
+                            transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                            "&:hover": {
+                                borderColor: "var(--themeColor)",
+                                backgroundColor: "#fbeeee",
+                                transform: "translateY(-2px)",
+                                boxShadow: "0 4px 12px rgba(95,41,48,0.15)",
+                            },
+                        }}
+                    >
+                        Offers & Schemes
+                    </Button>
+                </Link>
+                <Link to="/events">
+                    <Button
+                        variant="outlined"
+                        size="small"
+                        sx={{
+                            textTransform: "none",
+                            borderRadius: 5,
+                            borderColor: "var(--themeColor)",
+                            color: "var(--themeColor)",
+                            fontWeight: 600,
+                            fontSize: { md: 13, lg: 14 },
+                            transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                            "&:hover": {
+                                borderColor: "var(--themeColor)",
+                                backgroundColor: "#fbeeee",
+                                transform: "translateY(-2px)",
+                                boxShadow: "0 4px 12px rgba(95,41,48,0.15)",
+                            },
+                        }}
+                    >
+                        Events
+                    </Button>
+                </Link>
             </Box>
 
             {/* Mobile Left Buttons - Compact */}

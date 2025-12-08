@@ -30,6 +30,9 @@ import {
   Handshake,
   Shield,
   Verified,
+  LocalShipping,
+  ThumbUpOffAlt,
+  ThumbDownOffAlt,
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 
@@ -103,12 +106,12 @@ export const ProductDetails = () => {
                       },
                     }}
                   >
-                    <Box component="img" src={image} alt={`${product.name} ${index + 1}`} sx={{ width: "100%", height: "100%", objectFit: "cover", }} />
+                    <Box component="img" src={image} alt={`${product.name} ${index + 1}`} sx={{ width: "100%", height: "200px", objectFit: "cover", }} />
                   </Box>
                 ))}
               </Box>
               <Box sx={{ flex: 1 }}>
-                <Box sx={{ width: "100%", aspectRatio: "1", borderRadius: 2, overflow: "hidden", mb: 2, }}>
+                <Box sx={{ width: "100%", height: "450px", borderRadius: 2, overflow: "hidden", mb: 2 }}>
                   <Box component="img" src={product.images[selectedImage]} alt={product.name} sx={{ width: "100%", height: "100%", objectFit: "cover", }} />
                 </Box>
               </Box>
@@ -126,12 +129,7 @@ export const ProductDetails = () => {
               </Typography>
               <Box>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                  <Rating
-                    value={4.5}
-                    precision={0.5}
-                    readOnly
-                    sx={{ color: "#FF643A" }}  // star color
-                  />
+                  <Rating value={4.5} precision={0.5} readOnly sx={{ color: "#FF643A" }} />
                   <Typography sx={{ fontSize: 16, fontWeight: 600, color: "#333" }}>
                     4.5 <span style={{ fontWeight: 400, color: "#777" }}>/ 5</span>
                   </Typography>
@@ -142,7 +140,6 @@ export const ProductDetails = () => {
                 {product.description}
               </Typography>
               <Divider sx={{ my: 2, backgroundColor: "#F31400" }} />
-
               <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <Box>
                   <Typography variant="body2" sx={{ fontWeight: 600, color: "#2c2c2c" }}>
@@ -217,6 +214,11 @@ export const ProductDetails = () => {
                 </Grid>
               </Grid>
             </Box>
+            <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 1, mt: 2, backgroundColor: "#F0FFF4", p: 1, borderRadius: 2, border: "1px solid #B5FFC9" }}>
+              <Typography variant="subtitle1" sx={{ fontSize: 14, fontWeight: 600, color: "#00A819" }}>
+                <LocalShipping /> Order within 2hrs for delivery today.
+              </Typography>
+            </Box>
           </Grid>
         </Grid>
       </Container>
@@ -230,7 +232,7 @@ export const ProductDetails = () => {
                 <Box sx={{ backgroundColor: "#fff", color: "#FF6F61", width: 60, height: 60, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, }}>
                   {icons[i]}
                 </Box>
-                <Typography fontWeight={600} sx={{ whiteSpace: "pre-line", fontSize: 14, color: "#515151",fontWeight: 'bold' }}>
+                <Typography fontWeight={600} sx={{ whiteSpace: "pre-line", fontSize: 14, color: "#515151", fontWeight: 'bold' }}>
                   {text}
                 </Typography>
               </Box>
@@ -239,10 +241,10 @@ export const ProductDetails = () => {
         </Grid>
       </Box>
 
+      {/* 🔶 What's Inside + Nutrition Facts */}
       <Container maxWidth="xl">
-        {/* 🔶 What's Inside + Nutrition Facts */}
-        <Grid container spacing={3} mt={4}>
-          <Grid item xs={12} md={6}>
+        <Grid container spacing={2}>
+          <Grid size={6}>
             <Box sx={{ p: 3, border: "1px solid #ddd", borderRadius: 2 }}>
               <Typography fontWeight={600}>What's Inside</Typography>
               <Typography mt={1} fontSize={14} color="text.secondary">
@@ -250,27 +252,43 @@ export const ProductDetails = () => {
                 Premium Type 55 French Wheat Flour, Normandy Butter (82% fat), Belgian Dark Chocolate (54.5%),
                 Free-range Eggs, Fresh Whole Milk, Cane Sugar, Sea Salt, Yeast.
               </Typography>
-
-              <Box mt={2} sx={{ p: 2, background: "#FFF5F4", borderRadius: 2 }}>
-                <Typography fontWeight={600}>Allergen Information</Typography>
-                <Typography fontSize={13}>Contains: Wheat, Gluten, Milk, Eggs, Soy.</Typography>
+              <Box mt={2} sx={{ p: 2, background: "#FFF1EE", borderRadius: 2, display: "flex", alignItems: "center", gap: 2, border: "1px solid #FF643A" }}>
+                <ThumbUpOffAlt sx={{ color: "#FF643A" }} />
+                <Box>
+                  <Typography fontWeight={600}>Allergen Information</Typography>
+                  <Typography fontSize={13}>Contains: Wheat, Gluten, Milk, Eggs, Soy.</Typography>
+                </Box>
               </Box>
             </Box>
           </Grid>
-
-          <Grid item xs={12} md={6}>
+          <Grid size={6}>
             <Box sx={{ p: 3, border: "1px solid #ddd", borderRadius: 2 }}>
-              <Typography fontWeight={600}>Nutrition Facts</Typography>
-
-              <Box mt={1} fontSize={14}>
-                <Typography>Calories: <b>320 kcal</b></Typography>
-                <Typography>Fat: <b>19g</b></Typography>
-                <Typography>Carbohydrates: <b>35g</b></Typography>
-                <Typography>Protein: <b>4g</b></Typography>
-                <Typography>Sugar: <b>12g</b></Typography>
+              <Typography fontWeight={600} fontSize={18} mb={1}>
+                Nutrition Facts
+              </Typography>
+              <Box fontSize={14}>
+                {[
+                  { label: "Calories", value: "320 kcal" },
+                  { label: "Fat", value: "19g" },
+                  { label: "Carbohydrates", value: "35g" },
+                  { label: "Protein", value: "4g" },
+                  { label: "Sugar", value: "12g" }
+                ].map((item, index) => (
+                  <Box
+                    key={index}
+                    sx={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      py: 1.2,
+                      borderBottom: index !== 4 ? "1px solid #eee" : "none"
+                    }}
+                  >
+                    <Typography>{item.label}</Typography>
+                    <Typography fontWeight={600}>{item.value}</Typography>
+                  </Box>
+                ))}
               </Box>
-
-              <Box mt={2} sx={{ p: 2, background: "#FFF5F4", borderRadius: 2 }}>
+              <Box mt={2} sx={{ p: 2, background: "#F8F8F8", borderRadius: 2, border: "1px solid #D5D5D5" }}>
                 <Typography fontWeight={600}>Storage Instructions</Typography>
                 <Typography fontSize={13}>
                   Keep in a cool dry place. Consume within 24 hours.
@@ -312,9 +330,9 @@ export const ProductDetails = () => {
             name: "Ethan Bennett", time: "1 month ago",
             text: "Good taste, a little too sweet for me. Texture is soft and moist overall decent treat."
           }].map((review, i) => (
-            <Box key={i} sx={{ p: 3, borderRadius: 2, border: "1px solid #eee", mt: 2 }}>
+            <Box key={i} sx={{ p: 3, borderRadius: 2, backgroundColor: "#FCF7FA", mt: 2 }}>
               <Box display="flex" gap={2} alignItems="center">
-                <Avatar />
+                <Avatar alt="Remy Sharp" src="/static/images/avatar/1.jpg" />
                 <Box>
                   <Typography fontWeight={600}>{review.name}</Typography>
                   <Typography fontSize={12} color="text.secondary">{review.time}</Typography>
@@ -322,32 +340,67 @@ export const ProductDetails = () => {
               </Box>
               <Rating value={5 - i} readOnly size="small" sx={{ mt: 1 }} />
               <Typography mt={1} fontSize={14}>{review.text}</Typography>
+              <Box sx={{ display: "flex", gap: 3, mt: 2, color: "#707070" }}>
+                <Box sx={{ display: "flex", alignItems: "center", gap: .5, cursor: "pointer" }}>
+                  <ThumbUpOffAlt />
+                  <Typography fontSize={13}>12</Typography>
+                </Box>
+                <Box sx={{ display: "flex", alignItems: "center", gap: .5, cursor: "pointer" }}>
+                  <ThumbDownOffAlt />
+                  <Typography fontSize={13}>3</Typography>
+                </Box>
+              </Box>
             </Box>
           ))}
         </Box>
 
         {/* Explore More */}
-        <Typography align="center" fontWeight={700} mt={8} fontSize={32}>
-          Explore More
-        </Typography>
-
-        <Tabs
-          value={tab}
-          onChange={(_, v) => setTab(v)}
-          centered sx={{ mt: 2 }}
-        >
-          {["cake", "muffins", "croissant", "bread", "tart", "favorite"].map(t => (
-            <Tab key={t} label={t.charAt(0).toUpperCase() + t.slice(1)} value={t} />
-          ))}
-        </Tabs>
-
-        {/* Product Images */}
-        <Grid container spacing={2} mt={3}>
+        <h1 className="title-style text-center mt-5 mb-4">Explore More</h1>
+        <Box sx={{ width: "100%", borderBottom: "1px solid #e5e5e5" }}>
+          <Tabs
+            value={tab}
+            onChange={(_, v) => setTab(v)}
+            centered
+            TabIndicatorProps={{
+              sx: {
+                backgroundColor: "#C22A00",
+                height: 10,
+                borderTopRightRadius: "10px",
+                borderTopLeftRadius: "10px",
+                borderBottomLeftRadius: 0,
+                borderBottomRightRadius: 0,
+              }
+            }}
+            sx={{
+              "& .MuiTab-root": {
+                fontSize: 18,
+                textTransform: "capitalize",
+                fontWeight: 500,
+                mx: 2
+              },
+              "& .Mui-selected": { color: "#FF643A", fontWeight: 700 }
+            }}
+          >
+            {["Cake", "Muffins", "Croissant", "Bread", "Tart", "Favorite"].map((item) => (
+              <Tab key={item} label={item} value={item.toLowerCase()} />
+            ))}
+          </Tabs>
+        </Box>
+        <Grid container spacing={3} mt={4}>
           {images.map((img, i) => (
             <Grid item xs={6} sm={4} md={3} key={i}>
-              <Box component="img"
+              <Box
+                component="img"
                 src={img}
-                sx={{ width: "100%", height: 180, objectFit: "cover", borderRadius: 2 }}
+                sx={{
+                  width: "100%",
+                  height: 230,
+                  objectFit: "cover",
+                  borderRadius: 3,
+                  transition: "0.3s",
+                  cursor: "pointer",
+                  "&:hover": { transform: "scale(1.03)" } // subtle hover like premium UI
+                }}
               />
             </Grid>
           ))}

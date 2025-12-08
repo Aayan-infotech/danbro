@@ -8,10 +8,11 @@ import TwitterIcon from "@mui/icons-material/Twitter";
 import SendIcon from "@mui/icons-material/Send";
 
 import logo from "../../assets/logo.png";
-import postImg from "../../assets/cakeimg.png";    // sample image
-import visa from "../../assets/payments.png";          // add your icons
+import postImg from "../../assets/cakeimg.png";
+import visa from "../../assets/payments.png";
 import mastercard from "../../assets/logo.png";
 import maestro from "../../assets/logo.png";
+import { Link } from "react-router-dom";
 
 const FooterContainer = styled(Box)(({ theme }) => ({
   backgroundColor: "#FBEFE8",
@@ -43,6 +44,16 @@ export const Footer = () => {
       if (footerRef.current) observer.unobserve(footerRef.current);
     };
   }, []);
+
+  const knowMoreLinks = [
+    { label: "Offers and Schemes", link: "/offers" },
+    { label: "Press and Media", link: "/media" },
+    { label: "Events & Catering", link: "/events" },
+    { label: "Blogs", link: "/blogs" },
+    { label: "Career", link: "/career" },
+    { label: "Career at Danbro", link: "/career-danbro" },
+    { label: "Danbro Institute", link: "/institute" },
+  ];
 
   return (
     <Box>
@@ -340,35 +351,30 @@ export const Footer = () => {
               >
                 KNOW MORE
               </Typography>
-              {[
-                "Offers and Schemes",
-                "Press and Media",
-                "Events & Catering",
-                "Blogs",
-                "Career at Danbro",
-                "Danbro Institute",
-              ].map((item, index) => (
-                <Typography
-                  key={item}
-                  sx={{
-                    mb: 1,
-                    color: "#555",
-                    fontSize: { xs: 13, md: 14 },
-                    cursor: "pointer",
-                    transition: "all 0.3s ease",
-                    "&:hover": {
-                      color: "var(--themeColor)",
-                      transform: "translateX(5px)",
-                    },
-                    animation: `fadeInUp 0.6s ease-out ${index * 0.05}s both`,
-                    "@keyframes fadeInUp": {
-                      "0%": { opacity: 0, transform: "translateY(10px)" },
-                      "100%": { opacity: 1, transform: "translateY(0)" },
-                    },
-                  }}
-                >
-                  {item}
-                </Typography>
+              {knowMoreLinks.map((item, index) => (
+                <Link to={item.link} className="text-decoration-none">
+                  <Typography
+                    key={index}
+                    sx={{
+                      mb: 1,
+                      color: "#555",
+                      fontSize: { xs: 13, md: 14 },
+                      cursor: "pointer",
+                      transition: "all 0.3s ease",
+                      "&:hover": {
+                        color: "var(--themeColor)",
+                        transform: "translateX(5px)",
+                      },
+                      animation: `fadeInUp 0.6s ease-out ${index * 0.05}s both`,
+                      "@keyframes fadeInUp": {
+                        "0%": { opacity: 0, transform: "translateY(10px)" },
+                        "100%": { opacity: 1, transform: "translateY(0)" },
+                      },
+                    }}
+                  >
+                    {item.label}
+                  </Typography>
+                </Link>
               ))}
             </Grid>
             <Grid item xs={12} sm={6} md={3.4}>
