@@ -317,22 +317,7 @@ export const Offers = () => {
                 justifyContent: "space-between",
                 alignItems: { xs: "flex-start", md: "center" },
                 gap: { xs: 2, md: 3 },
-                p: { xs: 2, md: 3 },
                 borderRadius: 3,
-                backgroundColor: "#fff",
-                boxShadow: "0 2px 10px rgba(0,0,0,0.05)",
-                transition: "all 0.3s ease",
-                animation: visibleSections.positions
-                  ? `fadeInUp 0.6s ease-out ${index * 0.15}s both`
-                  : "none",
-                "@keyframes fadeInUp": {
-                  "0%": { opacity: 0, transform: "translateY(20px)" },
-                  "100%": { opacity: 1, transform: "translateY(0)" },
-                },
-                "&:hover": {
-                  boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
-                  transform: "translateY(-3px)",
-                },
               }}
             >
               <Box sx={{ flex: 1, textAlign: { xs: "center", md: "start" }, width: "100%" }}>

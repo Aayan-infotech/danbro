@@ -13,6 +13,7 @@ import { UserProfile } from "../pages/user/UserProfile";
 import { TrackOrder } from "../pages/orders/TrackOrder";
 import { ProductList } from "../pages/products/ProductList";
 import { ProductDetails } from "../pages/products/ProductDetails";
+import BlogDetails from "../pages/home/BlogDetails";
 
 
 const AppRoutes = () => {
@@ -21,6 +22,7 @@ const AppRoutes = () => {
             <Route path="/" element={<Home />} />
             <Route path="/about-us" element={<AboutUs />} />
             <Route path="/blog" element={<Blog />} />
+            <Route path="/blog-details" element={<BlogDetails />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/press-media" element={<PressandMedia />} />
             <Route path="/career" element={<Career />} />

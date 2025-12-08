@@ -49,10 +49,19 @@ export const Footer = () => {
     { label: "Offers and Schemes", link: "/offers" },
     { label: "Press and Media", link: "/media" },
     { label: "Events & Catering", link: "/events" },
-    { label: "Blogs", link: "/blogs" },
+    { label: "Blogs", link: "/blog" },
     { label: "Career", link: "/career" },
     { label: "Career at Danbro", link: "/career-danbro" },
     { label: "Danbro Institute", link: "/institute" },
+  ];
+
+  const ourStories = [
+    { label: "About Us", link: "/about" },
+    { label: "Lucknow Stores", link: "/media" },
+    { label: "Kanpur Stores", link: "/events" },
+    { label: "Ghaziabad Stores", link: "/blogs" },
+    { label: "Noida Stores", link: "/career" },
+    { label: "Delhi Stores", link: "/career-danbro" },
   ];
 
   return (
@@ -269,35 +278,30 @@ export const Footer = () => {
               >
                 OUR STORES
               </Typography>
-              {[
-                "About Us",
-                "Lucknow Stores",
-                "Kanpur Stores",
-                "Ghaziabad Stores",
-                "Noida Stores",
-                "Delhi Stores",
-              ].map((item, index) => (
-                <Typography
-                  key={item}
-                  sx={{
-                    mb: 1,
-                    color: "#555",
-                    fontSize: { xs: 13, md: 14 },
-                    cursor: "pointer",
-                    transition: "all 0.3s ease",
-                    "&:hover": {
-                      color: "var(--themeColor)",
-                      transform: "translateX(5px)",
-                    },
-                    animation: `fadeInUp 0.6s ease-out ${index * 0.05}s both`,
-                    "@keyframes fadeInUp": {
-                      "0%": { opacity: 0, transform: "translateY(10px)" },
-                      "100%": { opacity: 1, transform: "translateY(0)" },
-                    },
-                  }}
-                >
-                  {item}
-                </Typography>
+              {ourStories.map((item, index) => (
+                <Link to={item.link} className="text-decoration-none">
+                  <Typography
+                    key={item}
+                    sx={{
+                      mb: 1,
+                      color: "#555",
+                      fontSize: { xs: 13, md: 14 },
+                      cursor: "pointer",
+                      transition: "all 0.3s ease",
+                      "&:hover": {
+                        color: "var(--themeColor)",
+                        transform: "translateX(5px)",
+                      },
+                      animation: `fadeInUp 0.6s ease-out ${index * 0.05}s both`,
+                      "@keyframes fadeInUp": {
+                        "0%": { opacity: 0, transform: "translateY(10px)" },
+                        "100%": { opacity: 1, transform: "translateY(0)" },
+                      },
+                    }}
+                  >
+                    {item.label}
+                  </Typography>
+                </Link>
               ))}
             </Grid>
             <Grid item xs={6} sm={3} md={2}>

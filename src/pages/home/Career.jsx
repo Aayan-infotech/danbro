@@ -119,10 +119,9 @@ export const Career = () => {
           <Typography
             variant="body1"
             sx={{
-              fontSize: { xs: 14, md: 16 },
+              fontSize: { xs: 13, sm: 14, md: 16 },
               color: "#666",
               lineHeight: 1.8,
-              mx: "auto",
             }}
           >
             At Danbro Bakery, we're more than just a team; we're a family. We're passionate about crafting delicious baked goods and creating a positive work environment where everyone can thrive. If you're looking for a rewarding career in the baking industry, we invite you to explore opportunities with us.
@@ -142,17 +141,17 @@ export const Career = () => {
           <Typography
             variant="h2"
             sx={{
-              fontSize: { xs: 24, md: 32 },
+              fontSize: { xs: 22, sm: 26, md: 32 },
               fontWeight: 700,
               color: "#2c2c2c",
-              mb: 4,
+              mb: { xs: 3, md: 4 },
             }}
           >
             Why Work With Us?
           </Typography>
           <Grid container spacing={{ xs: 2, sm: 2, md: 2 }}>
             {whyWorkWithUs.map((item, index) => (
-              <Grid item xs={12} sm={6} md={3} key={index}>
+              <Grid size={3} key={index}>
                 <Card
                   onClick={() => setActiveIndex(index)}
                   sx={{
@@ -236,10 +235,10 @@ export const Career = () => {
           <Typography
             variant="h2"
             sx={{
-              fontSize: { xs: 24, md: 32 },
+              fontSize: { xs: 22, sm: 26, md: 32 },
               fontWeight: 700,
               color: "#2c2c2c",
-              mb: 4,
+              mb: { xs: 3, md: 4 },
             }}
           >
             Current Openings
@@ -248,7 +247,7 @@ export const Career = () => {
             {currentOpenings.map((job, index) => {
               const IconComponent = job.icon;
               return (
-                <Grid item xs={12} key={index}>
+                <Grid size={12} key={index}>
                   <Box
                     sx={{
                       animation: visibleSections.openings
@@ -266,10 +265,8 @@ export const Career = () => {
                         flexDirection: { xs: "column", sm: "row" },
                         alignItems: { xs: "flex-start", sm: "center" },
                         gap: { xs: 2, sm: 3 },
-                        p: { xs: 2, sm: 3 },
+                        p: 1,
                         borderRadius: 3,
-                        backgroundColor: "#fff",
-                        boxShadow: "0 2px 10px rgba(0,0,0,0.05)",
                         transition: "all 0.3s ease",
                         "&:hover": {
                           boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
@@ -369,10 +366,10 @@ export const Career = () => {
           <Typography
             variant="h2"
             sx={{
-              fontSize: { xs: 24, md: 32 },
+              fontSize: { xs: 22, sm: 26, md: 32 },
               fontWeight: 700,
               color: "#2c2c2c",
-              mb: 4,
+              mb: { xs: 3, md: 4 },
             }}
           >
             How to Apply
