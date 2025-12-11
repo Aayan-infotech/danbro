@@ -11,8 +11,8 @@ export const HeroBanner = () => {
 
   const bannerSlides = [
     { id: 1, img: banner, alt: "hero banner 1" },
-    { id: 2, img: banner, alt: "hero banner 2" },
-    { id: 3, img: banner, alt: "hero banner 3" },
+    { id: 2, img: "https://treasuretrove.com.my/wp-content/uploads/2022/05/bannerimage.jpg", alt: "hero banner 2" },
+    { id: 3, img: "https://treasuretrove.com.my/wp-content/uploads/2024/09/IMG_1039-scaled.jpg", alt: "hero banner 3" },
   ];
 
   const settings = {
