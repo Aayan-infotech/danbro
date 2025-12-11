@@ -6,7 +6,8 @@ import FacebookIcon from "@mui/icons-material/Facebook";
 import InstagramIcon from "@mui/icons-material/Instagram";
 import TwitterIcon from "@mui/icons-material/Twitter";
 import SendIcon from "@mui/icons-material/Send";
-
+import makeinindia from "../../assets/makeinindia.png";
+import Maskgroup from "../../assets/Maskgroup.png";
 import logo from "../../assets/logo.png";
 import postImg from "../../assets/cakeimg.png";
 import visa from "../../assets/payments.png";
@@ -15,8 +16,13 @@ import { Link, useNavigate } from "react-router-dom";
 const FooterContainer = styled(Box)(({ theme }) => ({
   backgroundColor: "#FBEFE8",
   paddingTop: theme.spacing(6),
+  paddingBottom: theme.spacing(4),
   position: "relative",
   marginTop: "auto",
+  [theme.breakpoints.down('sm')]: {
+    paddingLeft: theme.spacing(2),
+    paddingRight: theme.spacing(2),
+  },
 }));
 
 export const Footer = () => {
@@ -88,7 +94,12 @@ export const Footer = () => {
           minHeight: { xs: "400px", md: "500px" },
         }}
       >
-        <Container maxWidth="xl">
+        <Container 
+          maxWidth="xl"
+          sx={{
+            px: { xs: 2, sm: 3, md: 4 },
+          }}
+        >
           <Box
             ref={bannerRef}
             sx={{
@@ -97,7 +108,7 @@ export const Footer = () => {
               mx: "auto",
               p: { xs: 2.5, sm: 3, md: 4 },
               borderRadius: "20px",
-              display: "flex",
+              display: { xs: "none", md: "flex" },
               flexDirection: { xs: "column", sm: "row" },
               justifyContent: "space-between",
               alignItems: { xs: "flex-start", sm: "center" },
@@ -200,7 +211,7 @@ export const Footer = () => {
               Contact
             </Box>
           </Box>
-          <Box sx={{ display: 'flex', flexDirection: { xs: "column", sm: "row" }, justifyContent: 'space-between', alignItems: { xs: "flex-start", sm: "center" }, gap: { xs: 2, sm: 0 }, mb: { xs: 8, sm: 10, md: 12 } }}>
+          <Box sx={{ display: 'flex', flexDirection: { xs: "column", sm: "row" }, justifyContent: 'space-between', alignItems: { xs: "flex-start", sm: "center" }, gap: { xs: 2, sm: 0 }, mb: { xs: 6, sm: 10, md: 12 }, px: { xs: 1, md: 0 } }}>
             <Box
               component="img"
               src={logo}
@@ -265,7 +276,7 @@ export const Footer = () => {
           <Grid
             container
             spacing={{ xs: 4, md: 6 }}
-            sx={{ my: { xs: 3, md: 5 } }}
+            sx={{ my: { xs: 3, md: 5 }, px: { xs: 1, md: 0 } }}
           >
             <Grid item xs={12} sm={6} md={2}>
               <Typography
@@ -295,9 +306,9 @@ export const Footer = () => {
                 OUR STORES
               </Typography>
               {ourStories.map((item, index) => (
-                <Link 
+                <Link
                   key={index}
-                  to={item.link} 
+                  to={item.link}
                   className="text-decoration-none"
                   onClick={(e) => handleLinkClick(e, item.link)}
                 >
@@ -335,9 +346,9 @@ export const Footer = () => {
                 USEFUL LINKS
               </Typography>
               {knowMore?.map((item, index) => (
-                <Link 
+                <Link
                   key={index}
-                  to={item.link} 
+                  to={item.link}
                   className="text-decoration-none"
                   onClick={(e) => handleLinkClick(e, item.link)}
                 >
@@ -375,9 +386,9 @@ export const Footer = () => {
                 KNOW MORE
               </Typography>
               {knowMoreLinks.map((item, index) => (
-                <Link 
+                <Link
                   key={index}
-                  to={item.link} 
+                  to={item.link}
                   className="text-decoration-none"
                   onClick={(e) => handleLinkClick(e, item.link)}
                 >
@@ -475,7 +486,8 @@ export const Footer = () => {
               borderTop: "1px solid #ddd",
               mt: { xs: 4, md: 6 },
               pt: { xs: 2, md: 3 },
-              pb: 2,
+              pb: { xs: 3, md: 2 },
+              px: { xs: 1, md: 0 },
               display: "flex",
               flexDirection: { xs: "column", sm: "row" },
               justifyContent: "space-between",
@@ -483,24 +495,17 @@ export const Footer = () => {
               gap: { xs: 2, sm: 0 },
             }}
           >
-            <Typography
-              sx={{
-                color: "#444",
-                fontSize: { xs: 12, md: 14 },
-                textAlign: { xs: "left", sm: "left" },
-              }}
-            >
-              Mr. Brown Bakery and Food Products Pvt Ltd | 2025 | All Rights
-              Reserved
+            <Typography sx={{ color: "#000", fontSize: { xs: 12, md: 14 }, textAlign: { xs: "left", sm: "left" }, }}>
+              Mr. Brown Bakery and Food Products Pvt Ltd | 2025 |
             </Typography>
-
-            <Box
-              sx={{
-                display: "flex",
-                gap: 2,
-                alignItems: "center",
-              }}
-            >
+            <Box sx={{ display: "flex", gap: 2, alignItems: "center", }}>
+              <Typography sx={{ color: "#000", fontSize: { xs: 12, md: 14 }, textAlign: { xs: "left", sm: "left" }, }}>
+                Design & Developed by 
+              </Typography>
+              <img component="img" src={Maskgroup} alt="makeinindia" />
+              <img component="img" src={makeinindia} alt="makeinindia" />
+            </Box>
+            <Box sx={{ display: "flex", gap: 2, alignItems: "center", }}>
               <Box
                 component="img"
                 src={visa}
