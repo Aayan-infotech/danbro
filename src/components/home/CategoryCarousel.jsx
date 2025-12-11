@@ -53,8 +53,8 @@ export const CategoryCarousel = () => {
         width: "100%",
         background: "linear-gradient(135deg, #fbd9d3 0%, #ffe5e1 50%, #fbd9d3 100%)",
         borderRadius: { xs: "30px", md: "100px" },
-        py: { xs: 3, md: 5 },
-        px: { xs: 2, md: 5 },
+        py: { xs: 2, md: 4 },
+        px: { xs: 1, md: 4 },
         mb: { xs: 4, md: 6 },
         position: "relative",
         overflow: "hidden",
@@ -93,7 +93,6 @@ export const CategoryCarousel = () => {
         },
       }}
     >
-      {/* Decorative Elements */}
       {[...Array(3)].map((_, i) => (
         <Box
           key={i}

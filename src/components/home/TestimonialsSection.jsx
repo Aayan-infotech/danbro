@@ -181,17 +181,12 @@ export const TestimonialsSection = () => {
                     left: { xs: "5%", md: "15%" },
                     transform: "translateY(-50%)",
                     color: "var(--themeColor)",
-                    backgroundColor: "rgba(255, 255, 255, 0.95)",
-                    backdropFilter: "blur(10px)",
-                    boxShadow: "0 6px 20px rgba(0,0,0,0.15), 0 0 0 1px rgba(255,255,255,0.3) inset",
+                    backgroundColor: "transparent",
+                    backdropFilter: "none",
+                    boxShadow: "none",
                     width: { xs: 40, md: 50 },
                     height: { xs: 40, md: 50 },
-                    transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
-                    "&:hover": {
-                        backgroundColor: "rgba(255, 255, 255, 1)",
-                        transform: "translateY(-50%) scale(1.15) translateX(-5px)",
-                        boxShadow: "0 8px 25px rgba(0,0,0,0.25)",
-                    },
+                    transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)"
                 }}
             >
                 <ArrowBackIosNewIcon sx={{ fontSize: { xs: 20, md: 24 } }} />
@@ -206,17 +201,12 @@ export const TestimonialsSection = () => {
                     right: { xs: "5%", md: "15%" },
                     transform: "translateY(-50%)",
                     color: "var(--themeColor)",
-                    backgroundColor: "rgba(255, 255, 255, 0.95)",
-                    backdropFilter: "blur(10px)",
-                    boxShadow: "0 6px 20px rgba(0,0,0,0.15), 0 0 0 1px rgba(255,255,255,0.3) inset",
+                    backgroundColor: "transparent",
+                    backdropFilter: "none",
+                    boxShadow: "none",
                     width: { xs: 40, md: 50 },
                     height: { xs: 40, md: 50 },
-                    transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
-                    "&:hover": {
-                        backgroundColor: "rgba(255, 255, 255, 1)",
-                        transform: "translateY(-50%) scale(1.15) translateX(5px)",
-                        boxShadow: "0 8px 25px rgba(0,0,0,0.25)",
-                    },
+                    transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)"
                 }}
             >
                 <ArrowForwardIosIcon sx={{ fontSize: { xs: 20, md: 24 } }} />
@@ -243,7 +233,7 @@ export const TestimonialsSection = () => {
                 ref={cardRef}
                 sx={{
                     mx: "auto",
-                    maxWidth: 850,
+                    maxWidth: 1000,
                     width: { xs: "90%", md: "85%" },
                     bgcolor: "#fff",
                     borderRadius: { xs: "20px", md: "30px" },

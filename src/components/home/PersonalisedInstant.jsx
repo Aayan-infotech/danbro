@@ -34,11 +34,11 @@ export const PersonalisedInstant = () => {
             sx={{
                 width: "100%",
                 maxWidth: "100vw",
-                background: "linear-gradient(135deg, #f7f7f7 0%, #fef5f3 50%, #f7f7f7 100%)",
+                background: "linear-gradient(180deg, #EEEEEE 0%, #E0E1DC 100%)",
                 borderRadius: "0 0 40px 40px",
                 overflow: "hidden",
                 display: "flex",
-                flexDirection: { xs: "column", md: "row" },
+                justifyContent: "center",
                 alignItems: "center",
                 position: "relative",
                 boxShadow: "0 -10px 40px rgba(0,0,0,0.05)",
@@ -102,7 +102,7 @@ export const PersonalisedInstant = () => {
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    minHeight: { xs: "300px", md: "500px" },
+                    // minHeight: { xs: "500px", md: "700px" },
                     "&::after": {
                         content: '""',
                         position: "absolute",
@@ -139,15 +139,11 @@ export const PersonalisedInstant = () => {
                     alt="App Banner"
                     sx={{
                         width: "100%",
-                        height: { xs: "300px", md: "500px" },
-                        objectFit: "cover",
+                        height: "100%",
                         display: "block",
-                        borderRadius: { xs: "0", md: "0 0 0 40px" },
-                        boxShadow: "0 10px 40px rgba(0,0,0,0.15)",
                         transition: "transform 0.3s ease",
                         position: "relative",
                         zIndex: 0,
-                        backgroundColor: "#f0f0f0",
                         "&:hover": {
                             transform: "scale(1.02)",
                         },
@@ -157,9 +153,8 @@ export const PersonalisedInstant = () => {
             <Box
                 ref={contentRef}
                 sx={{
-                    width: { xs: "100%", md: "50%" },
                     px: { xs: 3, md: 6 },
-                    py: { xs: 4, md: 6 },
+                    py: { xs: 3, md: 5 },
                     textAlign: { xs: "center", md: "left" },
                     position: "relative",
                     zIndex: 2,
@@ -202,7 +197,7 @@ export const PersonalisedInstant = () => {
                             py: { xs: "10px", md: "12px" },
                             display: "block",
                             marginLeft: { xs: 0, md: "-170px" },
-                            width: "100%",
+                            width: "625px",
                             textAlign: "center",
                             boxShadow: "0 8px 25px rgba(15,27,64,0.4), 0 0 0 1px rgba(255,255,255,0.1) inset",
                             transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",

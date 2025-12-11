@@ -48,7 +48,6 @@ export const Footer = () => {
     { label: "Press and Media", link: "/media" },
     { label: "Events & Catering", link: "/events" },
     { label: "Blogs", link: "/blog" },
-    { label: "Contact", link: "/contact" },
     { label: "Career at Danbro", link: "/career" },
     { label: "Danbro Institute", link: "/institute" },
   ];
@@ -60,6 +59,15 @@ export const Footer = () => {
     { label: "Ghaziabad Stores", link: "/blogs" },
     { label: "Noida Stores", link: "/career" },
     { label: "Delhi Stores", link: "/career-danbro" },
+  ];
+
+  const knowMore = [
+    { label: "Privacy Policies", link: "/privacy-policies" },
+    { label: "Shipping Policies", link: "/shipping-policies" },
+    { label: "Refund & Returns Policy", link: "/refund-returns-policy" },
+    { label: "Terms and Conditions", link: "/terms-and-conditions" },
+    { label: "Corporate Queries", link: "/corporate-queries" },
+    { label: "Contact Us", link: "/contact" },
   ];
 
   return (
@@ -312,35 +320,30 @@ export const Footer = () => {
               >
                 USEFUL LINKS
               </Typography>
-              {[
-                "Privacy Policies",
-                "Shipping Policies",
-                "Refund & Returns Policy",
-                "Terms and Conditions",
-                "Corporate Queries",
-                "Contact Us",
-              ].map((item, index) => (
-                <Typography
-                  key={item}
-                  sx={{
-                    mb: 1,
-                    color: "#555",
-                    fontSize: { xs: 13, md: 14 },
-                    cursor: "pointer",
-                    transition: "all 0.3s ease",
-                    "&:hover": {
-                      color: "var(--themeColor)",
-                      transform: "translateX(5px)",
-                    },
-                    animation: `fadeInUp 0.6s ease-out ${index * 0.05}s both`,
-                    "@keyframes fadeInUp": {
-                      "0%": { opacity: 0, transform: "translateY(10px)" },
-                      "100%": { opacity: 1, transform: "translateY(0)" },
-                    },
-                  }}
-                >
-                  {item}
-                </Typography>
+              {knowMore?.map((item, index) => (
+                <Link to={item.link} className="text-decoration-none">
+                  <Typography
+                    key={item}
+                    sx={{
+                      mb: 1,
+                      color: "#555",
+                      fontSize: { xs: 13, md: 14 },
+                      cursor: "pointer",
+                      transition: "all 0.3s ease",
+                      "&:hover": {
+                        color: "var(--themeColor)",
+                        transform: "translateX(5px)",
+                      },
+                      animation: `fadeInUp 0.6s ease-out ${index * 0.05}s both`,
+                      "@keyframes fadeInUp": {
+                        "0%": { opacity: 0, transform: "translateY(10px)" },
+                        "100%": { opacity: 1, transform: "translateY(0)" },
+                      },
+                    }}
+                  >
+                    {item?.label}
+                  </Typography>
+                </Link>
               ))}
             </Grid>
             <Grid item xs={12} sm={6} md={2}>
@@ -374,7 +377,7 @@ export const Footer = () => {
                       },
                     }}
                   >
-                    {item.label}
+                    {item?.label}
                   </Typography>
                 </Link>
               ))}
