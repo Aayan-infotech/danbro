@@ -28,3 +28,35 @@ body {
 .title-style {
   font-family: 'Sansita Swashed', cursive;
 }
+
+/* Remove padding from MUI Container */
+.css-1u606s6-MuiContainer-root,
+.MuiContainer-root {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+@media (min-width: 600px) {
+  .css-1u606s6-MuiContainer-root,
+  .MuiContainer-root {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+}
+
+/* Remove margin-top from .css-1wc8q2d */
+.css-1wc8q2d {
+  margin-top: 0 !important;
+}
+
+@media (min-width: 0px) {
+  .css-1wc8q2d {
+    margin-top: 0 !important;
+  }
+}
+
+@media (min-width: 900px) {
+  .css-1wc8q2d {
+    margin-top: 0 !important;
+  }
+}

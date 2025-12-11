@@ -53,10 +53,8 @@ export const PersonalisedInstant = () => {
                 },
             }}
         >
-            {/* Animated Background Elements */}
             <Box
                 sx={{
-                    position: "absolute",
                     top: "-50px",
                     right: "-50px",
                     width: "200px",
@@ -97,6 +95,7 @@ export const PersonalisedInstant = () => {
                     width: { xs: "100%", md: "50%" },
                     position: "relative",
                     opacity: 0,
+                    zIndex: 5,
                     transform: "translateX(-50px)",
                     transition: "opacity 0.8s ease-out, transform 0.8s ease-out",
                     "&::after": {
@@ -106,7 +105,6 @@ export const PersonalisedInstant = () => {
                         left: 0,
                         right: 0,
                         bottom: 0,
-                        background: "linear-gradient(to right, transparent 0%, rgba(247,247,247,0.3) 100%)",
                         pointerEvents: "none",
                     },
                 }}
@@ -156,8 +154,8 @@ export const PersonalisedInstant = () => {
 
                 <Typography
                     sx={{
-                        mt: { xs: 2, md: 3 },
-                        fontSize: { xs: 24, sm: 28, md: 36 },
+                        mt: { xs: 3, md: 4 },
+                        fontSize: { xs: 30, sm: 34, md: 42 },
                         fontWeight: 800,
                         mb: { xs: 2, md: 3 },
                     }}
@@ -165,12 +163,15 @@ export const PersonalisedInstant = () => {
                     <Box
                         component="span"
                         sx={{
-                            backgroundColor: "#0f1b40",
+                            backgroundColor: "#03081F",
                             color: "#fff",
                             borderRadius: "40px",
                             px: { xs: 2, sm: 2.5, md: 3 },
                             py: { xs: "8px", md: "10px" },
-                            display: "inline-block",
+                            display: "block",
+                            marginLeft: "-170px",
+                            width: "100%",
+                            textAlign: "center",
                             boxShadow: "0 4px 15px rgba(15,27,64,0.3)",
                             transition: "all 0.3s ease",
                             "&:hover": {
@@ -200,19 +201,18 @@ export const PersonalisedInstant = () => {
                         fontSize: { xs: 14, sm: 16, md: 18 },
                         color: "#444",
                         mb: { xs: 2.5, md: 3 },
-                        fontWeight: 500,
+                        fontWeight: 'bold',
                     }}
                 >
                     Download the DANBRO app for faster ordering
                 </Typography>
 
-                {/* Store Buttons */}
                 <Box
                     sx={{
                         mt: { xs: 2, md: 3 },
                         display: "flex",
                         flexDirection: { xs: "column", sm: "row" },
-                        gap: { xs: 1.5, md: 2 },
+                        gap: { xs: 1, md: 1 },
                         justifyContent: { xs: "center", md: "flex-start" },
                     }}
                 >
@@ -290,7 +290,6 @@ export const PersonalisedInstant = () => {
                         </Box>
                     </Box>
                 </Box>
-
             </Box>
         </Box>
     );

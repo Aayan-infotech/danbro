@@ -169,7 +169,7 @@ export const CakeSection = () => {
             : comboData.filter((item) => item.category === activeComboTab);
 
     return (
-        <Box sx={{ py: { xs: 4, md: 6 } }}>
+        <Box sx={{ mb: 5 }}>
             <Box
                 sx={{
                     display: "flex",
@@ -231,14 +231,7 @@ export const CakeSection = () => {
             </Box>
 
             {/* Cake Cards */}
-            <Box
-                sx={{
-                    mt: 4,
-                    display: "grid",
-                    gridTemplateColumns: { xs: "1fr", md: "1fr 1fr 1fr" },
-                    gap: 4,
-                }}
-            >
+            <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "1fr 1fr 1fr" }, gap: 4, }}>
                 {filteredCategoryItems?.map((offer, index) => (
                     <Box
                         key={index}
@@ -376,13 +369,7 @@ export const CakeSection = () => {
                     my: { xs: 3, md: 4 },
                 }}
             >
-                <Typography
-                    sx={{
-                        fontSize: { xs: 28, sm: 32, md: 38 },
-                        fontWeight: 800,
-                        color: "var(--themeColor)",
-                    }}
-                >
+                <Typography sx={{ fontSize: { xs: 28, sm: 32, md: 38 }, fontWeight: 800, color: "var(--themeColor)", }}>
                     Pastries
                 </Typography>
 
@@ -424,14 +411,7 @@ export const CakeSection = () => {
                     ))}
                 </Box>
             </Box>
-            <Box
-                sx={{
-                    mt: 4,
-                    display: "grid",
-                    gridTemplateColumns: { xs: "1fr", md: "1fr 1fr 1fr" },
-                    gap: 4,
-                }}
-            >
+            <Box sx={{ mt: 4, display: "grid", gridTemplateColumns: { xs: "1fr", md: "1fr 1fr 1fr" }, gap: 4, }}>
                 {filteredPastries?.map((item, index) => (
                     <Box
                         key={index}
@@ -565,13 +545,7 @@ export const CakeSection = () => {
                     my: { xs: 3, md: 4 },
                 }}
             >
-                <Typography
-                    sx={{
-                        fontSize: { xs: 28, sm: 32, md: 38 },
-                        fontWeight: 800,
-                        color: "var(--themeColor)",
-                    }}
-                >
+                <Typography sx={{ fontSize: { xs: 28, sm: 32, md: 38 }, fontWeight: 800, color: "var(--themeColor)", }}>
                     Cookies
                 </Typography>
 
@@ -1032,7 +1006,6 @@ export const CakeSection = () => {
                     </Box>
                 ))}
             </Box>
-
         </Box>
     );
 };

@@ -9,7 +9,6 @@ export const HeroBanner = () => {
   let sliderRef = null;
   const bannerRef = useRef(null);
 
-  // Create multiple banner slides (using same image for carousel effect)
   const bannerSlides = [
     { id: 1, img: banner, alt: "hero banner 1" },
     { id: 2, img: banner, alt: "hero banner 2" },
@@ -111,10 +110,8 @@ export const HeroBanner = () => {
       <Box
         sx={{
           width: "100%",
-          maxWidth: "1400px",
           position: "relative",
           zIndex: 1,
-          borderRadius: { xs: "15px", md: "20px" },
           overflow: "hidden",
           boxShadow: "0 10px 40px rgba(0,0,0,0.1)",
         }}
@@ -142,7 +139,6 @@ export const HeroBanner = () => {
           <ArrowBackIosNewIcon sx={{ color: "var(--themeColor)", fontSize: 28 }} />
         </IconButton>
 
-        {/* Carousel */}
         <Slider ref={(slider) => (sliderRef = slider)} {...settings}>
           {bannerSlides.map((slide) => (
             <Box
@@ -175,8 +171,8 @@ export const HeroBanner = () => {
                 alt={slide.alt}
                 sx={{
                   width: "100%",
-                  maxWidth: "1400px",
-                  height: "auto",
+                  // height: { xs: "35vh", sm: "45vh", md: "60vh", lg: "70vh", },
+                  height: { xs: "50vh", sm: "60vh", md: "75vh", lg: "85vh", },
                   objectFit: "cover",
                   display: "block",
                   transition: "transform 0.8s cubic-bezier(0.4, 0, 0.2, 1)",
@@ -185,8 +181,6 @@ export const HeroBanner = () => {
             </Box>
           ))}
         </Slider>
-
-        {/* Right Arrow */}
         <IconButton
           onClick={() => sliderRef?.slickNext()}
           sx={{

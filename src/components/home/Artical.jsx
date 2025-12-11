@@ -54,7 +54,7 @@ export const Artical = () => {
     return (
         <Box
             sx={{
-                py: 10,
+                py: 5,
                 borderRadius: "30px",
                 position: "relative",
                 textAlign: "center",
@@ -101,7 +101,6 @@ export const Artical = () => {
                                 sx={{
                                     bgColor: "#fff",
                                     borderRadius: "12px",
-                                    p: 1,
                                     textAlign: "left",
                                     position: "relative",
                                     cursor: "pointer",
