@@ -540,13 +540,13 @@ export const ProductList = () => {
                         boxShadow: "0 4px 10px rgba(0,0,0,0.15)",
                       }}
                     >
-                      <IconButton size="small">
+                      <IconButton size="small" onClick={(e) => {e.stopPropagation()}}>
                         <ShoppingCart sx={{ fontSize: 18 }} />
                       </IconButton>
-                      <IconButton size="small">
+                      <IconButton size="small" onClick={(e) => {e.stopPropagation()}}>
                         <ShareOutlined sx={{ fontSize: 18 }} />
                       </IconButton>
-                      <IconButton size="small">
+                      <IconButton size="small" onClick={(e) => {e.stopPropagation()}}>
                         <FavoriteBorder sx={{ fontSize: 18 }} />
                       </IconButton>
                     </Box>

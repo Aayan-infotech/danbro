@@ -274,7 +274,7 @@ export const CateringEvents = () => {
 
           <Grid container spacing={{ xs: 2, sm: 2, md: 2 }}>
             {specialties.map((item, index) => (
-              <Grid item xs={12} sm={6} md={3} key={index}>
+              <Grid size={{ xs: 12, sm: 6, md: 3 }} key={index}>
                 <Box
                   sx={{
                     cursor: "pointer",
@@ -341,7 +341,7 @@ export const CateringEvents = () => {
       </Container>
 
       {/* Contact Section */}
-      <Container maxWidth="lg" sx={{ py: { xs: 1, sm: 2, md: 2 }, px: { xs: "11px" } }}>
+      <Container maxWidth="lg" sx={{ py: { xs: 1, sm: 2, md: 2 }, px: { xs: "11px" }, mb: 4 }}>
         <Box ref={sectionRefs.contact} sx={{ pb: 4 }}>
           <Box
             sx={{

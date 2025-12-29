@@ -86,7 +86,7 @@ export const Navbar = () => {
                 {categoryItems.map(({ label, path }) => (
                     <Typography
                         key={label}
-                        onClick={() => navigate(path)}     // <--- routing added
+                        onClick={() => navigate(path)}
                         onMouseEnter={() => setHoveredItem(label)}
                         onMouseLeave={() => setHoveredItem(null)}
                         sx={{
@@ -137,15 +137,6 @@ export const Navbar = () => {
                     boxShadow: "0 2px 10px rgba(0,0,0,0.05)",
                 }}
             >
-                <Typography
-                    sx={{
-                        fontWeight: 600,
-                        fontSize: 14,
-                        color: "var(--themeColor)",
-                    }}
-                >
-                    Menu
-                </Typography>
                 <IconButton
                     onClick={handleDrawerToggle}
                     sx={{
@@ -158,11 +149,20 @@ export const Navbar = () => {
                 >
                     <MenuIcon />
                 </IconButton>
+                {/* <Typography
+                    sx={{
+                        fontWeight: 600,
+                        fontSize: 14,
+                        color: "var(--themeColor)",
+                    }}
+                >
+                    Menu
+                </Typography> */}
             </Box>
 
             {/* Mobile Drawer */}
             <Drawer
-                anchor="right"
+                anchor="left"
                 open={mobileOpen}
                 onClose={handleDrawerToggle}
                 sx={{
