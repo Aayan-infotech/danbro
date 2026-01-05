@@ -1,0 +1,235 @@
+import { EXTERNAL_API_BASE_URL, EXTERNAL_API_ACCESS_KEY } from './apiUrl';
+
+/**
+ * Get the API URL - use proxy in development, direct URL in production
+ */
+const getApiUrl = () => {
+  if (import.meta.env.DEV) {
+    return `/api/external/downstream.asp?level=ITEMCATEGORY`;
+  }
+  // In production, use direct URL
+  return `${EXTERNAL_API_BASE_URL}/downstream.asp?level=ITEMCATEGORY`;
+};
+
+/**
+ * Fetch item categories from the external API
+ * @returns {Promise<Object>} Response object with status and records array
+ */
+export const fetchItemCategories = async () => {
+  try {
+    const url = getApiUrl();
+    
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Authorization': `accesskey ${EXTERNAL_API_ACCESS_KEY}`,
+      },
+      credentials: 'omit',
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const contentType = response.headers.get('content-type');
+    let data;
+    
+    if (contentType && contentType.includes('application/json')) {
+      data = await response.json();
+    } else {
+      const text = await response.text();
+      try {
+        data = JSON.parse(text);
+      } catch (parseError) {
+        console.error('Failed to parse response as JSON:', text);
+        throw new Error('Invalid response format from API');
+      }
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('Error fetching item categories:', error);
+    if (error.message === 'Failed to fetch') {
+      throw new Error('Network error: Unable to connect to the API. Please check your internet connection or try again later.');
+    }
+    throw error;
+  }
+};
+
+/**
+ * Get item categories with error handling
+ * @returns {Promise<Array>} Array of category records
+ */
+export const getItemCategories = async () => {
+  try {
+    const response = await fetchItemCategories();
+    
+    if ((response.status === 'sucess' || response.status === 'success') && response.records) {
+      return response.records;
+    } else if (response.records && Array.isArray(response.records)) {
+      // If records exist but status is different, still use it
+      return response.records;
+    }
+    
+    throw new Error(`Invalid response format: ${JSON.stringify(response)}`);
+  } catch (error) {
+    console.error('Error getting item categories:', error);
+    throw error;
+  }
+};
+
+/**
+ * Get API URL helper function
+ * @param {string} level - API level (ITEMCATEGORY, PRODUCTS, POS)
+ * @param {object} params - Additional query parameters
+ * @returns {string} API URL
+ */
+const getExternalApiUrl = (level, params = {}) => {
+  const baseUrl = import.meta.env.DEV 
+    ? `/api/external/downstream.asp`
+    : `${EXTERNAL_API_BASE_URL}/downstream.asp`;
+  
+  const queryParams = new URLSearchParams({ level, ...params });
+  return `${baseUrl}?${queryParams.toString()}`;
+};
+
+/**
+ * Fetch products from the external API
+ * @param {number} categoryId - Category ID to filter products
+ * @returns {Promise<Object>} Response object with status and records array
+ */
+export const fetchProducts = async (categoryId = null) => {
+  try {
+    const params = categoryId ? { categoryid: categoryId.toString() } : {};
+    const url = getExternalApiUrl('PRODUCTS', params);
+    
+    console.log('Fetching products from URL:', url);
+    console.log('Category ID:', categoryId);
+    
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Authorization': `accesskey ${EXTERNAL_API_ACCESS_KEY}`,
+      },
+      credentials: 'omit',
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const contentType = response.headers.get('content-type');
+    let data;
+    
+    if (contentType && contentType.includes('application/json')) {
+      data = await response.json();
+    } else {
+      const text = await response.text();
+      try {
+        data = JSON.parse(text);
+      } catch (parseError) {
+        console.error('Failed to parse response as JSON:', text);
+        throw new Error('Invalid response format from API');
+      }
+    }
+    
+    console.log('Products API Response Data:', data);
+    return data;
+  } catch (error) {
+    console.error('Error fetching products:', error);
+    if (error.message === 'Failed to fetch') {
+      throw new Error('Network error: Unable to connect to the API. Please check your internet connection or try again later.');
+    }
+    throw error;
+  }
+};
+
+/**
+ * Get products with error handling
+ * @param {number} categoryId - Category ID to filter products
+ * @returns {Promise<Array>} Array of product records
+ */
+export const getProducts = async (categoryId = null) => {
+  try {
+    const response = await fetchProducts(categoryId);
+    
+    if ((response.status === 'sucess' || response.status === 'success') && response.records) {
+      return response.records;
+    } else if (response.records && Array.isArray(response.records)) {
+      // If records exist but status is different, still use it
+      return response.records;
+    }
+    
+    throw new Error(`Invalid response format: ${JSON.stringify(response)}`);
+  } catch (error) {
+    console.error('Error getting products:', error);
+    throw error;
+  }
+};
+
+/**
+ * Fetch branches/POS from the external API
+ * @returns {Promise<Object>} Response object with status and records array
+ */
+export const fetchBranches = async () => {
+  try {
+    const url = getExternalApiUrl('POS');
+    
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Authorization': `accesskey ${EXTERNAL_API_ACCESS_KEY}`,
+      },
+      credentials: 'omit',
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const contentType = response.headers.get('content-type');
+    let data;
+    
+    if (contentType && contentType.includes('application/json')) {
+      data = await response.json();
+    } else {
+      const text = await response.text();
+      try {
+        data = JSON.parse(text);
+      } catch (parseError) {
+        console.error('Failed to parse response as JSON:', text);
+        throw new Error('Invalid response format from API');
+      }
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('Error fetching branches:', error);
+    if (error.message === 'Failed to fetch') {
+      throw new Error('Network error: Unable to connect to the API. Please check your internet connection or try again later.');
+    }
+    throw error;
+  }
+};
+
+/**
+ * Get branches with error handling
+ * @returns {Promise<Array>} Array of branch records
+ */
+export const getBranches = async () => {
+  try {
+    const response = await fetchBranches();
+    
+    if ((response.status === 'sucess' || response.status === 'success') && response.records) {
+      return response.records;
+    } else if (response.records && Array.isArray(response.records)) {
+      // If records exist but status is different, still use it
+      return response.records;
+    }
+    
+    throw new Error(`Invalid response format: ${JSON.stringify(response)}`);
+  } catch (error) {
+    console.error('Error getting branches:', error);
+    throw error;
+  }
+};
+

@@ -1,9 +1,8 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import {
   Box,
   Container,
   Typography,
-  Grid,
   Card,
   CardContent,
   CardMedia,
@@ -13,6 +12,8 @@ import {
   Tabs,
   Tab,
   IconButton,
+  CircularProgress,
+  Alert,
 } from "@mui/material";
 import {
   Search as SearchIcon,
@@ -21,91 +22,82 @@ import {
   FavoriteBorder,
   ShareOutlined,
 } from "@mui/icons-material";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import Rectangle45 from "../../assets/Rectangle45.png";
 import Slider from "react-slick";
 import { ArrowBackIosNew, ArrowForwardIos } from "@mui/icons-material";
+import { useItemCategories } from "../../hooks/useItemCategories";
+import { useProducts } from "../../hooks/useProducts";
 
 export const ProductList = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [selectedCategory, setSelectedCategory] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
   const [isVisible, setIsVisible] = useState(false);
   const productRef = useRef(null);
 
-  const categories = [
-    "Cakes",
-    "Breads",
-    "Pastries",
-    "Cookies",
-    "Donuts",
-    "Muffins",
-    "Product",
-    "Product",
-    "Product",
-    "Product",
-  ];
-
-  // Category-wise products
-  const allProducts = {
-    Cakes: [
-      { id: 1, name: "Chocolate Cake", description: "Rich chocolate flavor", price: "$35.00", image: "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=400&h=400&fit=crop" },
-      { id: 2, name: "Vanilla Cake", description: "Classic vanilla taste", price: "$30.00", image: "https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=400&h=400&fit=crop" },
-      { id: 3, name: "Red Velvet Cake", description: "Velvety smooth texture", price: "$40.00", image: "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=400&h=400&fit=crop" },
-      { id: 4, name: "Strawberry Cake", description: "Fresh strawberry delight", price: "$32.00", image: "https://images.unsplash.com/photo-1606312619070-d48d4ecc3b16?w=400&h=400&fit=crop" },
-      { id: 5, name: "Blueberry Cake", description: "Sweet blueberry delight", price: "$38.00", image: "https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=400&h=400&fit=crop" },
-    ],
-    Breads: [
-      { id: 6, name: "White Bread", description: "Fresh baked daily", price: "$5.00", image: "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&h=400&fit=crop" },
-      { id: 7, name: "Whole Wheat Bread", description: "Healthy and nutritious", price: "$6.00", image: "https://images.unsplash.com/photo-1549931319-a545dcf3bc73?w=400&h=400&fit=crop" },
-      { id: 8, name: "Garlic Bread", description: "Aromatic garlic flavor", price: "$7.00", image: "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&h=400&fit=crop" },
-      { id: 9, name: "Multigrain Bread", description: "Power-packed grains", price: "$8.00", image: "https://images.unsplash.com/photo-1549931319-a545dcf3bc73?w=400&h=400&fit=crop" },
-    ],
-    Pastries: [
-      { id: 10, name: "Apple Pastry", description: "Sweet apple filling", price: "$12.00", image: "https://images.unsplash.com/photo-1621303837174-89787a7d4729?w=400&h=400&fit=crop" },
-      { id: 11, name: "Chocolate Pastry", description: "Decadent chocolate", price: "$15.00", image: "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=400&h=400&fit=crop" },
-      { id: 12, name: "Cream Pastry", description: "Creamy and smooth", price: "$13.00", image: "https://images.unsplash.com/photo-1621303837174-89787a7d4729?w=400&h=400&fit=crop" },
-    ],
-    Cookies: [
-      { id: 13, name: "Chocolate Chip Cookie", description: "Classic favorite", price: "$8.00", image: "https://images.unsplash.com/photo-1499636136210-6f4ee915583e?w=400&h=400&fit=crop" },
-      { id: 14, name: "Oatmeal Cookie", description: "Healthy and tasty", price: "$9.00", image: "https://images.unsplash.com/photo-1499636136210-6f4ee915583e?w=400&h=400&fit=crop" },
-      { id: 15, name: "Sugar Cookie", description: "Sweet and simple", price: "$7.00", image: "https://images.unsplash.com/photo-1499636136210-6f4ee915583e?w=400&h=400&fit=crop" },
-    ],
-    Donuts: [
-      { id: 16, name: "Glazed Donut", description: "Sweet glaze coating", price: "$4.00", image: "https://images.unsplash.com/photo-1551024506-0bccd828d307?w=400&h=400&fit=crop" },
-      { id: 17, name: "Chocolate Donut", description: "Rich chocolate", price: "$5.00", image: "https://images.unsplash.com/photo-1551024506-0bccd828d307?w=400&h=400&fit=crop" },
-      { id: 18, name: "Sprinkled Donut", description: "Colorful sprinkles", price: "$4.50", image: "https://images.unsplash.com/photo-1551024506-0bccd828d307?w=400&h=400&fit=crop" },
-    ],
-    Muffins: [
-      { id: 19, name: "Chocolate Muffin", description: "Rich chocolate flavor", price: "$25.00", image: "https://images.unsplash.com/photo-1607958996333-41aef7caefaa?w=400&h=400&fit=crop" },
-      { id: 20, name: "Blueberry Muffin", description: "Fresh blueberries", price: "$22.00", image: "https://images.unsplash.com/photo-1607958996333-41aef7caefaa?w=400&h=400&fit=crop" },
-      { id: 21, name: "Banana Muffin", description: "Ripe banana taste", price: "$20.00", image: "https://images.unsplash.com/photo-1607958996333-41aef7caefaa?w=400&h=400&fit=crop" },
-    ],
-    Product: [
-      { id: 22, name: "Chocolate Muffin", description: "Rich chocolate flavor", price: "$25.00", image: "https://images.unsplash.com/photo-1607958996333-41aef7caefaa?w=400&h=400&fit=crop" },
-      { id: 23, name: "Chocolate Muffin", description: "Rich chocolate flavor", price: "$25.00", image: "https://images.unsplash.com/photo-1607958996333-41aef7caefaa?w=400&h=400&fit=crop" },
-      { id: 24, name: "Chocolate Muffin", description: "Rich chocolate flavor", price: "$25.00", image: "https://images.unsplash.com/photo-1607958996333-41aef7caefaa?w=400&h=400&fit=crop" },
-    ],
-  };
-
-  // Get products for selected category
-  const getFilteredProducts = () => {
-    const categoryName = categories[selectedCategory];
-    let categoryProducts = allProducts[categoryName] || allProducts.Muffins;
-
-    // Apply search filter
-    if (searchQuery) {
-      categoryProducts = categoryProducts.filter(
-        (product) =>
-          product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          product.description.toLowerCase().includes(searchQuery.toLowerCase())
-      );
+  // Fetch categories from API
+  const { categories: apiCategories, loading: categoriesLoading, error: categoriesError } = useItemCategories();
+  console.log(apiCategories, 'apiCategories')
+  
+  // Get categoryId from URL query params
+  const categoryIdFromUrl = searchParams.get('categoryId');
+  
+  // Set selected category based on URL parameter
+  useEffect(() => {
+    if (categoryIdFromUrl && apiCategories && apiCategories.length > 0) {
+      const categoryIndex = apiCategories.findIndex(cat => cat.id === parseInt(categoryIdFromUrl));
+      if (categoryIndex !== -1) {
+        setSelectedCategory(categoryIndex);
+      }
     }
+  }, [categoryIdFromUrl, apiCategories]);
+  
+  // Get selected category ID
+  const selectedCategoryId = useMemo(() => {
+    const categoryId = apiCategories?.[selectedCategory]?.id || null;
+    console.log('Selected Category Index:', selectedCategory);
+    console.log('Selected Category ID:', categoryId);
+    console.log('Category ID from URL:', categoryIdFromUrl);
+    console.log('Available Categories:', apiCategories?.map(c => ({ id: c.id, name: c.groupname })));
+    return categoryId;
+  }, [apiCategories, selectedCategory, categoryIdFromUrl]);
 
-    return categoryProducts;
-  };
+  // Fetch products for selected category
+  const { products: apiProducts, loading: productsLoading, error: productsError } = useProducts(selectedCategoryId);
 
-  const products = getFilteredProducts();
+  const transformedProducts = useMemo(() => {
+    if (!apiProducts || apiProducts.length === 0) return [];
+    
+    return apiProducts.map((product) => {
+      const priceObj = product.price && product.price.length > 0 ? product.price[0] : { rate: 0, mrp: 0 };
+      const displayPrice = priceObj.rate || priceObj.mrp || 0;
+      
+      return {
+        id: product.prdcode,
+        name: product.name,
+        description: product.ingredient || product.name,
+        price: `₹${displayPrice}`,
+        image: "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=400&h=400&fit=crop", // Placeholder - API doesn't provide images
+        originalData: product, // Keep original data for details page
+      };
+    });
+  }, [apiProducts]);
+
+  // Apply search filter
+  const filteredProducts = useMemo(() => {
+    if (!searchQuery) return transformedProducts;
+    
+    return transformedProducts.filter(
+      (product) =>
+        product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        product.description.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [transformedProducts, searchQuery]);
+
+  const products = filteredProducts;
+  const categories = apiCategories?.map(cat => cat.groupname) || [];
 
   // Animation on mount and category change
   useEffect(() => {
@@ -114,7 +106,27 @@ export const ProductList = () => {
       setIsVisible(true);
     }, 100);
     return () => clearTimeout(timer);
-  }, [selectedCategory, searchQuery]);
+  }, [selectedCategory, searchQuery, products]);
+
+  // Show loading state
+  if (categoriesLoading || productsLoading) {
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "60vh" }}>
+        <CircularProgress sx={{ color: "var(--themeColor)" }} />
+      </Box>
+    );
+  }
+
+  // Show error state
+  if (categoriesError || productsError) {
+    return (
+      <Box sx={{ px: { xs: 2, sm: 3, md: 6 }, py: 4 }}>
+        <Alert severity="error" sx={{ borderRadius: 2 }}>
+          {categoriesError || productsError}
+        </Alert>
+      </Box>
+    );
+  }
 
   const recommendedProducts = [
     {
