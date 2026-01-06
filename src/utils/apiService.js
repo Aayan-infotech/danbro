@@ -1,6 +1,71 @@
 import { EXTERNAL_API_BASE_URL, EXTERNAL_API_ACCESS_KEY } from './apiUrl';
 
 /**
+ * Sanitize JSON string by escaping control characters within string values
+ * @param {string} jsonString - The JSON string to sanitize
+ * @returns {string} Sanitized JSON string
+ */
+const sanitizeJsonString = (jsonString) => {
+  let result = '';
+  let inString = false;
+  let escapeNext = false;
+  
+  for (let i = 0; i < jsonString.length; i++) {
+    const char = jsonString[i];
+    const charCode = char.charCodeAt(0);
+    
+    if (escapeNext) {
+      // We're escaping the next character, so just add it as-is
+      result += char;
+      escapeNext = false;
+      continue;
+    }
+    
+    if (char === '\\') {
+      // Next character is escaped
+      escapeNext = true;
+      result += char;
+      continue;
+    }
+    
+    if (char === '"' && !escapeNext) {
+      // Toggle string state
+      inString = !inString;
+      result += char;
+      continue;
+    }
+    
+    if (inString) {
+      // We're inside a string value, escape control characters
+      if (charCode >= 0x00 && charCode <= 0x1F) {
+        // Control character - escape it
+        switch (charCode) {
+          case 0x08: result += '\\b'; break;  // Backspace
+          case 0x09: result += '\\t'; break;  // Tab
+          case 0x0A: result += '\\n'; break;  // Line feed
+          case 0x0C: result += '\\f'; break;  // Form feed
+          case 0x0D: result += '\\r'; break;  // Carriage return
+          default:
+            // For other control characters, use Unicode escape
+            result += '\\u' + ('0000' + charCode.toString(16)).slice(-4);
+        }
+      } else {
+        result += char;
+      }
+    } else {
+      // Outside string, keep as-is (but remove invalid control characters)
+      if (charCode >= 0x00 && charCode <= 0x1F && char !== '\n' && char !== '\r' && char !== '\t') {
+        // Remove control characters outside strings (except whitespace)
+        continue;
+      }
+      result += char;
+    }
+  }
+  
+  return result;
+};
+
+/**
  * Get the API URL - use proxy in development, direct URL in production
  */
 const getApiUrl = () => {
@@ -30,18 +95,22 @@ export const fetchItemCategories = async () => {
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-    const contentType = response.headers.get('content-type');
+    // Always read as text first to avoid "body stream already read" error
+    const text = await response.text();
     let data;
     
-    if (contentType && contentType.includes('application/json')) {
-      data = await response.json();
-    } else {
-      const text = await response.text();
+    try {
+      // First try parsing without sanitization
+      data = JSON.parse(text);
+    } catch (parseError) {
+      // If that fails, try sanitizing and parsing again
       try {
-        data = JSON.parse(text);
-      } catch (parseError) {
-        console.error('Failed to parse response as JSON:', text);
-        throw new Error('Invalid response format from API');
+        const sanitizedText = sanitizeJsonString(text);
+        data = JSON.parse(sanitizedText);
+      } catch (sanitizeError) {
+        console.error('Failed to parse response as JSON:', sanitizeError);
+        console.error('Response text (first 500 chars):', text.substring(0, 500));
+        throw new Error(`Invalid response format from API: ${sanitizeError.message}`);
       }
     }
     
@@ -117,18 +186,22 @@ export const fetchProducts = async (categoryId = null) => {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    const contentType = response.headers.get('content-type');
+    // Always read as text first to avoid "body stream already read" error
+    const text = await response.text();
     let data;
     
-    if (contentType && contentType.includes('application/json')) {
-      data = await response.json();
-    } else {
-      const text = await response.text();
+    try {
+      // First try parsing without sanitization
+      data = JSON.parse(text);
+    } catch (parseError) {
+      // If that fails, try sanitizing and parsing again
       try {
-        data = JSON.parse(text);
-      } catch (parseError) {
-        console.error('Failed to parse response as JSON:', text);
-        throw new Error('Invalid response format from API');
+        const sanitizedText = sanitizeJsonString(text);
+        data = JSON.parse(sanitizedText);
+      } catch (sanitizeError) {
+        console.error('Failed to parse response as JSON:', sanitizeError);
+        console.error('Response text (first 500 chars):', text.substring(0, 500));
+        throw new Error(`Invalid response format from API: ${sanitizeError.message}`);
       }
     }
     
@@ -186,18 +259,22 @@ export const fetchBranches = async () => {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    const contentType = response.headers.get('content-type');
+    // Always read as text first to avoid "body stream already read" error
+    const text = await response.text();
     let data;
     
-    if (contentType && contentType.includes('application/json')) {
-      data = await response.json();
-    } else {
-      const text = await response.text();
+    try {
+      // First try parsing without sanitization
+      data = JSON.parse(text);
+    } catch (parseError) {
+      // If that fails, try sanitizing and parsing again
       try {
-        data = JSON.parse(text);
-      } catch (parseError) {
-        console.error('Failed to parse response as JSON:', text);
-        throw new Error('Invalid response format from API');
+        const sanitizedText = sanitizeJsonString(text);
+        data = JSON.parse(sanitizedText);
+      } catch (sanitizeError) {
+        console.error('Failed to parse response as JSON:', sanitizeError);
+        console.error('Response text (first 500 chars):', text.substring(0, 500));
+        throw new Error(`Invalid response format from API: ${sanitizeError.message}`);
       }
     }
     

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   Box,
   Container,
@@ -17,6 +17,8 @@ import {
   Avatar,
   Tabs,
   Tab,
+  CircularProgress,
+  Alert,
 } from "@mui/material";
 import {
   FavoriteBorder as FavoriteBorderIcon,
@@ -34,30 +36,111 @@ import {
   ThumbUpOffAlt,
   ThumbDownOffAlt,
 } from "@mui/icons-material";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useMediaQuery, useTheme } from "@mui/material";
+import { fetchProducts } from "../../utils/apiService";
+import { useItemCategories } from "../../hooks/useItemCategories";
 
 export const ProductDetails = () => {
   const navigate = useNavigate();
+  const { id } = useParams();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [selectedImage, setSelectedImage] = useState(0);
   const [tab, setTab] = useState("cake");
+  const [product, setProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [quantity, setQuantity] = useState(1);
+  const [productWeight, setProductWeight] = useState("500g");
+  
+  // Fetch categories to get all products
+  const { categories: apiCategories } = useItemCategories();
 
-  const product = {
-    name: "Chocolate Muffin",
-    description:
-      "Break open sweetness with our Red Velvet Hammer Pinata Cake – 500 g of creamy, romantic indulgence hidden inside a smashable chocolate dome.",
-    price: "$3.50",
-    weight: "500g",
-    stock: 235,
-    images: [
+  // Fetch product data
+  useEffect(() => {
+    const loadProduct = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        if (!id) {
+          setError("Product ID not found");
+          setLoading(false);
+          return;
+        }
+
+        const productId = parseInt(id);
+        
+        // Try to find product by searching through categories
+        if (apiCategories && apiCategories.length > 0) {
+          for (const category of apiCategories) {
+            try {
+              const response = await fetchProducts(category.id);
+              if (response?.records && Array.isArray(response.records)) {
+                const foundProduct = response.records.find(p => p.prdcode === productId);
+                if (foundProduct) {
+                  setProduct(foundProduct);
+                  setProductWeight(foundProduct.weight || "500g");
+                  setLoading(false);
+                  return;
+                }
+              }
+            } catch (err) {
+              console.error(`Error fetching products for category ${category.id}:`, err);
+              continue;
+            }
+          }
+        }
+        
+        setError("Product not found");
+      } catch (err) {
+        setError(err.message || "Failed to load product");
+        console.error("Error loading product:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadProduct();
+  }, [id, apiCategories]);
+
+  // Transform product data for display
+  const productData = useMemo(() => {
+    if (!product) return null;
+    
+    const priceObj = product.price && product.price.length > 0 ? product.price[0] : { rate: 0, mrp: 0 };
+    const displayPrice = priceObj.rate || priceObj.mrp || 0;
+    
+    // Transform nutrition array to object
+    const nutritionObj = {};
+    if (product.nutrition && Array.isArray(product.nutrition)) {
+      product.nutrition.forEach(item => {
+        const key = Object.keys(item)[0];
+        const value = item[key];
+        nutritionObj[key] = value;
+      });
+    }
+    
+    // Create images array (using placeholder since API doesn't provide images)
+    const images = [
       "https://images.unsplash.com/photo-1607958996333-41aef7caefaa?w=600&h=600&fit=crop",
       "https://images.unsplash.com/photo-1607958996333-41aef7caefaa?w=600&h=600&fit=crop",
       "https://images.unsplash.com/photo-1607958996333-41aef7caefaa?w=600&h=600&fit=crop",
       "https://images.unsplash.com/photo-1607958996333-41aef7caefaa?w=600&h=600&fit=crop",
-    ],
-  };
+    ];
+    
+    return {
+      name: product.name || "Product",
+      description: product.ingredient || product.name || "",
+      price: `₹${displayPrice}`,
+      weight: product.weight || "500g",
+      stock: 235, // API doesn't provide stock, using default
+      images: images,
+      nutrition: nutritionObj,
+      ingredient: product.ingredient || "",
+    };
+  }, [product]);
 
   const icons = [<LocalGroceryStore />, <Handshake />, <Shield />, <Verified />];
   const features = [
@@ -78,6 +161,24 @@ export const ProductDetails = () => {
     "https://picsum.photos/id/123/300/200"
   ];
 
+  if (loading) {
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "60vh" }}>
+        <CircularProgress sx={{ color: "var(--themeColor)" }} />
+      </Box>
+    );
+  }
+
+  if (error || !productData) {
+    return (
+      <Box sx={{ px: { xs: 2, sm: 3, md: 6 }, py: 4 }}>
+        <Alert severity="error" sx={{ borderRadius: 2 }}>
+          {error || "Product not found"}
+        </Alert>
+      </Box>
+    );
+  }
+
   return (
     <Box sx={{ minHeight: "100vh", backgroundColor: "#fff", py: { xs: 4, md: 0 }, pb: { xs: 12, md: 0 }, p: { xs: 1.25, md: 0 } }}>
       <Container maxWidth="xl" sx={{ py: 4 }}>
@@ -85,14 +186,14 @@ export const ProductDetails = () => {
           <Link component="button" variant="body1" onClick={() => navigate("/products")} sx={{ color: "#666", textDecoration: "none", cursor: "pointer", "&:hover": { color: "#FF9472", }, }}>
             Products
           </Link>
-          <Typography color="text.primary">{product.name}</Typography>
+          <Typography color="text.primary">{productData.name}</Typography>
         </Breadcrumbs>
 
         <Grid container spacing={{ xs: 2, md: 4 }}>
           <Grid size={{ xs: 12, md: 6 }}>
             <Box sx={{ display: "flex", gap: { xs: 1, md: 2 } }}>
               <Box sx={{ display: { xs: "none", md: "flex" }, flexDirection: "column", gap: 1 }}>
-                {product.images.map((image, index) => (
+                {productData.images.map((image, index) => (
                   <Box
                     key={index}
                     onClick={() => setSelectedImage(index)}
@@ -109,13 +210,13 @@ export const ProductDetails = () => {
                       },
                     }}
                   >
-                    <Box component="img" src={image} alt={`${product.name} ${index + 1}`} sx={{ width: "100%", height: "100%", objectFit: "cover", }} />
+                    <Box component="img" src={image} alt={`${productData.name} ${index + 1}`} sx={{ width: "100%", height: "100%", objectFit: "cover", }} />
                   </Box>
                 ))}
               </Box>
               <Box sx={{ flex: 1 }}>
                 <Box sx={{ width: "100%", height: { xs: 300, sm: 350, md: 450 }, borderRadius: 2, overflow: "hidden", mb: 2 }}>
-                  <Box component="img" src={product.images[selectedImage]} alt={product.name} sx={{ width: "100%", height: "100%", objectFit: "cover", }} />
+                  <Box component="img" src={productData.images[selectedImage]} alt={productData.name} sx={{ width: "100%", height: "100%", objectFit: "cover", }} />
                 </Box>
               </Box>
             </Box>
@@ -123,11 +224,11 @@ export const ProductDetails = () => {
           <Grid size={{ xs: 12, md: 6 }}>
             <Box>
               <Typography variant="h3" sx={{ fontSize: { xs: 28, md: 36 }, fontWeight: 700, color: "#2c2c2c", mb: 2, }}>
-                {product.name}
+                {productData.name}
               </Typography>
               <Typography variant="h4" sx={{ fontSize: { xs: 28, md: 36 }, fontWeight: 700, color: "#F31400", mb: 2, display: "flex", alignItems: "center" }}>
-                {product.price} / <Typography variant="body1" sx={{ fontSize: '13px', fontWeight: 600, color: "#2c2c2c", }}>
-                  {product.weight}
+                {productData.price} / <Typography variant="body1" sx={{ fontSize: '13px', fontWeight: 600, color: "#2c2c2c", }}>
+                  {productData.weight}
                 </Typography>
               </Typography>
               <Box>
@@ -140,7 +241,7 @@ export const ProductDetails = () => {
                 </Box>
               </Box>
               <Typography variant="body1" sx={{ color: "#666", lineHeight: 1.8, mb: 3, fontSize: { xs: 14, md: 16 }, }}>
-                {product.description}
+                {productData.description}
               </Typography>
               <Divider sx={{ my: 2, backgroundColor: "#F31400" }} />
               <Box sx={{ display: "flex", flexDirection: { xs: "column", md: "row" }, justifyContent: "space-between", alignItems: { xs: "flex-start", md: "center" }, gap: { xs: 2, md: 0 } }}>
@@ -148,21 +249,18 @@ export const ProductDetails = () => {
                   <Typography variant="body2" sx={{ fontWeight: 600, color: "#2c2c2c", fontSize: { xs: 13, md: 14 } }}>
                     Weight
                   </Typography>
-                  <Select value={product.weight} size="small" onChange={(e) => setProductWeight(e.target.value)} sx={{ width: { xs: "100%", md: 250 }, mt: 1 }}>
-                    <MenuItem value="500g">Regular (500g)</MenuItem>
-                    <MenuItem value="1000g">Medium (1kg)</MenuItem>
-                    <MenuItem value="2000g">Large (2kg)</MenuItem>
-                    <MenuItem value="3000g">Party Pack (3kg)</MenuItem>
+                  <Select value={productWeight} size="small" onChange={(e) => setProductWeight(e.target.value)} sx={{ width: { xs: "100%", md: 250 }, mt: 1 }}>
+                    <MenuItem value={product.weight || "500g"}>{product.weight || "500g"}</MenuItem>
                     <MenuItem value="custom">Custom</MenuItem>
                   </Select>
-                  {product.weight === "custom" && (
+                  {productWeight === "custom" && (
                     <TextField type="number" label="Enter weight (g)" onBlur={(e) => setProductWeight(e.target.value + "g")} size="small" sx={{ mt: 1, width: { xs: "100%", md: 150 } }} />
                   )}
                 </Box>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1, backgroundColor: "#9BFF82", borderRadius: 2, p: { xs: 0.8, md: 1 } }}>
                   <CheckCircleIcon sx={{ color: "#4caf50", fontSize: { xs: 18, md: 20 } }} />
                   <Typography variant="body1" sx={{ fontWeight: 600, color: "#2c2c2c", fontSize: { xs: 13, md: 16 } }}>
-                    {product.stock} in stock
+                    {productData.stock} in stock
                   </Typography>
                 </Box>
               </Box>
@@ -170,14 +268,14 @@ export const ProductDetails = () => {
               <Grid container spacing={{ xs: 1.5, md: 2 }} mt={{ xs: 3, md: 4 }}>
                 <Grid size={{ xs: 4, md: 3 }}>
                   <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: { xs: 1, md: 2 }, borderRadius: 10, border: "1px solid #2c2c2c", p: { xs: 0.8, md: 1 }, backgroundColor: "#gainsboro" }}>
-                    <Box>
-                      <Add sx={{ color: "#2c2c2c", fontSize: { xs: 18, md: 20 } }} />
+                    <Box onClick={() => setQuantity(Math.max(1, quantity - 1))} sx={{ cursor: "pointer" }}>
+                      <Remove sx={{ color: "#2c2c2c", fontSize: { xs: 18, md: 20 } }} />
                     </Box>
                     <Typography variant="body2" sx={{ fontWeight: 600, color: "#2c2c2c", fontSize: { xs: 13, md: 14 } }}>
-                      1
+                      {quantity}
                     </Typography>
-                    <Box>
-                      <Remove sx={{ color: "#2c2c2c", fontSize: { xs: 18, md: 20 } }} />
+                    <Box onClick={() => setQuantity(quantity + 1)} sx={{ cursor: "pointer" }}>
+                      <Add sx={{ color: "#2c2c2c", fontSize: { xs: 18, md: 20 } }} />
                     </Box>
                   </Box>
                 </Grid>
@@ -250,17 +348,17 @@ export const ProductDetails = () => {
             <Box sx={{ p: { xs: 2, md: 3 }, border: "1px solid #ddd", borderRadius: 2 }}>
               <Typography fontWeight={600} fontSize={{ xs: 16, md: 18 }}>What's Inside</Typography>
               <Typography mt={1} fontSize={{ xs: 13, md: 14 }} color="text.secondary">
-                We use only the finest ingredients sourced from trusted local farmers and premium importers.
-                Premium Type 55 French Wheat Flour, Normandy Butter (82% fat), Belgian Dark Chocolate (54.5%),
-                Free-range Eggs, Fresh Whole Milk, Cane Sugar, Sea Salt, Yeast.
+                {productData.ingredient || "Ingredients information not available."}
               </Typography>
-              <Box mt={2} sx={{ p: { xs: 1.5, md: 2 }, background: "#FFF1EE", borderRadius: 2, display: "flex", alignItems: "center", gap: { xs: 1.5, md: 2 }, border: "1px solid #FF643A" }}>
-                <ThumbUpOffAlt sx={{ color: "#FF643A", fontSize: { xs: 18, md: 20 } }} />
-                <Box>
-                  <Typography fontWeight={600} fontSize={{ xs: 13, md: 14 }}>Allergen Information</Typography>
-                  <Typography fontSize={{ xs: 12, md: 13 }}>Contains: Wheat, Gluten, Milk, Eggs, Soy.</Typography>
+              {product.veg && (
+                <Box mt={2} sx={{ p: { xs: 1.5, md: 2 }, background: "#FFF1EE", borderRadius: 2, display: "flex", alignItems: "center", gap: { xs: 1.5, md: 2 }, border: "1px solid #FF643A" }}>
+                  <ThumbUpOffAlt sx={{ color: "#FF643A", fontSize: { xs: 18, md: 20 } }} />
+                  <Box>
+                    <Typography fontWeight={600} fontSize={{ xs: 13, md: 14 }}>Vegetarian Product</Typography>
+                    <Typography fontSize={{ xs: 12, md: 13 }}>{product.veg === "Y" ? "This is a vegetarian product." : "Please check ingredients for allergen information."}</Typography>
+                  </Box>
                 </Box>
-              </Box>
+              )}
             </Box>
           </Grid>
           <Grid size={{ xs: 12, md: 6 }}>
@@ -269,34 +367,35 @@ export const ProductDetails = () => {
                 Nutrition Facts
               </Typography>
               <Box fontSize={{ xs: 13, md: 14 }}>
-                {[
-                  { label: "Calories", value: "320 kcal" },
-                  { label: "Fat", value: "19g" },
-                  { label: "Carbohydrates", value: "35g" },
-                  { label: "Protein", value: "4g" },
-                  { label: "Sugar", value: "12g" }
-                ].map((item, index) => (
-                  <Box
-                    key={index}
-                    sx={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      py: { xs: 1, md: 1.2 },
-                      borderBottom: index !== 4 ? "1px solid #eee" : "none"
-                    }}
-                  >
-                    <Typography fontSize={{ xs: 13, md: 14 }}>{item.label}</Typography>
-                    <Typography fontWeight={600} fontSize={{ xs: 13, md: 14 }}>{item.value}</Typography>
-                  </Box>
-                ))}
+                {productData.nutrition && Object.keys(productData.nutrition).length > 0 ? (
+                  Object.entries(productData.nutrition).map(([label, value], index, array) => (
+                    <Box
+                      key={index}
+                      sx={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        py: { xs: 1, md: 1.2 },
+                        borderBottom: index !== array.length - 1 ? "1px solid #eee" : "none"
+                      }}
+                    >
+                      <Typography fontSize={{ xs: 13, md: 14 }}>{label}</Typography>
+                      <Typography fontWeight={600} fontSize={{ xs: 13, md: 14 }}>{value}</Typography>
+                    </Box>
+                  ))
+                ) : (
+                  <Typography fontSize={{ xs: 13, md: 14 }} color="text.secondary">
+                    Nutrition information not available.
+                  </Typography>
+                )}
               </Box>
-              <Box mt={2} sx={{ p: { xs: 1.5, md: 2 }, background: "#F8F8F8", borderRadius: 2, border: "1px solid #D5D5D5" }}>
-                <Typography fontWeight={600} fontSize={{ xs: 13, md: 14 }}>Storage Instructions</Typography>
-                <Typography fontSize={{ xs: 12, md: 13 }}>
-                  Keep in a cool dry place. Consume within 24 hours.
-                  Can be rewarmed in an oven for 2 mins at 180°C.
-                </Typography>
-              </Box>
+              {product.expiryday && (
+                <Box mt={2} sx={{ p: { xs: 1.5, md: 2 }, background: "#F8F8F8", borderRadius: 2, border: "1px solid #D5D5D5" }}>
+                  <Typography fontWeight={600} fontSize={{ xs: 13, md: 14 }}>Storage Instructions</Typography>
+                  <Typography fontSize={{ xs: 12, md: 13 }}>
+                    Best consumed within {product.expiryday} days. Keep in a cool dry place.
+                  </Typography>
+                </Box>
+              )}
             </Box>
           </Grid>
         </Grid>

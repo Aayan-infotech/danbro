@@ -44,7 +44,6 @@ export const ProductList = () => {
   // Get categoryId from URL query params
   const categoryIdFromUrl = searchParams.get('categoryId');
   
-  // Set selected category based on URL parameter
   useEffect(() => {
     if (categoryIdFromUrl && apiCategories && apiCategories.length > 0) {
       const categoryIndex = apiCategories.findIndex(cat => cat.id === parseInt(categoryIdFromUrl));
@@ -85,7 +84,6 @@ export const ProductList = () => {
     });
   }, [apiProducts]);
 
-  // Apply search filter
   const filteredProducts = useMemo(() => {
     if (!searchQuery) return transformedProducts;
     
@@ -108,7 +106,6 @@ export const ProductList = () => {
     return () => clearTimeout(timer);
   }, [selectedCategory, searchQuery, products]);
 
-  // Show loading state
   if (categoriesLoading || productsLoading) {
     return (
       <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "60vh" }}>
@@ -117,7 +114,6 @@ export const ProductList = () => {
     );
   }
 
-  // Show error state
   if (categoriesError || productsError) {
     return (
       <Box sx={{ px: { xs: 2, sm: 3, md: 6 }, py: 4 }}>
