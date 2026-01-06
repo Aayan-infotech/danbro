@@ -56,10 +56,6 @@ export const ProductList = () => {
   // Get selected category ID
   const selectedCategoryId = useMemo(() => {
     const categoryId = apiCategories?.[selectedCategory]?.id || null;
-    console.log('Selected Category Index:', selectedCategory);
-    console.log('Selected Category ID:', categoryId);
-    console.log('Category ID from URL:', categoryIdFromUrl);
-    console.log('Available Categories:', apiCategories?.map(c => ({ id: c.id, name: c.groupname })));
     return categoryId;
   }, [apiCategories, selectedCategory, categoryIdFromUrl]);
 
