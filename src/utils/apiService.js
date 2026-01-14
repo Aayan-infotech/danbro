@@ -1,4 +1,4 @@
-import { EXTERNAL_API_BASE_URL, EXTERNAL_API_ACCESS_KEY } from './apiUrl';
+import { EXTERNAL_API_BASE_URL, EXTERNAL_API_ACCESS_KEY, API_BASE_URL } from './apiUrl';
 
 /**
  * Sanitize JSON string by escaping control characters within string values
@@ -66,14 +66,18 @@ const sanitizeJsonString = (jsonString) => {
 };
 
 /**
- * Get the API URL - use proxy in development, direct URL in production
+ * Get authentication token from localStorage
+ * @returns {string|null} The authentication token or null if not found
+ */
+const getAuthToken = () => {
+  return localStorage.getItem('token') || localStorage.getItem('authToken');
+};
+
+/**
+ * Get the API URL for category endpoint
  */
 const getApiUrl = () => {
-  if (import.meta.env.DEV) {
-    return `/api/external/downstream.asp?level=ITEMCATEGORY`;
-  }
-  // In production, use direct URL
-  return `${EXTERNAL_API_BASE_URL}/downstream.asp?level=ITEMCATEGORY`;
+  return `${API_BASE_URL}/category/getAll`;
 };
 
 /**
@@ -87,7 +91,7 @@ export const fetchItemCategories = async () => {
     const response = await fetch(url, {
       method: 'GET',
       headers: {
-        'Authorization': `accesskey ${EXTERNAL_API_ACCESS_KEY}`,
+        'Content-Type': 'application/json',
       },
       credentials: 'omit',
     });
