@@ -192,6 +192,7 @@ export const CategoryCarousel = () => {
                       component="img"
                       src={item?.img}
                       alt=""
+                      loading="lazy"
                       sx={{
                         height: { xs: 65, md: 95 },
                         width: "100%",

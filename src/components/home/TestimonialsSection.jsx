@@ -370,6 +370,7 @@ export const TestimonialsSection = () => {
                             component="img"
                             src={t.img}
                             alt={t.name}
+                            loading="lazy"
                             sx={{
                                 width: { xs: 55, sm: 65, md: 75 },
                                 height: { xs: 55, sm: 65, md: 75 },

@@ -7,6 +7,7 @@ import offer2 from "../../assets/Group 8 (2).png";
 import offer3 from "../../assets/Group 8 (1).png";
 import { useState, useRef } from "react";
 import Slider from "react-slick";
+import { TabButton } from "../comman/TabButton";
 
 const categoryTabs = ["Category 1", "Category 2", "Category 3", "Category 4"];
 const pastryTabs = ["Birthday Cake", "Anniversary Cake", "Danbro Special", "Others"];
@@ -229,32 +230,13 @@ export const CakeSection = () => {
                     }}
                 >
                     {categoryTabs?.map((tab) => (
-                        <Button
+                        <TabButton
                             key={tab}
+                            label={tab}
+                            isActive={activeCategoryTab === tab}
                             onClick={() => setActiveCategoryTab(tab)}
-                            sx={{
-                                textTransform: "none",
-                                fontWeight: 600,
-                                fontSize: { xs: 11, sm: 12, md: 14 },
-                                color:
-                                    activeCategoryTab === tab
-                                        ? "var(--themeColor)"
-                                        : "rgba(0,0,0,0.7)",
-                                border:
-                                    activeCategoryTab === tab
-                                        ? "2px solid var(--themeColor)"
-                                        : "2px solid transparent",
-                                backgroundColor:
-                                    activeCategoryTab === tab ? "#fff4f0" : "transparent",
-                                borderRadius: 20,
-                                px: activeCategoryTab === tab ? { xs: 2, md: 3 } : 0,
-                                py: activeCategoryTab === tab ? { xs: 0.4, md: 0.6 } : 0,
-                                transition: "0.25s",
-                                whiteSpace: "nowrap",
-                            }}
-                        >
-                            {tab}
-                        </Button>
+                            sx={{ transition: "0.25s" }}
+                        />
                     ))}
                 </Box>
             </Box>
@@ -363,6 +345,7 @@ export const CakeSection = () => {
                                                 component="img"
                                                 src={offer?.img}
                                                 alt={offer?.title}
+                                                loading="lazy"
                                                 sx={{
                                                     width: "100%",
                                                     height: { xs: 240, md: 280 },
@@ -569,6 +552,7 @@ export const CakeSection = () => {
                             component="img"
                             src={offer?.img}
                             alt={offer?.title}
+                            loading="lazy"
                             sx={{
                                 width: "100%",
                                 height: { xs: 240, md: 280 },
@@ -706,32 +690,13 @@ export const CakeSection = () => {
                     }}
                 >
                     {pastryTabs?.map((tab) => (
-                        <Button
+                        <TabButton
                             key={tab}
+                            label={tab}
+                            isActive={activePastryTab === tab}
                             onClick={() => setActivePastryTab(tab)}
-                            sx={{
-                                textTransform: "none",
-                                fontWeight: 600,
-                                fontSize: { xs: 11, sm: 12, md: 14 },
-                                color:
-                                    activePastryTab === tab
-                                        ? "var(--themeColor)"
-                                        : "rgba(0,0,0,0.7)",
-                                border:
-                                    activePastryTab === tab
-                                        ? "2px solid var(--themeColor)"
-                                        : "2px solid transparent",
-                                backgroundColor:
-                                    activePastryTab === tab ? "#fff4f0" : "transparent",
-                                borderRadius: 20,
-                                px: activePastryTab === tab ? { xs: 2, md: 3 } : 0,
-                                py: activePastryTab === tab ? { xs: 0.4, md: 0.6 } : 0,
-                                transition: "0.25s",
-                                whiteSpace: "nowrap",
-                            }}
-                        >
-                            {tab}
-                        </Button>
+                            sx={{ transition: "0.25s" }}
+                        />
                     ))}
                 </Box>
             </Box>
@@ -813,6 +778,7 @@ export const CakeSection = () => {
                                                 component="img"
                                                 src={item?.img}
                                                 alt={item?.title}
+                                                loading="lazy"
                                                 sx={{
                                                     width: "100%",
                                                     height: 260,
@@ -950,6 +916,7 @@ export const CakeSection = () => {
                             component="img"
                             src={item?.img}
                             alt={item?.title}
+                            loading="lazy"
                             sx={{
                                 width: "100%",
                                 height: 260,
@@ -1054,32 +1021,13 @@ export const CakeSection = () => {
                     }}
                 >
                     {cookieTabs?.map((tab) => (
-                        <Button
+                        <TabButton
                             key={tab}
+                            label={tab}
+                            isActive={activeCookieTab === tab}
                             onClick={() => setActiveCookieTab(tab)}
-                            sx={{
-                                textTransform: "none",
-                                fontWeight: 600,
-                                fontSize: { xs: 11, sm: 12, md: 14 },
-                                color:
-                                    activeCookieTab === tab
-                                        ? "var(--themeColor)"
-                                        : "rgba(0,0,0,0.7)",
-                                border:
-                                    activeCookieTab === tab
-                                        ? "2px solid var(--themeColor)"
-                                        : "2px solid transparent",
-                                backgroundColor:
-                                    activeCookieTab === tab ? "#fff4f0" : "transparent",
-                                borderRadius: 20,
-                                px: activeCookieTab === tab ? { xs: 2, md: 3 } : 0,
-                                py: activeCookieTab === tab ? { xs: 0.4, md: 0.6 } : 0,
-                                transition: "0.25s",
-                                whiteSpace: "nowrap",
-                            }}
-                        >
-                            {tab}
-                        </Button>
+                            sx={{ transition: "0.25s" }}
+                        />
                     ))}
                 </Box>
             </Box>
@@ -1159,6 +1107,7 @@ export const CakeSection = () => {
                                                 component="img"
                                                 src={item?.img}
                                                 alt={item?.title}
+                                                loading="lazy"
                                                 sx={{
                                                     width: "100%",
                                                     height: 260,
@@ -1278,6 +1227,7 @@ export const CakeSection = () => {
                             component="img"
                             src={item?.img}
                             alt={item?.title}
+                            loading="lazy"
                             sx={{
                                 width: "100%",
                                 height: 260,
@@ -1365,32 +1315,13 @@ export const CakeSection = () => {
                     }}
                 >
                     {breadTabs?.map((tab) => (
-                        <Button
+                        <TabButton
                             key={tab}
+                            label={tab}
+                            isActive={activeBreadTab === tab}
                             onClick={() => setActiveBreadTab(tab)}
-                            sx={{
-                                textTransform: "none",
-                                fontWeight: 600,
-                                fontSize: { xs: 11, sm: 12, md: 14 },
-                                color:
-                                    activeBreadTab === tab
-                                        ? "var(--themeColor)"
-                                        : "rgba(0,0,0,0.7)",
-                                border:
-                                    activeBreadTab === tab
-                                        ? "2px solid var(--themeColor)"
-                                        : "2px solid transparent",
-                                backgroundColor:
-                                    activeBreadTab === tab ? "#fff4f0" : "transparent",
-                                borderRadius: 20,
-                                px: activeBreadTab === tab ? { xs: 2, md: 3 } : 0,
-                                py: activeBreadTab === tab ? { xs: 0.4, md: 0.6 } : 0,
-                                transition: "0.25s",
-                                whiteSpace: "nowrap",
-                            }}
-                        >
-                            {tab}
-                        </Button>
+                            sx={{ transition: "0.25s" }}
+                        />
                     ))}
                 </Box>
             </Box>
@@ -1470,6 +1401,7 @@ export const CakeSection = () => {
                                                 component="img"
                                                 src={item?.img}
                                                 alt={item?.title}
+                                                loading="lazy"
                                                 sx={{
                                                     width: "100%",
                                                     height: 260,
@@ -1589,6 +1521,7 @@ export const CakeSection = () => {
                             component="img"
                             src={item?.img}
                             alt={item?.title}
+                            loading="lazy"
                             sx={{
                                 width: "100%",
                                 height: 260,
@@ -1676,32 +1609,13 @@ export const CakeSection = () => {
                     }}
                 >
                     {comboTabs?.map((tab) => (
-                        <Button
+                        <TabButton
                             key={tab}
+                            label={tab}
+                            isActive={activeComboTab === tab}
                             onClick={() => setActiveComboTab(tab)}
-                            sx={{
-                                textTransform: "none",
-                                fontWeight: 600,
-                                fontSize: { xs: 11, sm: 12, md: 14 },
-                                color:
-                                    activeComboTab === tab
-                                        ? "var(--themeColor)"
-                                        : "rgba(0,0,0,0.7)",
-                                border:
-                                    activeComboTab === tab
-                                        ? "2px solid var(--themeColor)"
-                                        : "2px solid transparent",
-                                backgroundColor:
-                                    activeComboTab === tab ? "#fff4f0" : "transparent",
-                                borderRadius: 20,
-                                px: activeComboTab === tab ? { xs: 2, md: 3 } : 0,
-                                py: activeComboTab === tab ? { xs: 0.4, md: 0.6 } : 0,
-                                transition: "0.25s",
-                                whiteSpace: "nowrap",
-                            }}
-                        >
-                            {tab}
-                        </Button>
+                            sx={{ transition: "0.25s" }}
+                        />
                     ))}
                 </Box>
             </Box>
@@ -1781,6 +1695,7 @@ export const CakeSection = () => {
                                                 component="img"
                                                 src={item?.img}
                                                 alt={item?.title}
+                                                loading="lazy"
                                                 sx={{
                                                     width: "100%",
                                                     height: 260,
@@ -1900,6 +1815,7 @@ export const CakeSection = () => {
                             component="img"
                             src={item?.img}
                             alt={item?.title}
+                            loading="lazy"
                             sx={{
                                 width: "100%",
                                 height: 260,

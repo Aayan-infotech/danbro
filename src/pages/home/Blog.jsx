@@ -211,6 +211,7 @@ export const Blog = () => {
                   <img
                     src={blog.image}
                     alt={blog.title}
+                    loading="lazy"
                     style={{
                       width: "100%",
                       height: "100%",
@@ -375,6 +376,7 @@ export const Blog = () => {
                     <img
                       src={b.image}
                       alt={b.title}
+                      loading="lazy"
                       style={{
                         width: 70,
                         height: 70,

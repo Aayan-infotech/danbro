@@ -319,6 +319,7 @@ export const Artical = () => {
                                     className="article-image"
                                     component="img"
                                     src={item.image}
+                                    loading="lazy"
                                     sx={{
                                         width: "100%",
                                         height: { xs: 200, sm: 220, md: 240 },

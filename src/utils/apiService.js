@@ -71,9 +71,6 @@ const sanitizeJsonString = (jsonString) => {
  * Get authentication token from localStorage
  * @returns {string|null} The authentication token or null if not found
  */
-const getAuthToken = () => {
-  return localStorage.getItem('token') || localStorage.getItem('authToken');
-};
 
 /**
  * Get the API URL for category endpoint
@@ -93,9 +90,10 @@ export const fetchItemCategories = async () => {
     const response = await axios.get(url, {
       headers: {
         'Content-Type': 'application/json',
+        'Accept': 'application/json',
       },
       withCredentials: false,
-      timeout: 10000,
+      timeout: 30000, // Increased to 30 seconds to handle slower network conditions
     });
 
     return response.data;
@@ -103,7 +101,19 @@ export const fetchItemCategories = async () => {
   } catch (error) {
     console.error('Error fetching item categories:', error);
 
+    // Handle timeout errors specifically
+    if (error.code === 'ECONNABORTED' || error.message.includes('timeout')) {
+      throw new Error(
+        'Request timeout: The server is taking too long to respond. Please try again or check your network connection.'
+      );
+    }
+
     if (!error.response) {
+      if (error.code === 'ERR_NETWORK' || error.message.includes('Network Error')) {
+        throw new Error(
+          'Network error: Unable to connect to the API. Please check your internet connection or try again later.'
+        );
+      }
       throw new Error(
         'Network error: Unable to connect to the API. Please check your internet connection or try again later.'
       );
@@ -157,10 +167,11 @@ const getExternalApiUrl = (level, params = {}) => {
  * Fetch products from the API
  * @param {number} categoryId - Category ID to filter products
  * @param {number} page - Page number (default: 1)
+ * @param {number} limit - Number of items per page (default: 20)
  * @param {string} search - Search query (default: '')
  * @returns {Promise<Object>} Response object with success, message, meta, and data array
  */
-export const fetchProducts = async (categoryId = null, page = 1, search = '') => {
+export const fetchProducts = async (categoryId = null, page = 1, limit = 20, search = '') => {
   try {
     const baseUrl = `${API_BASE_URL}/product/getAll`;
     const params = new URLSearchParams();
@@ -169,6 +180,7 @@ export const fetchProducts = async (categoryId = null, page = 1, search = '') =>
       params.append('category', categoryId.toString());
     }
     params.append('page', page.toString());
+    params.append('limit', limit.toString());
     params.append('search', search);
     
     const url = `${baseUrl}?${params.toString()}`;
@@ -176,9 +188,10 @@ export const fetchProducts = async (categoryId = null, page = 1, search = '') =>
     const response = await axios.get(url, {
       headers: {
         'Content-Type': 'application/json',
+        'Accept': 'application/json',
       },
       withCredentials: false,
-      timeout: 10000,
+      timeout: 30000, // Increased to 30 seconds to handle slower network conditions
       responseType: 'text', // Get as text first to handle potential JSON parsing issues
     });
 
@@ -203,7 +216,20 @@ export const fetchProducts = async (categoryId = null, page = 1, search = '') =>
   } catch (error) {
     console.error('Error fetching products:', error);
     
+    // Handle timeout errors specifically
+    if (error.code === 'ECONNABORTED' || error.message.includes('timeout')) {
+      throw new Error(
+        'Request timeout: The server is taking too long to respond. Please try again or check your network connection.'
+      );
+    }
+    
+    // Handle network errors
     if (!error.response) {
+      if (error.code === 'ERR_NETWORK' || error.message.includes('Network Error')) {
+        throw new Error(
+          'Network error: Unable to connect to the API. Please check your internet connection or try again later.'
+        );
+      }
       throw new Error(
         'Network error: Unable to connect to the API. Please check your internet connection or try again later.'
       );
@@ -220,12 +246,13 @@ export const fetchProducts = async (categoryId = null, page = 1, search = '') =>
  * Get products with error handling
  * @param {number} categoryId - Category ID to filter products
  * @param {number} page - Page number (default: 1)
+ * @param {number} limit - Number of items per page (default: 20)
  * @param {string} search - Search query (default: '')
  * @returns {Promise<Array>} Array of product records
  */
-export const getProducts = async (categoryId = null, page = 1, search = '') => {
+export const getProducts = async (categoryId = null, page = 1, limit = 20, search = '') => {
   try {
-    const response = await fetchProducts(categoryId, page, search);
+    const response = await fetchProducts(categoryId, page, limit, search);
     
     if (response.success && response.data && Array.isArray(response.data)) {
       return response.data;
@@ -252,9 +279,10 @@ export const fetchBranches = async () => {
     const response = await axios.get(url, {
       headers: {
         'Content-Type': 'application/json',
+        'Accept': 'application/json',
       },
       withCredentials: false,
-      timeout: 10000,
+      timeout: 30000, // Increased to 30 seconds to handle slower network conditions
       responseType: 'text', // Get as text first to handle potential JSON parsing issues
     });
 
@@ -279,7 +307,20 @@ export const fetchBranches = async () => {
   } catch (error) {
     console.error('Error fetching branches:', error);
     
+    // Handle timeout errors specifically
+    if (error.code === 'ECONNABORTED' || error.message.includes('timeout')) {
+      throw new Error(
+        'Request timeout: The server is taking too long to respond. Please try again or check your network connection.'
+      );
+    }
+    
+    // Handle network errors
     if (!error.response) {
+      if (error.code === 'ERR_NETWORK' || error.message.includes('Network Error')) {
+        throw new Error(
+          'Network error: Unable to connect to the API. Please check your internet connection or try again later.'
+        );
+      }
       throw new Error(
         'Network error: Unable to connect to the API. Please check your internet connection or try again later.'
       );

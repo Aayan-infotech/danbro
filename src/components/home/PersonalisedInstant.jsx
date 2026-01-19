@@ -139,6 +139,7 @@ export const PersonalisedInstant = () => {
                     component="img"
                     src={mens}
                     alt="App Banner"
+                    loading="lazy"
                     sx={{
                         width: "100%",
                         height: { xs: "auto", md: "100%" },
@@ -172,6 +173,7 @@ export const PersonalisedInstant = () => {
                     component="img"
                     src={logo}
                     alt="logo"
+                    loading="lazy"
                     sx={{
                         height: { xs: 60, sm: 80, md: 100 },
                         width: "auto",

@@ -17,21 +17,17 @@ export const useItemCategories = () => {
 
   useEffect(() => {
     const loadCategories = async () => {
-      // Check if we have valid cached data
       const now = Date.now();
       if (categoriesCache && cacheTimestamp && (now - cacheTimestamp) < CACHE_DURATION) {
         setCategories(categoriesCache);
         setLoading(false);
         return;
       }
-
       try {
         setLoading(true);
         setError(null);
         const response = await fetchItemCategories();
-        
         if (response.status === 'sucess' && response.records) {
-          // Update cache
           categoriesCache = response.records;
           cacheTimestamp = Date.now();
           setCategories(response.records);

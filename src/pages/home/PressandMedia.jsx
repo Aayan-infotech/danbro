@@ -3,7 +3,6 @@ import PhoneIcon from "@mui/icons-material/Phone";
 import EmailIcon from "@mui/icons-material/Email";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import cateringEvents from "../../assets/createevents.png";
-import createevents1 from "../../assets/createevents1.png";
 import offers from "../../assets/a3d911fa3a066482b613b012d6ec9a5c875d515c.jpg";
 import offers1 from "../../assets/b7a67b048af16c83e30c7f2f03dc8270f5a65c26.png";
 import offers2 from "../../assets/b99b1bd9963e106a73131dcda2ec226e89d0989e.png";
@@ -64,15 +63,7 @@ export const PressandMedia = () => {
           transition: "opacity 0.8s ease-out, transform 0.8s ease-out",
         }}
       >
-        <Typography
-          variant="h1"
-          sx={{
-            fontSize: { xs: 28, sm: 36, md: 56 },
-            fontWeight: 700,
-            color: "#fff",
-            mb: 2,
-          }}
-        >
+        <Typography variant="h1" sx={{ fontSize: { xs: 28, sm: 36, md: 56 }, fontWeight: 700, color: "#fff", mb: 2, }}>
           PRESS AND MEDIA
         </Typography>
       </Box>
@@ -85,14 +76,7 @@ export const PressandMedia = () => {
             </Typography>
 
             <Box sx={{ display: "flex", justifyContent: "center", gap: 2, flexWrap: "wrap" }}>
-              <Button variant="contained"
-                sx={{
-                  background: "#FFB5A1",
-                  color: "#fff",
-                  textTransform: "none",
-                  px: { xs: 3, md: 4 }, py: 1.2, fontWeight: 600,
-                  "&:hover": { background: "#d66a1f" }
-                }}>
+              <Button variant="contained" sx={{ background: "#FFB5A1", color: "#fff", textTransform: "none", px: { xs: 3, md: 4 }, py: 1.2, fontWeight: 600, "&:hover": { background: "#d66a1f" } }}>
                 Download Media Kit
               </Button>
 

@@ -3,7 +3,6 @@ import Slider from "react-slick";
 import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import { useEffect, useRef, useState } from "react";
-import banner from "../../assets/banner.png";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import "./HeroBanner.css";
@@ -26,7 +25,7 @@ export const HeroBanner = () => {
     },
     {
       id: 2,
-      img: "https://media.newyorker.com/photos/693b059fdb6063d63c569f98/16:10/w_2560%2Cc_limit/ROSNER-BESTDISHES-2025.gif",
+      img: "https://media4.giphy.com/media/v1.Y2lkPTZjMDliOTUyYzFzYmI4cmhqYnVoOHZsd2d2M3BuYWxvZ3ZudGk3ODg0cXQxMnc3ZSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/KRWPCOeJakqju/giphy.gif",
       alt: "Cake decoration",
       title: "Handcrafted Cakes",
       subtitle: "Beautifully designed cakes for every celebration",
@@ -124,158 +123,6 @@ export const HeroBanner = () => {
 
   return (
     <>
-      <style>
-        {`
-          @keyframes float {
-            0%, 100% { 
-              transform: translate(0, 0) scale(1) rotate(0deg);
-            }
-            50% { 
-              transform: translate(50px, 50px) scale(1.2) rotate(180deg);
-            }
-          }
-          
-          @keyframes floatReverse {
-            0%, 100% { 
-              transform: translate(0, 0) scale(1) rotate(0deg);
-            }
-            50% { 
-              transform: translate(-40px, -40px) scale(1.15) rotate(-180deg);
-            }
-          }
-          
-          @keyframes particleFloat {
-            0%, 100% { 
-              transform: translateY(0px) translateX(0px) scale(1);
-              opacity: 0.3;
-            }
-            50% { 
-              transform: translateY(-40px) translateX(30px) scale(1.5);
-              opacity: 0.8;
-            }
-          }
-          
-          @keyframes shimmer {
-            0% {
-              background-position: -1000px 0;
-            }
-            100% {
-              background-position: 1000px 0;
-            }
-          }
-          
-          @keyframes glow {
-            0%, 100% {
-              box-shadow: 0 0 20px rgba(95, 41, 48, 0.3),
-                          0 0 40px rgba(255, 181, 161, 0.2),
-                          0 0 60px rgba(95, 41, 48, 0.1);
-            }
-            50% {
-              box-shadow: 0 0 30px rgba(95, 41, 48, 0.5),
-                          0 0 60px rgba(255, 181, 161, 0.3),
-                          0 0 90px rgba(95, 41, 48, 0.2);
-            }
-          }
-          
-          @keyframes slideInLeft {
-            from {
-              opacity: 0;
-              transform: translateX(-100px) scale(0.9);
-            }
-            to {
-              opacity: 1;
-              transform: translateX(0) scale(1);
-            }
-          }
-          
-          @keyframes slideInRight {
-            from {
-              opacity: 0;
-              transform: translateX(100px) scale(0.9);
-            }
-            to {
-              opacity: 1;
-              transform: translateX(0) scale(1);
-            }
-          }
-          
-          @keyframes zoomIn {
-            from {
-              opacity: 0;
-              transform: scale(0.8) translateY(30px);
-            }
-            to {
-              opacity: 1;
-              transform: scale(1) translateY(0);
-            }
-          }
-          
-          @keyframes fadeUp {
-            from {
-              opacity: 0;
-              transform: translateY(50px);
-            }
-            to {
-              opacity: 1;
-              transform: translateY(0);
-            }
-          }
-          
-          @keyframes pulseArrow {
-            0%, 100% {
-              transform: translateY(-50%) scale(1);
-              box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-            }
-            50% {
-              transform: translateY(-50%) scale(1.1);
-              box-shadow: 0 12px 35px rgba(95, 41, 48, 0.4);
-            }
-          }
-          
-          @keyframes rotate360 {
-            from {
-              transform: rotate(0deg);
-            }
-            to {
-              transform: rotate(360deg);
-            }
-          }
-          
-          @keyframes gradientShift {
-            0%, 100% {
-              background-position: 0% 50%;
-            }
-            50% {
-              background-position: 100% 50%;
-            }
-          }
-          
-          @keyframes textGlow {
-            0%, 100% {
-              text-shadow: 0 4px 20px rgba(0,0,0,0.5),
-                           0 2px 10px rgba(0,0,0,0.3),
-                           0 0 30px rgba(255, 181, 161, 0.3);
-            }
-            50% {
-              text-shadow: 0 4px 20px rgba(0,0,0,0.5),
-                           0 2px 10px rgba(0,0,0,0.3),
-                           0 0 50px rgba(255, 181, 161, 0.6);
-            }
-          }
-          
-          @keyframes dotPulse {
-            0%, 100% {
-              transform: scale(1);
-              opacity: 0.6;
-            }
-            50% {
-              transform: scale(1.3);
-              opacity: 1;
-            }
-          }
-        `}
-      </style>
-
       <Box
         ref={bannerRef}
         onMouseEnter={() => setIsHovered(true)}
@@ -529,7 +376,7 @@ export const HeroBanner = () => {
                     className={isActive ? "kb-kenburns-img" : ""}
                     sx={{
                       width: "100%",
-                      height: { xs: "55vh", sm: "65vh", md: "80vh", lg: "90vh" },
+                      height: { xs: "40vh", sm: "50vh", md: "60vh", lg: "70vh" },
                       objectFit: "cover",
                       display: "block",
                       opacity: isActive ? 0.8 : 0.6,

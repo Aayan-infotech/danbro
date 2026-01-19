@@ -578,8 +578,8 @@ export const ProductDetails = () => {
             ))}
           </Tabs>
         </Box>
-        <Grid container spacing={{ xs: 2, md: 3 }} mt={{ xs: 3, md: 4 }}>
-          {images.map((img, i) => (
+        <Grid container spacing={{ xs: 2, md: 3 }} mt={{ xs: 3, md: 4 }} sx={{ mb: 5 }}>
+          {images?.map((img, i) => (
             <Grid size={{ xs: 6, sm: 4, md: 3 }} key={i}>
               <Box
                 component="img"

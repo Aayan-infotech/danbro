@@ -26,7 +26,12 @@ export const ProductList = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
   const [isVisible, setIsVisible] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [displayedProducts, setDisplayedProducts] = useState([]);
+  const [allProducts, setAllProducts] = useState([]);
   const productRef = useRef(null);
+  
+  const ITEMS_PER_PAGE = 20; // Show 20 items per page
 
   const { categories: apiCategories, loading: categoriesLoading, error: categoriesError } = useItemCategories();
   
@@ -63,12 +68,31 @@ export const ProductList = () => {
     }
   };
 
-  const { products: apiProducts, loading: productsLoading, error: productsError } = useProducts(selectedCategoryId);
+  // Reset pagination when category or search changes
+  useEffect(() => {
+    setCurrentPage(1);
+    setDisplayedProducts([]);
+    setAllProducts([]);
+  }, [selectedCategoryId, debouncedSearchQuery]);
 
-  const transformedProducts = useMemo(() => {
-    if (!apiProducts || apiProducts.length === 0) return [];
+  const { products: apiProducts, loading: productsLoading, error: productsError, pagination } = useProducts(
+    selectedCategoryId,
+    currentPage,
+    ITEMS_PER_PAGE,
+    debouncedSearchQuery
+  );
+
+  // Transform products when API data changes
+  useEffect(() => {
+    if (!apiProducts || apiProducts.length === 0) {
+      if (currentPage === 1) {
+        setAllProducts([]);
+        setDisplayedProducts([]);
+      }
+      return;
+    }
     
-    return apiProducts.map((product) => {
+    const transformed = apiProducts.map((product) => {
       const priceObj = product.price && product.price.length > 0 ? product.price[0] : { rate: 0, mrp: 0 };
       const displayPrice = priceObj.rate || priceObj.mrp || 0;
       
@@ -80,19 +104,34 @@ export const ProductList = () => {
         image: "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=400&h=400&fit=crop&auto=format&q=80", 
       };
     });
-  }, [apiProducts]);
+
+    if (currentPage === 1) {
+      // First page - replace all products
+      setAllProducts(transformed);
+      setDisplayedProducts(transformed);
+    } else {
+      // Subsequent pages - append to existing products
+      setAllProducts(prev => [...prev, ...transformed]);
+      setDisplayedProducts(prev => [...prev, ...transformed]);
+    }
+  }, [apiProducts, currentPage]);
 
   const filteredProducts = useMemo(() => {
-    if (!debouncedSearchQuery) return transformedProducts;
-    return transformedProducts.filter(
+    if (!debouncedSearchQuery) return displayedProducts;
+    return displayedProducts.filter(
       (product) =>
         product.name.toLowerCase().includes(debouncedSearchQuery.toLowerCase()) ||
         product.description.toLowerCase().includes(debouncedSearchQuery.toLowerCase())
     );
-  }, [transformedProducts, debouncedSearchQuery]);
+  }, [displayedProducts, debouncedSearchQuery]);
 
   const products = filteredProducts;
   const categories = apiCategories?.map(cat => cat.groupname) || [];
+  const hasMore = pagination?.hasMore || (apiProducts && apiProducts.length === ITEMS_PER_PAGE);
+
+  const handleLoadMore = () => {
+    setCurrentPage(prev => prev + 1);
+  };
 
   // Animation on mount and category change
   useEffect(() => {
@@ -101,7 +140,7 @@ export const ProductList = () => {
       setIsVisible(true);
     }, 100);
     return () => clearTimeout(timer);
-  }, [selectedCategory, debouncedSearchQuery, products]);
+  }, [selectedCategory, debouncedSearchQuery]);
 
   if (categoriesLoading || productsLoading) {
     return (
@@ -225,6 +264,48 @@ export const ProductList = () => {
         />
         <Box ref={productRef}>
           <ProductGrid products={products} isVisible={isVisible} />
+          
+          {/* Load More Button */}
+          {products.length > 0 && hasMore && !productsLoading && (
+            <Box sx={{ display: "flex", justifyContent: "center", mt: 4, mb: 2 }}>
+              <Button
+                variant="outlined"
+                onClick={handleLoadMore}
+                disabled={productsLoading}
+                sx={{
+                  px: 4,
+                  py: 1.5,
+                  borderRadius: "30px",
+                  borderColor: "#FF643A",
+                  color: "#FF643A",
+                  textTransform: "none",
+                  fontSize: { xs: 14, md: 16 },
+                  fontWeight: 600,
+                  transition: "all 0.3s ease",
+                  "&:hover": {
+                    backgroundColor: "#FF643A",
+                    color: "#fff",
+                    borderColor: "#FF643A",
+                    transform: "translateY(-2px)",
+                    boxShadow: "0 4px 12px rgba(255,100,58,0.3)",
+                  },
+                  "&:disabled": {
+                    borderColor: "#ccc",
+                    color: "#ccc",
+                  },
+                }}
+              >
+                {productsLoading ? "Loading..." : "Load More Products"}
+              </Button>
+            </Box>
+          )}
+          
+          {/* Loading indicator for load more */}
+          {productsLoading && currentPage > 1 && (
+            <Box sx={{ display: "flex", justifyContent: "center", mt: 2, mb: 2 }}>
+              <CircularProgress size={32} sx={{ color: "#FF643A" }} />
+            </Box>
+          )}
         </Box>
       </Container>
 
@@ -324,7 +405,37 @@ export const ProductList = () => {
         </Box>
       </Container>
 
-      <RecommendedProducts recommendedProducts={recommendedProducts} />
+      {/* Recommended Products Section */}
+      <Container maxWidth="xl" sx={{ px: { xs: 2, md: 3 }, py: 4 }}>
+        <Box
+          sx={{
+            mb: { xs: 3, md: 4 },
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            flexWrap: "wrap",
+            gap: { xs: 1.5, md: 2 },
+            animation: "fadeInDown 0.8s ease-out",
+            "@keyframes fadeInDown": {
+              "0%": {
+                opacity: 0,
+                transform: "translateY(-20px)",
+              },
+              "100%": {
+                opacity: 1,
+                transform: "translateY(0)",
+              },
+            },
+          }}
+        >
+          <Typography variant="h4" sx={{ fontSize: { xs: 22, sm: 24, md: 32 }, fontWeight: 700, color: "#2c2c2c", transition: "color 0.3s ease", }}>
+            Recommended Products
+          </Typography>
+        </Box>
+        {recommendedProducts && recommendedProducts.length > 0 && (
+          <RecommendedProducts recommendedProducts={recommendedProducts} />
+        )}
+      </Container>
     </Box>
   );
 };

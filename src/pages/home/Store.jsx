@@ -39,27 +39,20 @@ export const Store = () => {
     // Fetch branches from API
     const { branches, loading, error } = useBranches();
 
-    // Extract unique cities from branches
     const categories = useMemo(() => {
         if (!branches || branches.length === 0) return [];
-
-        // Normalize city names: trim whitespace, handle case differences
         const cityMap = new Map();
         branches.forEach(branch => {
             if (branch?.city) {
                 const normalizedCity = branch.city.trim();
                 if (normalizedCity) {
-                    // Use title case for consistency (first letter uppercase, rest lowercase)
                     const titleCaseCity = normalizedCity.charAt(0).toUpperCase() + normalizedCity.slice(1).toLowerCase();
-                    // Store original city for filtering, but use normalized for display
                     if (!cityMap.has(titleCaseCity)) {
                         cityMap.set(titleCaseCity, normalizedCity);
                     }
                 }
             }
         });
-
-        // Convert to array and sort alphabetically
         const uniqueCities = Array.from(cityMap.keys()).sort();
         console.log('Extracted cities:', uniqueCities);
         return uniqueCities;
@@ -69,13 +62,10 @@ export const Store = () => {
     const filteredBranches = useMemo(() => {
         if (!branches || branches.length === 0) return [];
         if (!selectedCity) return branches;
-
-        // Filter by city (case-insensitive comparison)
         return branches.filter(branch => {
             if (!branch?.city) return false;
             const branchCity = branch.city.trim();
             const selectedCityNormalized = selectedCity.trim();
-            // Case-insensitive comparison
             return branchCity.toLowerCase() === selectedCityNormalized.toLowerCase();
         });
     }, [branches, selectedCity]);
@@ -123,17 +113,7 @@ export const Store = () => {
                     <Box sx={{ textAlign: "center", mt: { xs: 2, md: 3 } }}>
                         <img src={lucknowlogo} alt="logo" style={{ width: "auto" }} />
                     </Box>
-                    <Box
-                        sx={{
-                            height: { xs: 140, sm: 180, md: 240 },
-                            backgroundImage: `url(${store})`,
-                            backgroundSize: "cover",
-                            backgroundPosition: "center",
-                            display: "flex",
-                            justifyContent: "center",
-                            alignItems: "center"
-                        }}>
-                    </Box>
+                    <Box sx={{ height: { xs: 140, sm: 180, md: 240 }, backgroundImage: `url(${store})`, backgroundSize: "cover", backgroundPosition: "center", display: "flex", justifyContent: "center", alignItems: "center" }}></Box>
 
                     <Container maxWidth="xl" sx={{ py: { xs: 3, md: 5 } }}>
                         <Box ref={sectionRefs.categories}>
@@ -160,7 +140,6 @@ export const Store = () => {
                                         </Box>
                                     ))}
                                 </Box>
-
                                 <Divider sx={{ borderColor: "#000", borderBottomWidth: 2, mt: 2 }} />
                             </Box>
                         </Box>

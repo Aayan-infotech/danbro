@@ -1,4 +1,4 @@
-import { Box, Container, Typography, Card, CardContent, CardMedia } from "@mui/material";
+import { Box, Card, CardContent, CardMedia, Typography } from "@mui/material";
 import Slider from "react-slick";
 import { ArrowBackIosNew, ArrowForwardIos } from "@mui/icons-material";
 
@@ -53,124 +53,98 @@ const PrevArrow = ({ onClick }) => (
 );
 
 export const RecommendedProducts = ({ recommendedProducts = [] }) => {
+  if (!recommendedProducts || recommendedProducts.length === 0) {
+    return null;
+  }
+
   const settings = {
     dots: false,
-    infinite: true,
+    infinite: recommendedProducts.length > 5,
     speed: 600,
-    slidesToShow: 5,
+    slidesToShow: Math.min(5, recommendedProducts.length),
     slidesToScroll: 2,
     autoplay: true,
     autoplaySpeed: 2500,
-    arrows: true,
+    arrows: recommendedProducts.length > 5,
     nextArrow: <NextArrow />,
     prevArrow: <PrevArrow />,
     responsive: [
-      { breakpoint: 1200, settings: { slidesToShow: 4, slidesToScroll: 2 } },
-      { breakpoint: 900, settings: { slidesToShow: 3, slidesToScroll: 1 } },
-      { breakpoint: 600, settings: { slidesToShow: 2, slidesToScroll: 1 } },
+      { breakpoint: 1200, settings: { slidesToShow: Math.min(4, recommendedProducts.length), slidesToScroll: 2 } },
+      { breakpoint: 900, settings: { slidesToShow: Math.min(3, recommendedProducts.length), slidesToScroll: 1 } },
+      { breakpoint: 600, settings: { slidesToShow: Math.min(2, recommendedProducts.length), slidesToScroll: 1 } },
       { breakpoint: 400, settings: { slidesToShow: 1, slidesToScroll: 1 } },
     ],
   };
 
   return (
-    <Container maxWidth="xl" sx={{ px: { xs: "11px", md: 3 } }}>
-      <Box
-        sx={{
-          mb: { xs: 4, md: 6 },
-          animation: "fadeIn 1s ease-out 0.3s both",
-          "@keyframes fadeIn": {
-            "0%": { opacity: 0 },
-            "100%": { opacity: 1 },
-          },
+    <Box
+      sx={{
+        position: "relative",
+        "& .slick-slider": {
           position: "relative",
-          "& .slick-slider": {
-            position: "relative",
-          },
-          "& .slick-list": {
-            padding: { xs: "0 20px", md: "0" },
-          },
-        }}
-      >
-        <Typography
-          variant="h4"
-          sx={{
-            fontSize: { xs: 20, sm: 24, md: 32 },
-            fontWeight: 700,
-            color: "#2c2c2c",
-            mb: { xs: 3, md: 4 },
-            animation: "slideInLeft 0.8s ease-out",
-            "@keyframes slideInLeft": {
-              "0%": {
-                opacity: 0,
-                transform: "translateX(-30px)",
-              },
-              "100%": {
-                opacity: 1,
-                transform: "translateX(0)",
-              },
-            },
-          }}
-        >
-          Recommended Products
-        </Typography>
-
-        <Box sx={{ position: "relative" }}>
-          <Slider {...settings}>
-            {recommendedProducts?.map((product) => (
-              <Box key={product.id} sx={{ px: { xs: 1, md: 1.5 } }}>
-                <Card
-                  elevation={0}
-                  sx={{
-                    borderRadius: { xs: 1.5, md: 2 },
-                    transition: "all 0.3s ease",
-                    cursor: "pointer",
-                    "&:hover": {
-                      transform: "translateY(-5px)",
-                      boxShadow: "0 8px 25px rgba(0,0,0,0.15)",
-                    },
+        },
+        "& .slick-list": {
+          padding: { xs: "0 20px", md: "0" },
+        },
+      }}
+    >
+      <Box sx={{ position: "relative" }}>
+        <Slider {...settings}>
+          {recommendedProducts?.map((product) => (
+            <Box key={product?.id} sx={{ px: { xs: 1, md: 1.5 } }}>
+              <Card
+                elevation={0}
+                sx={{
+                  borderRadius: { xs: 1.5, md: 2 },
+                  transition: "all 0.3s ease",
+                  cursor: "pointer",
+                  "&:hover": {
+                    transform: "translateY(-5px)",
+                    boxShadow: "0 8px 25px rgba(0,0,0,0.15)",
+                  },
+                }}
+              >
+                <CardMedia
+                  component="img"
+                  height="200"
+                  image={product?.image}
+                  alt={product?.name}
+                  loading="lazy"
+                  sx={{ 
+                    height: { xs: 160, sm: 180, md: 200 },
+                    objectFit: "cover" 
                   }}
-                >
-                  <CardMedia
-                    component="img"
-                    height="200"
-                    image={product.image}
-                    alt={product.name}
-                    sx={{ 
-                      height: { xs: 160, sm: 180, md: 200 },
-                      objectFit: "cover" 
+                />
+
+                <CardContent sx={{ p: { xs: 1.5, md: 2 } }}>
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      fontWeight: 600,
+                      color: "#2c2c2c",
+                      mb: 0.5,
+                      fontSize: { xs: 13, md: 16 },
                     }}
-                  />
+                  >
+                    {product?.name}
+                  </Typography>
 
-                  <CardContent sx={{ p: { xs: 1.5, md: 2 } }}>
-                    <Typography
-                      variant="h6"
-                      sx={{
-                        fontWeight: 600,
-                        color: "#2c2c2c",
-                        mb: 0.5,
-                        fontSize: { xs: 13, md: 16 },
-                      }}
-                    >
-                      {product.name}
-                    </Typography>
-
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        color: "#964F73",
-                        fontSize: { xs: 11, md: 13 },
-                      }}
-                    >
-                      {product.description}
-                    </Typography>
-                  </CardContent>
-                </Card>
-              </Box>
-            ))}
-          </Slider>
-        </Box>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: "#964F73",
+                      fontSize: { xs: 11, md: 13 },
+                    }}
+                  >
+                    {product?.description}
+                  </Typography>
+                </CardContent>
+              </Card>
+            </Box>
+          ))}
+        </Slider>
       </Box>
-    </Container>
+    </Box>
   );
 };
 
