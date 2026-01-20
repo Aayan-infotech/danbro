@@ -168,14 +168,17 @@ export const ProductDetails = () => {
       });
     }
     
-    // Create images array (using placeholder since API doesn't provide images)
-    // Using optimized image URLs with proper sizing
-    const images = [
-      "https://images.unsplash.com/photo-1607958996333-41aef7caefaa?w=400&h=400&fit=crop&auto=format&q=80",
-      "https://images.unsplash.com/photo-1607958996333-41aef7caefaa?w=400&h=400&fit=crop&auto=format&q=80",
-      "https://images.unsplash.com/photo-1607958996333-41aef7caefaa?w=400&h=400&fit=crop&auto=format&q=80",
-      "https://images.unsplash.com/photo-1607958996333-41aef7caefaa?w=400&h=400&fit=crop&auto=format&q=80",
-    ];
+    // Get images from API - use product images if available, otherwise use placeholder
+    const placeholderImage = "https://images.unsplash.com/photo-1607958996333-41aef7caefaa?w=400&h=400&fit=crop&auto=format&q=80";
+    let images = [];
+    
+    if (product.images && Array.isArray(product.images) && product.images.length > 0) {
+      // Use actual images from API
+      images = product.images.map(img => img.url || placeholderImage);
+    } else {
+      // Use placeholder if no images available
+      images = [placeholderImage, placeholderImage, placeholderImage, placeholderImage];
+    }
     
     return {
       name: product.name || "Product",

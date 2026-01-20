@@ -22,10 +22,11 @@ export const CategoryCarousel = () => {
   const navigate = useNavigate();
 
   // Transform API data to component format
+  // Prefer API image, fallback to local themed image based on index
   const items = categories?.map((category, index) => ({
     id: category?.id,
     title: category?.groupname,
-    img: getCategoryImage(category?.groupname, index),
+    img: category?.image || getCategoryImage(category?.groupname, index),
     brand: category?.brand,
     brandid: category?.brandid,
   }));

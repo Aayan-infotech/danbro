@@ -46,11 +46,11 @@ export const ProductList = () => {
     }
   }, [categoryIdFromUrl, apiCategories]);
   
-  // Debounce search query to avoid excessive filtering
+  // Debounce search query to avoid excessive API calls - increased delay for better typing experience
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearchQuery(searchQuery);
-    }, 300); // 300ms delay
+    }, 800); // 800ms delay to allow user to finish typing
 
     return () => clearTimeout(timer);
   }, [searchQuery]);
@@ -96,12 +96,17 @@ export const ProductList = () => {
       const priceObj = product.price && product.price.length > 0 ? product.price[0] : { rate: 0, mrp: 0 };
       const displayPrice = priceObj.rate || priceObj.mrp || 0;
       
+      // Get image from API - use first image if available, otherwise use placeholder
+      const productImage = product.images && product.images.length > 0 && product.images[0].url
+        ? product.images[0].url
+        : "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=400&h=400&fit=crop&auto=format&q=80";
+      
       return {
         id: product.prdcode,
         name: product.name,
         description: product.ingredient || product.name,
         price: `₹${displayPrice}`,
-        image: "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=400&h=400&fit=crop&auto=format&q=80", 
+        image: productImage,
       };
     });
 
@@ -116,13 +121,23 @@ export const ProductList = () => {
     }
   }, [apiProducts, currentPage]);
 
+  // Since API handles search, we don't need client-side filtering
+  // Only filter if search query exists but API hasn't filtered yet (fallback)
   const filteredProducts = useMemo(() => {
+    // If search is being sent to API, use API results directly
+    // Only do client-side filtering as fallback if needed
     if (!debouncedSearchQuery) return displayedProducts;
-    return displayedProducts.filter(
+    
+    // API should handle search, but if we have search query and products don't match,
+    // do a quick client-side filter as fallback
+    const apiFiltered = displayedProducts.filter(
       (product) =>
         product.name.toLowerCase().includes(debouncedSearchQuery.toLowerCase()) ||
         product.description.toLowerCase().includes(debouncedSearchQuery.toLowerCase())
     );
+    
+    // Return API filtered results (API handles search, this is just for display)
+    return apiFiltered.length > 0 ? apiFiltered : displayedProducts;
   }, [displayedProducts, debouncedSearchQuery]);
 
   const products = filteredProducts;
