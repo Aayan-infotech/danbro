@@ -95,14 +95,15 @@ export const Career = () => {
   ];
 
   return (
-    <Box sx={{ width: "100%", overflowX: "hidden", backgroundColor: "#fff", pb: { xs: 12, md: 0 }, p: { xs: 1.25, md: 0 } }}>
-      <Container maxWidth="xl" sx={{ py: { xs: 4, md: 0 }, px: { xs: 2, md: 3 } }}>
+    <Box sx={{ width: "100%", overflowX: "hidden", backgroundColor: "#fff", pb: { xs: 12, sm: 8, md: 0 }, p: { xs: 1.25, sm: 1.5, md: 0 } }}>
+      <Container maxWidth="xl" sx={{ py: { xs: 4, sm: 4, md: 4, lg: 0 }, px: { xs: 2, sm: 3, md: 4, lg: 4 } }}>
         <Box
           ref={sectionRefs.header}
           sx={{
             opacity: visibleSections.header ? 1 : 0,
             transform: visibleSections.header ? "translateY(0)" : "translateY(30px)",
             transition: "opacity 0.8s ease-out, transform 0.8s ease-out",
+            px: { xs: 0, sm: 0, md: 1, lg: 0 },
           }}
         >
           <Typography
@@ -111,7 +112,7 @@ export const Career = () => {
               fontWeight: 700,
               color: "#2c2c2c",
               mb: 3,
-              fontSize: { xs: 24, sm: 28, md: 32 },
+              fontSize: { xs: 24, sm: 28, md: 30, lg: 32 },
             }}
           >
             Join the Danbro Bakery Team
@@ -119,7 +120,7 @@ export const Career = () => {
           <Typography
             variant="body1"
             sx={{
-              fontSize: { xs: 13, sm: 14, md: 16 },
+              fontSize: { xs: 13, sm: 14, md: 15, lg: 16 },
               color: "#666",
               lineHeight: 1.8,
             }}
@@ -130,26 +131,27 @@ export const Career = () => {
       </Container>
 
       {/* Why Work With Us Section */}
-      <Container maxWidth="xl" ref={sectionRefs.whyWork} sx={{ px: { xs: 2, md: 3 } }}>
+      <Container maxWidth="xl" ref={sectionRefs.whyWork} sx={{ px: { xs: 2, sm: 3, md: 4, lg: 4 }, py: { xs: 2, sm: 3, md: 3, lg: 4 } }}>
         <Box
           sx={{
             opacity: visibleSections.whyWork ? 1 : 0,
             transform: visibleSections.whyWork ? "translateY(0)" : "translateY(30px)",
             transition: "opacity 0.8s ease-out, transform 0.8s ease-out",
+            px: { xs: 0, sm: 0, md: 1, lg: 0 },
           }}
         >
           <Typography
             variant="h2"
             sx={{
-              fontSize: { xs: 22, sm: 26, md: 32 },
+              fontSize: { xs: 22, sm: 26, md: 28, lg: 32 },
               fontWeight: 700,
               color: "#2c2c2c",
-              mb: { xs: 3, md: 4 },
+              mb: { xs: 3, sm: 3.5, md: 4, lg: 4 },
             }}
           >
             Why Work With Us?
           </Typography>
-          <Grid container spacing={{ xs: 2, sm: 2, md: 2 }}>
+          <Grid container spacing={{ xs: 2, sm: 2, md: 2.5, lg: 3 }}>
             {whyWorkWithUs.map((item, index) => (
               <Grid size={{ xs: 12, sm: 6, md: 3 }} key={index}>
                 <Card
@@ -197,7 +199,7 @@ export const Career = () => {
                         fontWeight: 700,
                         mb: 1.5,
                         color: "#2c2c2c",
-                        fontSize: { xs: 16, md: 18 },
+                        fontSize: { xs: 16, sm: 17, md: 17, lg: 18 },
                         textAlign: "center",
                       }}
                     >
@@ -209,7 +211,7 @@ export const Career = () => {
                       sx={{
                         color: "#666",
                         lineHeight: 1.7,
-                        fontSize: { xs: 13, md: 14 },
+                        fontSize: { xs: 13, sm: 13.5, md: 13.5, lg: 14 },
                         textAlign: "center",
                       }}
                     >
@@ -224,26 +226,27 @@ export const Career = () => {
       </Container>
 
       {/* Current Openings Section */}
-      <Container maxWidth="xl" sx={{ py: { xs: 4, md: 0 }, px: { xs: 2, md: 3 } }} ref={sectionRefs.openings}>
+      <Container maxWidth="xl" sx={{ py: { xs: 4, sm: 4, md: 4, lg: 0 }, px: { xs: 2, sm: 3, md: 4, lg: 4 } }} ref={sectionRefs.openings}>
         <Box
           sx={{
             opacity: visibleSections.openings ? 1 : 0,
             transform: visibleSections.openings ? "translateY(0)" : "translateY(30px)",
             transition: "opacity 0.8s ease-out, transform 0.8s ease-out",
+            px: { xs: 0, sm: 0, md: 1, lg: 0 },
           }}
         >
           <Typography
             variant="h2"
             sx={{
-              fontSize: { xs: 22, sm: 26, md: 32 },
+              fontSize: { xs: 22, sm: 26, md: 28, lg: 32 },
               fontWeight: 700,
               color: "#2c2c2c",
-              mb: { xs: 3, md: 4 },
+              mb: { xs: 3, sm: 3.5, md: 4, lg: 4 },
             }}
           >
             Current Openings
           </Typography>
-          <Grid container spacing={{ xs: 2, sm: 3, md: 3 }}>
+          <Grid container spacing={{ xs: 2, sm: 3, md: 3, lg: 3 }}>
             {currentOpenings.map((job, index) => {
               const IconComponent = job.icon;
               return (
@@ -307,7 +310,7 @@ export const Career = () => {
                             sx={{
                               fontWeight: 700,
                               color: "#2c2c2c",
-                              fontSize: { xs: 16, sm: 18, md: 20 },
+                              fontSize: { xs: 16, sm: 18, md: 19, lg: 20 },
                               mb: 0.5,
                             }}
                           >
@@ -317,7 +320,7 @@ export const Career = () => {
                             variant="body2"
                             sx={{
                               color: "#666",
-                              fontSize: { xs: 12, sm: 13, md: 14 },
+                              fontSize: { xs: 12, sm: 13, md: 13.5, lg: 14 },
                             }}
                           >
                             {job.description}
@@ -331,9 +334,9 @@ export const Career = () => {
                           color: "#fff",
                           textTransform: "none",
                           borderRadius: 2,
-                          px: { xs: 3, sm: 4, md: 5 },
-                          py: { xs: 1, sm: 1.2 },
-                          fontSize: { xs: 13, sm: 14, md: 16 },
+                          px: { xs: 3, sm: 4, md: 4, lg: 5 },
+                          py: { xs: 1, sm: 1.2, md: 1.1, lg: 1.2 },
+                          fontSize: { xs: 13, sm: 14, md: 15, lg: 16 },
                           fontWeight: 600,
                           width: { xs: "100%", sm: "auto" },
                           "&:hover": {
@@ -355,33 +358,34 @@ export const Career = () => {
       </Container>
 
       {/* How to Apply Section */}
-      <Container maxWidth="xl" sx={{ py: { xs: 4, md: 0 }, px: { xs: 2, md: 3 } }} ref={sectionRefs.apply}>
+      <Container maxWidth="xl" sx={{ py: { xs: 4, sm: 4, md: 4, lg: 0 }, px: { xs: 2, sm: 3, md: 4, lg: 4 }, mb: 5 }} ref={sectionRefs.apply}>
         <Box
           sx={{
             opacity: visibleSections.apply ? 1 : 0,
             transform: visibleSections.apply ? "translateY(0)" : "translateY(30px)",
             transition: "opacity 0.8s ease-out, transform 0.8s ease-out",
+            px: { xs: 0, sm: 0, md: 1, lg: 0 },
           }}
         >
           <Typography
             variant="h2"
             sx={{
-              fontSize: { xs: 22, sm: 26, md: 32 },
+              fontSize: { xs: 22, sm: 26, md: 28, lg: 32 },
               fontWeight: 700,
               color: "#2c2c2c",
-              mb: { xs: 3, md: 4 },
+              mb: { xs: 3, sm: 3.5, md: 4, lg: 4 },
             }}
           >
             How to Apply
           </Typography>
-          <Grid container spacing={{ xs: 2, sm: 3, md: 4 }}>
+          <Grid container spacing={{ xs: 2, sm: 3, md: 3, lg: 4 }}>
             <Grid size={{ xs: 12, sm: 6, md: 4 }}>
               <Box
                 sx={{
                   display: "flex",
                   alignItems: "flex-start",
                   gap: { xs: 1.5, sm: 2 },
-                  p: { xs: 2, sm: 3 },
+                  p: { xs: 2, sm: 2.5, md: 2.5, lg: 3 },
                   borderRadius: 3,
                   backgroundColor: "#f9f9f9",
                   height: "100%",
@@ -413,7 +417,7 @@ export const Career = () => {
                     sx={{
                       fontWeight: 700,
                       color: "#2c2c2c",
-                      fontSize: { xs: 15, sm: 16, md: 18 },
+                      fontSize: { xs: 15, sm: 16, md: 17, lg: 18 },
                       mb: 0.5,
                     }}
                   >
@@ -423,7 +427,7 @@ export const Career = () => {
                     variant="body2"
                     sx={{
                       color: "#666",
-                      fontSize: { xs: 12, sm: 13, md: 14 },
+                      fontSize: { xs: 12, sm: 13, md: 13.5, lg: 14 },
                       lineHeight: 1.7,
                     }}
                   >
@@ -438,7 +442,7 @@ export const Career = () => {
                   display: "flex",
                   alignItems: "flex-start",
                   gap: { xs: 1.5, sm: 2 },
-                  p: { xs: 2, sm: 3 },
+                  p: { xs: 2, sm: 2.5, md: 2.5, lg: 3 },
                   borderRadius: 3,
                   backgroundColor: "#f9f9f9",
                   height: "100%",
@@ -470,7 +474,7 @@ export const Career = () => {
                     sx={{
                       fontWeight: 700,
                       color: "#2c2c2c",
-                      fontSize: { xs: 15, sm: 16, md: 18 },
+                      fontSize: { xs: 15, sm: 16, md: 17, lg: 18 },
                       mb: 0.5,
                     }}
                   >
@@ -480,7 +484,7 @@ export const Career = () => {
                     variant="body2"
                     sx={{
                       color: "#666",
-                      fontSize: { xs: 12, sm: 13, md: 14 },
+                      fontSize: { xs: 12, sm: 13, md: 13.5, lg: 14 },
                       lineHeight: 1.7,
                     }}
                   >
@@ -495,7 +499,7 @@ export const Career = () => {
                   display: "flex",
                   alignItems: "flex-start",
                   gap: { xs: 1.5, sm: 2 },
-                  p: { xs: 2, sm: 3 },
+                  p: { xs: 2, sm: 2.5, md: 2.5, lg: 3 },
                   borderRadius: 3,
                   backgroundColor: "#f9f9f9",
                   height: "100%",
@@ -527,7 +531,7 @@ export const Career = () => {
                     sx={{
                       fontWeight: 700,
                       color: "#2c2c2c",
-                      fontSize: { xs: 15, sm: 16, md: 18 },
+                      fontSize: { xs: 15, sm: 16, md: 17, lg: 18 },
                       mb: 0.5,
                     }}
                   >
@@ -537,7 +541,7 @@ export const Career = () => {
                     variant="body2"
                     sx={{
                       color: "#666",
-                      fontSize: { xs: 12, sm: 13, md: 14 },
+                      fontSize: { xs: 12, sm: 13, md: 13.5, lg: 14 },
                       lineHeight: 1.7,
                     }}
                   >

@@ -94,14 +94,14 @@ export const Blog = () => {
       <Box
         ref={sectionRefs.hero}
         sx={{
-          height: { xs: 250, sm: 300, md: 380 },
+          height: { xs: 250, sm: 300, md: 350, lg: 380 },
           backgroundImage: `url(${blogHero})`,
           backgroundSize: "cover",
           backgroundPosition: "center",
           display: "flex",
           flexDirection: "column",
           justifyContent: "center",
-          px: { xs: 2, sm: 4, md: 8 },
+          px: { xs: 2, sm: 4, md: 6, lg: 8 },
           opacity: visibleSections.hero ? 1 : 0,
           transform: visibleSections.hero ? "translateY(0)" : "translateY(30px)",
           transition: "opacity 0.8s ease-out, transform 0.8s ease-out",
@@ -110,7 +110,7 @@ export const Blog = () => {
         <Typography
           variant="h1"
           sx={{
-            fontSize: { xs: 28, sm: 36, md: 52 },
+            fontSize: { xs: 28, sm: 36, md: 42, lg: 52 },
             fontWeight: 700,
             color: "#fff",
             mb: 1,
@@ -120,7 +120,7 @@ export const Blog = () => {
         </Typography>
         <Typography
           sx={{
-            fontSize: { xs: 12, sm: 14 },
+            fontSize: { xs: 12, sm: 14, md: 13, lg: 14 },
             color: "#f2f2f2",
             opacity: 0.9,
             letterSpacing: 0.5,
@@ -132,8 +132,8 @@ export const Blog = () => {
 
 
       {/* ---------------- BLOG CONTENT WRAPPER ---------------- */}
-      <Container maxWidth="xl" sx={{ py: 4, px: { xs: 2, md: 3 } }}>
-        <Box ref={sectionRefs.categories}>
+      <Container maxWidth="xl" sx={{ py: { xs: 4, sm: 4, md: 4, lg: 4 }, px: { xs: 2, sm: 3, md: 4, lg: 4 } }}>
+        <Box ref={sectionRefs.categories} sx={{ px: { xs: 0, sm: 0, md: 1, lg: 0 } }}>
           <Box
             sx={{
               opacity: visibleSections.categories ? 1 : 0,
@@ -156,7 +156,7 @@ export const Blog = () => {
                   sx={{
                     display: "flex",
                     alignItems: "center",
-                    px: { xs: 1, sm: 1.5, md: 2 },
+                    px: { xs: 1, sm: 1.5, md: 2, lg: 2 },
                     borderRight:
                       index !== categories.length - 1 ? "2px solid black" : "none",
                     my: 1,
@@ -165,7 +165,7 @@ export const Blog = () => {
                   <Button
                     disableRipple
                     sx={{
-                      fontSize: { xs: 11, sm: 12, md: 14 },
+                      fontSize: { xs: 11, sm: 12, md: 13, lg: 14 },
                       color: "#000",
                       borderRadius: 0,
                       fontWeight: 500,
@@ -181,28 +181,29 @@ export const Blog = () => {
                 </Box>
               ))}
             </Box>
-            <Divider sx={{ mb: { xs: 3, md: 4 }, borderBottomWidth: 2, borderColor: "black" }} />
+            <Divider sx={{ mb: { xs: 3, sm: 3.5, md: 4, lg: 4 }, borderBottomWidth: 2, borderColor: "black" }} />
           </Box>
         </Box>
 
-        <Grid container spacing={{ xs: 2, sm: 3, md: 3 }}>
+        <Grid container spacing={{ xs: 2, sm: 3, md: 3, lg: 3 }}>
           <Grid size={{ xs: 12, md: 8 }}>
             {blogs.map((blog) => (
               <Box
                 key={blog.id}
                 sx={{
                   display: "flex",
-                  gap: 3,
-                  mb: 6,
+                  gap: { xs: 2, sm: 2.5, md: 3, lg: 3 },
+                  mb: { xs: 4, sm: 5, md: 6, lg: 6 },
                   flexDirection: { xs: "column", sm: "row" },
                   alignItems: { xs: "flex-start", sm: "center" },
+                  px: { xs: 0, sm: 0, md: 1, lg: 0 },
                 }}
               >
                 {/* Image */}
                 <Box
                   sx={{
                     width: { xs: "100%", sm: "45%" },
-                    height: { xs: 200, sm: 220, md: 240 },
+                    height: { xs: 200, sm: 220, md: 220, lg: 240 },
                     borderRadius: 3,
                     overflow: "hidden",
                     flexShrink: 0,
@@ -224,7 +225,7 @@ export const Blog = () => {
                 <Box sx={{ flex: 1 }}>
                   <Typography
                     sx={{
-                      fontSize: 11,
+                      fontSize: { xs: 11, sm: 11, md: 11, lg: 11 },
                       textTransform: "uppercase",
                       letterSpacing: 1,
                       mb: 1,
@@ -236,7 +237,7 @@ export const Blog = () => {
 
                   <Typography
                     sx={{
-                      fontSize: { xs: 18, md: 22 },
+                      fontSize: { xs: 18, sm: 20, md: 20, lg: 22 },
                       fontWeight: 700,
                       lineHeight: 1.3,
                       color: "#111",
@@ -247,7 +248,7 @@ export const Blog = () => {
 
                   <Typography
                     sx={{
-                      fontSize: 11,
+                      fontSize: { xs: 11, sm: 11, md: 11, lg: 11 },
                       color: "#8a8a8a",
                       mb: 1,
                     }}
@@ -257,7 +258,7 @@ export const Blog = () => {
 
                   <Typography
                     sx={{
-                      fontSize: 14,
+                      fontSize: { xs: 14, sm: 14, md: 13.5, lg: 14 },
                       color: "#555",
                       lineHeight: 1.7,
                       mb: 2.5,
@@ -273,8 +274,8 @@ export const Blog = () => {
                     onClick={() => navigate("/blog-details", { state: blog })}
                     sx={{
                       borderRadius: 2,
-                      fontSize: 13,
-                      px: 4,
+                      fontSize: { xs: 13, sm: 13, md: 12.5, lg: 13 },
+                      px: { xs: 4, sm: 4, md: 3.5, lg: 4 },
                       textTransform: "none",
                       borderColor: "#111",
                       color: "#111",
@@ -299,14 +300,15 @@ export const Blog = () => {
                 opacity: visibleSections.sidebar ? 1 : 0,
                 transform: visibleSections.sidebar ? "translateY(0)" : "translateY(30px)",
                 transition: "opacity 0.8s ease-out, transform 0.8s ease-out",
+                px: { xs: 0, sm: 0, md: 1, lg: 0 },
               }}
             >
-              <Box sx={{ mb: { xs: 3, md: 4 } }}>
+              <Box sx={{ mb: { xs: 3, sm: 3.5, md: 4, lg: 4 } }}>
                 <Typography
                   sx={{
                     fontWeight: 700,
                     mb: 1,
-                    fontSize: { xs: 14, sm: 15 },
+                    fontSize: { xs: 14, sm: 15, md: 14.5, lg: 15 },
                   }}
                 >
                   Search
@@ -328,7 +330,7 @@ export const Blog = () => {
                     sx={{
                       backgroundColor: "#ED7D2B",
                       textTransform: "none",
-                      fontSize: { xs: 12, sm: 13 },
+                      fontSize: { xs: 12, sm: 13, md: 12.5, lg: 13 },
                       transition: "all 0.3s ease",
                       "&:hover": {
                         backgroundColor: "#d66a1f",
@@ -346,7 +348,7 @@ export const Blog = () => {
                   sx={{
                     fontWeight: 700,
                     mb: 2,
-                    fontSize: { xs: 14, sm: 15 },
+                    fontSize: { xs: 14, sm: 15, md: 14.5, lg: 15 },
                   }}
                 >
                   Recent Posts
@@ -419,13 +421,14 @@ export const Blog = () => {
           ref={sectionRefs.pagination}
           sx={{
             display: "flex",
-            gap: { xs: 0.5, sm: 1 },
+            gap: { xs: 0.5, sm: 1, md: 1 },
             justifyContent: "center",
-            mt: { xs: 3, md: 4 },
+            mt: { xs: 3, sm: 3.5, md: 4, lg: 4 },
             flexWrap: "wrap",
             opacity: visibleSections.pagination ? 1 : 0,
             transform: visibleSections.pagination ? "translateY(0)" : "translateY(30px)",
             transition: "opacity 0.8s ease-out, transform 0.8s ease-out",
+            px: { xs: 0, sm: 0, md: 1, lg: 0 },
           }}
         >
           {[1, 2, 3, 4, 5, 10, 20, 30].map((n, i) => (

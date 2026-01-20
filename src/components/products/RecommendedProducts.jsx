@@ -1,4 +1,4 @@
-import { Box, Card, CardContent, CardMedia, Typography } from "@mui/material";
+import { Box, Card, CardContent, CardMedia, Typography, Container } from "@mui/material";
 import Slider from "react-slick";
 import { ArrowBackIosNew, ArrowForwardIos } from "@mui/icons-material";
 
@@ -77,6 +77,7 @@ export const RecommendedProducts = ({ recommendedProducts = [] }) => {
   };
 
   return (
+    <Container maxWidth="xl" sx={{ px: { xs: 2, md: 3 }, py: 4 }}>
     <Box
       sx={{
         position: "relative",
@@ -145,6 +146,7 @@ export const RecommendedProducts = ({ recommendedProducts = [] }) => {
         </Slider>
       </Box>
     </Box>
+    </Container>
   );
 };
 

@@ -80,12 +80,12 @@ export const CateringEvents = () => {
   ];
 
   return (
-    <Box sx={{ width: "100%", overflowX: "hidden", backgroundColor: "#fff", pb: { xs: 12, md: 0 }, p: { xs: 1.25, md: 0 } }}>
+    <Box sx={{ width: "100%", overflowX: "hidden", backgroundColor: "#fff", pb: { xs: 12, sm: 8, md: 0 }, p: { xs: 1.25, sm: 1.5, md: 0 } }}>
       <Box
         ref={sectionRefs.header}
         sx={{
           position: "relative",
-          height: { xs: 250, sm: 300, md: 400 },
+          height: { xs: 250, sm: 300, md: 350, lg: 400 },
           backgroundImage: `url(${cateringEvents})`,
           backgroundSize: "cover",
           backgroundPosition: "center",
@@ -93,7 +93,7 @@ export const CateringEvents = () => {
           flexDirection: "column",
           justifyContent: "center",
           alignItems: "start",
-          px: { xs: 2, sm: 3, md: 6 },
+          px: { xs: 2, sm: 3, md: 4, lg: 6 },
           opacity: visibleSections.header ? 1 : 0,
           transform: visibleSections.header ? "translateY(0)" : "translateY(30px)",
           transition: "opacity 0.8s ease-out, transform 0.8s ease-out",
@@ -102,7 +102,7 @@ export const CateringEvents = () => {
         <Typography
           variant="h1"
           sx={{
-            fontSize: { xs: 28, sm: 36, md: 56 },
+            fontSize: { xs: 28, sm: 36, md: 42, lg: 56 },
             fontWeight: 700,
             color: "#fff",
             mb: 2,
@@ -113,12 +113,12 @@ export const CateringEvents = () => {
       </Box>
 
       {/* Event Types Section */}
-      <Container maxWidth="lg" sx={{ py: 4, px: { xs: "11px" } }}>
+      <Container maxWidth="lg" sx={{ py: { xs: 4, sm: 4, md: 4, lg: 4 }, px: { xs: 2, sm: 3, md: 4, lg: 4 } }}>
         <Box
           ref={sectionRefs.hero}
           sx={{
             position: "relative",
-            height: { xs: 280, sm: 320, md: 400 },
+            height: { xs: 280, sm: 320, md: 350, lg: 400 },
             backgroundImage: `url(${createevents1})`,
             backgroundSize: "cover",
             backgroundPosition: "center",
@@ -126,9 +126,9 @@ export const CateringEvents = () => {
             flexDirection: "column",
             justifyContent: "center",
             alignItems: "center",
-            px: { xs: 2, sm: 3, md: 6 },
-            borderRadius: { xs: 2, md: 3 },
-            pt: { xs: 4, sm: 6, md: 10 },
+            px: { xs: 2, sm: 3, md: 4, lg: 6 },
+            borderRadius: { xs: 2, sm: 2.5, md: 3 },
+            pt: { xs: 4, sm: 6, md: 8, lg: 10 },
             opacity: visibleSections.hero ? 1 : 0,
             transform: visibleSections.hero ? "translateY(0)" : "translateY(30px)",
             transition: "opacity 0.8s ease-out, transform 0.8s ease-out",
@@ -137,12 +137,12 @@ export const CateringEvents = () => {
           <Typography
             variant="h1"
             sx={{
-              fontSize: { xs: 22, sm: 28, md: 50 },
+              fontSize: { xs: 22, sm: 28, md: 36, lg: 50 },
               fontWeight: 700,
               color: "#fff",
               mb: 2,
               textAlign: "center",
-              px: { xs: 1, sm: 0 },
+              px: { xs: 1, sm: 1, md: 2, lg: 0 },
             }}
           >
             Make your celebrations sweeter with Danbro's premium catering services!
@@ -150,11 +150,11 @@ export const CateringEvents = () => {
           <Typography
             variant="body1"
             sx={{
-              fontSize: { xs: 11, sm: 12, md: 14 },
+              fontSize: { xs: 11, sm: 12, md: 13, lg: 14 },
               color: "#fff",
               textAlign: "center",
-              maxWidth: "700px",
-              px: { xs: 2, sm: 0 },
+              maxWidth: { xs: "100%", sm: "90%", md: "700px" },
+              px: { xs: 2, sm: 1, md: 2, lg: 0 },
             }}
           >
             Elevate your event with our exquisite baked goods and personalized service.
@@ -167,10 +167,10 @@ export const CateringEvents = () => {
               textTransform: "none",
               borderRadius: 2,
               mt: 2,
-              fontSize: { xs: 12, sm: 14, md: 16 },
+              fontSize: { xs: 12, sm: 14, md: 15, lg: 16 },
               fontWeight: 600,
-              px: { xs: 3, md: 4 },
-              py: { xs: 0.8, md: 1.2 },
+              px: { xs: 3, sm: 3.5, md: 3.5, lg: 4 },
+              py: { xs: 0.8, sm: 1, md: 1.1, lg: 1.2 },
               transition: "all 0.3s ease",
               "&:hover": {
                 backgroundColor: "#d66a1f",
@@ -183,21 +183,23 @@ export const CateringEvents = () => {
         </Box>
 
         {/* Why Choose Section */}
-        <Box ref={sectionRefs.whyChoose} sx={{ mt: { xs: 3, md: 4 } }}>
+        <Box ref={sectionRefs.whyChoose} sx={{ mt: { xs: 3, sm: 3.5, md: 4, lg: 4 }, px: { xs: 0, sm: 0, md: 2, lg: 0 } }}>
           <Box
             sx={{
               opacity: visibleSections.whyChoose ? 1 : 0,
               transform: visibleSections.whyChoose ? "translateY(0)" : "translateY(30px)",
               transition: "opacity 0.8s ease-out, transform 0.8s ease-out",
+              px: { xs: 0, sm: 0, md: 1, lg: 0 },
             }}
           >
             <Typography
               variant="h2"
               sx={{
-                fontSize: { xs: 20, sm: 24, md: 30 },
+                fontSize: { xs: 20, sm: 24, md: 26, lg: 30 },
                 fontWeight: 700,
                 color: "#2c2c2c",
                 mb: 2,
+                px: { xs: 0, sm: 0, md: 1, lg: 0 },
               }}
             >
               Why Choose Danbro for Catering?
@@ -207,10 +209,11 @@ export const CateringEvents = () => {
               variant="body1"
               sx={{
                 color: "#555",
-                fontSize: { xs: 13, sm: 14, md: 15 },
-                maxWidth: "850px",
+                fontSize: { xs: 13, sm: 14, md: 14, lg: 15 },
+                maxWidth: { xs: "100%", sm: "100%", md: "850px" },
                 lineHeight: 1.7,
                 mb: 3,
+                px: { xs: 0, sm: 0, md: 1, lg: 0 },
               }}
             >
               Danbro Bakery brings a touch of elegance and deliciousness to every event.
@@ -248,7 +251,7 @@ export const CateringEvents = () => {
                       flexShrink: 0,
                     }}
                   />
-                  <Typography sx={{ color: "#444", fontSize: { xs: 13, sm: 14, md: 15 } }}>
+                  <Typography sx={{ color: "#444", fontSize: { xs: 13, sm: 14, md: 14, lg: 15 } }}>
                     {item}
                   </Typography>
                 </Box>
@@ -258,21 +261,22 @@ export const CateringEvents = () => {
         </Box>
       </Container>
 
-      <Container maxWidth="lg" sx={{ px: { xs: "11px" } }}>
-        <Box ref={sectionRefs.specialties}>
+      <Container maxWidth="lg" sx={{ px: { xs: 2, sm: 3, md: 4, lg: 4 }, py: { xs: 2, sm: 3, md: 4, lg: 4 } }}>
+        <Box ref={sectionRefs.specialties} sx={{ px: { xs: 0, sm: 0, md: 1, lg: 0 } }}>
           <Typography
             variant="h2"
             sx={{
-              fontSize: { xs: 20, sm: 24, md: 30 },
+              fontSize: { xs: 20, sm: 24, md: 26, lg: 30 },
               fontWeight: 700,
               color: "#2c2c2c",
-              mb: { xs: 3, md: 4 },
+              mb: { xs: 3, sm: 3.5, md: 4, lg: 4 },
+              px: { xs: 0, sm: 0, md: 1, lg: 0 },
             }}
           >
             Our Catering Specialties
           </Typography>
 
-          <Grid container spacing={{ xs: 2, sm: 2, md: 2 }}>
+          <Grid container spacing={{ xs: 2, sm: 2, md: 2.5, lg: 3 }}>
             {specialties.map((item, index) => (
               <Grid size={{ xs: 12, sm: 6, md: 3 }} key={index}>
                 <Box
@@ -293,9 +297,9 @@ export const CateringEvents = () => {
                 >
                   <Box
                     sx={{
-                      borderRadius: { xs: 2, md: 3 },
+                      borderRadius: { xs: 2, sm: 2.5, md: 3 },
                       overflow: "hidden",
-                      height: { xs: 200, sm: 180, md: 170 },
+                      height: { xs: 200, sm: 180, md: 160, lg: 170 },
                       mb: 2,
                       transition: "transform 0.3s ease",
                       "&:hover": {
@@ -317,7 +321,7 @@ export const CateringEvents = () => {
                   <Typography
                     sx={{
                       fontWeight: 700,
-                      fontSize: { xs: 15, sm: 16, md: 16 },
+                      fontSize: { xs: 15, sm: 16, md: 15, lg: 16 },
                       color: "#2c2c2c",
                     }}
                   >
@@ -325,7 +329,7 @@ export const CateringEvents = () => {
                   </Typography>
                   <Typography
                     sx={{
-                      fontSize: { xs: 12, sm: 13, md: 13 },
+                      fontSize: { xs: 12, sm: 13, md: 12.5, lg: 13 },
                       color: "#666",
                       mt: 0.5,
                       lineHeight: 1.5,
@@ -341,8 +345,8 @@ export const CateringEvents = () => {
       </Container>
 
       {/* Contact Section */}
-      <Container maxWidth="lg" sx={{ py: { xs: 1, sm: 2, md: 2 }, px: { xs: "11px" }, mb: 4 }}>
-        <Box ref={sectionRefs.contact} sx={{ pb: 4 }}>
+      <Container maxWidth="lg" sx={{ py: { xs: 1, sm: 2, md: 3, lg: 2 }, px: { xs: 2, sm: 3, md: 4, lg: 4 }, mb: 4 }}>
+        <Box ref={sectionRefs.contact} sx={{ pb: 4, px: { xs: 0, sm: 0, md: 1, lg: 0 } }}>
           <Box
             sx={{
               opacity: visibleSections.contact ? 1 : 0,
@@ -350,17 +354,17 @@ export const CateringEvents = () => {
               transition: "opacity 0.8s ease-out, transform 0.8s ease-out",
             }}
           >
-            <Typography variant="h2" sx={{ fontSize: { xs: 20, sm: 24, md: 32 }, fontWeight: 700, color: "#2c2c2c", mb: 1, }}>
+            <Typography variant="h2" sx={{ fontSize: { xs: 20, sm: 24, md: 28, lg: 32 }, fontWeight: 700, color: "#2c2c2c", mb: 1, px: { xs: 0, sm: 0, md: 1, lg: 0 } }}>
               Get in Touch
             </Typography>
-            <Typography variant="body1" sx={{ fontSize: { xs: 13, sm: 14, md: 16 }, color: "#666", lineHeight: 1.8, mb: { xs: 3, md: 4 }, }}>
+            <Typography variant="body1" sx={{ fontSize: { xs: 13, sm: 14, md: 15, lg: 16 }, color: "#666", lineHeight: 1.8, mb: { xs: 3, sm: 3.5, md: 4, lg: 4 }, px: { xs: 0, sm: 0, md: 1, lg: 0 } }}>
               Planning an event? Contact us today to discuss your requirements and get a customized quote. Our team is ready to help make your celebration perfect!
             </Typography>
-            <Grid container spacing={{ xs: 2, sm: 3, md: 4 }}>
+            <Grid container spacing={{ xs: 2, sm: 3, md: 3, lg: 4 }}>
               <Grid item xs={12} sm={6} md={4}>
                 <Box
                   sx={{
-                    p: 1,
+                    p: { xs: 2, sm: 2, md: 2.5, lg: 3 },
                     borderRadius: 3,
                     backgroundColor: "#f9f9f9",
                     height: "100%",
@@ -383,7 +387,7 @@ export const CateringEvents = () => {
                     sx={{
                       fontWeight: 700,
                       color: "#2c2c2c",
-                      fontSize: { xs: 15, sm: 16, md: 18 },
+                      fontSize: { xs: 15, sm: 16, md: 17, lg: 18 },
                     }}
                   >
                     Visit Us
@@ -392,7 +396,7 @@ export const CateringEvents = () => {
                     variant="body2"
                     sx={{
                       color: "#666",
-                      fontSize: { xs: 12, sm: 13, md: 14 },
+                      fontSize: { xs: 12, sm: 13, md: 13, lg: 14 },
                     }}
                   >
                     B-35, Sector-P, Aliganj, Lucknow 226024
@@ -402,7 +406,7 @@ export const CateringEvents = () => {
               <Grid item xs={12} sm={6} md={4}>
                 <Box
                   sx={{
-                    p: { xs: 2, sm: 2.5, md: 3 },
+                    p: { xs: 2, sm: 2.5, md: 2.5, lg: 3 },
                     borderRadius: 3,
                     backgroundColor: "#f9f9f9",
                     height: "100%",
@@ -425,7 +429,7 @@ export const CateringEvents = () => {
                     sx={{
                       fontWeight: 700,
                       color: "#2c2c2c",
-                      fontSize: { xs: 15, sm: 16, md: 18 },
+                      fontSize: { xs: 15, sm: 16, md: 17, lg: 18 },
                     }}
                   >
                     Call Us
@@ -434,7 +438,7 @@ export const CateringEvents = () => {
                     variant="body2"
                     sx={{
                       color: "#666",
-                      fontSize: { xs: 12, sm: 13, md: 14 },
+                      fontSize: { xs: 12, sm: 13, md: 13, lg: 14 },
                     }}
                   >
                     +91-7309010623
@@ -444,7 +448,7 @@ export const CateringEvents = () => {
               <Grid item xs={12} sm={6} md={4}>
                 <Box
                   sx={{
-                    p: { xs: 2, sm: 2.5, md: 3 },
+                    p: { xs: 2, sm: 2.5, md: 2.5, lg: 3 },
                     borderRadius: 3,
                     backgroundColor: "#f9f9f9",
                     transition: "all 0.3s ease",
@@ -461,10 +465,10 @@ export const CateringEvents = () => {
                     },
                   }}
                 >
-                  <Typography variant="h6" sx={{ fontWeight: 700, color: "#2c2c2c", fontSize: { xs: 15, sm: 16, md: 18 }, }}>
+                  <Typography variant="h6" sx={{ fontWeight: 700, color: "#2c2c2c", fontSize: { xs: 15, sm: 16, md: 17, lg: 18 }, }}>
                     Email Us
                   </Typography>
-                  <Typography variant="body2" sx={{ color: "#666", fontSize: { xs: 12, sm: 13, md: 14 }, }}>
+                  <Typography variant="body2" sx={{ color: "#666", fontSize: { xs: 12, sm: 13, md: 13, lg: 14 }, }}>
                     hr@mrbrownbakery.com
                   </Typography>
                 </Box>

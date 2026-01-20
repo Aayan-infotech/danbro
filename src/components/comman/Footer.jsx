@@ -23,6 +23,10 @@ const FooterContainer = styled(Box)(({ theme }) => ({
     paddingLeft: theme.spacing(2),
     paddingRight: theme.spacing(2),
   },
+  [theme.breakpoints.between('md', 'lg')]: {
+    paddingLeft: theme.spacing(2),
+    paddingRight: theme.spacing(2),
+  },
 }));
 
 export const Footer = () => {
@@ -91,30 +95,32 @@ export const Footer = () => {
       <FooterContainer
         ref={footerRef}
         sx={{
-          minHeight: { xs: "400px", md: "500px" },
+          minHeight: { xs: "400px", sm: "450px", md: "480px", lg: "500px" },
         }}
       >
         <Container 
           maxWidth="xl"
           sx={{
-            px: { xs: 2, sm: 3, md: 4 },
+            px: { xs: 2, sm: 3, md: 4, lg: 4 },
+            width: "100%",
+            maxWidth: { xs: "100%", sm: "100%", md: "100%", lg: "1536px" },
           }}
         >
           <Box
             ref={bannerRef}
             sx={{
               background: "linear-gradient(90deg, #FF9472 0%, #F2709C 100%)",
-              width: { xs: "95%", sm: "92%", md: "90%" },
+              width: { xs: "95%", sm: "92%", md: "92%", lg: "90%" },
               mx: "auto",
-              p: { xs: 2.5, sm: 3, md: 4 },
+              p: { xs: 2.5, sm: 3, md: 3, lg: 4 },
               borderRadius: "20px",
               display: { xs: "none", md: "flex" },
               flexDirection: { xs: "column", sm: "row" },
               justifyContent: "space-between",
               alignItems: { xs: "flex-start", sm: "center" },
-              gap: { xs: 2, sm: 3 },
+              gap: { xs: 2, sm: 2, md: 2.5, lg: 3 },
               position: "absolute",
-              bottom: { xs: "4%", md: "85%" },
+              bottom: { xs: "4%", md: "88%", lg: "85%" },
               left: "50%",
               transform: "translateX(-50%)",
               opacity: 0,
@@ -130,7 +136,7 @@ export const Footer = () => {
             <Box sx={{ flex: 1 }}>
               <Typography
                 sx={{
-                  fontSize: { xs: 24, sm: 28, md: 36 },
+                  fontSize: { xs: 24, sm: 28, md: 32, lg: 36 },
                   fontWeight: 800,
                   color: "#fff",
                   mb: { xs: 1.5, md: 2 },
@@ -147,7 +153,7 @@ export const Footer = () => {
                 sx={{
                   display: "flex",
                   flexDirection: { xs: "column", sm: "row" },
-                  gap: { xs: 1.5, sm: 2, md: 4 },
+                  gap: { xs: 1.5, sm: 2, md: 3, lg: 4 },
                   flexWrap: "wrap",
                 }}
               >
@@ -168,7 +174,7 @@ export const Footer = () => {
                     <CheckCircleIcon
                       sx={{
                         color: "#fff",
-                        fontSize: { xs: 18, md: 20 },
+                        fontSize: { xs: 18, sm: 19, md: 19, lg: 20 },
                         animation: "pulse 2s ease-in-out infinite",
                         "@keyframes pulse": {
                           "0%, 100%": { transform: "scale(1)" },
@@ -179,7 +185,7 @@ export const Footer = () => {
                     <Typography
                       sx={{
                         color: "#fff",
-                        fontSize: { xs: 14, sm: 15, md: 16 },
+                        fontSize: { xs: 14, sm: 15, md: 15, lg: 16 },
                         fontWeight: 500,
                       }}
                     >
@@ -192,10 +198,10 @@ export const Footer = () => {
             <Box
               sx={{
                 background: "#fff",
-                px: { xs: 3, sm: 4, md: 5 },
-                py: { xs: 1, sm: 1.2, md: 1.5 },
+                px: { xs: 3, sm: 4, md: 4, lg: 5 },
+                py: { xs: 1, sm: 1.2, md: 1.3, lg: 1.5 },
                 borderRadius: "40px",
-                fontSize: { xs: 16, sm: 18, md: 20 },
+                fontSize: { xs: 16, sm: 18, md: 18, lg: 20 },
                 fontWeight: 600,
                 cursor: "pointer",
                 transition: "all 0.3s ease",
@@ -211,13 +217,13 @@ export const Footer = () => {
               Contact
             </Box>
           </Box>
-          <Box sx={{ mt: 10, display: 'flex', flexDirection: { xs: "column", sm: "row" }, justifyContent: 'space-between', alignItems: { xs: "flex-start", sm: "center" }, gap: { xs: 2, sm: 0 }, mb: { xs: 6, sm: 10, md: 12 }, px: { xs: 1, md: 0 } }}>
+          <Box sx={{ mt: { xs: 6, sm: 8, md: 10, lg: 10 }, display: 'flex', flexDirection: { xs: "column", sm: "row" }, justifyContent: { xs: "flex-start", sm: "space-between", md: "space-between" }, alignItems: { xs: "flex-start", sm: "center" }, gap: { xs: 2, sm: 2, md: 2, lg: 0 }, mb: { xs: 6, sm: 8, md: 8, lg: 12 }, px: { xs: 1, sm: 1, md: 1, lg: 0 } }}>
             <Box
               component="img"
               src={logo}
               alt="logo"
               sx={{
-                height: { xs: 60, sm: 75, md: 90 },
+                height: { xs: 60, sm: 70, md: 80, lg: 90 },
                 width: "auto",
                 animation: "fadeInLeft 0.8s ease-out",
                 "@keyframes fadeInLeft": {
@@ -239,12 +245,12 @@ export const Footer = () => {
                 sx={{
                   fontWeight: 700,
                   mb: 1,
-                  fontSize: { xs: 16, md: 18 },
+                  fontSize: { xs: 16, sm: 17, md: 17, lg: 18 },
                 }}
               >
                 Let's do it!
               </Typography>
-              <Box sx={{ display: "flex", gap: { xs: 1.5, md: 2 } }}>
+              <Box sx={{ display: "flex", gap: { xs: 1.5, sm: 1.5, md: 1.5, lg: 2 } }}>
                 {[
                   { icon: FacebookIcon, color: "#1877F2" },
                   { icon: InstagramIcon, color: "#E4405F" },
@@ -275,17 +281,18 @@ export const Footer = () => {
           </Box>
           <Grid
             container
-            spacing={{ xs: 4, md: 6 }}
-            sx={{ my: { xs: 3, md: 5 }, px: { xs: 1, md: 0 } }}
+            spacing={{ xs: 4, sm: 4, md: 3, lg: 6 }}
+            sx={{ my: { xs: 3, sm: 4, md: 4, lg: 5 }, px: { xs: 1, sm: 1, md: 1, lg: 0 } }}
           >
-            <Grid item xs={12} sm={6} md={2}>
+            <Grid item xs={12} sm={6} md={3} lg={2}>
               <Typography
                 variant="body2"
                 sx={{
                   fontWeight: 700,
                   mb: 2,
-                  width: { xs: "100%", md: 250 },
-                  fontSize: { xs: 13, md: 14 },
+                  width: { xs: "100%", sm: "100%", md: "100%", lg: 250 },
+                  maxWidth: { md: "100%" },
+                  fontSize: { xs: 13, sm: 13, md: 12, lg: 14 },
                   lineHeight: 1.6,
                 }}
               >
@@ -295,12 +302,12 @@ export const Footer = () => {
                 unforgettable.
               </Typography>
             </Grid>
-            <Grid item xs={6} sm={3} md={2}>
+            <Grid item xs={6} sm={3} md={2} lg={2}>
               <Typography
                 sx={{
                   fontWeight: 700,
                   mb: 2,
-                  fontSize: { xs: 14, md: 16 },
+                  fontSize: { xs: 14, sm: 14, md: 13, lg: 16 },
                 }}
               >
                 OUR STORES
@@ -316,7 +323,7 @@ export const Footer = () => {
                     sx={{
                       mb: 1,
                       color: "#555",
-                      fontSize: { xs: 13, md: 14 },
+                      fontSize: { xs: 13, sm: 13, md: 11.5, lg: 14 },
                       cursor: "pointer",
                       transition: "all 0.3s ease",
                       "&:hover": {
@@ -335,12 +342,12 @@ export const Footer = () => {
                 </Link>
               ))}
             </Grid>
-            <Grid item xs={6} sm={3} md={2}>
+            <Grid item xs={6} sm={3} md={2} lg={2}>
               <Typography
                 sx={{
                   fontWeight: 700,
                   mb: 2,
-                  fontSize: { xs: 14, md: 16 },
+                  fontSize: { xs: 14, sm: 14, md: 13, lg: 16 },
                 }}
               >
                 USEFUL LINKS
@@ -356,7 +363,7 @@ export const Footer = () => {
                     sx={{
                       mb: 1,
                       color: "#555",
-                      fontSize: { xs: 13, md: 14 },
+                      fontSize: { xs: 13, sm: 13, md: 11.5, lg: 14 },
                       cursor: "pointer",
                       transition: "all 0.3s ease",
                       "&:hover": {
@@ -375,12 +382,12 @@ export const Footer = () => {
                 </Link>
               ))}
             </Grid>
-            <Grid item xs={12} sm={6} md={2}>
+            <Grid item xs={6} sm={3} md={2} lg={2}>
               <Typography
                 sx={{
                   fontWeight: 700,
                   mb: 2,
-                  fontSize: { xs: 14, md: 16 },
+                  fontSize: { xs: 14, sm: 14, md: 13, lg: 16 },
                 }}
               >
                 KNOW MORE
@@ -396,7 +403,7 @@ export const Footer = () => {
                     sx={{
                       mb: 1,
                       color: "#555",
-                      fontSize: { xs: 13, md: 14 },
+                      fontSize: { xs: 13, sm: 13, md: 11.5, lg: 14 },
                       cursor: "pointer",
                       transition: "all 0.3s ease",
                       "&:hover": {
@@ -415,12 +422,12 @@ export const Footer = () => {
                 </Link>
               ))}
             </Grid>
-            <Grid item xs={12} sm={6} md={3.4}>
+            <Grid item xs={12} sm={6} md={3} lg={3.4}>
               <Typography
                 sx={{
                   mb: 2,
                   fontWeight: 700,
-                  fontSize: { xs: 14, md: 16 },
+                  fontSize: { xs: 14, sm: 14, md: 14, lg: 16 },
                 }}
               >
                 RECENT POSTS
@@ -431,7 +438,7 @@ export const Footer = () => {
                   key={i}
                   sx={{
                     display: "flex",
-                    gap: 2,
+                    gap: { xs: 1.5, sm: 1.5, md: 2 },
                     mb: 2,
                     cursor: "pointer",
                     transition: "all 0.3s ease",
@@ -449,18 +456,21 @@ export const Footer = () => {
                     component="img"
                     src={postImg}
                     sx={{
-                      width: { xs: 60, md: 70 },
-                      height: { xs: 60, md: 70 },
+                      width: { xs: 60, sm: 65, md: 55, lg: 70 },
+                      height: { xs: 60, sm: 65, md: 55, lg: 70 },
                       borderRadius: 2,
                       objectFit: "cover",
+                      flexShrink: 0,
                     }}
                   />
-                  <Box>
+                  <Box sx={{ flex: 1, minWidth: 0 }}>
                     <Typography
                       sx={{
-                        fontSize: { xs: 12, md: 14 },
+                        fontSize: { xs: 12, sm: 12, md: 11.5, lg: 14 },
                         fontWeight: 600,
                         mb: 0.5,
+                        wordBreak: "break-word",
+                        lineHeight: 1.4,
                       }}
                     >
                       Handmade with Love – Discover Danbro Cookies by Mr Brown
@@ -469,7 +479,7 @@ export const Footer = () => {
 
                     <Typography
                       sx={{
-                        fontSize: { xs: 11, md: 12 },
+                        fontSize: { xs: 11, sm: 11, md: 10, lg: 12 },
                         color: "#777",
                       }}
                     >
@@ -484,37 +494,39 @@ export const Footer = () => {
           <Box
             sx={{
               borderTop: "1px solid #ddd",
-              mt: { xs: 4, md: 6 },
-              pt: { xs: 2, md: 3 },
-              pb: { xs: 3, md: 2 },
-              px: { xs: 1, md: 0 },
+              mt: { xs: 4, sm: 4, md: 5, lg: 6 },
+              pt: { xs: 2, sm: 2.5, md: 2.5, lg: 3 },
+              pb: { xs: 3, sm: 2.5, md: 2.5, lg: 2 },
+              px: { xs: 1, sm: 1, md: 1, lg: 0 },
               display: "flex",
-              flexDirection: { xs: "column", sm: "row" },
-              justifyContent: "space-between",
-              alignItems: { xs: "flex-start", sm: "center" },
-              gap: { xs: 2, sm: 0 },
+              flexDirection: { xs: "column", sm: "column", md: "row" },
+              justifyContent: { xs: "flex-start", sm: "flex-start", md: "space-between" },
+              alignItems: { xs: "flex-start", sm: "flex-start", md: "center" },
+              gap: { xs: 2, sm: 2, md: 1.5, lg: 0 },
+              flexWrap: { xs: "wrap", sm: "wrap", md: "nowrap", lg: "nowrap" },
             }}
           >
-            <Typography sx={{ color: "#000", fontSize: { xs: 12, md: 14 }, textAlign: { xs: "left", sm: "left" }, }}>
+            <Typography sx={{ color: "#000", fontSize: { xs: 12, sm: 12, md: 12, lg: 14 }, textAlign: { xs: "left", sm: "left", md: "left" }, flex: { md: "0 0 auto" }, whiteSpace: { md: "nowrap" } }}>
               Mr. Brown Bakery and Food Products Pvt Ltd | 2025 |
             </Typography>
-            <Box sx={{ display: "flex", gap: 2, alignItems: "center", }}>
-              <Typography sx={{ color: "#000", fontSize: { xs: 12, md: 14 }, textAlign: { xs: "left", sm: "left" }, }}>
+            <Box sx={{ display: "flex", gap: { xs: 1.5, sm: 2, md: 1.5, lg: 2 }, alignItems: "center", flexWrap: { xs: "wrap", sm: "wrap", md: "nowrap" }, flex: { md: "0 0 auto" } }}>
+              <Typography sx={{ color: "#000", fontSize: { xs: 12, sm: 12, md: 12, lg: 14 }, textAlign: { xs: "left", sm: "left", md: "left" }, whiteSpace: "nowrap" }}>
                 Design & Developed by 
               </Typography>
-              <img component="img" src={Maskgroup} alt="makeinindia" />
-              <img component="img" src={makeinindia} alt="makeinindia" />
+              <Box component="img" src={Maskgroup} alt="makeinindia" sx={{ height: { xs: 20, sm: 24, md: 24, lg: 32 }, width: "auto", flexShrink: 0 }} />
+              <Box component="img" src={makeinindia} alt="makeinindia" sx={{ height: { xs: 20, sm: 24, md: 24, lg: 32 }, width: "auto", flexShrink: 0 }} />
             </Box>
-            <Box sx={{ display: "flex", gap: 2, alignItems: "center", }}>
+            <Box sx={{ display: "flex", gap: 2, alignItems: "center", flex: { md: "0 0 auto" } }}>
               <Box
                 component="img"
                 src={visa}
                 alt="payment methods"
                 sx={{
-                  height: { xs: 30, md: 40 },
+                  height: { xs: 30, sm: 35, md: 32, lg: 40 },
                   width: "auto",
                   filter: "grayscale(0.3)",
                   transition: "all 0.3s ease",
+                  flexShrink: 0,
                   "&:hover": {
                     filter: "grayscale(0)",
                     transform: "scale(1.1)",

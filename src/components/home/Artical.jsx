@@ -66,13 +66,13 @@ export const Artical = () => {
     return (
         <Box
             sx={{
-                py: { xs: 4, md: 6 },
+                py: { xs: 4, sm: 4, md: 6, lg: 6 },
                 borderRadius: { xs: "20px", md: "30px" },
                 position: "relative",
                 textAlign: "center",
                 overflow: "hidden",
                 background: "linear-gradient(135deg, rgba(255,255,255,0.8) 0%, rgba(251,217,211,0.1) 100%)",
-                px: { xs: 1.25, md: 0 },
+                px: { xs: 1.25, sm: 1.5, md: 2, lg: 0 },
                 "&::before": {
                     content: '""',
                     position: "absolute",
@@ -112,11 +112,11 @@ export const Artical = () => {
 
             <Typography
                 sx={{
-                    fontSize: { xs: 24, sm: 28, md: 34 },
+                    fontSize: { xs: 24, sm: 28, md: 32, lg: 34 },
                     fontWeight: 800,
                     color: "var(--themeColor)",
-                    mb: { xs: 5, md: 7 },
-                    px: { xs: 2, md: 0 },
+                    mb: { xs: 5, sm: 5, md: 6, lg: 7 },
+                    px: { xs: 2, sm: 2, md: 2, lg: 0 },
                     position: "relative",
                     display: "inline-block",
                     "&::after": {
@@ -134,7 +134,7 @@ export const Artical = () => {
             >
                 Check it out, OUR NEW ARTICLES
             </Typography>
-            <Container sx={{ px: { xs: 2, md: 3 } }}>
+            <Container sx={{ px: { xs: 2, sm: 3, md: 4, lg: 3 } }}>
                 {isMobile ? (
                     <Box sx={{ position: "relative" }}>
                         <IconButton
@@ -210,10 +210,10 @@ export const Artical = () => {
                                                         filter: "brightness(0.95)",
                                                     }}
                                                 />
-                                                <Box sx={{ p: { xs: 2, md: 2.5 }, position: "relative", zIndex: 2 }}>
+                                                <Box sx={{ p: { xs: 2, sm: 2.5, md: 2.5, lg: 2.5 }, position: "relative", zIndex: 2 }}>
                                                     <Typography
                                                         sx={{
-                                                            fontSize: { xs: 11, md: 12 },
+                                                            fontSize: { xs: 11, sm: 11.5, md: 12, lg: 12 },
                                                             fontWeight: 600,
                                                             color: "rgba(0,0,0,0.6)",
                                                             letterSpacing: 0.8,
@@ -226,7 +226,7 @@ export const Artical = () => {
                                                     <Typography
                                                         className="article-title"
                                                         sx={{
-                                                            fontSize: { xs: 15, md: 17 },
+                                                            fontSize: { xs: 15, sm: 16, md: 16, lg: 17 },
                                                             fontWeight: 700,
                                                             lineHeight: 1.5,
                                                             color: "#333",
@@ -260,7 +260,7 @@ export const Artical = () => {
                         </IconButton>
                     </Box>
                 ) : (
-                    <Grid container spacing={{ xs: 2, md: 2 }}>
+                    <Grid container spacing={{ xs: 2, sm: 2, md: 2.5, lg: 3 }}>
                         {articleList?.map((item, i) => (
                             <Grid size={{ xs: 12, sm: 6, md: 4 }} key={i}>
                             <Box
@@ -331,10 +331,10 @@ export const Artical = () => {
                                 />
 
                                 {/* Date */}
-                                <Box sx={{ p: { xs: 2, md: 2.5 }, position: "relative", zIndex: 2 }}>
+                                <Box sx={{ p: { xs: 2, sm: 2.5, md: 2.5, lg: 2.5 }, position: "relative", zIndex: 2 }}>
                                     <Typography
                                         sx={{
-                                            fontSize: { xs: 11, md: 12 },
+                                            fontSize: { xs: 11, sm: 11.5, md: 12, lg: 12 },
                                             fontWeight: 600,
                                             color: "rgba(0,0,0,0.6)",
                                             letterSpacing: 0.8,
@@ -347,7 +347,7 @@ export const Artical = () => {
                                     <Typography
                                         className="article-title"
                                         sx={{
-                                            fontSize: { xs: 15, md: 17 },
+                                            fontSize: { xs: 15, sm: 16, md: 16, lg: 17 },
                                             fontWeight: 700,
                                             lineHeight: 1.5,
                                             color: "#333",

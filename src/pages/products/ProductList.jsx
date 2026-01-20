@@ -406,7 +406,7 @@ export const ProductList = () => {
       </Container>
 
       {/* Recommended Products Section */}
-      <Container maxWidth="xl" sx={{ px: { xs: 2, md: 3 }, py: 4 }}>
+      {/* <Container maxWidth="xl" sx={{ px: { xs: 2, md: 3 }, py: 4 }}>
         <Box
           sx={{
             mb: { xs: 3, md: 4 },
@@ -431,11 +431,11 @@ export const ProductList = () => {
           <Typography variant="h4" sx={{ fontSize: { xs: 22, sm: 24, md: 32 }, fontWeight: 700, color: "#2c2c2c", transition: "color 0.3s ease", }}>
             Recommended Products
           </Typography>
-        </Box>
+        </Box> */}
         {recommendedProducts && recommendedProducts.length > 0 && (
           <RecommendedProducts recommendedProducts={recommendedProducts} />
         )}
-      </Container>
+      {/* </Container> */}
     </Box>
   );
 };
