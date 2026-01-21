@@ -8,7 +8,7 @@ const Home = () => {
   return (
     <Box sx={{ width: "100%", maxWidth: "100vw", overflowX: "hidden", pb: { xs: 8, md: 12 } }}>
       <HeroBanner />
-      <Container maxWidth="xxl" sx={{ overflowX: "hidden", px: { xs: 2, sm: 3, md: 6, lg: 3 }, maxWidth: { lg: "1400px" } }}>
+      <Container maxWidth="false" sx={{ overflowX: "hidden", px: { xs: 2, md: 3, lg: 2 }, py: 2 }}>
         <CategoryCarousel />
         <OffersSection />
       </Container>

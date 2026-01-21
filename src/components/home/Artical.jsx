@@ -135,7 +135,7 @@ export const Artical = () => {
             >
                 Check it out, OUR NEW ARTICLES
             </CustomText>
-            <Container sx={{ px: { xs: 2, sm: 3, md: 4, lg: 3 } }}>
+            <Container sx={{ px: { xs: 2, md: 3, lg: 2 } }}>
                 {isMobile ? (
                     <Box sx={{ position: "relative" }}>
                         <IconButton

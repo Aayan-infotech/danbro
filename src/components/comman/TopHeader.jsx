@@ -3,7 +3,7 @@ import { NearMe, ShoppingCart } from "@mui/icons-material";
 import SearchIcon from "@mui/icons-material/Search";
 import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
 import ShoppingBagOutlinedIcon from "@mui/icons-material/ShoppingBagOutlined";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useState } from "react";
 import logo from "../../assets/logo.png";
 import { DeliveryCheckDialog } from "./DeliveryCheckDialog";
@@ -15,8 +15,12 @@ export const TopHeader = () => {
     const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
     const isTablet = useMediaQuery(theme.breakpoints.down("md"));
     const navigate = useNavigate();
+    const location = useLocation();
     const [openDeliveryDialog, setOpenDeliveryDialog] = useState(false);
     const [openBusinessDialog, setOpenBusinessDialog] = useState(false);
+
+    // Check if on profile page to add bottom border
+    const isProfilePage = location.pathname === "/profile" || location.pathname === "/user-profile";
 
     return (
         <Box
@@ -30,6 +34,8 @@ export const TopHeader = () => {
                 backgroundColor: "#fff",
                 flexWrap: { xs: "wrap", md: "nowrap" },
                 gap: { xs: 1, md: 0 },
+                borderBottom: isProfilePage ? "2px solid #fbc7b5" : "none",
+                boxShadow: isProfilePage ? "0 2px 8px rgba(0,0,0,0.05)" : "none",
             }}
         >
             {/* Left Buttons - Hidden on mobile */}

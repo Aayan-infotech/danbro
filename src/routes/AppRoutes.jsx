@@ -57,7 +57,7 @@ const AppRoutes = () => {
                 <Route path="/events" element={<CateringEvents />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
-                <Route path="/user-profile" element={<UserProfile />} />
+                <Route path="/profile" element={<UserProfile />} />
                 <Route path="/track-order" element={<TrackOrder />} />
                 <Route path="/products" element={<ProductList />} />
                 <Route path="/products/:id" element={<ProductDetails />} />

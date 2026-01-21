@@ -96,7 +96,7 @@ export const AboutUs = () => {
         </CustomText>
       </Box>
 
-      <Container maxWidth="xl" sx={{ py: { xs: 5, md: 0 }, px: { xs: 3, sm: 3, md: 4 } }}>
+      <Container  sx={{ py: { xs: 5, md: 0 }, px: { xs: 3, sm: 3, md: 4 } }}>
         <CustomText align="center" sx={{ fontWeight: 700, color: "#FF9472", mb: { xs: 4, md: 5 }, fontSize: { xs: 20, sm: 24, md: 32 }, px: { xs: 0, md: 0 } }}>
           SOME WORDS ABOUT US
         </CustomText>
@@ -131,7 +131,7 @@ export const AboutUs = () => {
         </Grid>
       </Container>
 
-      <Container maxWidth="xl" sx={{ px: { xs: 3, sm: 3, md: 4 }, py: { xs: 2, md: 0 } }}>
+      <Container  sx={{ px: { xs: 3, sm: 3, md: 4 }, py: { xs: 2, md: 0 } }}>
         <Box
           sx={{
             p: { xs: 3.5, sm: 3, md: 5 },
@@ -175,7 +175,7 @@ export const AboutUs = () => {
       {/*================ COUNT + RIGHT IMAGE =================*/}
 
       <Box sx={{ py: { xs: 5, md: 0 }, mt: { xs: 4, md: 5 } }}>
-        <Container maxWidth="xl" sx={{ px: { xs: 3, md: 3 } }}>
+        <Container  sx={{ px: { xs: 3, md: 3 } }}>
           <Grid container spacing={{ xs: 4, md: 4 }} alignItems="center">
             <Grid size={{ xs: 12, md: 6 }}>
               <CustomText variant="h3" sx={{ fontWeight: 700, mb: { xs: 2, md: 2 }, fontSize: { xs: 20, sm: 24, md: 32 }, px: { xs: 0, md: 0 } }}>
@@ -361,7 +361,7 @@ export const AboutUs = () => {
 
       {/*================ VIDEO SECTION (DYNAMIC) =================*/}
 
-      <Container maxWidth="xl" sx={{ py: { xs: 5, md: 0 }, pb: { xs: 10, md: 0 }, px: { xs: 3, sm: 3, md: 4 } }}>
+      <Container  sx={{ py: { xs: 5, md: 0 }, pb: { xs: 10, md: 0 }, px: { xs: 3, sm: 3, md: 4 } }}>
         <Grid container spacing={{ xs: 3, md: 3 }}>
           {videos.map((v, i) => (
             <Grid size={{ xs: 12, md: 6 }} key={i}>

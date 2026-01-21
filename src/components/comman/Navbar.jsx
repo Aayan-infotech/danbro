@@ -4,20 +4,10 @@ import MenuIcon from "@mui/icons-material/Menu";
 import CloseIcon from "@mui/icons-material/Close";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-
-const categoryItems = [
-    { label: "CAKES & DRY CAKES", path: "/cakes" },
-    { label: "MITHAI & COOKIES", path: "/mithai" },
-    { label: "BREAD & RUSK", path: "/bread-rusk" },
-    { label: "GIFT HAMPERS & CHOCOLATES", path: "/gift-hampers" },
-    { label: "ADDONS", path: "/addons" },
-    { label: "PRODUCTS", path: "/products" },
-    { label: "EVENTS", path: "/events" },
-];
+import { categoryItems } from "../../utils/navigationItems";
 
 export const Navbar = () => {
     const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down("md"));
     const [mobileOpen, setMobileOpen] = useState(false);
     const [hoveredItem, setHoveredItem] = useState(null);
 
@@ -26,34 +16,6 @@ export const Navbar = () => {
     const handleDrawerToggle = () => {
         setMobileOpen(!mobileOpen);
     };
-
-    const menuItems = (
-        <>
-            {categoryItems?.map((item) => (
-                <CustomText
-                    key={item}
-                    sx={{
-                        fontWeight: 600,
-                        fontSize: { xs: 12, sm: 13, md: 14 },
-                        cursor: "pointer",
-                        color: item === "ADDONS" ? "#fff" : "var(--themeColor)",
-                        ...(item === "ADDONS" && {
-                            backgroundColor: "#00b53d",
-                            borderRadius: 2,
-                            px: { xs: 1.5, md: 2 },
-                            py: 0.3,
-                        }),
-                        whiteSpace: "nowrap",
-                        "&:hover": {
-                            opacity: 0.8,
-                        },
-                    }}
-                >
-                    {item}
-                </CustomText>
-            ))}
-        </>
-    );
 
     return (
         <>
@@ -83,9 +45,10 @@ export const Navbar = () => {
                     },
                 }}
             >
-                {categoryItems.map(({ label, path }) => (
+                {categoryItems?.map(({ label, path }) => (
                     <CustomText
                         key={label}
+                        autoTitleCase={true}
                         onClick={() => navigate(path)}
                         onMouseEnter={() => setHoveredItem(label)}
                         onMouseLeave={() => setHoveredItem(null)}
@@ -149,15 +112,6 @@ export const Navbar = () => {
                 >
                     <MenuIcon />
                 </IconButton>
-                {/* <CustomText
-                    sx={{
-                        fontWeight: 600,
-                        fontSize: 14,
-                        color: "var(--themeColor)",
-                    }}
-                >
-                    Menu
-                </CustomText> */}
             </Box>
 
             {/* Mobile Drawer */}
@@ -196,6 +150,7 @@ export const Navbar = () => {
                     {categoryItems.map(({ label, path }, index) => (
                         <CustomText
                             key={label}
+                            autoTitleCase={true}
                             onClick={() => {
                                 navigate(path);
                                 handleDrawerToggle();  // close drawer after navigating

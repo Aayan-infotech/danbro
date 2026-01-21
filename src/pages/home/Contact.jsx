@@ -137,7 +137,7 @@ export const Contact = () => {
         </CustomText>
       </Box>
 
-      <Container maxWidth="xl" sx={{ py: 4, px: { xs: 2, md: 3, lg: 2 } }}>
+      <Container  sx={{ py: 4, px: { xs: 2, md: 3, lg: 2 } }}>
         <Box sx={{
           display: "flex",
           flexDirection: { xs: "column", md: "row" },

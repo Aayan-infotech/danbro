@@ -73,7 +73,7 @@ export default function BlogDetails() {
 
   return (
     <Box sx={{ backgroundColor: "#fff", pb: { xs: 8, md: 10 }, p: { xs: 1.25, md: 0 } }}>
-      <Container maxWidth="xl" sx={{ py: { xs: 2, md: 2 }, px: { xs: 2, md: 3 } }}>
+      <Container  sx={{ py: { xs: 2, md: 2 }, px: { xs: 2, md: 3 } }}>
         <Box ref={sectionRefs.header}>
           <Button
             onClick={() => navigate(-1)}
@@ -94,7 +94,7 @@ export default function BlogDetails() {
       </Container>
 
       {/* Category Navigation */}
-      <Container maxWidth="xl" ref={sectionRefs.categories} sx={{ px: { xs: 2, md: 3 } }}>
+      <Container  ref={sectionRefs.categories} sx={{ px: { xs: 2, md: 3 } }}>
         <Box
           sx={{
             opacity: visibleSections.categories ? 1 : 0,
@@ -139,7 +139,7 @@ export default function BlogDetails() {
       </Container>
 
       {/* BLOG TITLE + Meta */}
-      <Container maxWidth="xl" sx={{ textAlign: "center", mb: { xs: 3, md: 4 }, px: { xs: 2, md: 3 } }} ref={sectionRefs.title}>
+      <Container  sx={{ textAlign: "center", mb: { xs: 3, md: 4 }, px: { xs: 2, md: 3 } }} ref={sectionRefs.title}>
         <Box
           sx={{
             opacity: visibleSections.title ? 1 : 0,
@@ -171,7 +171,7 @@ export default function BlogDetails() {
       </Container>
 
       {/* Blog Image */}
-      <Container maxWidth="xl" ref={sectionRefs.image} sx={{ px: { xs: 2, md: 3 } }}>
+      <Container  ref={sectionRefs.image} sx={{ px: { xs: 2, md: 3 } }}>
         <Box
           sx={{
             width: "100%",
@@ -193,7 +193,7 @@ export default function BlogDetails() {
       </Container>
 
       {/* Blog Content */}
-      <Container maxWidth="xl" sx={{ lineHeight: 1.8, color: "#444", px: { xs: 2, md: 3 } }} ref={sectionRefs.content}>
+      <Container  sx={{ lineHeight: 1.8, color: "#444", px: { xs: 2, md: 3 } }} ref={sectionRefs.content}>
         <Box
           sx={{
             opacity: visibleSections.content ? 1 : 0,
@@ -388,7 +388,7 @@ export default function BlogDetails() {
       </Container>
 
       {/* Related Posts Section */}
-      <Container maxWidth="xl" sx={{ py: { xs: 4, md: 0 }, px: { xs: 2, md: 3 } }}>
+      <Container  sx={{ py: { xs: 4, md: 0 }, px: { xs: 2, md: 3 } }}>
         <Box ref={sectionRefs.specialties}>
           <Box
             sx={{

@@ -268,7 +268,7 @@ export const TrackOrder = () => {
               </Button>
               <Button
                 variant="contained"
-                onClick={() => navigate("/user-profile")}
+                onClick={() => navigate("/profile")}
                 sx={{
                   backgroundColor: "#FFB5A1",
                   color: "#000",

@@ -116,7 +116,7 @@ export const Store = () => {
                     </Box>
                     <Box sx={{ height: { xs: 140, sm: 180, md: 240 }, backgroundImage: `url(${store})`, backgroundSize: "cover", backgroundPosition: "center", display: "flex", justifyContent: "center", alignItems: "center" }}></Box>
 
-                    <Container maxWidth="xl" sx={{ py: { xs: 3, md: 5 } }}>
+                    <Container  sx={{ py: { xs: 3, md: 5 } }}>
                         <Box ref={sectionRefs.categories}>
                             <Box sx={{
                                 opacity: visibleSections.categories ? 1 : 0,

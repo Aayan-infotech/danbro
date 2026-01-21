@@ -1,6 +1,6 @@
 import { memo } from "react";
 import { Box, Card, CardContent, CardMedia, IconButton } from "@mui/material";
-import { ShoppingCart, ShareOutlined, FavoriteBorder } from "@mui/icons-material";
+import { ShoppingCart, ShareOutlined, FavoriteBorder, SearchOff } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import { CustomText } from "../comman/CustomText";
 import { ProductDescription } from "../comman/ProductDescription";
@@ -190,10 +190,108 @@ export const ProductGrid = memo(({ products, isVisible }) => {
           </Box>
         ))
       ) : (
-        <Box sx={{ width: "100%", textAlign: "center", py: 8, animation: "fadeIn 0.6s ease-out", "@keyframes fadeIn": { "0%": { opacity: 0 }, "100%": { opacity: 1 }, }, }}>
-          <CustomText variant="h6" sx={{ color: "#999", fontSize: { xs: 16, md: 20 }, }}>
-            No products found
-          </CustomText>
+        <Box 
+          sx={{ 
+            width: "100%", 
+            textAlign: "center", 
+            py: { xs: 6, md: 10 },
+            px: 2,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 3,
+            animation: "fadeInUp 0.8s ease-out",
+            "@keyframes fadeInUp": {
+              "0%": { opacity: 0, transform: "translateY(30px)" },
+              "100%": { opacity: 1, transform: "translateY(0)" },
+            },
+          }}
+        >
+          <Box
+            sx={{
+              position: "relative",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              animation: "pulse 2s ease-in-out infinite",
+              "@keyframes pulse": {
+                "0%, 100%": { transform: "scale(1)" },
+                "50%": { transform: "scale(1.1)" },
+              },
+            }}
+          >
+            <Box
+              sx={{
+                position: "absolute",
+                width: { xs: 120, md: 150 },
+                height: { xs: 120, md: 150 },
+                borderRadius: "50%",
+                background: "linear-gradient(135deg, rgba(255,148,114,0.1) 0%, rgba(242,112,156,0.1) 100%)",
+                animation: "ripple 2s ease-out infinite",
+                "@keyframes ripple": {
+                  "0%": { transform: "scale(0.8)", opacity: 1 },
+                  "100%": { transform: "scale(1.5)", opacity: 0 },
+                },
+              }}
+            />
+            <Box
+              sx={{
+                position: "absolute",
+                width: { xs: 100, md: 130 },
+                height: { xs: 100, md: 130 },
+                borderRadius: "50%",
+                background: "linear-gradient(135deg, rgba(255,148,114,0.15) 0%, rgba(242,112,156,0.15) 100%)",
+                animation: "ripple 2s ease-out infinite 0.5s",
+              }}
+            />
+            <Box
+              sx={{
+                position: "relative",
+                zIndex: 1,
+                width: { xs: 80, md: 100 },
+                height: { xs: 80, md: 100 },
+                borderRadius: "50%",
+                background: "linear-gradient(135deg, #FF9472 0%, #F2709C 100%)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                boxShadow: "0 8px 30px rgba(255,148,114,0.3)",
+              }}
+            >
+              <SearchOff 
+                sx={{ 
+                  fontSize: { xs: 40, md: 50 },
+                  color: "#fff",
+                }} 
+              />
+            </Box>
+          </Box>
+          
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+            <CustomText 
+              variant="h5" 
+              sx={{ 
+                color: "#2c2c2c", 
+                fontSize: { xs: 20, sm: 24, md: 28 },
+                fontWeight: 700,
+                mb: 0.5,
+              }}
+            >
+              No Products Found
+            </CustomText>
+            <CustomText 
+              sx={{ 
+                color: "#666", 
+                fontSize: { xs: 14, md: 16 },
+                maxWidth: { xs: "100%", md: "500px" },
+                mx: "auto",
+                lineHeight: 1.6,
+              }}
+            >
+              We couldn't find any products matching your search. Try adjusting your filters or browse our categories.
+            </CustomText>
+          </Box>
         </Box>
       )}
     </Box>

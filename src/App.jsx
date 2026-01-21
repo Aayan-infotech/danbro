@@ -17,8 +17,12 @@ const ScrollToTop = () => {
   return null;
 };
 
-function App() {
+const AppContent = () => {
+  const { pathname } = useLocation();
   const [showDeliveryDialog, setShowDeliveryDialog] = useState(false);
+
+  // Hide Navbar on profile page
+  const hideNavbar = pathname === "/profile" || pathname === "/user-profile";
 
   useEffect(() => {
     const hasSeenDialog = localStorage.getItem("deliveryDialogShown");
@@ -35,7 +39,7 @@ function App() {
   };
 
   return (
-    <BrowserRouter>
+    <>
       <ScrollToTop />
       <DeliveryCheckDialog open={showDeliveryDialog} onClose={handleCloseDeliveryDialog} />
       <Box
@@ -50,12 +54,20 @@ function App() {
         }}
       >
         <TopHeader />
-        <Navbar />
+        {!hideNavbar && <Navbar />}
         <Box sx={{ flex: 1 }}>
           <AppRoutes />
         </Box>
-        <Footer />
+        {!hideNavbar && <Footer />}
       </Box>
+    </>
+  );
+};
+
+function App() {
+  return (
+    <BrowserRouter>
+      <AppContent />
     </BrowserRouter>
   );
 }

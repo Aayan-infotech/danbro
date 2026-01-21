@@ -78,7 +78,7 @@ export const Cart = () => {
 
   return (
     <Box sx={{ minHeight: "100vh", backgroundColor: "#fff", py: { xs: 4, md: 0 }, pb: { xs: 12, md: 0 }, p: { xs: 1.25, md: 0 }, mb: 4 }}>
-      <Container maxWidth="xl" sx={{ py: 4, px: { xs: 2, md: 3 } }}>
+      <Container  sx={{ py: 4, px: { xs: 2, md: 3 } }}>
         <Box sx={{ mb: { xs: 3, md: 4 } }}>
           <CustomText
             variant="h4"

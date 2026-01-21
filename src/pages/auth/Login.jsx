@@ -5,6 +5,9 @@ import { useNavigate } from "react-router-dom";
 import banner from "../../assets/login.png";
 import { CustomTextField } from "../../components/comman/CustomTextField";
 import { CustomButton } from "../../components/comman/CustomButton";
+import { CustomText } from "../../components/comman/CustomText";
+import axios from "axios";
+import { API_BASE_URL } from "../../utils/apiUrl";
 
 const RECAPTCHA_SITE_KEY = "6LfBFCwsAAAAAIiTPg_1ZGCaKId4TwkCDcvBNBq0";
 
@@ -22,6 +25,8 @@ export const Login = () => {
   const [recaptchaToken, setRecaptchaToken] = useState(null);
   const [recaptchaError, setRecaptchaError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [apiError, setApiError] = useState("");
+  const [apiSuccess, setApiSuccess] = useState("");
   const [recaptchaLoaded, setRecaptchaLoaded] = useState(false);
   const recaptchaWidgetRef = useRef(null);
   const [formData, setFormData] = useState({
@@ -135,35 +140,61 @@ export const Login = () => {
     e.preventDefault();
     setIsSubmitting(true);
     setRecaptchaError("");
+    setApiError("");
+    setApiSuccess("");
+
     try {
-      if (isDevelopment) {
-        console.warn("Development mode: Skipping reCAPTCHA validation");
-        const loginPayload = {
-          ...formData,
-          recaptchaToken: "dev-mode-token",
-        };
-        console.log("Login data:", loginPayload);
-        setIsSubmitting(false);
-        return;
-      }
-
-      // Validate reCAPTCHA token
-      if (!recaptchaToken) {
-        setRecaptchaError("Please verify you are not a robot.");
-        setIsSubmitting(false);
-        return;
-      }
-
-      // Proceed with login
+      // Prepare login payload - use email from username field
       const loginPayload = {
-        ...formData,
-        recaptchaToken: recaptchaToken,
+        email: formData.username.includes("@") ? formData.username : formData.username, // Support email or phone
+        password: formData.password,
       };
-      console.log("Login data:", loginPayload);
-      setIsSubmitting(false);
+
+      // Call login API
+      try {
+        const response = await axios.post(`${API_BASE_URL}/user/login`, loginPayload, {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (response.data) {
+          setApiSuccess("Login successful! Redirecting...");
+          setApiError("");
+          
+          // Store auth token and user data
+          if (response.data.token) {
+            localStorage.setItem('authToken', response.data.token);
+          }
+          if (response.data.user) {
+            localStorage.setItem('userData', JSON.stringify(response.data.user));
+          }
+          if (response.data.data && response.data.data.token) {
+            localStorage.setItem('authToken', response.data.data.token);
+          }
+          if (response.data.data && response.data.data.user) {
+            localStorage.setItem('userData', JSON.stringify(response.data.data.user));
+          }
+
+          // Redirect to home or profile page
+          setTimeout(() => {
+            navigate("/");
+          }, 1500);
+        }
+      } catch (error) {
+        console.error("Login error:", error);
+        if (error.response && error.response.data) {
+          setApiError(error.response.data.message || error.response.data.error || "Login failed. Please check your credentials.");
+        } else {
+          setApiError("Network error. Please check your connection and try again.");
+        }
+        setApiSuccess("");
+      } finally {
+        setIsSubmitting(false);
+      }
     } catch (error) {
       console.error("Form submission error:", error);
-      setRecaptchaError("An error occurred. Please try again.");
+      setApiError("An error occurred. Please try again.");
       setIsSubmitting(false);
     }
   };
@@ -242,10 +273,26 @@ export const Login = () => {
           </CustomText>
 
           <Box component="form" onSubmit={handleSubmit}>
+            {apiError && (
+              <Alert severity="error" sx={{ mb: 2, borderRadius: 2 }}>
+                {apiError}
+              </Alert>
+            )}
+            {apiSuccess && (
+              <Alert severity="success" sx={{ mb: 2, borderRadius: 2 }}>
+                {apiSuccess}
+              </Alert>
+            )}
+            {recaptchaError && (
+              <Alert severity="error" sx={{ mb: 2, borderRadius: 2 }}>
+                {recaptchaError}
+              </Alert>
+            )}
             <CustomTextField
               fullWidth
               name="username"
-              placeholder="Username, Email or Mobile Number"
+              placeholder="Email Address"
+              type="email"
               required
               value={formData.username}
               onChange={handleChange}
@@ -394,7 +441,7 @@ export const Login = () => {
               disabled={isSubmitting || !recaptchaToken}
               onClick={() => {
                 if (formData.username && formData.password) {
-                  navigate("/user-profile");
+                  navigate("/profile");
                 } else {
                   alert("Please enter valid email and password");
                 }

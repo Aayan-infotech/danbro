@@ -419,7 +419,7 @@ export const ProductDetails = () => {
       </Box>
 
       {/* 🔶 What's Inside + Nutrition Facts */}
-      <Container maxWidth="xl" sx={{ py: 4, px: { xs: 2, md: 3, lg: 2 } }}>
+      <Container  sx={{ py: 4, px: { xs: 2, md: 3, lg: 2 } }}>
         <Grid container spacing={{ xs: 2, md: 2 }} sx={{ px: { xs: 2, md: 3, lg: 2 } }}>
           <Grid size={{ xs: 12, md: 6 }}>
             <Box sx={{ p: { xs: 2, md: 3 }, border: "1px solid #ddd", borderRadius: 2 }}>

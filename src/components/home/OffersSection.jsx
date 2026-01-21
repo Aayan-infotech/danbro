@@ -1,4 +1,4 @@
-import { Box,  Button, useMediaQuery, IconButton } from "@mui/material";
+import { Box, Button, useMediaQuery, IconButton } from "@mui/material";
 import { CustomText } from "../comman/CustomText";
 import offer1 from "../../assets/Group 8.png";
 import offer2 from "../../assets/Group 8 (2).png";
@@ -156,7 +156,7 @@ export const OffersSection = () => {
 
   return (
     <Box>
-      <Box sx={{ px: { xs: 2, sm: 3, md: 6, lg: 2 } }}>
+      <Box sx={{ px: { xs: 2, md: 3, lg: 2 } }}>
         <Box
           sx={{
             display: "flex",
@@ -169,10 +169,10 @@ export const OffersSection = () => {
           }}
         >
           <Box sx={{ position: "relative" }}>
-            <CustomText 
-              sx={{ 
-                fontSize: { xs: 28, sm: 32, md: 38 }, 
-                fontWeight: 800, 
+            <CustomText
+              sx={{
+                fontSize: { xs: 28, sm: 32, md: 38 },
+                fontWeight: 800,
                 color: "var(--themeColor)",
                 position: "relative",
                 display: "inline-block",
@@ -310,10 +310,10 @@ export const OffersSection = () => {
                             zIndex: 2,
                           }}
                         >
-                          <CustomText 
-                            sx={{ 
-                              fontSize: { xs: 12, md: 14 }, 
-                              opacity: 0.95, 
+                          <CustomText
+                            sx={{
+                              fontSize: { xs: 12, md: 14 },
+                              opacity: 0.95,
                               color: "#FFB5A1",
                               fontWeight: 500,
                               mb: 0.5,
@@ -323,9 +323,9 @@ export const OffersSection = () => {
                           >
                             {offer?.subtitle}
                           </CustomText>
-                          <CustomText 
-                            sx={{ 
-                              fontSize: { xs: 18, sm: 20, md: 24 }, 
+                          <CustomText
+                            sx={{
+                              fontSize: { xs: 18, sm: 20, md: 24 },
                               fontWeight: 800,
                               lineHeight: 1.2,
                               textShadow: "0 2px 10px rgba(0,0,0,0.5)",
@@ -408,165 +408,165 @@ export const OffersSection = () => {
             }}
           >
             {filteredItems?.map((offer, index) => (
-            <Box
-              key={index}
-              sx={{
-                position: "relative",
-                borderRadius: { xs: 2, md: 3 },
-                overflow: "hidden",
-                cursor: "pointer",
-                transition: "all 0.5s cubic-bezier(0.4, 0, 0.2, 1)",
-                boxShadow: "0 8px 25px rgba(0,0,0,0.12), 0 0 0 1px rgba(0,0,0,0.05) inset",
-                animation: `fadeInUp 0.6s ease-out ${index * 0.1}s both`,
-                "@keyframes fadeInUp": {
-                  "0%": {
-                    opacity: 0,
-                    transform: "translateY(30px)",
-                  },
-                  "100%": {
-                    opacity: 1,
-                    transform: "translateY(0)",
-                  },
-                },
-                "&::before": {
-                  content: '""',
-                  position: "absolute",
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  background: "linear-gradient(135deg, rgba(255,181,161,0.1) 0%, rgba(95,41,48,0.05) 100%)",
-                  opacity: 0,
-                  transition: "opacity 0.5s ease",
-                  zIndex: 1,
-                  pointerEvents: "none",
-                },
-                "&:hover": {
-                  transform: "translateY(-12px) scale(1.03)",
-                  boxShadow: "0 20px 50px rgba(0,0,0,0.25), 0 0 0 1px rgba(255,181,161,0.3) inset",
-                  "&::before": {
-                    opacity: 1,
-                  },
-                  "& img": {
-                    transform: "scale(1.15)",
-                  },
-                  "& .overlay-content": {
-                    opacity: 1,
-                    transform: "translateY(0)",
-                    background: "linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,.95) 100%)",
-                  },
-                  "& .discount-badge": {
-                    transform: "scale(1.15) rotate(5deg)",
-                    boxShadow: "0 8px 25px rgba(10,18,52,0.5)",
-                  },
-                },
-              }}
-            >
-                <Box
-                    component="img"
-                    src={offer.img}
-                    alt={offer.title}
-                    loading="lazy"
-                    sx={{
-                  width: "100%",
-                  height: { xs: 220, sm: 250, md: 280 },
-                  objectFit: "cover",
-                  transition: "transform 0.8s cubic-bezier(0.4, 0, 0.2, 1)",
-                  filter: "brightness(0.95)",
-                }}
-              />
               <Box
-                className="overlay-content"
+                key={index}
                 sx={{
-                  position: "absolute",
-                  bottom: 0,
-                  width: "100%",
-                  p: { xs: 2, md: 2.5 },
-                  background:
-                    "linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,.85) 100%)",
-                  color: "#fff",
+                  position: "relative",
+                  borderRadius: { xs: 2, md: 3 },
+                  overflow: "hidden",
+                  cursor: "pointer",
                   transition: "all 0.5s cubic-bezier(0.4, 0, 0.2, 1)",
-                  opacity: 1,
-                  transform: "translateY(0)",
-                  zIndex: 2,
-                }}
-              >
-                <CustomText 
-                  sx={{ 
-                    fontSize: { xs: 12, md: 14 }, 
-                    opacity: 0.95, 
-                    color: "#FFB5A1",
-                    fontWeight: 500,
-                    mb: 0.5,
-                    textTransform: "uppercase",
-                    letterSpacing: "0.5px",
-                  }}
-                >
-                  {offer?.subtitle}
-                </CustomText>
-                <CustomText 
-                  sx={{ 
-                    fontSize: { xs: 18, sm: 20, md: 24 }, 
-                    fontWeight: 800,
-                    lineHeight: 1.2,
-                    textShadow: "0 2px 10px rgba(0,0,0,0.5)",
-                  }}
-                >
-                  {offer?.title}
-                </CustomText>
-              </Box>
-              <Box
-                className="discount-badge"
-                sx={{
-                  position: "absolute",
-                  top: { xs: 12, md: 15 },
-                  right: { xs: 12, md: 18 },
-                  background: "linear-gradient(135deg, #0A1234 0%, #1a2a4a 100%)",
-                  px: { xs: 2, md: 2.5 },
-                  py: { xs: 1.5, md: 2 },
-                  borderRadius: { xs: 1.5, md: 2 },
-                  fontSize: { xs: 13, md: 16 },
-                  fontWeight: 800,
-                  color: "#fff",
-                  transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
-                  animation: "pulse 2.5s ease-in-out infinite",
-                  boxShadow: "0 4px 15px rgba(10,18,52,0.4), 0 0 0 2px rgba(255,255,255,0.1) inset",
-                  zIndex: 3,
-                  "@keyframes pulse": {
-                    "0%, 100%": { transform: "scale(1)" },
-                    "50%": { transform: "scale(1.08)" },
+                  boxShadow: "0 8px 25px rgba(0,0,0,0.12), 0 0 0 1px rgba(0,0,0,0.05) inset",
+                  animation: `fadeInUp 0.6s ease-out ${index * 0.1}s both`,
+                  "@keyframes fadeInUp": {
+                    "0%": {
+                      opacity: 0,
+                      transform: "translateY(30px)",
+                    },
+                    "100%": {
+                      opacity: 1,
+                      transform: "translateY(0)",
+                    },
                   },
                   "&::before": {
                     content: '""',
                     position: "absolute",
-                    top: "-2px",
-                    left: "-2px",
-                    right: "-2px",
-                    bottom: "-2px",
-                    background: "linear-gradient(45deg, rgba(255,181,161,0.5), rgba(255,255,255,0.3))",
-                    borderRadius: "inherit",
-                    zIndex: -1,
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    background: "linear-gradient(135deg, rgba(255,181,161,0.1) 0%, rgba(95,41,48,0.05) 100%)",
                     opacity: 0,
-                    transition: "opacity 0.3s ease",
+                    transition: "opacity 0.5s ease",
+                    zIndex: 1,
+                    pointerEvents: "none",
                   },
-                  "&:hover::before": {
-                    opacity: 1,
+                  "&:hover": {
+                    transform: "translateY(-12px) scale(1.03)",
+                    boxShadow: "0 20px 50px rgba(0,0,0,0.25), 0 0 0 1px rgba(255,181,161,0.3) inset",
+                    "&::before": {
+                      opacity: 1,
+                    },
+                    "& img": {
+                      transform: "scale(1.15)",
+                    },
+                    "& .overlay-content": {
+                      opacity: 1,
+                      transform: "translateY(0)",
+                      background: "linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,.95) 100%)",
+                    },
+                    "& .discount-badge": {
+                      transform: "scale(1.15) rotate(5deg)",
+                      boxShadow: "0 8px 25px rgba(10,18,52,0.5)",
+                    },
                   },
                 }}
               >
-                {offer?.discount}
+                <Box
+                  component="img"
+                  src={offer.img}
+                  alt={offer.title}
+                  loading="lazy"
+                  sx={{
+                    width: "100%",
+                    height: { xs: 220, sm: 250, md: 280 },
+                    objectFit: "cover",
+                    transition: "transform 0.8s cubic-bezier(0.4, 0, 0.2, 1)",
+                    filter: "brightness(0.95)",
+                  }}
+                />
+                <Box
+                  className="overlay-content"
+                  sx={{
+                    position: "absolute",
+                    bottom: 0,
+                    width: "100%",
+                    p: { xs: 2, md: 2.5 },
+                    background:
+                      "linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,.85) 100%)",
+                    color: "#fff",
+                    transition: "all 0.5s cubic-bezier(0.4, 0, 0.2, 1)",
+                    opacity: 1,
+                    transform: "translateY(0)",
+                    zIndex: 2,
+                  }}
+                >
+                  <CustomText
+                    sx={{
+                      fontSize: { xs: 12, md: 14 },
+                      opacity: 0.95,
+                      color: "#FFB5A1",
+                      fontWeight: 500,
+                      mb: 0.5,
+                      textTransform: "uppercase",
+                      letterSpacing: "0.5px",
+                    }}
+                  >
+                    {offer?.subtitle}
+                  </CustomText>
+                  <CustomText
+                    sx={{
+                      fontSize: { xs: 18, sm: 20, md: 24 },
+                      fontWeight: 800,
+                      lineHeight: 1.2,
+                      textShadow: "0 2px 10px rgba(0,0,0,0.5)",
+                    }}
+                  >
+                    {offer?.title}
+                  </CustomText>
+                </Box>
+                <Box
+                  className="discount-badge"
+                  sx={{
+                    position: "absolute",
+                    top: { xs: 12, md: 15 },
+                    right: { xs: 12, md: 18 },
+                    background: "linear-gradient(135deg, #0A1234 0%, #1a2a4a 100%)",
+                    px: { xs: 2, md: 2.5 },
+                    py: { xs: 1.5, md: 2 },
+                    borderRadius: { xs: 1.5, md: 2 },
+                    fontSize: { xs: 13, md: 16 },
+                    fontWeight: 800,
+                    color: "#fff",
+                    transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
+                    animation: "pulse 2.5s ease-in-out infinite",
+                    boxShadow: "0 4px 15px rgba(10,18,52,0.4), 0 0 0 2px rgba(255,255,255,0.1) inset",
+                    zIndex: 3,
+                    "@keyframes pulse": {
+                      "0%, 100%": { transform: "scale(1)" },
+                      "50%": { transform: "scale(1.08)" },
+                    },
+                    "&::before": {
+                      content: '""',
+                      position: "absolute",
+                      top: "-2px",
+                      left: "-2px",
+                      right: "-2px",
+                      bottom: "-2px",
+                      background: "linear-gradient(45deg, rgba(255,181,161,0.5), rgba(255,255,255,0.3))",
+                      borderRadius: "inherit",
+                      zIndex: -1,
+                      opacity: 0,
+                      transition: "opacity 0.3s ease",
+                    },
+                    "&:hover::before": {
+                      opacity: 1,
+                    },
+                  }}
+                >
+                  {offer?.discount}
+                </Box>
               </Box>
-            </Box>
-          ))}
-        </Box>
+            ))}
+          </Box>
         )}
-        <Box 
-          sx={{ 
-            width: "100%", 
-            display: "flex", 
-            justifyContent: "center", 
-            my: { xs: 5, md: 7 }, 
-            mb: { xs: 6, md: 8 }, 
+        <Box
+          sx={{
+            width: "100%",
+            display: "flex",
+            justifyContent: "center",
+            my: { xs: 5, md: 7 },
+            mb: { xs: 6, md: 8 },
             overflow: "hidden",
             position: "relative",
             "&::before": {
@@ -686,10 +686,10 @@ export const OffersSection = () => {
                   zIndex: 2,
                 }}
               >
-                <CustomText 
-                  sx={{ 
-                    fontSize: { xs: 12, md: 14 }, 
-                    opacity: 0.95, 
+                <CustomText
+                  sx={{
+                    fontSize: { xs: 12, md: 14 },
+                    opacity: 0.95,
                     color: "#FFB5A1",
                     fontWeight: 500,
                     mb: 0.5,
@@ -699,9 +699,9 @@ export const OffersSection = () => {
                 >
                   {offer?.subtitle}
                 </CustomText>
-                <CustomText 
-                  sx={{ 
-                    fontSize: { xs: 18, sm: 20, md: 24 }, 
+                <CustomText
+                  sx={{
+                    fontSize: { xs: 18, sm: 20, md: 24 },
                     fontWeight: 800,
                     lineHeight: 1.2,
                     textShadow: "0 2px 10px rgba(0,0,0,0.5)",

@@ -5,7 +5,7 @@ import { CustomText } from "../../components/comman/CustomText";
 export const TermsAndConditions = () => {
   return (
     <Box sx={{ width: "100%", overflowX: "hidden", backgroundColor: "#fff", pb: { xs: 12, md: 0 }, p: { xs: 1.25, md: 0 } }}>
-      <Container maxWidth="xl" sx={{ py: { xs: 4, md: 6 }, px: { xs: 2, md: 3 } }}>
+      <Container  sx={{ py: { xs: 4, md: 6 }, px: { xs: 2, md: 3 } }}>
         <CustomText
           variant="h3"
           sx={{

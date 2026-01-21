@@ -5,17 +5,15 @@ import { useNavigate } from "react-router-dom";
 import banner from "../../assets/login.png";
 import { CustomTextField } from "../../components/comman/CustomTextField";
 import { CustomButton } from "../../components/comman/CustomButton";
+import { CustomText } from "../../components/comman/CustomText";
+import axios from "axios";
+import { API_BASE_URL } from "../../utils/apiUrl";
 
 const RECAPTCHA_SITE_KEY = "6Lfr-iAsAAAAAIQsR8mfUxZO1qK3r_AXrTSLSb4g";
 
 // Check if we're in development mode (localhost)
 // Set to false if you want to test reCAPTCHA even on localhost
 const FORCE_RECAPTCHA = false; // Set to true to force reCAPTCHA even in dev
-const isDevelopment = !FORCE_RECAPTCHA && (
-  window.location.hostname === 'localhost' ||
-  window.location.hostname === '127.0.0.1' ||
-  window.location.hostname === ''
-);
 
 export const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -23,6 +21,12 @@ export const Register = () => {
   const [recaptchaToken, setRecaptchaToken] = useState(null);
   const [recaptchaError, setRecaptchaError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [apiError, setApiError] = useState("");
+  const [apiSuccess, setApiSuccess] = useState("");
+  const [showOtpVerification, setShowOtpVerification] = useState(false);
+  const [registeredEmail, setRegisteredEmail] = useState("");
+  const [otp, setOtp] = useState("");
+  const [isVerifying, setIsVerifying] = useState(false);
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
@@ -94,63 +98,41 @@ export const Register = () => {
     setRecaptchaError("");
 
     try {
-      // In development mode, skip reCAPTCHA or use a test token
-      if (isDevelopment) {
-        console.warn("Development mode: Skipping reCAPTCHA validation");
-        const registerPayload = {
-          ...formData,
-          recaptchaToken: "dev-mode-token",
-        };
-        console.log("Registration data:", registerPayload);
-        setIsSubmitting(false);
-        // Here you would typically send the data to your backend
-        return;
-      }
+      // Prepare signup payload
+      const signupPayload = {
+        name: formData.fullName,
+        email: formData.email,
+        phone: formData.mobile,
+        password: formData.password,
+      };
 
-      // Execute reCAPTCHA Enterprise
-      if (window.grecaptcha && window.grecaptcha.enterprise) {
-        const executeRecaptcha = async () => {
-          try {
-            const token = await window.grecaptcha.enterprise.execute(RECAPTCHA_SITE_KEY, {
-              action: "REGISTER",
-            });
+      // Call signup API
+      try {
+        const response = await axios.post(`${API_BASE_URL}/user/signup`, signupPayload, {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
 
-            if (token) {
-              setRecaptchaToken(token);
-              setRecaptchaError("");
-
-              // Handle registration logic here
-              const registerPayload = {
-                ...formData,
-                recaptchaToken: token,
-              };
-
-              console.log("Registration data:", registerPayload);
-            } else {
-              setRecaptchaError("reCAPTCHA verification failed. Please try again.");
-            }
-          } catch (error) {
-            console.error("reCAPTCHA error:", error);
-            // Check for specific domain error
-            if (error.message && error.message.includes("not in the list of supported domains")) {
-              setRecaptchaError("reCAPTCHA domain not configured. Please add localhost to your reCAPTCHA console settings or wait a few minutes for changes to propagate.");
-            } else {
-              setRecaptchaError("reCAPTCHA verification failed. Please try again.");
-            }
-          } finally {
-            setIsSubmitting(false);
-          }
-        };
-
-        // Use ready callback to ensure grecaptcha is loaded
-        if (typeof window.grecaptcha.enterprise.ready === 'function') {
-          window.grecaptcha.enterprise.ready(executeRecaptcha);
-        } else {
-          // If ready doesn't exist, try executing directly after a small delay
-          setTimeout(executeRecaptcha, 100);
+        if (response.data) {
+          setApiSuccess("Registration successful! Please verify your email with OTP.");
+          setApiError("");
+          
+          // Store registered email for OTP verification
+          setRegisteredEmail(formData.email);
+          
+          // Show OTP verification step
+          setShowOtpVerification(true);
         }
-      } else {
-        setRecaptchaError("reCAPTCHA is not loaded. Please refresh the page.");
+      } catch (error) {
+        console.error("Signup error:", error);
+        if (error.response && error.response.data) {
+          setApiError(error.response.data.message || error.response.data.error || "Registration failed. Please try again.");
+        } else {
+          setApiError("Network error. Please check your connection and try again.");
+        }
+        setApiSuccess("");
+      } finally {
         setIsSubmitting(false);
       }
     } catch (error) {
@@ -233,10 +215,150 @@ export const Register = () => {
               },
             }}
           >
-            Welcome Back
+            {showOtpVerification ? "Verify Your Email" : "Create Account"}
           </CustomText>
 
-          <Box component="form" onSubmit={handleSubmit}>
+          {showOtpVerification ? (
+            // OTP Verification Form
+            <Box component="form" onSubmit={handleVerifyOtp}>
+              {apiError && (
+                <Alert severity="error" sx={{ mb: 2, borderRadius: 2 }}>
+                  {apiError}
+                </Alert>
+              )}
+              {apiSuccess && (
+                <Alert severity="success" sx={{ mb: 2, borderRadius: 2 }}>
+                  {apiSuccess}
+                </Alert>
+              )}
+              
+              <CustomText
+                sx={{
+                  fontSize: { xs: 14, md: 16 },
+                  color: "#fff",
+                  textAlign: "center",
+                  mb: 3,
+                  opacity: 0.9,
+                }}
+              >
+                We've sent a 6-digit OTP to <strong>{registeredEmail}</strong>. Please enter it below to verify your email.
+              </CustomText>
+
+              <InputLabel sx={{ fontSize: 14, color: "#fff", mb: 1 }}>Enter OTP</InputLabel>
+              <CustomTextField
+                fullWidth
+                placeholder="Enter 6-digit OTP"
+                value={otp}
+                onChange={(e) => {
+                  const value = e.target.value.replace(/\D/g, '').slice(0, 6);
+                  setOtp(value);
+                }}
+                inputProps={{
+                  maxLength: 6,
+                  style: {
+                    textAlign: "center",
+                    fontSize: "24px",
+                    letterSpacing: "8px",
+                    fontWeight: "bold",
+                  },
+                }}
+                required
+                sx={{ mb: 2 }}
+              />
+
+              <CustomButton
+                type="submit"
+                fullWidth
+                variant="contained"
+                disabled={isVerifying || otp.length !== 6}
+                sx={{
+                  backgroundColor: "#FFB5A1",
+                  color: "#000",
+                  textTransform: "none",
+                  borderRadius: 2,
+                  fontWeight: 600,
+                  py: 1.5,
+                  mb: 2,
+                  "&:hover": {
+                    backgroundColor: "#F2709C",
+                  },
+                  "&:disabled": {
+                    backgroundColor: "rgba(255,181,161,0.5)",
+                    color: "rgba(0,0,0,0.3)",
+                  },
+                }}
+              >
+                {isVerifying ? "Verifying..." : "Verify OTP"}
+              </CustomButton>
+
+              <Box sx={{ textAlign: "center", mt: 2 }}>
+                <CustomText
+                  sx={{
+                    fontSize: 14,
+                    color: "#fff",
+                    opacity: 0.8,
+                    mb: 1,
+                  }}
+                >
+                  Didn't receive OTP?
+                </CustomText>
+                <Button
+                  onClick={handleResendOtp}
+                  sx={{
+                    color: "#FFB5A1",
+                    textTransform: "none",
+                    fontSize: 14,
+                    fontWeight: 600,
+                    "&:hover": {
+                      backgroundColor: "transparent",
+                      textDecoration: "underline",
+                    },
+                  }}
+                >
+                  Resend OTP
+                </Button>
+              </Box>
+
+              <Box sx={{ textAlign: "center", mt: 2 }}>
+                <Button
+                  onClick={() => {
+                    setShowOtpVerification(false);
+                    setOtp("");
+                    setApiError("");
+                    setApiSuccess("");
+                  }}
+                  sx={{
+                    color: "#fff",
+                    textTransform: "none",
+                    fontSize: 14,
+                    "&:hover": {
+                      backgroundColor: "transparent",
+                      textDecoration: "underline",
+                    },
+                  }}
+                >
+                  Back to Registration
+                </Button>
+              </Box>
+            </Box>
+          ) : (
+            // Registration Form
+            <Box component="form" onSubmit={handleSubmit}>
+            {apiError && (
+              <Alert severity="error" sx={{ mb: 2, borderRadius: 2 }}>
+                {apiError}
+              </Alert>
+            )}
+            {apiSuccess && (
+              <Alert severity="success" sx={{ mb: 2, borderRadius: 2 }}>
+                {apiSuccess}
+              </Alert>
+            )}
+            {recaptchaError && (
+              <Alert severity="error" sx={{ mb: 2, borderRadius: 2 }}>
+                {recaptchaError}
+              </Alert>
+            )}
             <InputLabel sx={{ fontSize: 14, color: "#fff", mb: 1 }}>Full Name</InputLabel>
             <CustomTextField
               fullWidth
@@ -461,10 +583,10 @@ export const Register = () => {
               )}
             </CustomButton>
 
-            {/* Login Link */}
-            <CustomText sx={{ textAlign: "center", color: "#fff", fontSize: { xs: 14, md: 16 }, mb: 2 }}>
-              Already have an account?{" "}
-              <Link
+              {/* Login Link */}
+              <CustomText sx={{ textAlign: "center", color: "#fff", fontSize: { xs: 14, md: 16 }, mb: 2 }}>
+                Already have an account?{" "}
+                <Link
                 onClick={() => navigate("/login")}
                 sx={{
                   color: "#4A90E2",
@@ -512,7 +634,8 @@ export const Register = () => {
             >
               Continue with Google
             </Button>
-          </Box>
+            </Box>
+          )}
         </Box>
       </Container>
     </Box>

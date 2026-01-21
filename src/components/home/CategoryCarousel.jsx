@@ -10,7 +10,6 @@ import { useNavigate } from "react-router-dom";
 import { CustomText } from "../comman/CustomText";
 
 
-// Helper function to get image based on category name or index
 const getCategoryImage = (categoryName, index) => {
   const images = [cat1, cat2, cat3];
   return images[index % images.length];
@@ -22,8 +21,6 @@ export const CategoryCarousel = () => {
 
   const navigate = useNavigate();
 
-  // Transform API data to component format
-  // Prefer API image, fallback to local themed image based on index
   const items = categories?.map((category, index) => ({
     id: category?.id,
     title: category?.groupname,
@@ -56,21 +53,22 @@ export const CategoryCarousel = () => {
         <CircularProgress sx={{ color: "var(--themeColor)" }} />
       </Box>
     ) : error || !items || items.length === 0 ? (
-      <Box sx={{ px: { xs: 2, sm: 3, md: 6, lg: 2 } }}>
+      <Box>
         <Alert severity={error ? "error" : "info"} sx={{ borderRadius: 2 }}>
           {error ? `Failed to load categories: ${error}` : "No categories available at the moment."}
         </Alert>
       </Box>
     ) : (
-      <Box sx={{ px: { xs: 2, sm: 3, md: 6, lg: 2 } }}>
+      <Box sx={{ px: { xs: 2, md: 3, lg: 2 } }}>
         <Box
           sx={{
             width: "100%",
             background: "linear-gradient(135deg, #fbd9d3 0%, #ffe5e1 50%, #fbd9d3 100%)",
             borderRadius: { xs: "30px", md: "100px" },
-            py: { xs: 2, md: 4 },
-            px: { xs: 1, md: 4 },
-            mb: { xs: 4, md: 6 },
+            py: { xs: 1, sm: 1.5, md: 2, lg: 2.5 },
+            px: { xs: 0.5, sm: 1, md: 2, lg: 2.5 },
+            mb: { xs: 1.5, md: 3 },
+            minHeight: { xs: "100px", sm: "120px", md: "140px", lg: "160px" },
             position: "relative",
             overflow: "hidden",
             "&::before": {
@@ -112,8 +110,8 @@ export const CategoryCarousel = () => {
               key={i}
               sx={{
                 position: "absolute",
-                width: { xs: "60px", md: "100px" },
-                height: { xs: "60px", md: "100px" },
+                width: { xs: "40px", md: "80px" },
+                height: { xs: "40px", md: "80px" },
                 borderRadius: "50%",
                 background: "radial-gradient(circle, rgba(255,181,161,0.2) 0%, transparent 70%)",
                 top: `${20 + i * 30}%`,
@@ -178,7 +176,7 @@ export const CategoryCarousel = () => {
                         height: "120%",
                       },
                       "& img": {
-                        transform: "scale(1.25) rotate(180deg)",
+                        transform: "scale(1.15) rotate(180deg)",
                         filter: "drop-shadow(0 8px 16px rgba(0,0,0,0.2))",
                       },
                       "& .category-title": {
@@ -189,20 +187,20 @@ export const CategoryCarousel = () => {
                     },
                   }}
                 >
-                  <Box className="category-card" onClick={() => handleToProductList(item.id)} sx={{ backgroundColor: "transparent", backdropFilter: "blur(10px)", borderRadius: { xs: "15px", md: "20px" }, transition: "all 0.4s ease", overflow: "visible", display: "flex", flexDirection: "column", alignItems: "center", gap: 1 }}>
+                  <Box className="category-card" onClick={() => handleToProductList(item.id)} sx={{ backgroundColor: "transparent", backdropFilter: "blur(10px)", borderRadius: { xs: "15px", md: "20px" }, transition: "all 0.4s ease", overflow: "visible", display: "flex", flexDirection: "column", alignItems: "center", gap: "2px" }}>
                     <Box
                       component="img"
                       src={item?.img}
                       alt=""
                       loading="lazy"
                       sx={{
-                        height: { xs: 65, md: 95 },
-                        width: { xs: 65, md: 95 },
+                        height: { xs: 55, sm: 65, md: 80, lg: 95 },
+                        width: { xs: 55, sm: 65, md: 80, lg: 95 },
                         borderRadius: "50%",
                         objectFit: "cover",
                         transition: "transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)",
                         filter: "drop-shadow(0 4px 12px rgba(0,0,0,0.15))",
-                        border: "3px solid rgba(255,255,255,0.8)",
+                        border: { xs: "2px solid rgba(255,255,255,0.8)", md: "3px solid rgba(255,255,255,0.8)" },
                         boxShadow: "0 4px 15px rgba(0,0,0,0.1)",
                       }}
                     />
