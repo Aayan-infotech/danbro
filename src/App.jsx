@@ -69,9 +69,9 @@ const AppContent = () => {
 function App() {
   return (
     <Provider store={store}>
-      <BrowserRouter>
-        <AppContent />
-      </BrowserRouter>
+    <BrowserRouter>
+      <AppContent />
+    </BrowserRouter>
     </Provider>
   );
 }

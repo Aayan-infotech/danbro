@@ -11,6 +11,7 @@ import { BusinessDialog } from "./BusinessDialog";
 import { getAccessToken } from "../../utils/cookies";
 import api from "../../utils/api";
 import { getWishlist } from "../../utils/wishlist";
+import { getCart } from "../../utils/cart";
 import { getStoredLocation } from "../../utils/location";
 
 
@@ -25,6 +26,7 @@ export const TopHeader = () => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [userProfile, setUserProfile] = useState(null);
     const [wishlistCount, setWishlistCount] = useState(0);
+    const [cartCount, setCartCount] = useState(0);
 
     // Check if on profile page to add bottom border
     const isProfilePage = location.pathname === "/profile" || location.pathname === "/user-profile";
@@ -63,7 +65,7 @@ export const TopHeader = () => {
             try {
                 // lat and long are automatically added via API interceptor
                 const wishlistData = await getWishlist();
-                if (wishlistData && wishlistData.data) {
+                if (wishlistData && wishlistData.data && Array.isArray(wishlistData.data)) {
                     setWishlistCount(wishlistData.data.length);
                 } else {
                     setWishlistCount(0);
@@ -76,6 +78,80 @@ export const TopHeader = () => {
 
         fetchWishlistCount();
     }, [isLoggedIn, location.pathname]);
+
+    // Fetch cart count
+    useEffect(() => {
+        const fetchCartCount = async () => {
+            if (!isLoggedIn) {
+                setCartCount(0);
+                return;
+            }
+
+            try {
+                const cartData = await getCart();
+                // Handle different response structures
+                let items = [];
+                if (cartData && Array.isArray(cartData.data)) {
+                    items = cartData.data;
+                } else if (cartData && cartData.data && Array.isArray(cartData.data)) {
+                    items = cartData.data;
+                } else if (cartData && cartData.data?.data && Array.isArray(cartData.data.data)) {
+                    items = cartData.data.data;
+                } else if (Array.isArray(cartData)) {
+                    items = cartData;
+                }
+                
+                // Calculate total quantity
+                const totalQuantity = items.reduce((sum, item) => {
+                    return sum + (item.quantity || 0);
+                }, 0);
+                setCartCount(totalQuantity);
+            } catch (error) {
+                console.error("Error fetching cart count:", error);
+                setCartCount(0);
+            }
+        };
+
+        fetchCartCount();
+    }, [isLoggedIn, location.pathname]);
+
+    // Listen for cart updates
+    useEffect(() => {
+        const handleCartUpdate = async () => {
+            if (!isLoggedIn) {
+                setCartCount(0);
+                return;
+            }
+
+            try {
+                const cartData = await getCart();
+                // Handle different response structures
+                let items = [];
+                if (cartData && Array.isArray(cartData.data)) {
+                    items = cartData.data;
+                } else if (cartData && cartData.data && Array.isArray(cartData.data)) {
+                    items = cartData.data;
+                } else if (cartData && cartData.data?.data && Array.isArray(cartData.data.data)) {
+                    items = cartData.data.data;
+                } else if (Array.isArray(cartData)) {
+                    items = cartData;
+                }
+                
+                // Calculate total quantity
+                const totalQuantity = items.reduce((sum, item) => {
+                    return sum + (item.quantity || 0);
+                }, 0);
+                setCartCount(totalQuantity);
+            } catch (error) {
+                console.error("Error fetching cart count:", error);
+            }
+        };
+
+        window.addEventListener('cartUpdated', handleCartUpdate);
+        return () => {
+            window.removeEventListener('cartUpdated', handleCartUpdate);
+        };
+    }, [isLoggedIn]);
 
     // Listen for wishlist updates from custom event
     useEffect(() => {
@@ -281,32 +357,11 @@ export const TopHeader = () => {
                 >
                     <Badge
                         badgeContent={wishlistCount}
-                        color="error"
-                        sx={{
-                            "& .MuiBadge-badge": {
-                                fontSize: { xs: 10, md: 11 },
-                                minWidth: { xs: 16, md: 18 },
-                                height: { xs: 16, md: 18 },
-                                padding: "0 4px",
-                                backgroundColor: "#f44336",
-                                color: "#fff",
-                                fontWeight: 700,
-                                boxShadow: "0 2px 8px rgba(244,67,54,0.4)",
-                                animation: wishlistCount > 0 ? "pulse 2s ease-in-out infinite" : "none",
-                                "@keyframes pulse": {
-                                    "0%, 100%": {
-                                        transform: "scale(1)",
-                                    },
-                                    "50%": {
-                                        transform: "scale(1.1)",
-                                    },
-                                },
-                            },
-                        }}
-                    >
+                        color="error" >
                         <Favorite sx={{ fontSize: { xs: 20, md: 24 } }} />
                     </Badge>
                 </IconButton>
+
                 {isLoggedIn && userProfile ? (
                     <IconButton
                         onClick={() => navigate("/profile")}
@@ -335,8 +390,8 @@ export const TopHeader = () => {
                             {userProfile.name
                                 ? userProfile.name.charAt(0).toUpperCase()
                                 : userProfile.email
-                                ? userProfile.email.charAt(0).toUpperCase()
-                                : "U"}
+                                    ? userProfile.email.charAt(0).toUpperCase()
+                                    : "U"}
                         </Avatar>
                     </IconButton>
                 ) : (
@@ -371,7 +426,11 @@ export const TopHeader = () => {
                             },
                         }}
                     >
-                        <ShoppingCart sx={{ fontSize: { xs: 20, md: 24 } }} />
+                        <Badge
+                            badgeContent={cartCount}
+                            color="error" >
+                            <ShoppingCart sx={{ fontSize: { xs: 20, md: 24 } }} />
+                        </Badge>
                     </IconButton>
                 </Link>
             </Box>

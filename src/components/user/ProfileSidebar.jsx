@@ -128,8 +128,8 @@ export const ProfileSidebar = ({
                 primary={item?.id === "logout" && isLoggingOut ? "Logging out..." : item?.label}
                 primaryTypographyProps={{
                   sx: {
-                    fontSize: 14,
-                    fontWeight: activeTab === item?.id ? 600 : 400,
+                  fontSize: 14,
+                  fontWeight: activeTab === item?.id ? 600 : 400,
                   },
                 }}
               />

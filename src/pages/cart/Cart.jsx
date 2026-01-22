@@ -27,6 +27,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { getCart, increaseItemCount, decreaseItemCount } from "../../utils/cart";
 import { getAccessToken } from "../../utils/cookies";
+import api from "../../utils/api";
 
 export const Cart = () => {
   const navigate = useNavigate();
@@ -54,17 +55,30 @@ export const Cart = () => {
       }
       const response = await getCart();
       
-      // Handle different response structures
-      if (response?.data?.items) {
+      // Handle API response structure: { success: true, data: [...], cartTotal: ... }
+      if (response?.data && Array.isArray(response.data)) {
+        setCartItems(response.data);
+        // Set cartTotal if available in response
+        if (response.cartTotal !== undefined) {
+          setCartTotal(response.cartTotal);
+        }
+      } else if (response?.data?.data && Array.isArray(response.data.data)) {
+        setCartItems(response.data.data);
+        if (response.data.cartTotal !== undefined) {
+          setCartTotal(response.data.cartTotal);
+        }
+      } else if (response?.data?.items) {
         setCartItems(response.data.items);
+        if (response.data.cartTotal !== undefined) {
+          setCartTotal(response.data.cartTotal);
+        }
       } else if (response?.items) {
         setCartItems(response.items);
-      } else if (Array.isArray(response?.data)) {
-        setCartItems(response.data);
       } else if (Array.isArray(response)) {
         setCartItems(response);
       } else {
         setCartItems([]);
+        setCartTotal(0);
       }
     } catch (err) {
       console.error("Error loading cart:", err);
@@ -89,6 +103,8 @@ export const Cart = () => {
       
       // Reload cart to get updated data
       await loadCart();
+      // Dispatch event to update cart count in header
+      window.dispatchEvent(new CustomEvent('cartUpdated'));
     } catch (err) {
       console.error("Error updating quantity:", err);
       setError(err.response?.data?.message || err.message || "Failed to update quantity");
@@ -102,25 +118,98 @@ export const Cart = () => {
   };
 
   const removeItem = async (productId) => {
-    // For now, we'll decrease quantity to 0 or handle removal
-    // If there's a remove endpoint, implement it here
     try {
-      // Keep decreasing until quantity is 0 or implement remove endpoint
       await decreaseItemCount(productId);
       await loadCart();
+      // Dispatch event to update cart count in header
+      window.dispatchEvent(new CustomEvent('cartUpdated'));
     } catch (err) {
       console.error("Error removing item:", err);
       setError(err.response?.data?.message || err.message || "Failed to remove item");
     }
   };
 
+  const [cartTotal, setCartTotal] = useState(0);
+  const [couponCode, setCouponCode] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState(null);
+  const [couponError, setCouponError] = useState("");
+  const [applyingCoupon, setApplyingCoupon] = useState(false);
+
+  // Apply coupon
+  const handleApplyCoupon = async () => {
+    if (!couponCode.trim()) {
+      setCouponError("Please enter a coupon code");
+      return;
+    }
+
+    setApplyingCoupon(true);
+    setCouponError("");
+
+    try {
+      const response = await api.post('/coupon/apply', {
+        couponCode: couponCode.trim(),
+      });
+
+      if (response.data && response.data.success) {
+        const couponData = response.data.data || response.data;
+        setAppliedCoupon({
+          code: couponCode.trim(),
+          discountPercent: couponData.discountPercentage || couponData.discount || 0,
+          discountAmount: couponData.discountAmount || 0,
+          discountType: couponData.discountType,
+        });
+        setCouponCode("");
+      } else {
+        setCouponError(response.data?.message || "Invalid coupon code");
+      }
+    } catch (err) {
+      console.error("Error applying coupon:", err);
+      setCouponError(err.response?.data?.message || err.message || "Failed to apply coupon");
+    } finally {
+      setApplyingCoupon(false);
+    }
+  };
+
+  // Remove coupon
+  const handleRemoveCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponCode("");
+    setCouponError("");
+  };
+
+  // Calculate subtotal from cart items
   const subtotal = cartItems.reduce((sum, item) => {
-    const price = typeof item.price === 'number' ? item.price : parseFloat(item.price) || 0;
+    // Handle price - can be array or number
+    let itemPrice = 0;
+    if (Array.isArray(item.price) && item.price.length > 0) {
+      itemPrice = item.price[0].rate || item.price[0].mrp || 0;
+    } else if (typeof item.price === 'number') {
+      itemPrice = item.price;
+    } else if (item.lineTotal) {
+      itemPrice = item.lineTotal;
+    }
+    
     const quantity = typeof item.quantity === 'number' ? item.quantity : parseInt(item.quantity) || 0;
-    return sum + price * quantity;
+    return sum + itemPrice * quantity;
   }, 0);
-  const shipping = subtotal > 50 ? 0 : 5.0;
-  const total = subtotal + shipping;
+
+  // Use cartTotal from API if available, otherwise calculate
+  const finalSubtotal = cartTotal > 0 ? cartTotal : subtotal;
+  
+  // Calculate discount based on coupon type
+  let discount = 0;
+  if (appliedCoupon) {
+    if (appliedCoupon.discountType === "ITEM_DISCOUNT_PERCENTAGE" || appliedCoupon.discountPercent) {
+      // Percentage discount
+      discount = finalSubtotal * (appliedCoupon.discountPercent || 0) / 100;
+    } else if (appliedCoupon.discountAmount) {
+      // Fixed amount discount
+      discount = appliedCoupon.discountAmount;
+    }
+  }
+  
+  const shipping = finalSubtotal > 50 ? 0 : 5.0;
+  const total = finalSubtotal - discount + shipping;
 
   return (
     <Box sx={{ minHeight: "100vh", backgroundColor: "#fff", py: { xs: 4, md: 0 }, pb: { xs: 12, md: 0 }, p: { xs: 1.25, md: 0 }, mb: 4 }}>
@@ -227,7 +316,12 @@ export const Cart = () => {
                           }}
                         >
                           <img
-                            src={item.image || item.product?.image || "https://via.placeholder.com/200"}
+                            src={
+                              (item.images && Array.isArray(item.images) && item.images.length > 0 && item.images[0].url) ||
+                              item.image || 
+                              item.product?.image || 
+                              "https://via.placeholder.com/200"
+                            }
                             alt={item.name || item.product?.name || "Product"}
                             style={{
                               width: "100%",
@@ -266,7 +360,13 @@ export const Cart = () => {
                                 color: "var(--themeColor)",
                               }}
                             >
-                              ₹{typeof item.price === 'number' ? item.price.toFixed(2) : parseFloat(item.price || 0).toFixed(2)}
+                              ₹{
+                                item.lineTotal 
+                                  ? item.lineTotal.toFixed(2)
+                                  : (Array.isArray(item.price) && item.price.length > 0)
+                                    ? (item.price[0].rate || item.price[0].mrp || 0).toFixed(2)
+                                    : (typeof item.price === 'number' ? item.price : parseFloat(item.price || 0)).toFixed(2)
+                              }
                             </CustomText>
                           </Box>
 
@@ -400,15 +500,96 @@ export const Cart = () => {
                     Order Summary
                   </CustomText>
 
+                  {/* Coupon Section */}
+                  <Box sx={{ mb: 2 }}>
+                    <CustomText sx={{ fontSize: { xs: 14, md: 16 }, fontWeight: 600, mb: 1, color: "#2c2c2c" }}>
+                      Apply Coupon
+                    </CustomText>
+                    <Box sx={{ display: "flex", gap: 1 }}>
+                      <TextField
+                        fullWidth
+                        size="small"
+                        placeholder="Enter coupon code"
+                        value={couponCode}
+                        onChange={(e) => {
+                          setCouponCode(e.target.value.toUpperCase());
+                          setCouponError("");
+                        }}
+                        disabled={applyingCoupon || !!appliedCoupon}
+                        sx={{
+                          "& .MuiOutlinedInput-root": {
+                            borderRadius: 2,
+                          },
+                        }}
+                      />
+                      <Button
+                        variant="contained"
+                        onClick={handleApplyCoupon}
+                        disabled={!couponCode || applyingCoupon || !!appliedCoupon}
+                        sx={{
+                          backgroundColor: appliedCoupon ? "#4caf50" : "var(--themeColor)",
+                          color: "#fff",
+                          textTransform: "none",
+                          borderRadius: 2,
+                          px: 3,
+                          "&:hover": {
+                            backgroundColor: appliedCoupon ? "#45a049" : "var(--specialColor)",
+                          },
+                          "&:disabled": {
+                            backgroundColor: "#ccc",
+                          },
+                        }}
+                      >
+                        {applyingCoupon ? "Applying..." : appliedCoupon ? "Applied" : "Apply"}
+                      </Button>
+                    </Box>
+                    {couponError && (
+                      <Alert severity="error" sx={{ mt: 1, fontSize: 12 }}>
+                        {couponError}
+                      </Alert>
+                    )}
+                    {appliedCoupon && (
+                      <Alert severity="success" sx={{ mt: 1, fontSize: 12 }}>
+                        Coupon "{appliedCoupon.code}" applied! {
+                          appliedCoupon.discountType === "ITEM_DISCOUNT_PERCENTAGE" || appliedCoupon.discountPercent
+                            ? `${appliedCoupon.discountPercent}% discount`
+                            : `₹${appliedCoupon.discountAmount} off`
+                        }
+                      </Alert>
+                    )}
+                    {appliedCoupon && (
+                      <Button
+                        size="small"
+                        onClick={handleRemoveCoupon}
+                        sx={{ mt: 1, textTransform: "none", fontSize: 12 }}
+                      >
+                        Remove Coupon
+                      </Button>
+                    )}
+                  </Box>
+
+                  <Divider sx={{ mb: 2 }} />
+
                   <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5, mb: 2 }}>
                     <Box sx={{ display: "flex", justifyContent: "space-between" }}>
                       <CustomText sx={{ fontSize: { xs: 14, md: 16 }, color: "#666" }}>
                         Subtotal
                       </CustomText>
                       <CustomText sx={{ fontSize: { xs: 14, md: 16 }, fontWeight: 600 }}>
-                        ₹{subtotal.toFixed(2)}
+                        ₹{finalSubtotal.toFixed(2)}
                       </CustomText>
                     </Box>
+
+                    {appliedCoupon && discount > 0 && (
+                      <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+                        <CustomText sx={{ fontSize: { xs: 14, md: 16 }, color: "#4caf50" }}>
+                          Discount ({appliedCoupon.code})
+                        </CustomText>
+                        <CustomText sx={{ fontSize: { xs: 14, md: 16 }, fontWeight: 600, color: "#4caf50" }}>
+                          -₹{discount.toFixed(2)}
+                        </CustomText>
+                      </Box>
+                    )}
 
                     <Box sx={{ display: "flex", justifyContent: "space-between" }}>
                       <CustomText sx={{ fontSize: { xs: 14, md: 16 }, color: "#666" }}>
@@ -425,7 +606,7 @@ export const Cart = () => {
                       </CustomText>
                     </Box>
 
-                    {subtotal < 50 && (
+                    {finalSubtotal < 50 && (
                       <CustomText
                         sx={{
                           fontSize: { xs: 12, md: 13 },
@@ -433,7 +614,7 @@ export const Cart = () => {
                           fontStyle: "italic",
                         }}
                       >
-                        Add ₹{(50 - subtotal).toFixed(2)} more for free shipping
+                        Add ₹{(50 - finalSubtotal).toFixed(2)} more for free shipping
                       </CustomText>
                     )}
 

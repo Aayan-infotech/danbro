@@ -33,7 +33,7 @@ const renderRoutes = (routes, isPrivate = false) => {
  */
 const AppRoutes = () => {
     return (
-        <Routes>
+            <Routes>
             {/* Public Routes - No authentication required */}
             {renderRoutes(publicRoutes, false)}
             
@@ -48,7 +48,7 @@ const AppRoutes = () => {
                 path={notFoundRoute.path} 
                 element={<LazyRoute component={notFoundRoute.component} />} 
             />
-        </Routes>
+            </Routes>
     );
 };
 

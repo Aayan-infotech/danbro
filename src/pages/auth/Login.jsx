@@ -154,22 +154,22 @@ export const Login = () => {
     // Handle OTP verification case
     const result = await dispatch(loginUser({
       email: formData.username,
-      password: formData.password,
+        password: formData.password,
     }));
 
     // Check if login was rejected due to OTP verification
     if (loginUser.rejected.match(result)) {
       const errorPayload = result.payload;
       if (errorPayload?.status === 403 || errorPayload?.isVerified === false) {
-        localStorage.setItem('pendingLoginEmail', formData.username);
-        localStorage.setItem('pendingLoginPassword', formData.password);
-        navigate("/verify-otp", {
-          state: {
-            email: formData.username,
-            password: formData.password,
+            localStorage.setItem('pendingLoginEmail', formData.username);
+            localStorage.setItem('pendingLoginPassword', formData.password);
+            navigate("/verify-otp", {
+              state: {
+                email: formData.username,
+                password: formData.password,
             message: errorPayload?.message || "OTP has been sent to your email. Please check your inbox."
-          }
-        });
+              }
+            });
       }
     }
   };
