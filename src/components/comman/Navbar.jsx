@@ -51,7 +51,7 @@ export const Navbar = () => {
                 ref={navbarRef}
                 sx={{
                     position: "sticky",
-                    top: { xs: "50px", md: "60px" },
+                    top: { xs: "50px", md: "57px" },
                     zIndex: 999,
                     transition: "transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease",
                     transform: isVisible ? "translateY(0)" : "translateY(-100%)",

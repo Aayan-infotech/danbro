@@ -84,7 +84,7 @@ export const TestimonialsCarousel = () => {
   const settings = {
     infinite: true,
     speed: 800,
-    slidesToShow: 2,
+    slidesToShow: 3,
     slidesToScroll: 1,
     arrows: false,
     dots: true,
@@ -94,6 +94,7 @@ export const TestimonialsCarousel = () => {
     cssEase: "cubic-bezier(0.25, 0.46, 0.45, 0.94)",
     beforeChange: (current, next) => setCurrentSlide(next),
     responsive: [
+      { breakpoint: 1200, settings: { slidesToShow: 3 } },
       { breakpoint: 992, settings: { slidesToShow: 2 } },
       { breakpoint: 768, settings: { slidesToShow: 1 } },
     ],

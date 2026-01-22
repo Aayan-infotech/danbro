@@ -1,4 +1,4 @@
-import { Box, Popover } from "@mui/material";
+import { Box, Popover, Grid } from "@mui/material";
 import { CustomText } from "./CustomText";
 import { useNavigate } from "react-router-dom";
 
@@ -12,11 +12,8 @@ import { useNavigate } from "react-router-dom";
  * @param {Function} props.onClose - Close handler
  * @param {Object} props.anchorEl - Anchor element for popover positioning
  */
-export const NavbarDropdown = ({ category, isOpen, onClose, anchorEl }) => {
-  const navigate = useNavigate();
-
-  // Dropdown menu data based on category
-  const getDropdownData = (categoryLabel) => {
+// Dropdown menu data based on category
+const getDropdownData = (categoryLabel) => {
     const menus = {
       "CAKES & DRY CAKES": {
         sections: [
@@ -115,8 +112,11 @@ export const NavbarDropdown = ({ category, isOpen, onClose, anchorEl }) => {
       },
     };
 
-    return menus[categoryLabel] || { sections: [] };
-  };
+  return menus[categoryLabel] || { sections: [] };
+};
+
+export const NavbarDropdown = ({ category, isOpen, onClose, anchorEl }) => {
+  const navigate = useNavigate();
 
   const dropdownData = getDropdownData(category);
 
@@ -125,7 +125,6 @@ export const NavbarDropdown = ({ category, isOpen, onClose, anchorEl }) => {
   }
 
   const handleItemClick = (item) => {
-    // Navigate to products page with search query
     navigate(`/products?search=${encodeURIComponent(item)}`);
     onClose();
   };
@@ -146,43 +145,34 @@ export const NavbarDropdown = ({ category, isOpen, onClose, anchorEl }) => {
       sx={{
         mt: 1,
         "& .MuiPaper-root": {
-          borderRadius: 3,
+          borderRadius: 2,
           boxShadow: "0 8px 24px rgba(0,0,0,0.15)",
-          maxWidth: { xs: "90vw", sm: "600px", md: "700px", lg: "800px" },
+          maxWidth: { xs: "95vw", sm: "900px", md: "1000px" },
+          width: { xs: "95vw", sm: "900px", md: "1000px" },
           maxHeight: "70vh",
           overflowY: "auto",
+          overflowX: "hidden",
+          backgroundColor: "#e3f2fd",
+          border: "1px solid rgba(0,0,0,0.1)",
         },
       }}
+      onMouseEnter={(e) => {
+        e.stopPropagation();
+      }}
       onMouseLeave={(e) => {
-        // Close immediately when mouse leaves the popover
         onClose();
       }}
     >
       <Box
         sx={{
-          backgroundColor: "#fff8f5",
           py: 3,
           px: { xs: 2, sm: 3, md: 4 },
-          borderRadius: 3,
-          minWidth: { xs: "280px", sm: "400px", md: "500px" },
         }}
       >
-        <Box sx={{ display: "flex", gap: 3, flexWrap: "wrap" }}>
+        <Grid container spacing={3}>
           {dropdownData.sections.map((section, index) => (
-            <Box
-              key={index}
-              sx={{
-                flex: "1 1 auto",
-                minWidth: { xs: "100%", sm: "180px", md: "200px" },
-                maxWidth: { xs: "100%", sm: "250px", md: "280px" },
-              }}
-            >
-              <Box
-                sx={{
-                  position: "relative",
-                  mb: 2,
-                }}
-              >
+            <Grid item xs={12} sm={6} md={4} key={index}>
+              <Box>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1.5, flexWrap: "wrap" }}>
                   <CustomText
                     sx={{
@@ -247,9 +237,9 @@ export const NavbarDropdown = ({ category, isOpen, onClose, anchorEl }) => {
                   ))}
                 </Box>
               </Box>
-            </Box>
+            </Grid>
           ))}
-        </Box>
+        </Grid>
       </Box>
     </Popover>
   );

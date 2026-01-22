@@ -308,7 +308,7 @@ export const HeroBanner = () => {
                   key={slide.id}
                   sx={{
                     width: "100%",
-                    height: { xs: "25vh", sm: "28vh", md: "32vh", lg: "35vh" },
+                    height: { xs: "70vh", sm: "75vh", md: "80vh", lg: "85vh" },
                     position: "relative",
                     overflow: "hidden",
                     "&::before": {
@@ -369,8 +369,8 @@ export const HeroBanner = () => {
                     sx={{
                       width: "100%",
                       height: "100%",
-                      minHeight: { xs: "25vh", sm: "28vh", md: "32vh", lg: "35vh" },
-                      maxHeight: { xs: "25vh", sm: "28vh", md: "32vh", lg: "35vh" },
+                      minHeight: { xs: "70vh", sm: "75vh", md: "80vh", lg: "85vh" },
+                      maxHeight: { xs: "70vh", sm: "75vh", md: "80vh", lg: "85vh" },
                       objectFit: "cover",
                       objectPosition: "center center",
                       display: "block",
