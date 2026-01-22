@@ -1,13 +1,133 @@
-import { memo } from "react";
-import { Box, Card, CardContent, CardMedia, IconButton } from "@mui/material";
-import { ShoppingCart, ShareOutlined, FavoriteBorder, SearchOff } from "@mui/icons-material";
+import { memo, useState, useEffect } from "react";
+import { Box, Card, CardContent, CardMedia, IconButton, CircularProgress } from "@mui/material";
+import { ShoppingCart, ShareOutlined, FavoriteBorder, Favorite, SearchOff } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import { CustomText } from "../comman/CustomText";
 import { ProductDescription } from "../comman/ProductDescription";
 import { ProductPrice } from "../comman/ProductPrice";
+import { CustomToast } from "../comman/CustomToast";
+import { addToWishlist, removeFromWishlist, isInWishlist } from "../../utils/wishlist";
+import { getStoredLocation } from "../../utils/location";
+import { getAccessToken } from "../../utils/cookies";
 
 export const ProductGrid = memo(({ products, isVisible }) => {
   const navigate = useNavigate();
+  const [wishlistItems, setWishlistItems] = useState(new Set());
+  const [loadingWishlist, setLoadingWishlist] = useState(new Set());
+  const [toast, setToast] = useState({ 
+    open: false, 
+    message: "", 
+    severity: "success", 
+    loading: false 
+  });
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  // Check if user is logged in
+  useEffect(() => {
+    const token = getAccessToken();
+    setIsLoggedIn(!!token);
+  }, []);
+
+  // Check which products are in wishlist
+  useEffect(() => {
+    const checkWishlistItems = async () => {
+      if (!isLoggedIn || !products || products.length === 0) return;
+
+      const location = getStoredLocation();
+      const wishlistSet = new Set();
+
+      for (const product of products) {
+        try {
+          const inWishlist = await isInWishlist(product?.productId, location.lat, location.long);
+          if (inWishlist) {
+            wishlistSet.add(product?.productId);
+          }
+        } catch (error) {
+          console.error(`Error checking wishlist for product ${product?.productId}:`, error);
+        }
+      }
+
+      setWishlistItems(wishlistSet);
+    };
+
+    checkWishlistItems();
+  }, [products, isLoggedIn]);
+
+  const handleWishlistToggle = async (e, productId) => {
+    console.log(productId, 'productId')
+    e.stopPropagation();
+
+    if (!productId) {
+      console.error("ProductId is missing");
+      console.error("Product object:", e.currentTarget.closest('[data-product-id]'));
+      setToast({
+        open: true,
+        message: "Product ID is missing. Please try again.",
+        severity: "error",
+        loading: false,
+      });
+      return;
+    }
+    if (!isLoggedIn) {
+      setToast({
+        open: true,
+        message: "Please login to add items to wishlist",
+        severity: "warning",
+        loading: false,
+      });
+      return;
+    }
+    const isInList = wishlistItems.has(productId);
+    setToast({
+      open: true,
+      message: isInList ? "Removing from wishlist..." : "Adding to wishlist...",
+      severity: "info",
+      loading: true,
+    });
+    setLoadingWishlist((prev) => new Set(prev).add(productId));
+
+    try {
+      if (isInList) {
+        await removeFromWishlist(productId);
+        setWishlistItems((prev) => {
+          const newSet = new Set(prev);
+          newSet.delete(productId);
+          return newSet;
+        });
+        setToast({
+          open: true,
+          message: "Removed from wishlist",
+          severity: "success",
+          loading: false,
+        });
+        window.dispatchEvent(new CustomEvent('wishlistUpdated'));
+      } else {
+        const response = await addToWishlist(productId);
+        setWishlistItems((prev) => new Set(prev).add(productId));
+        setToast({
+          open: true,
+          message: response?.message || "Added to wishlist",
+          severity: "success",
+          loading: false,
+        });
+        window.dispatchEvent(new CustomEvent('wishlistUpdated'));
+      }
+    } catch (error) {
+      console.error("Error toggling wishlist:", error);
+      setToast({
+        open: true,
+        message: error.response?.data?.message || "Failed to update wishlist",
+        severity: "error",
+        loading: false,
+      });
+    } finally {
+      setLoadingWishlist((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(productId);
+        return newSet;
+      });
+    }
+  };
 
   return (
     <Box
@@ -23,7 +143,7 @@ export const ProductGrid = memo(({ products, isVisible }) => {
       {products?.length > 0 ? (
         products?.map((product, index) => (
           <Box
-            key={product.id}
+            key={product?.productId}
             sx={{
               width: {
                 xs: "calc(50% - 6px)",
@@ -48,7 +168,7 @@ export const ProductGrid = memo(({ products, isVisible }) => {
           >
             <Card
               elevation={0}
-              onClick={() => navigate(`/products/${product.id}`)}
+              onClick={() => navigate(`/products/${product?.productId}`)}
               sx={{
                 borderRadius: 2,
                 overflow: "hidden",
@@ -124,8 +244,8 @@ export const ProductGrid = memo(({ products, isVisible }) => {
                 <CardMedia
                   component="img"
                   height="200"
-                  image={product.image}
-                  alt={product.name}
+                  image={product?.image}
+                  alt={product?.name}
                   loading="lazy"
                   sx={{
                     height: { xs: 160, sm: 180, md: 200 },
@@ -159,8 +279,55 @@ export const ProductGrid = memo(({ products, isVisible }) => {
                   <IconButton size="small" onClick={(e) => { e.stopPropagation() }}>
                     <ShareOutlined sx={{ fontSize: 18 }} />
                   </IconButton>
-                  <IconButton size="small" onClick={(e) => { e.stopPropagation() }}>
-                    <FavoriteBorder sx={{ fontSize: 18 }} />
+                  <IconButton
+                    size="small"
+                    onClick={(e) => handleWishlistToggle(e, product?.productId)}
+                    disabled={loadingWishlist.has(product?.productId)}
+                    sx={{
+                      position: "relative",
+                      "&:disabled": {
+                        opacity: 0.8,
+                      },
+                      transition: "all 0.3s ease",
+                      "&:hover:not(:disabled)": {
+                        transform: "scale(1.15)",
+                      },
+                    }}
+                  >
+                    {loadingWishlist.has(product?.productId) ? (
+                      <CircularProgress
+                        size={18}
+                        thickness={4}
+                        sx={{
+                          color: "#f44336",
+                          position: "absolute",
+                        }}
+                      />
+                    ) : wishlistItems.has(product?.productId) ? (
+                      <Favorite
+                        sx={{
+                          fontSize: 18,
+                          color: "#f44336",
+                          animation: "heartBeat 0.6s ease",
+                          "@keyframes heartBeat": {
+                            "0%, 100%": { transform: "scale(1)" },
+                            "25%": { transform: "scale(1.3)" },
+                            "50%": { transform: "scale(1)" },
+                            "75%": { transform: "scale(1.15)" },
+                          },
+                        }}
+                      />
+                    ) : (
+                      <FavoriteBorder
+                        sx={{
+                          fontSize: 18,
+                          transition: "all 0.3s ease",
+                          "&:hover": {
+                            color: "#f44336",
+                          },
+                        }}
+                      />
+                    )}
                   </IconButton>
                 </Box>
               </Box>
@@ -294,6 +461,14 @@ export const ProductGrid = memo(({ products, isVisible }) => {
           </Box>
         </Box>
       )}
+
+      <CustomToast
+        open={toast.open}
+        onClose={() => setToast({ ...toast, open: false })}
+        message={toast.message}
+        severity={toast.severity}
+        loading={toast.loading}
+      />
     </Box>
   );
 });

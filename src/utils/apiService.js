@@ -1,5 +1,6 @@
 import { EXTERNAL_API_BASE_URL, EXTERNAL_API_ACCESS_KEY, API_BASE_URL } from './apiUrl';
 import axios from 'axios';
+import { getStoredLocation } from './location';
 
 
 /**
@@ -86,11 +87,14 @@ const getApiUrl = () => {
 export const fetchItemCategories = async () => {
   try {
     const url = getApiUrl();
+    const location = getStoredLocation();
 
     const response = await axios.get(url, {
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
+        'lat': location.lat.toString(),
+        'long': location.long.toString(),
       },
       withCredentials: false,
       timeout: 30000, // Increased to 30 seconds to handle slower network conditions
@@ -184,11 +188,14 @@ export const fetchProducts = async (categoryId = null, page = 1, limit = 20, sea
     params.append('search', search);
     
     const url = `${baseUrl}?${params.toString()}`;
+    const location = getStoredLocation();
     
     const response = await axios.get(url, {
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
+        'lat': location.lat.toString(),
+        'long': location.long.toString(),
       },
       withCredentials: false,
       timeout: 30000, // Increased to 30 seconds to handle slower network conditions
@@ -275,11 +282,14 @@ export const getProducts = async (categoryId = null, page = 1, limit = 20, searc
 export const fetchBranches = async () => {
   try {
     const url = `${API_BASE_URL}/branch/getAll`;
+    const location = getStoredLocation();
     
     const response = await axios.get(url, {
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
+        'lat': location.lat.toString(),
+        'long': location.long.toString(),
       },
       withCredentials: false,
       timeout: 30000, // Increased to 30 seconds to handle slower network conditions

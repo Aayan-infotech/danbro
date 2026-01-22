@@ -1,6 +1,8 @@
 import { Box } from "@mui/material";
 import { BrowserRouter, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { Provider } from "react-redux";
+import { store } from "./store/store";
 import { Footer } from "./components/comman/Footer";
 import AppRoutes from "./routes/AppRoutes";
 import { Navbar } from "./components/comman/Navbar";
@@ -66,9 +68,11 @@ const AppContent = () => {
 
 function App() {
   return (
-    <BrowserRouter>
-      <AppContent />
-    </BrowserRouter>
+    <Provider store={store}>
+      <BrowserRouter>
+        <AppContent />
+      </BrowserRouter>
+    </Provider>
   );
 }
 

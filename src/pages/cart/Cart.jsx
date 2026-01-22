@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Container,
@@ -12,6 +12,8 @@ import {
   TextField,
   useMediaQuery,
   useTheme,
+  CircularProgress,
+  Alert,
 } from "@mui/material";
 import { CustomText } from "../../components/comman/CustomText";
 import {
@@ -23,56 +25,100 @@ import {
   Payment as PaymentIcon,
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
+import { getCart, increaseItemCount, decreaseItemCount } from "../../utils/cart";
+import { getAccessToken } from "../../utils/cookies";
 
 export const Cart = () => {
   const navigate = useNavigate();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
-  const [cartItems, setCartItems] = useState([
-    {
-      id: 1,
-      name: "Chocolate Muffin",
-      price: 3.5,
-      quantity: 2,
-      image: "https://images.unsplash.com/photo-1607958996333-41aef7caefaa?w=200&h=200&fit=crop",
-      weight: "500g",
-    },
-    {
-      id: 2,
-      name: "Red Velvet Cake",
-      price: 25.0,
-      quantity: 1,
-      image: "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=200&h=200&fit=crop",
-      weight: "1kg",
-    },
-    {
-      id: 3,
-      name: "Vanilla Cookies",
-      price: 5.0,
-      quantity: 3,
-      image: "https://images.unsplash.com/photo-1599599810769-14c6292a94f3?w=200&h=200&fit=crop",
-      weight: "250g",
-    },
-  ]);
+  const [cartItems, setCartItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [updatingItems, setUpdatingItems] = useState(new Set());
 
-  const updateQuantity = (id, change) => {
-    setCartItems((items) =>
-      items.map((item) => {
-        if (item.id === id) {
-          const newQuantity = item.quantity + change;
-          return { ...item, quantity: newQuantity > 0 ? newQuantity : 1 };
-        }
-        return item;
-      })
-    );
+  useEffect(() => {
+    loadCart();
+  }, []);
+
+  const loadCart = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const token = getAccessToken();
+      if (!token) {
+        setError("Please login to view your cart");
+        setLoading(false);
+        return;
+      }
+      const response = await getCart();
+      
+      // Handle different response structures
+      if (response?.data?.items) {
+        setCartItems(response.data.items);
+      } else if (response?.items) {
+        setCartItems(response.items);
+      } else if (Array.isArray(response?.data)) {
+        setCartItems(response.data);
+      } else if (Array.isArray(response)) {
+        setCartItems(response);
+      } else {
+        setCartItems([]);
+      }
+    } catch (err) {
+      console.error("Error loading cart:", err);
+      setError(err.response?.data?.message || err.message || "Failed to load cart");
+      setCartItems([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const removeItem = (id) => {
-    setCartItems((items) => items.filter((item) => item.id !== id));
+  const updateQuantity = async (productId, change) => {
+    if (updatingItems.has(productId)) return;
+    
+    try {
+      setUpdatingItems((prev) => new Set(prev).add(productId));
+      
+      if (change > 0) {
+        await increaseItemCount(productId);
+      } else {
+        await decreaseItemCount(productId);
+      }
+      
+      // Reload cart to get updated data
+      await loadCart();
+    } catch (err) {
+      console.error("Error updating quantity:", err);
+      setError(err.response?.data?.message || err.message || "Failed to update quantity");
+    } finally {
+      setUpdatingItems((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(productId);
+        return newSet;
+      });
+    }
   };
 
-  const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const removeItem = async (productId) => {
+    // For now, we'll decrease quantity to 0 or handle removal
+    // If there's a remove endpoint, implement it here
+    try {
+      // Keep decreasing until quantity is 0 or implement remove endpoint
+      await decreaseItemCount(productId);
+      await loadCart();
+    } catch (err) {
+      console.error("Error removing item:", err);
+      setError(err.response?.data?.message || err.message || "Failed to remove item");
+    }
+  };
+
+  const subtotal = cartItems.reduce((sum, item) => {
+    const price = typeof item.price === 'number' ? item.price : parseFloat(item.price) || 0;
+    const quantity = typeof item.quantity === 'number' ? item.quantity : parseInt(item.quantity) || 0;
+    return sum + price * quantity;
+  }, 0);
   const shipping = subtotal > 50 ? 0 : 5.0;
   const total = subtotal + shipping;
 
@@ -96,7 +142,17 @@ export const Cart = () => {
           </CustomText>
         </Box>
 
-        {cartItems.length === 0 ? (
+        {error && (
+          <Alert severity="error" sx={{ mb: 2 }}>
+            {error}
+          </Alert>
+        )}
+
+        {loading ? (
+          <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", py: 8 }}>
+            <CircularProgress />
+          </Box>
+        ) : cartItems.length === 0 ? (
           <Box
             sx={{
               textAlign: "center",
@@ -136,9 +192,13 @@ export const Cart = () => {
             {/* Cart Items */}
             <Grid size={{ xs: 12, md: 8 }}>
               <Box sx={{ display: "flex", flexDirection: "column", gap: { xs: 2, md: 3 } }}>
-                {cartItems.map((item) => (
+                {cartItems.map((item) => {
+                  const productId = item.productId || item._id || item.id;
+                  const isUpdating = updatingItems.has(productId);
+                  
+                  return (
                   <Card
-                    key={item.id}
+                    key={productId || item.id}
                     sx={{
                       borderRadius: { xs: 2, md: 3 },
                       boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
@@ -167,8 +227,8 @@ export const Cart = () => {
                           }}
                         >
                           <img
-                            src={item.image}
-                            alt={item.name}
+                            src={item.image || item.product?.image || "https://via.placeholder.com/200"}
+                            alt={item.name || item.product?.name || "Product"}
                             style={{
                               width: "100%",
                               height: "100%",
@@ -188,7 +248,7 @@ export const Cart = () => {
                                 mb: 0.5,
                               }}
                             >
-                              {item.name}
+                              {item.name || item.product?.name || "Product"}
                             </CustomText>
                             <CustomText
                               sx={{
@@ -197,7 +257,7 @@ export const Cart = () => {
                                 mb: { xs: 1, md: 1.5 },
                               }}
                             >
-                              Weight: {item.weight}
+                              Weight: {item.weight || item.product?.weight || "N/A"}
                             </CustomText>
                             <CustomText
                               sx={{
@@ -206,7 +266,7 @@ export const Cart = () => {
                                 color: "var(--themeColor)",
                               }}
                             >
-                              ${item.price.toFixed(2)}
+                              ₹{typeof item.price === 'number' ? item.price.toFixed(2) : parseFloat(item.price || 0).toFixed(2)}
                             </CustomText>
                           </Box>
 
@@ -231,13 +291,19 @@ export const Cart = () => {
                             >
                               <IconButton
                                 size="small"
-                                onClick={() => updateQuantity(item.id, -1)}
+                                onClick={() => updateQuantity(productId, -1)}
+                                disabled={isUpdating}
                                 sx={{
                                   color: "var(--themeColor)",
                                   "&:hover": { backgroundColor: "rgba(95, 41, 48, 0.1)" },
+                                  "&:disabled": { opacity: 0.5 },
                                 }}
                               >
+                                {isUpdating ? (
+                                  <CircularProgress size={16} />
+                                ) : (
                                 <RemoveIcon sx={{ fontSize: { xs: 18, md: 20 } }} />
+                                )}
                               </IconButton>
                               <CustomText
                                 sx={{
@@ -251,21 +317,29 @@ export const Cart = () => {
                               </CustomText>
                               <IconButton
                                 size="small"
-                                onClick={() => updateQuantity(item.id, 1)}
+                                onClick={() => updateQuantity(productId, 1)}
+                                disabled={isUpdating}
                                 sx={{
                                   color: "var(--themeColor)",
                                   "&:hover": { backgroundColor: "rgba(95, 41, 48, 0.1)" },
+                                  "&:disabled": { opacity: 0.5 },
                                 }}
                               >
+                                {isUpdating ? (
+                                  <CircularProgress size={16} />
+                                ) : (
                                 <AddIcon sx={{ fontSize: { xs: 18, md: 20 } }} />
+                                )}
                               </IconButton>
                             </Box>
 
                             <IconButton
-                              onClick={() => removeItem(item.id)}
+                              onClick={() => removeItem(productId)}
+                              disabled={isUpdating}
                               sx={{
                                 color: "#d32f2f",
                                 "&:hover": { backgroundColor: "rgba(211, 47, 47, 0.1)" },
+                                "&:disabled": { opacity: 0.5 },
                               }}
                             >
                               <DeleteOutlineIcon sx={{ fontSize: { xs: 20, md: 24 } }} />
@@ -275,7 +349,8 @@ export const Cart = () => {
                       </Box>
                     </CardContent>
                   </Card>
-                ))}
+                  );
+                })}
               </Box>
 
               {/* Continue Shopping Button */}
@@ -331,7 +406,7 @@ export const Cart = () => {
                         Subtotal
                       </CustomText>
                       <CustomText sx={{ fontSize: { xs: 14, md: 16 }, fontWeight: 600 }}>
-                        ${subtotal.toFixed(2)}
+                        ₹{subtotal.toFixed(2)}
                       </CustomText>
                     </Box>
 
@@ -345,7 +420,7 @@ export const Cart = () => {
                             Free
                           </Box>
                         ) : (
-                          `$${shipping.toFixed(2)}`
+                          `₹${shipping.toFixed(2)}`
                         )}
                       </CustomText>
                     </Box>
@@ -358,7 +433,7 @@ export const Cart = () => {
                           fontStyle: "italic",
                         }}
                       >
-                        Add ${(50 - subtotal).toFixed(2)} more for free shipping
+                        Add ₹{(50 - subtotal).toFixed(2)} more for free shipping
                       </CustomText>
                     )}
 
@@ -381,7 +456,7 @@ export const Cart = () => {
                           color: "var(--themeColor)",
                         }}
                       >
-                        ${total.toFixed(2)}
+                        ₹{total.toFixed(2)}
                       </CustomText>
                     </Box>
                   </Box>
@@ -419,7 +494,7 @@ export const Cart = () => {
                     <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                       <LocalShippingIcon sx={{ fontSize: { xs: 18, md: 20 }, color: "#666" }} />
                       <CustomText sx={{ fontSize: { xs: 12, md: 13 }, color: "#666" }}>
-                        Free shipping on orders over $50
+                        Free shipping on orders over ₹50
                       </CustomText>
                     </Box>
                     <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>

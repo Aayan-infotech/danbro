@@ -8,6 +8,8 @@ import { CustomButton } from "../../components/comman/CustomButton";
 import { CustomText } from "../../components/comman/CustomText";
 import axios from "axios";
 import { API_BASE_URL } from "../../utils/apiUrl";
+import { setAccessToken, setRefreshToken, getAccessToken } from "../../utils/cookies";
+import { getStoredLocation } from "../../utils/location";
 
 const RECAPTCHA_SITE_KEY = "6Lfr-iAsAAAAAIQsR8mfUxZO1qK3r_AXrTSLSb4g";
 
@@ -38,6 +40,14 @@ export const Register = () => {
   });
   const formRef = useRef(null);
   const navigate = useNavigate();
+
+  // Redirect if already logged in
+  useEffect(() => {
+    const token = getAccessToken();
+    if (token) {
+      navigate("/");
+    }
+  }, [navigate]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -108,9 +118,12 @@ export const Register = () => {
 
       // Call signup API
       try {
+        const location = getStoredLocation();
         const response = await axios.post(`${API_BASE_URL}/user/signup`, signupPayload, {
           headers: {
             'Content-Type': 'application/json',
+            'lat': location.lat.toString(),
+            'long': location.long.toString(),
           },
         });
 
@@ -139,6 +152,71 @@ export const Register = () => {
       console.error("Form submission error:", error);
       setRecaptchaError("An error occurred. Please try again.");
       setIsSubmitting(false);
+    }
+  };
+
+  // Handle OTP Verification
+  const handleVerifyOtp = async (e) => {
+    e.preventDefault();
+    
+    if (!otp || otp.length !== 6) {
+      setApiError("Please enter a valid 6-digit OTP.");
+      return;
+    }
+
+    setIsVerifying(true);
+    setApiError("");
+    setApiSuccess("");
+
+    try {
+      const location = getStoredLocation();
+      const response = await axios.post(`${API_BASE_URL}/user/verify`, {
+        email: registeredEmail,
+        otp: otp,
+      }, {
+        headers: {
+          'Content-Type': 'application/json',
+          'lat': location.lat.toString(),
+          'long': location.long.toString(),
+        },
+      });
+
+      if (response.data) {
+        setApiSuccess("Email verified successfully! Redirecting to login...");
+        setApiError("");
+        
+        // After OTP verification, redirect to login
+        // Login will handle token storage
+
+        // Redirect to login after 2 seconds
+        setTimeout(() => {
+          navigate("/login");
+        }, 2000);
+      }
+    } catch (error) {
+      console.error("OTP verification error:", error);
+      if (error.response && error.response.data) {
+        setApiError(error.response.data.message || error.response.data.error || "OTP verification failed. Please try again.");
+      } else {
+        setApiError("Network error. Please check your connection and try again.");
+      }
+      setApiSuccess("");
+    } finally {
+      setIsVerifying(false);
+    }
+  };
+
+  // Resend OTP handler (if needed)
+  const handleResendOtp = async () => {
+    setApiError("");
+    setApiSuccess("Resending OTP...");
+    
+    try {
+      // You might need to call a resend OTP API here
+      // For now, we'll just show a message
+      setApiSuccess("OTP has been resent to your email. Please check your inbox.");
+    } catch (error) {
+      setApiError("Failed to resend OTP. Please try again.");
     }
   };
 

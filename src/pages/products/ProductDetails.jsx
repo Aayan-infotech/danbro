@@ -39,6 +39,8 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useMediaQuery, useTheme } from "@mui/material";
 import { fetchProducts } from "../../utils/apiService";
 import { useItemCategories } from "../../hooks/useItemCategories";
+import { addToCart } from "../../utils/cart";
+import { getAccessToken } from "../../utils/cookies";
 
 export const ProductDetails = () => {
   const navigate = useNavigate();
@@ -53,6 +55,8 @@ export const ProductDetails = () => {
   const [quantity, setQuantity] = useState(1);
   const [productWeight, setProductWeight] = useState("500g");
   const [selectOpen, setSelectOpen] = useState(false);
+  const [addingToCart, setAddingToCart] = useState(false);
+  const [cartMessage, setCartMessage] = useState(null);
   
   // Fetch categories to get all products
   const { categories: apiCategories } = useItemCategories();
@@ -140,6 +144,50 @@ export const ProductDetails = () => {
       loadProduct();
     }
   }, [id, apiCategories]);
+
+  const handleAddToCart = async () => {
+    if (!product) return;
+    
+    const token = getAccessToken();
+    if (!token) {
+      setCartMessage({ type: "error", text: "Please login to add items to cart" });
+      setTimeout(() => setCartMessage(null), 3000);
+      return;
+    }
+
+    try {
+      setAddingToCart(true);
+      setCartMessage(null);
+      
+      // Get productId - could be _id, productId, or prdcode
+      const productId = product._id || product.productId || product.id || product.prdcode?.toString();
+      
+      if (!productId) {
+        throw new Error("Product ID not found");
+      }
+
+      const response = await addToCart(productId, quantity);
+      
+      setCartMessage({ 
+        type: "success", 
+        text: response?.message || "Item added to cart successfully!" 
+      });
+      
+      // Dispatch event to update cart count in header
+      window.dispatchEvent(new CustomEvent('cartUpdated'));
+      
+      setTimeout(() => setCartMessage(null), 3000);
+    } catch (error) {
+      console.error("Error adding to cart:", error);
+      setCartMessage({ 
+        type: "error", 
+        text: error.response?.data?.message || error.message || "Failed to add item to cart" 
+      });
+      setTimeout(() => setCartMessage(null), 3000);
+    } finally {
+      setAddingToCart(false);
+    }
+  };
 
   // Transform product data for display
   const productData = useMemo(() => {
@@ -358,7 +406,8 @@ export const ProductDetails = () => {
                 </Grid>
                 <Grid size={{ xs: 6, md: 8 }} sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
                   <Button
-                    type="submit"
+                    onClick={handleAddToCart}
+                    disabled={addingToCart || !product}
                     fullWidth
                     sx={{
                       backgroundColor: "#FF9472",
@@ -381,7 +430,14 @@ export const ProductDetails = () => {
                       },
                     }}
                   >
-                    Add to Cart
+                    {addingToCart ? (
+                      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                        <CircularProgress size={20} sx={{ color: "#fff" }} />
+                        <CustomText>Adding...</CustomText>
+                      </Box>
+                    ) : (
+                      "Add to Cart"
+                    )}
                   </Button>
                 </Grid>
                 <Grid size={{ xs: 2, md: 1 }} sx={{ display: "flex", justifyContent: { xs: "center", md: "end" }, alignItems: { xs: "center", md: "end" } }}>
@@ -391,6 +447,15 @@ export const ProductDetails = () => {
                 </Grid>
               </Grid>
             </Box>
+            {cartMessage && (
+              <Alert 
+                severity={cartMessage.type} 
+                sx={{ mt: 2 }}
+                onClose={() => setCartMessage(null)}
+              >
+                {cartMessage.text}
+              </Alert>
+            )}
             <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 1, mt: { xs: 2, md: 2 }, backgroundColor: "#F0FFF4", p: { xs: 1, md: 1 }, borderRadius: 2, border: "1px solid #B5FFC9" }}>
               <CustomText variant="subtitle1" sx={{ fontSize: { xs: 12, md: 14 }, fontWeight: 600, color: "#00A819", display: "flex", alignItems: "center", gap: 0.5, flexWrap: "wrap", justifyContent: "center" }}>
                 <LocalShipping sx={{ fontSize: { xs: 16, md: 18 } }} /> Order within 2hrs for delivery today.

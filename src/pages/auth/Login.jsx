@@ -1,32 +1,29 @@
 import { useState, useEffect, useRef } from "react";
-import { Box,  Button, Checkbox, FormControlLabel, Link, Container, Alert, CircularProgress } from "@mui/material";
+import { Box, Button, Checkbox, FormControlLabel, Link, Container, Alert, CircularProgress } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
+import { useAppDispatch, useAppSelector } from "../../store/hooks";
+import { loginUser, checkAuth } from "../../store/authSlice";
 import banner from "../../assets/login.png";
 import { CustomTextField } from "../../components/comman/CustomTextField";
 import { CustomButton } from "../../components/comman/CustomButton";
 import { CustomText } from "../../components/comman/CustomText";
-import axios from "axios";
-import { API_BASE_URL } from "../../utils/apiUrl";
+import { getAccessToken } from "../../utils/cookies";
 
 const RECAPTCHA_SITE_KEY = "6LfBFCwsAAAAAIiTPg_1ZGCaKId4TwkCDcvBNBq0";
 
 // Check if we're in development mode (localhost)
 // Set to false if you want to test reCAPTCHA even on localhost
 const FORCE_RECAPTCHA = false; // Set to true to force reCAPTCHA even in dev
-const isDevelopment = !FORCE_RECAPTCHA && (
-  window.location.hostname === 'localhost' ||
-  window.location.hostname === '127.0.0.1' ||
-  window.location.hostname === ''
-);
 
 export const Login = () => {
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+  const { isAuthenticated, isLoading, error, isRedirecting } = useAppSelector((state) => state.auth);
+  
   const [showPassword, setShowPassword] = useState(false);
   const [recaptchaToken, setRecaptchaToken] = useState(null);
   const [recaptchaError, setRecaptchaError] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [apiError, setApiError] = useState("");
-  const [apiSuccess, setApiSuccess] = useState("");
   const [recaptchaLoaded, setRecaptchaLoaded] = useState(false);
   const recaptchaWidgetRef = useRef(null);
   const [formData, setFormData] = useState({
@@ -36,7 +33,25 @@ export const Login = () => {
     newsletter: true,
   });
   const formRef = useRef(null);
-  const navigate = useNavigate();
+
+  // Check auth status on mount
+  useEffect(() => {
+    dispatch(checkAuth());
+  }, [dispatch]);
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/profile", { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
+
+  // Redirect after successful login
+  useEffect(() => {
+    if (isRedirecting && isAuthenticated) {
+      navigate("/profile", { replace: true });
+    }
+  }, [isRedirecting, isAuthenticated, navigate]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -98,10 +113,7 @@ export const Login = () => {
     if (!window.grecaptcha || !window.grecaptcha.enterprise) return;
 
     try {
-      // Check if already rendered
       if (recaptchaWidgetRef.current.dataset.rendered === "true") return;
-
-      // Render Enterprise checkbox widget
       const widgetId = window.grecaptcha.enterprise.render(recaptchaWidgetRef.current, {
         sitekey: RECAPTCHA_SITE_KEY,
         callback: (token) => {
@@ -118,11 +130,10 @@ export const Login = () => {
           setRecaptchaError("reCAPTCHA verification failed. Please try again.");
         },
       });
-
       recaptchaWidgetRef.current.dataset.rendered = "true";
       recaptchaWidgetRef.current.dataset.widgetId = widgetId;
       console.log("reCAPTCHA Enterprise checkbox widget rendered");
-    } catch (error) {
+    } catch (error) {l
       console.error("reCAPTCHA Enterprise render error:", error);
       setRecaptchaError("Unable to load reCAPTCHA. Please refresh the page.");
     }
@@ -138,66 +149,31 @@ export const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsSubmitting(true);
     setRecaptchaError("");
-    setApiError("");
-    setApiSuccess("");
+    
+    // Handle OTP verification case
+    const result = await dispatch(loginUser({
+      email: formData.username,
+      password: formData.password,
+    }));
 
-    try {
-      // Prepare login payload - use email from username field
-      const loginPayload = {
-        email: formData.username.includes("@") ? formData.username : formData.username, // Support email or phone
-        password: formData.password,
-      };
-
-      // Call login API
-      try {
-        const response = await axios.post(`${API_BASE_URL}/user/login`, loginPayload, {
-          headers: {
-            'Content-Type': 'application/json',
-          },
+    // Check if login was rejected due to OTP verification
+    if (loginUser.rejected.match(result)) {
+      const errorPayload = result.payload;
+      if (errorPayload?.status === 403 || errorPayload?.isVerified === false) {
+        localStorage.setItem('pendingLoginEmail', formData.username);
+        localStorage.setItem('pendingLoginPassword', formData.password);
+        navigate("/verify-otp", {
+          state: {
+            email: formData.username,
+            password: formData.password,
+            message: errorPayload?.message || "OTP has been sent to your email. Please check your inbox."
+          }
         });
-
-        if (response.data) {
-          setApiSuccess("Login successful! Redirecting...");
-          setApiError("");
-          
-          // Store auth token and user data
-          if (response.data.token) {
-            localStorage.setItem('authToken', response.data.token);
-          }
-          if (response.data.user) {
-            localStorage.setItem('userData', JSON.stringify(response.data.user));
-          }
-          if (response.data.data && response.data.data.token) {
-            localStorage.setItem('authToken', response.data.data.token);
-          }
-          if (response.data.data && response.data.data.user) {
-            localStorage.setItem('userData', JSON.stringify(response.data.data.user));
-          }
-
-          // Redirect to home or profile page
-          setTimeout(() => {
-            navigate("/");
-          }, 1500);
-        }
-      } catch (error) {
-        console.error("Login error:", error);
-        if (error.response && error.response.data) {
-          setApiError(error.response.data.message || error.response.data.error || "Login failed. Please check your credentials.");
-        } else {
-          setApiError("Network error. Please check your connection and try again.");
-        }
-        setApiSuccess("");
-      } finally {
-        setIsSubmitting(false);
       }
-    } catch (error) {
-      console.error("Form submission error:", error);
-      setApiError("An error occurred. Please try again.");
-      setIsSubmitting(false);
     }
   };
+
 
   return (
     <Box
@@ -239,6 +215,27 @@ export const Login = () => {
 
       {/* Login Form */}
       <Container maxWidth="sm" sx={{ mb: { xs: 6, md: 8 } }}>
+        {isRedirecting ? (
+          <Box
+            sx={{
+              position: "relative",
+              zIndex: 1,
+              backgroundColor: "transparent",
+              borderRadius: { xs: "20px", md: "30px" },
+              p: { xs: 3, sm: 4, md: 5 },
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              minHeight: "400px",
+            }}
+          >
+            <CircularProgress sx={{ color: "#fff", mb: 2 }} />
+            <CustomText sx={{ color: "white", fontSize: { xs: 16, md: 18 } }}>
+              Login successful! Redirecting...
+            </CustomText>
+          </Box>
+        ) : (
         <Box
           ref={formRef}
           sx={{
@@ -273,14 +270,14 @@ export const Login = () => {
           </CustomText>
 
           <Box component="form" onSubmit={handleSubmit}>
-            {apiError && (
+            {error && typeof error === 'object' && error.message && (
               <Alert severity="error" sx={{ mb: 2, borderRadius: 2 }}>
-                {apiError}
+                {error.message}
               </Alert>
             )}
-            {apiSuccess && (
-              <Alert severity="success" sx={{ mb: 2, borderRadius: 2 }}>
-                {apiSuccess}
+            {error && typeof error === 'string' && (
+              <Alert severity="error" sx={{ mb: 2, borderRadius: 2 }}>
+                {error}
               </Alert>
             )}
             {recaptchaError && (
@@ -438,20 +435,13 @@ export const Login = () => {
             <CustomButton
               type="submit"
               fullWidth
-              disabled={isSubmitting || !recaptchaToken}
-              onClick={() => {
-                if (formData.username && formData.password) {
-                  navigate("/profile");
-                } else {
-                  alert("Please enter valid email and password");
-                }
-              }}
+              disabled={isLoading || !recaptchaToken}
               sx={{ mb: 3 }}
             >
-              {isSubmitting ? (
+              {isLoading ? (
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                   <CircularProgress size={20} sx={{ color: "#fff" }} />
-                  <CustomText>Verifying...</CustomText>
+                  <CustomText>Logging in...</CustomText>
                 </Box>
               ) : (
                 "Login"
@@ -481,6 +471,7 @@ export const Login = () => {
             </CustomText>
           </Box>
         </Box>
+        )}
       </Container>
     </Box>
   );

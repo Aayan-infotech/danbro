@@ -50,7 +50,7 @@ export const ProductList = () => {
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearchQuery(searchQuery);
-    }, 800); // 800ms delay to allow user to finish typing
+    }, 800); 
 
     return () => clearTimeout(timer);
   }, [searchQuery]);
@@ -102,6 +102,7 @@ export const ProductList = () => {
 
       return {
         id: product.prdcode,
+        productId: product.productId || product._id,
         name: product.name,
         description: product.ingredient || product.name,
         price: `₹${displayPrice}`,
