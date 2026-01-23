@@ -9,13 +9,13 @@ import StarIcon from "@mui/icons-material/Star";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 
-export const ProductSectionCarousel = ({ 
-  title, 
-  subtitle, 
-  products, 
+export const ProductSectionCarousel = ({
+  title,
+  subtitle,
+  products,
   icon: Icon,
   bgColor = "transparent",
-  showBadge = true 
+  showBadge = true
 }) => {
   const navigate = useNavigate();
   let sliderRef = useRef(null);
@@ -131,6 +131,8 @@ export const ProductSectionCarousel = ({
             mb: 2,
             position: "relative",
             display: "inline-block",
+            fontFamily: "'Playfair Display', 'Cormorant Garamond', serif",
+            fontStyle: "italic",
             "&::after": {
               content: '""',
               position: "absolute",
@@ -180,7 +182,7 @@ export const ProductSectionCarousel = ({
         <Slider ref={(slider) => (sliderRef = slider)} {...settings}>
           {products.map((product, index) => (
             <Box
-              key={product.id || index}
+              key={product?.id || index}
               onMouseEnter={() => setHoveredIndex(index)}
               onMouseLeave={() => setHoveredIndex(null)}
               sx={{
@@ -191,7 +193,13 @@ export const ProductSectionCarousel = ({
               }}
             >
               <Box
-                onClick={() => navigate(`/products?search=${encodeURIComponent(product.title || product.name)}`)}
+                onClick={() => {
+                  if (product?.categoryId) {
+                    navigate(`/products?categoryId=${product?.categoryId}&search=${encodeURIComponent(product?.title || product?.name)}`);
+                  } else {
+                    navigate(`/products?search=${encodeURIComponent(product?.title || product?.name)}`);
+                  }
+                }}
                 sx={{
                   bgcolor: "#fff",
                   borderRadius: { xs: 2.5, md: 3 },
@@ -208,8 +216,8 @@ export const ProductSectionCarousel = ({
                     left: 0,
                     right: 0,
                     bottom: 0,
-                    background: hoveredIndex === index 
-                      ? `linear-gradient(135deg, ${product.color || "#FF9472"}12 0%, ${product.color || "#FF9472"}08 50%, #fff 100%)`
+                    background: hoveredIndex === index
+                      ? `linear-gradient(135deg, ${product?.color || "#FF9472"}12 0%, ${product?.color || "#FF9472"}08 50%, #fff 100%)`
                       : "linear-gradient(135deg, rgba(255,181,161,0.05) 0%, rgba(95,41,48,0.02) 100%)",
                     opacity: hoveredIndex === index ? 1 : 0,
                     transition: "opacity 0.5s ease",
@@ -218,7 +226,7 @@ export const ProductSectionCarousel = ({
                   },
                   "&:hover": {
                     transform: "translateY(-15px) scale(1.03) rotateY(2deg)",
-                    boxShadow: `0 25px 60px ${product.color || "#FF9472"}30, 0 0 0 2px ${product.color || "#FF9472"}20 inset`,
+                    boxShadow: `0 25px 60px ${product?.color || "#FF9472"}30, 0 0 0 2px ${product?.color || "#FF9472"}20 inset`,
                     "& .product-image": {
                       transform: "scale(1.1)",
                     },
@@ -230,19 +238,12 @@ export const ProductSectionCarousel = ({
                 }}
               >
                 {/* Product Image */}
-                <Box
-                  sx={{
-                    position: "relative",
-                    height: { xs: 200, md: 250 },
-                    overflow: "hidden",
-                    background: "#f9f9f9",
-                  }}
-                >
+                <Box sx={{ position: "relative", height: { xs: 200, md: 250 }, overflow: "hidden", background: "#f9f9f9", }}>
                   <Box
                     className="product-image"
                     component="img"
-                    src={product.image}
-                    alt={product.title || product.name}
+                    src={product?.image}
+                    alt={product?.title || product?.name}
                     sx={{
                       width: "100%",
                       height: "100%",
@@ -250,15 +251,15 @@ export const ProductSectionCarousel = ({
                       transition: "transform 0.8s cubic-bezier(0.4, 0, 0.2, 1)",
                     }}
                   />
-                  
+
                   {/* Badge */}
-                  {showBadge && product.badge && (
+                  {showBadge && product?.badge && (
                     <Box
                       sx={{
                         position: "absolute",
                         top: 12,
                         left: 12,
-                        bgcolor: product.badgeColor || "var(--themeColor)",
+                        bgcolor: product?.badgeColor || "var(--themeColor)",
                         color: "#fff",
                         px: 1.5,
                         py: 0.5,
@@ -276,12 +277,12 @@ export const ProductSectionCarousel = ({
                         },
                       }}
                     >
-                      {product.badge}
+                      {product?.badge}
                     </Box>
                   )}
 
                   {/* Discount */}
-                  {product.discount && (
+                  {product?.discount && (
                     <Box
                       sx={{
                         position: "absolute",
@@ -297,7 +298,7 @@ export const ProductSectionCarousel = ({
                         zIndex: 2,
                       }}
                     >
-                      {product.discount}
+                      {product?.discount}
                     </Box>
                   )}
 
@@ -312,7 +313,7 @@ export const ProductSectionCarousel = ({
                       height: 38,
                       zIndex: 2,
                       transition: "all 0.3s ease",
-                      "&:hover": { 
+                      "&:hover": {
                         bgcolor: "#fff",
                         transform: "scale(1.1)",
                       },
@@ -325,62 +326,66 @@ export const ProductSectionCarousel = ({
                 {/* Product Info */}
                 <Box sx={{ p: { xs: 2, md: 2.5 }, position: "relative", zIndex: 2 }}>
                   {/* Rating */}
-                  {product.rating && (
+                  {product?.rating && (
                     <Box sx={{ display: "flex", alignItems: "center", gap: 0.8, mb: 1 }}>
                       <StarIcon sx={{ fontSize: 14, color: "#FFD700" }} />
-                      <CustomText sx={{ fontSize: 12, fontWeight: 600, color: "#666" }}>
-                        {product.rating} {product.reviews && `(${product.reviews})`}
+                      <CustomText
+                        autoTitleCase={false}
+                        sx={{ fontSize: 12, fontWeight: 600, color: "#666", textTransform: "none" }}
+                      >
+                        {product?.rating} {product?.reviews && `(${product?.reviews})`}
                       </CustomText>
                     </Box>
                   )}
 
                   {/* Title */}
                   <CustomText
+                    autoTitleCase={false}
                     sx={{
                       fontSize: { xs: 16, md: 18 },
                       fontWeight: 700,
                       color: "var(--themeColor)",
-                      mb: 0.5,
                       lineHeight: 1.3,
                       minHeight: { xs: 40, md: 50 },
                       display: "-webkit-box",
                       WebkitLineClamp: 2,
                       WebkitBoxOrient: "vertical",
                       overflow: "hidden",
+                      textTransform: "none !important",
                     }}
+                    style={{ textTransform: "none" }}
                   >
-                    {product.title || product.name}
+                    {(() => {
+                      const text = product?.title || product?.name || "";
+                      if (text && text === text.toUpperCase() && text !== text.toLowerCase()) {
+                        return text.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
+                      }
+                      return text;
+                    })()}
                   </CustomText>
 
                   {/* SKU */}
-                  {product.sku && (
-                    <CustomText
-                      sx={{
-                        fontSize: 11,
-                        color: "#999",
-                        mb: 1,
-                      }}
-                    >
-                      SKU: {product.sku}
+                  {product?.sku && (
+                    <CustomText autoTitleCase={false} sx={{ fontSize: 11, color: "#999", textTransform: "none" }}>
+                      SKU: {product?.sku}
                     </CustomText>
                   )}
 
                   {/* Price and Add to Cart */}
-                  <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mt: 1.5 }}>
+                  <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                     <Box>
-                      <CustomText sx={{ fontSize: { xs: 18, md: 20 }, fontWeight: 800, color: "var(--themeColor)" }}>
-                        {product.price}
+                      <CustomText
+                        autoTitleCase={false}
+                        sx={{ fontSize: { xs: 18, md: 20 }, fontWeight: 800, color: "#d32f2f", textTransform: "none" }}
+                      >
+                        {product?.price}
                       </CustomText>
-                      {product.originalPrice && (
+                      {product?.originalPrice && (
                         <CustomText
-                          sx={{
-                            fontSize: 12,
-                            color: "#999",
-                            textDecoration: "line-through",
-                            ml: 1,
-                          }}
+                          autoTitleCase={false}
+                          sx={{ fontSize: 12, color: "#999", textDecoration: "line-through", ml: 1, textTransform: "none" }}
                         >
-                          {product.originalPrice}
+                          {product?.originalPrice}
                         </CustomText>
                       )}
                     </Box>
