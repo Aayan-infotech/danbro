@@ -375,7 +375,7 @@ export const UserProfile = () => {
               )}
 
               {activeTab === "addresses" && (
-                <SavedAddressesTab addresses={addresses} />
+                <SavedAddressesTab />
               )}
 
               {/* Account Details Section */}

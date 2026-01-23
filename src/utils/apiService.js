@@ -1,6 +1,7 @@
 import { EXTERNAL_API_BASE_URL, EXTERNAL_API_ACCESS_KEY, API_BASE_URL } from './apiUrl';
 import axios from 'axios';
 import { getStoredLocation } from './location';
+import { getAccessToken } from './cookies';
 
 
 /**
@@ -362,6 +363,300 @@ export const getBranches = async () => {
   } catch (error) {
     console.error('Error getting branches:', error);
     throw error;
+  }
+};
+
+/**
+ * Add a new address
+ * @param {Object} addressData - Address data
+ * @param {string} addressData.addressType - Address type (Home, Work, etc.)
+ * @param {string} addressData.zipCode - Zip code
+ * @param {string} addressData.houseNumber - House number
+ * @param {string} addressData.streetName - Street name
+ * @param {string} addressData.area - Area
+ * @param {string} addressData.landmark - Landmark
+ * @param {string} addressData.city - City
+ * @param {string} addressData.state - State
+ * @param {boolean} addressData.isDefault - Is default address
+ * @param {Object} addressData.currentAddress - Current address coordinates
+ * @returns {Promise<Object>} Response object
+ */
+export const addAddress = async (addressData) => {
+  try {
+    const url = `${API_BASE_URL}/address/add`;
+    const location = getStoredLocation();
+    const token = getAccessToken();
+    
+    if (!token) {
+      throw new Error('Authentication required. Please login.');
+    }
+    
+    const headers = {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'Authorization': `Bearer ${token}`,
+      'lat': location.lat.toString(),
+      'long': location.long.toString(),
+    };
+    
+    const response = await axios.post(url, addressData, {
+      headers,
+      withCredentials: false,
+      timeout: 30000,
+    });
+    
+    return response.data;
+  } catch (error) {
+    console.error('Error adding address:', error);
+    
+    if (error.code === 'ECONNABORTED' || error.message.includes('timeout')) {
+      throw new Error('Request timeout: The server is taking too long to respond. Please try again.');
+    }
+    
+    if (!error.response) {
+      throw new Error('Network error: Unable to connect to the server. Please check your internet connection.');
+    }
+    
+    throw new Error(
+      error.response?.data?.message ||
+      error.response?.data?.error ||
+      `Failed to add address. Status: ${error.response.status}`
+    );
+  }
+};
+
+/**
+ * Get all addresses for the current user
+ * @returns {Promise<Array>} Array of address objects
+ */
+export const getMyAddresses = async () => {
+  try {
+    const url = `${API_BASE_URL}/address/myAddresses`;
+    const location = getStoredLocation();
+    const token = getAccessToken();
+    
+    if (!token) {
+      throw new Error('Authentication required. Please login.');
+    }
+    
+    const headers = {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'Authorization': `Bearer ${token}`,
+      'lat': location.lat.toString(),
+      'long': location.long.toString(),
+    };
+    
+    const response = await axios.get(url, {
+      headers,
+      withCredentials: false,
+      timeout: 30000,
+    });
+    
+    // Handle different response structures
+    if (response.data?.data && Array.isArray(response.data.data)) {
+      return response.data.data;
+    } else if (response.data?.addresses && Array.isArray(response.data.addresses)) {
+      return response.data.addresses;
+    } else if (Array.isArray(response.data)) {
+      return response.data;
+    }
+    
+    return [];
+  } catch (error) {
+    console.error('Error fetching addresses:', error);
+    
+    if (error.code === 'ECONNABORTED' || error.message.includes('timeout')) {
+      throw new Error('Request timeout: The server is taking too long to respond. Please try again.');
+    }
+    
+    if (!error.response) {
+      throw new Error('Network error: Unable to connect to the server. Please check your internet connection.');
+    }
+    
+    throw new Error(
+      error.response?.data?.message ||
+      error.response?.data?.error ||
+      `Failed to fetch addresses. Status: ${error.response.status}`
+    );
+  }
+};
+
+/**
+ * Update an existing address
+ * @param {string} addressId - Address ID to update
+ * @param {Object} addressData - Updated address data
+ * @returns {Promise<Object>} Response object
+ */
+export const updateAddress = async (addressId, addressData) => {
+  try {
+    const url = `${API_BASE_URL}/address/update/${addressId}`;
+    const location = getStoredLocation();
+    const token = getAccessToken();
+    
+    if (!token) {
+      throw new Error('Authentication required. Please login.');
+    }
+    
+    const headers = {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'Authorization': `Bearer ${token}`,
+      'lat': location.lat.toString(),
+      'long': location.long.toString(),
+    };
+    
+    const response = await axios.put(url, addressData, {
+      headers,
+      withCredentials: false,
+      timeout: 30000,
+    });
+    
+    return response.data;
+  } catch (error) {
+    console.error('Error updating address:', error);
+    
+    if (error.code === 'ECONNABORTED' || error.message.includes('timeout')) {
+      throw new Error('Request timeout: The server is taking too long to respond. Please try again.');
+    }
+    
+    if (!error.response) {
+      throw new Error('Network error: Unable to connect to the server. Please check your internet connection.');
+    }
+    
+    throw new Error(
+      error.response?.data?.message ||
+      error.response?.data?.error ||
+      `Failed to update address. Status: ${error.response.status}`
+    );
+  }
+};
+
+/**
+ * Delete an address
+ * @param {string} addressId - Address ID to delete
+ * @returns {Promise<Object>} Response object
+ */
+export const deleteAddress = async (addressId) => {
+  try {
+    const url = `${API_BASE_URL}/address/delete/${addressId}`;
+    const location = getStoredLocation();
+    const token = getAccessToken();
+    
+    if (!token) {
+      throw new Error('Authentication required. Please login.');
+    }
+    
+    const headers = {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'Authorization': `Bearer ${token}`,
+      'lat': location.lat.toString(),
+      'long': location.long.toString(),
+    };
+    
+    const response = await axios.delete(url, {
+      headers,
+      withCredentials: false,
+      timeout: 30000,
+    });
+    
+    return response.data;
+  } catch (error) {
+    console.error('Error deleting address:', error);
+    
+    if (error.code === 'ECONNABORTED' || error.message.includes('timeout')) {
+      throw new Error('Request timeout: The server is taking too long to respond. Please try again.');
+    }
+    
+    if (!error.response) {
+      throw new Error('Network error: Unable to connect to the server. Please check your internet connection.');
+    }
+    
+    throw new Error(
+      error.response?.data?.message ||
+      error.response?.data?.error ||
+      `Failed to delete address. Status: ${error.response.status}`
+    );
+  }
+};
+
+/**
+ * Submit contact form data
+ * @param {Object} contactData - Contact form data
+ * @param {string} contactData.firstName - First name
+ * @param {string} contactData.lastName - Last name
+ * @param {string} contactData.email - Email address
+ * @param {string} contactData.phone - Phone number
+ * @param {string} contactData.message - Message/query
+ * @returns {Promise<Object>} Response object
+ */
+export const submitContactForm = async (contactData) => {
+  try {
+    const url = `${API_BASE_URL}/address/add`;
+    const location = getStoredLocation();
+    
+    // Get access token if available (for authenticated users)
+    const token = getAccessToken();
+    
+    const headers = {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'lat': location.lat.toString(),
+      'long': location.long.toString(),
+    };
+    
+    // Add authorization header if token is available
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
+    
+    // Prepare payload - using address API structure as shown in Postman request
+    const payload = {
+      addressType: "Contact",
+      zipCode: "000000", // Default zipcode for contact form
+      houseNumber: contactData.firstName || "",
+      streetName: contactData.lastName || "",
+      area: contactData.email || "",
+      landmark: contactData.phone || "",
+      city: contactData.message || "",
+      state: "Contact Form Submission",
+      isDefault: false,
+      currentAddress: {
+        type: "Point",
+        coordinates: [location.long, location.lat] // [longitude, latitude]
+      }
+    };
+    
+    const response = await axios.post(url, payload, {
+      headers,
+      withCredentials: false,
+      timeout: 30000,
+    });
+    
+    return response.data;
+  } catch (error) {
+    console.error('Error submitting contact form:', error);
+    
+    // Handle timeout errors
+    if (error.code === 'ECONNABORTED' || error.message.includes('timeout')) {
+      throw new Error(
+        'Request timeout: The server is taking too long to respond. Please try again.'
+      );
+    }
+    
+    // Handle network errors
+    if (!error.response) {
+      throw new Error(
+        'Network error: Unable to connect to the server. Please check your internet connection.'
+      );
+    }
+    
+    throw new Error(
+      error.response?.data?.message ||
+      error.response?.data?.error ||
+      `Failed to submit contact form. Status: ${error.response.status}`
+    );
   }
 };
 

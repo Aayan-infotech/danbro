@@ -13,6 +13,7 @@ import { Box, CircularProgress, Alert } from "@mui/material";
  * @param {string} bgColor - Background color for the section
  * @param {boolean} showBadge - Whether to show product badges
  * @param {number} limit - Number of products to fetch (default: 10)
+ * @param {Array} preloadedProducts - Pre-loaded products array (optional, if provided, skips API call)
  */
 export const CategoryProductSection = ({
   categoryGroupname,
@@ -22,10 +23,11 @@ export const CategoryProductSection = ({
   bgColor = "transparent",
   showBadge = true,
   limit = 10,
+  preloadedProducts = null,
 }) => {
   const { categories, loading: categoriesLoading } = useItemCategories();
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [products, setProducts] = useState(preloadedProducts || []);
+  const [loading, setLoading] = useState(preloadedProducts === null);
   const [error, setError] = useState(null);
 
   // Find category by groupname
@@ -36,8 +38,21 @@ export const CategoryProductSection = ({
     );
   }, [categories, categoryGroupname]);
 
-  // Fetch products when category is found
+  // Update products when preloadedProducts prop changes
   useEffect(() => {
+    if (preloadedProducts !== null) {
+      setProducts(preloadedProducts);
+      setLoading(false);
+    }
+  }, [preloadedProducts]);
+
+  // Fetch products when category is found (only if preloadedProducts not provided)
+  useEffect(() => {
+    // Skip API call if preloaded products are provided
+    if (preloadedProducts !== null) {
+      return;
+    }
+
     const loadProducts = async () => {
       if (!category || !category.id) {
         setLoading(false);
@@ -118,15 +133,15 @@ export const CategoryProductSection = ({
       setLoading(false);
       setProducts([]);
     }
-  }, [category, categoryGroupname, limit, categoriesLoading]);
+  }, [category, categoryGroupname, limit, categoriesLoading, preloadedProducts]);
 
-  // Don't render if category not found or no products
-  if (!categoriesLoading && !category) {
+  // Don't render if category not found or no products (only check if not using preloaded products)
+  if (preloadedProducts === null && !categoriesLoading && !category) {
     return null;
   }
 
-  // Show loading state
-  if (loading || categoriesLoading) {
+  // Show loading state (only if not using preloaded products)
+  if (preloadedProducts === null && (loading || categoriesLoading)) {
     return (
       <Box
         sx={{

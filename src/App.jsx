@@ -64,7 +64,17 @@ const AppContent = () => {
       >
         <TopHeader />
         {!hideNavbar && <Navbar />}
-        <Box sx={{ flex: 1 }}>
+        <Box 
+          sx={{ 
+            flex: 1,
+            // Add padding-top to account for fixed TopHeader
+            // TopHeader height: ~60-70px mobile (with wrapping), ~55-60px desktop
+            // Navbar height: ~50px mobile, ~55px desktop (when visible)
+            pt: hideNavbar 
+              ? { xs: "65px", sm: "70px", md: "65px", lg: "70px" } // Profile page: only TopHeader
+              : { xs: "115px", sm: "120px", md: "115px", lg: "120px" } // Other pages: TopHeader + Navbar
+          }}
+        >
           <AppRoutes />
         </Box>
         {!hideNavbar && <Footer />}

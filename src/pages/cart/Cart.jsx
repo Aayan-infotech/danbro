@@ -28,6 +28,8 @@ import { useNavigate } from "react-router-dom";
 import { getCart, increaseItemCount, decreaseItemCount } from "../../utils/cart";
 import { getAccessToken } from "../../utils/cookies";
 import api from "../../utils/api";
+import { getMyAddresses } from "../../utils/apiService";
+import { Radio, RadioGroup, FormControlLabel } from "@mui/material";
 
 export const Cart = () => {
   const navigate = useNavigate();
@@ -38,10 +40,51 @@ export const Cart = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [updatingItems, setUpdatingItems] = useState(new Set());
+  const [addresses, setAddresses] = useState([]);
+  const [selectedAddress, setSelectedAddress] = useState(null);
+  const [addressesLoading, setAddressesLoading] = useState(false);
 
   useEffect(() => {
     loadCart();
+    loadAddresses();
   }, []);
+
+  const loadAddresses = async () => {
+    try {
+      setAddressesLoading(true);
+      const token = getAccessToken();
+      if (!token) {
+        setAddresses([]);
+        return;
+      }
+      const data = await getMyAddresses();
+      setAddresses(data || []);
+      // Set default address as selected
+      const defaultAddress = data?.find((addr) => addr.isDefault);
+      if (defaultAddress) {
+        setSelectedAddress(defaultAddress._id || defaultAddress.id);
+      } else if (data && data.length > 0) {
+        setSelectedAddress(data[0]._id || data[0].id);
+      }
+    } catch (err) {
+      console.error("Error loading addresses:", err);
+      setAddresses([]);
+    } finally {
+      setAddressesLoading(false);
+    }
+  };
+
+  const formatAddress = (address) => {
+    const parts = [];
+    if (address.houseNumber) parts.push(address.houseNumber);
+    if (address.streetName) parts.push(address.streetName);
+    if (address.area) parts.push(address.area);
+    if (address.landmark) parts.push(`Near ${address.landmark}`);
+    if (address.city) parts.push(address.city);
+    if (address.state) parts.push(address.state);
+    if (address.zipCode) parts.push(address.zipCode);
+    return parts.join(", ");
+  };
 
   const loadCart = async () => {
     try {
@@ -480,6 +523,115 @@ export const Cart = () => {
 
             {/* Order Summary */}
             <Grid size={{ xs: 12, md: 4 }}>
+              <Card
+                sx={{
+                  borderRadius: { xs: 2, md: 3 },
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+                  position: { md: "sticky" },
+                  top: { md: 100 },
+                  mb: 3,
+                }}
+              >
+                <CardContent sx={{ p: { xs: 2, md: 3 } }}>
+                  <CustomText
+                    sx={{
+                      fontSize: { xs: 20, md: 24 },
+                      fontWeight: 700,
+                      color: "#2c2c2c",
+                      mb: { xs: 2, md: 3 },
+                    }}
+                  >
+                    Saved Addresses
+                  </CustomText>
+
+                  {addressesLoading ? (
+                    <Box sx={{ display: "flex", justifyContent: "center", py: 2 }}>
+                      <CircularProgress size={24} />
+                    </Box>
+                  ) : addresses.length === 0 ? (
+                    <Box sx={{ mb: 2 }}>
+                      <CustomText sx={{ fontSize: { xs: 14, md: 16 }, color: "#666", mb: 2 }}>
+                        No saved addresses. Please add an address in your profile.
+                      </CustomText>
+                      <Button
+                        variant="outlined"
+                        onClick={() => navigate("/profile", { state: { activeTab: "addresses" } })}
+                        sx={{
+                          borderColor: "var(--themeColor)",
+                          color: "var(--themeColor)",
+                          textTransform: "none",
+                          "&:hover": {
+                            borderColor: "var(--themeColor)",
+                            backgroundColor: "#fbeeee",
+                          },
+                        }}
+                      >
+                        Add Address
+                      </Button>
+                    </Box>
+                  ) : (
+                    <RadioGroup
+                      value={selectedAddress || ""}
+                      onChange={(e) => setSelectedAddress(e.target.value)}
+                      sx={{ mb: 2 }}
+                    >
+                      {addresses.map((address) => {
+                        const addressId = address._id || address.id;
+                        return (
+                          <Card
+                            key={addressId}
+                            sx={{
+                              mb: 2,
+                              border: selectedAddress === addressId ? "2px solid var(--themeColor)" : "1px solid #ddd",
+                              borderRadius: 2,
+                              transition: "all 0.3s ease",
+                              "&:hover": {
+                                boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+                              },
+                            }}
+                          >
+                            <CardContent sx={{ p: 2, "&:last-child": { pb: 2 } }}>
+                              <FormControlLabel
+                                value={addressId}
+                                control={<Radio sx={{ color: "var(--themeColor)" }} />}
+                                label={
+                                  <Box>
+                                    <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 0.5 }}>
+                                      <CustomText sx={{ fontWeight: 600, fontSize: { xs: 14, md: 16 } }}>
+                                        {address.addressType || "Address"}
+                                      </CustomText>
+                                      {address.isDefault && (
+                                        <Box
+                                          sx={{
+                                            px: 1,
+                                            py: 0.2,
+                                            borderRadius: 1,
+                                            backgroundColor: "#FFB5A1",
+                                            color: "#000",
+                                            fontSize: 10,
+                                            fontWeight: 600,
+                                          }}
+                                        >
+                                          Default
+                                        </Box>
+                                      )}
+                                    </Box>
+                                    <CustomText sx={{ fontSize: { xs: 12, md: 14 }, color: "#666" }}>
+                                      {formatAddress(address)}
+                                    </CustomText>
+                                  </Box>
+                                }
+                                sx={{ width: "100%", m: 0, alignItems: "flex-start" }}
+                              />
+                            </CardContent>
+                          </Card>
+                        );
+                      })}
+                    </RadioGroup>
+                  )}
+                </CardContent>
+              </Card>
+
               <Card
                 sx={{
                   borderRadius: { xs: 2, md: 3 },

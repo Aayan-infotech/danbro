@@ -346,6 +346,7 @@ export const ProductSectionCarousel = ({
                       fontWeight: 700,
                       color: "var(--themeColor)",
                       lineHeight: 1.3,
+                      mb: 0,
                       minHeight: { xs: 40, md: 50 },
                       display: "-webkit-box",
                       WebkitLineClamp: 2,
@@ -356,7 +357,7 @@ export const ProductSectionCarousel = ({
                     style={{ textTransform: "none" }}
                   >
                     {(() => {
-                      const text = product?.title || product?.name || "";
+                      const text = product?.title || product?.name || " ";
                       if (text && text === text.toUpperCase() && text !== text.toLowerCase()) {
                         return text.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
                       }
