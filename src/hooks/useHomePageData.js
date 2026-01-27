@@ -34,6 +34,8 @@ export const useHomePageData = (categoryConfigs = []) => {
   }, [categoryConfigs]);
 
   useEffect(() => {
+    let cancelled = false; // Flag to cancel requests if component unmounts or dependencies change
+
     const loadAllProducts = async () => {
       // Wait for categories to load first
       if (categoriesLoading) {
@@ -56,8 +58,18 @@ export const useHomePageData = (categoryConfigs = []) => {
         setLoading(true);
         setError(null);
 
-        // Create array of promises for all category product fetches
-        const productPromises = categoryConfigs.map(async (config) => {
+        // OPTIMIZED: Batch requests to prevent overwhelming the server
+        // Process categories in batches of 5 to reduce concurrent requests
+        const BATCH_SIZE = 5;
+        const productsDataMap = {};
+
+        for (let i = 0; i < categoryConfigs.length; i += BATCH_SIZE) {
+          if (cancelled) break; // Stop if cancelled
+
+          const batch = categoryConfigs.slice(i, i + BATCH_SIZE);
+          
+          // Create array of promises for batch
+          const productPromises = batch.map(async (config) => {
           const { categoryGroupname, limit = 10 } = config;
           const category = categoryMap[categoryGroupname?.toUpperCase()];
 
@@ -70,7 +82,9 @@ export const useHomePageData = (categoryConfigs = []) => {
           }
 
           try {
-            const response = await fetchProducts(category.id, 1, limit, '');
+            // OPTIMIZED: Reduce limit to prevent loading too many products at once
+            const optimizedLimit = Math.min(limit, 15); // Cap at 15 products per category
+            const response = await fetchProducts(category.id, 1, optimizedLimit, '');
 
             if (!response?.success) {
               return {
@@ -140,28 +154,45 @@ export const useHomePageData = (categoryConfigs = []) => {
           }
         });
 
-        // Wait for all promises to resolve
-        const results = await Promise.all(productPromises);
+          // Wait for batch promises to resolve
+          const results = await Promise.all(productPromises);
 
-        // Convert results array to object keyed by categoryGroupname
-        const productsDataMap = {};
-        results.forEach((result) => {
-          productsDataMap[result.categoryGroupname] = {
-            products: result.products,
-            error: result.error,
-          };
-        });
+          // Convert results array to object keyed by categoryGroupname
+          results.forEach((result) => {
+            productsDataMap[result.categoryGroupname] = {
+              products: result.products,
+              error: result.error,
+            };
+          });
 
-        setProductsData(productsDataMap);
+          // Update state incrementally for better UX
+          if (!cancelled) {
+            setProductsData({ ...productsDataMap });
+          }
+        }
+
+        // Final update with all data
+        if (!cancelled) {
+          setProductsData(productsDataMap);
+        }
       } catch (err) {
-        console.error('Error loading home page data:', err);
-        setError(err.message || 'Failed to load home page data');
+        if (!cancelled) {
+          console.error('Error loading home page data:', err);
+          setError(err.message || 'Failed to load home page data');
+        }
       } finally {
-        setLoading(false);
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
     };
 
     loadAllProducts();
+
+    // Cleanup function to cancel requests
+    return () => {
+      cancelled = true;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [categories, categoriesLoading, stableCategoryConfigs]);
 

@@ -208,7 +208,11 @@ export const FeaturedProductsCarousel = () => {
                 }}
               >
                 <Box
-                  onClick={() => navigate(`/products/${product.id}`)}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    navigate(`/products/${product.id}`);
+                  }}
                   sx={{
                     bgcolor: "#fff",
                     borderRadius: 3,

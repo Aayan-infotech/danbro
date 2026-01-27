@@ -367,6 +367,9 @@ export const HeroBanner = () => {
                     src={slide?.img}
                     alt={slide?.alt}
                     className={isActive ? "kb-kenburns-img" : ""}
+                    loading={index === 0 ? "eager" : "lazy"}
+                    fetchPriority={index === 0 ? "high" : "low"}
+                    decoding="async"
                     sx={{
                       width: "100%",
                       height: "100%",

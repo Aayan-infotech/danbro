@@ -95,14 +95,22 @@ export const TestimonialsCarousel = () => {
     beforeChange: (current, next) => setCurrentSlide(next),
     responsive: [
       { breakpoint: 1200, settings: { slidesToShow: 3 } },
-      { breakpoint: 992, settings: { slidesToShow: 2 } },
-      { breakpoint: 768, settings: { slidesToShow: 1 } },
+      { breakpoint: 992, settings: { slidesToShow: 3 } },
+      { breakpoint: 768, settings: { slidesToShow: 2 } },
+      { breakpoint: 576, settings: { slidesToShow: 1 } },
     ],
   };
 
   return (
-    <Box ref={sectionRef} sx={{ py: { xs: 6, md: 10 }, }}>
-      <Container maxWidth="lg" sx={{ px: { xs: 2, md: 3 }, position: "relative", zIndex: 1 }}>
+    <Box ref={sectionRef} sx={{ py: { xs: 6, md: 10 } }}>
+      <Container
+        maxWidth={false}
+        sx={{
+          px: { xs: 2, md: 3 },
+          position: "relative",
+          zIndex: 1,
+        }}
+      >
         {/* Section Header */}
         <Box sx={{ textAlign: "center", mb: { xs: 6, md: 8 } }}>
           <Box
@@ -136,7 +144,7 @@ export const TestimonialsCarousel = () => {
         </Box>
 
         {/* Testimonials Carousel */}
-        <Box sx={{ position: "relative" }}>
+        <Box sx={{ position: "relative", zIndex: 1 }}>
           <IconButton
             onClick={() => sliderRef?.slickPrev()}
             sx={{
@@ -164,10 +172,10 @@ export const TestimonialsCarousel = () => {
           </IconButton>
 
           <Slider ref={(slider) => (sliderRef = slider)} {...settings}>
-            {testimonials.map((testimonial, index) => {
+            {testimonials?.map((testimonial, index) => {
               const isActive = currentSlide === index || currentSlide === index - 1;
               return (
-                <Box key={testimonial.id} sx={{ px: { xs: 1, md: 1.5 } }}>
+                <Box key={testimonial?.id} sx={{ px: { xs: 1, md: 1.5 } }}>
                   <Box
                     sx={{
                       bgcolor: "#fff",
@@ -248,7 +256,7 @@ export const TestimonialsCarousel = () => {
                         zIndex: 1,
                       }}
                     >
-                      {[...Array(testimonial.rating)].map((_, i) => (
+                      {[...Array(testimonial?.rating)].map((_, i) => (
                         <StarIcon
                           key={i}
                           sx={{
@@ -268,7 +276,7 @@ export const TestimonialsCarousel = () => {
 
                     {/* Comment */}
                     <CustomText sx={{ fontSize: { xs: 15, md: 16 }, color: "#555", lineHeight: 1.9, mb: 3.5, position: "relative", zIndex: 1, fontStyle: "italic", }}>
-                      "{testimonial.comment}"
+                      "{testimonial?.comment}"
                     </CustomText>
 
                     {/* Author Section */}
@@ -294,8 +302,8 @@ export const TestimonialsCarousel = () => {
                         <Box
                           className="testimonial-image"
                           component="img"
-                          src={testimonial.image}
-                          alt={testimonial.name}
+                          src={testimonial?.image}
+                          alt={testimonial?.name}
                           loading="lazy"
                           sx={{
                             width: { xs: 65, md: 75 },
@@ -310,10 +318,10 @@ export const TestimonialsCarousel = () => {
                       </Box>
                       <Box>
                         <CustomText sx={{ fontSize: { xs: 17, md: 18 }, fontWeight: 700, color: "var(--themeColor)", mb: 0.5, }}>
-                          {testimonial.name}
+                          {testimonial?.name}
                         </CustomText>
                         <CustomText sx={{ fontSize: { xs: 13, md: 14 }, color: "#999", fontWeight: 500, }}>
-                          {testimonial.role}
+                          {testimonial?.role}
                         </CustomText>
                       </Box>
                     </Box>

@@ -275,11 +275,12 @@ export const ProductSectionCarousel = memo(({
               }}
             >
               <Box
-                onClick={() => {
-                  if (product?.categoryId) {
-                    navigate(`/products?categoryId=${product?.categoryId}&search=${encodeURIComponent(product?.title || product?.name)}`);
-                  } else {
-                    navigate(`/products?search=${encodeURIComponent(product?.title || product?.name)}`);
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  const productId = product?.productId || product?.id || product?._id;
+                  if (productId) {
+                    navigate(`/products/${productId}`);
                   }
                 }}
                 sx={{
@@ -327,6 +328,8 @@ export const ProductSectionCarousel = memo(({
                     src={product?.image}
                     alt={product?.title || product?.name}
                     loading="lazy"
+                    decoding="async"
+                    fetchPriority="low"
                     sx={{
                       width: "100%",
                       height: "100%",

@@ -6,7 +6,7 @@ import { CustomText } from "../comman/CustomText";
 import { ProductDescription } from "../comman/ProductDescription";
 import { ProductPrice } from "../comman/ProductPrice";
 import { CustomToast } from "../comman/CustomToast";
-import { addToWishlist, removeFromWishlist, isInWishlist } from "../../utils/wishlist";
+import { addToWishlist, removeFromWishlist, getWishlist } from "../../utils/wishlist";
 import { addToCart } from "../../utils/cart";
 import { getStoredLocation } from "../../utils/location";
 import { getAccessToken } from "../../utils/cookies";
@@ -30,26 +30,44 @@ export const ProductGrid = memo(({ products, isVisible }) => {
     setIsLoggedIn(!!token);
   }, []);
 
-  // Check which products are in wishlist
+  // Check which products are in wishlist - OPTIMIZED: Fetch wishlist once instead of N times
   useEffect(() => {
     const checkWishlistItems = async () => {
-      if (!isLoggedIn || !products || products.length === 0) return;
-
-      const location = getStoredLocation();
-      const wishlistSet = new Set();
-
-      for (const product of products) {
-        try {
-          const inWishlist = await isInWishlist(product?.productId, location.lat, location.long);
-          if (inWishlist) {
-            wishlistSet.add(product?.productId);
-          }
-        } catch (error) {
-          console.error(`Error checking wishlist for product ${product?.productId}:`, error);
-        }
+      if (!isLoggedIn || !products || products.length === 0) {
+        setWishlistItems(new Set());
+        return;
       }
 
-      setWishlistItems(wishlistSet);
+      try {
+        // Fetch wishlist ONCE instead of calling isInWishlist for each product
+        const wishlistData = await getWishlist();
+        const wishlistSet = new Set();
+
+        if (wishlistData && wishlistData.data && Array.isArray(wishlistData.data)) {
+          // Extract all product IDs from wishlist
+          const wishlistProductIds = new Set();
+          wishlistData.data.forEach((item) => {
+            const product = item.product || item;
+            const productId = product.productId || product._id || item.productId;
+            if (productId) {
+              wishlistProductIds.add(productId);
+            }
+          });
+
+          // Check which products are in wishlist
+          products.forEach((product) => {
+            const productId = product?.productId || product?.id;
+            if (productId && wishlistProductIds.has(productId)) {
+              wishlistSet.add(productId);
+            }
+          });
+        }
+
+        setWishlistItems(wishlistSet);
+      } catch (error) {
+        console.error('Error checking wishlist:', error);
+        setWishlistItems(new Set());
+      }
     };
 
     checkWishlistItems();
@@ -233,7 +251,11 @@ export const ProductGrid = memo(({ products, isVisible }) => {
           >
             <Card
               elevation={0}
-              onClick={() => navigate(`/products/${product?.productId}`)}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                navigate(`/products/${product?.productId}`);
+              }}
               sx={{
                 borderRadius: 2,
                 overflow: "hidden",

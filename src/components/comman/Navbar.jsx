@@ -113,7 +113,11 @@ export const Navbar = () => {
                             >
                                 <CustomText
                                     autoTitleCase={true}
-                                    onClick={() => navigate(path)}
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      e.stopPropagation();
+                                      navigate(path);
+                                    }}
                                     sx={{
                                         fontWeight: 600,
                                         fontSize: { xs: 12, sm: 13, md: 14 },

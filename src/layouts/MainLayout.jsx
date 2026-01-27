@@ -24,7 +24,6 @@ import CelebrationIcon from "@mui/icons-material/Celebration";
 import LiquorIcon from "@mui/icons-material/Liquor";
 import CookieIcon from "@mui/icons-material/Cookie";
 import AcUnitIcon from "@mui/icons-material/AcUnit";
-import StoreIcon from "@mui/icons-material/Store";
 import LocalDiningIcon from "@mui/icons-material/LocalDining";
 
 // Define all category configurations for home page - moved outside component to prevent re-creation on every render
@@ -46,8 +45,6 @@ const categoryConfigs = [
   { categoryGroupname: "MITHAI", limit: 10 },
   { categoryGroupname: "NAMKEEN", limit: 10 },
   { categoryGroupname: "NAMKEEN SHYAM", limit: 10 },
-  { categoryGroupname: "NEW SAPRU MARG EJ", limit: 10 },
-  { categoryGroupname: "TAJ", limit: 10 },
 ];
 
 const Home = () => {
@@ -127,8 +124,8 @@ const Home = () => {
           subtitle="Birthday Cakes, Beautiful Cakes"
           icon={CakeIcon}
           bgColor="rgba(255,248,245,0.5)"
-          limit={40}
-          preloadedProducts={cakesProducts}
+          limit={20}
+          preloadedProducts={cakesProducts.slice(0, 20)}
         />
         
         {/* Special Offers / Deals */}
@@ -247,29 +244,8 @@ const Home = () => {
           subtitle="Crunchy Snacks & Premium Selection"
           icon={RestaurantIcon}
           bgColor="rgba(255,248,245,0.5)"
-          limit={20}
-          preloadedProducts={namkeenProducts}
-        />
-        
-        {/* New Sapru Marg EJ - From API */}
-        <CategoryProductSection
-          categoryGroupname="NEW SAPRU MARG EJ"
-          title="New Sapru Marg"
-          subtitle="Special Collection"
-          icon={StoreIcon}
-          limit={10}
-          preloadedProducts={productsData["NEW SAPRU MARG EJ"]?.products || []}
-        />
-        
-        {/* Taj - From API */}
-        <CategoryProductSection
-          categoryGroupname="TAJ"
-          title="Taj"
-          subtitle="Premium Selection"
-          icon={CardGiftcardIcon}
-          bgColor="rgba(255,248,245,0.5)"
-          limit={10}
-          preloadedProducts={productsData["TAJ"]?.products || []}
+          limit={15}
+          preloadedProducts={namkeenProducts.slice(0, 15)}
         />
         
         {/* About the Bakery */}

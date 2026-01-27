@@ -111,11 +111,13 @@ export const NavbarDropdown = ({ category, isOpen, onClose, anchorEl }) => {
     return getCategoryKeywords(category);
   }, [category]);
 
-  // Fetch products for each category to get varieties
+  // Fetch products for each category to get varieties - OPTIMIZED with cancellation
   useEffect(() => {
     if (!isOpen || !categories || categories.length === 0 || homePageSections.length === 0) {
       return;
     }
+
+    let cancelled = false; // Flag to cancel requests if dropdown closes
 
     const loadProducts = async () => {
       setLoadingProducts(true);
@@ -136,34 +138,53 @@ export const NavbarDropdown = ({ category, isOpen, onClose, anchorEl }) => {
           });
         });
 
-        // Fetch products for each category in parallel
-        const productPromises = allCategoryIds.map(async (categoryId) => {
-          try {
-            const response = await fetchProducts(categoryId, 1, 50, ""); // Fetch up to 50 products
-            if (response?.success && response?.data && Array.isArray(response.data)) {
-              return { categoryId, products: response.data };
-            }
-            return { categoryId, products: [] };
-          } catch (error) {
-            console.error(`Error fetching products for category ${categoryId}:`, error);
-            return { categoryId, products: [] };
-          }
-        });
+        // OPTIMIZED: Reduce limit and add batching to prevent overwhelming server
+        const BATCH_SIZE = 3; // Process 3 categories at a time
+        for (let i = 0; i < allCategoryIds.length; i += BATCH_SIZE) {
+          if (cancelled) break; // Stop if dropdown closed
 
-        const results = await Promise.all(productPromises);
-        results.forEach(({ categoryId, products }) => {
-          productsMap[categoryId] = products;
-        });
+          const batch = allCategoryIds.slice(i, i + BATCH_SIZE);
+          
+          // Fetch products for batch in parallel
+          const productPromises = batch.map(async (categoryId) => {
+            try {
+              const response = await fetchProducts(categoryId, 1, 10, ""); // Reduced from 50 to 10 products
+              if (response?.success && response?.data && Array.isArray(response.data)) {
+                return { categoryId, products: response.data };
+              }
+              return { categoryId, products: [] };
+            } catch (error) {
+              console.error(`Error fetching products for category ${categoryId}:`, error);
+              return { categoryId, products: [] };
+            }
+          });
+
+          const results = await Promise.all(productPromises);
+          results.forEach(({ categoryId, products }) => {
+            productsMap[categoryId] = products;
+          });
+
+          // Update state incrementally for better UX
+          if (!cancelled) {
+            setProductsData({ ...productsMap });
+          }
+        }
       } catch (error) {
         console.error("Error loading products:", error);
       } finally {
-        setLoadingProducts(false);
+        if (!cancelled) {
+          setLoadingProducts(false);
+          setProductsData(productsMap);
+        }
       }
-
-      setProductsData(productsMap);
     };
 
     loadProducts();
+
+    // Cleanup: cancel requests if dropdown closes
+    return () => {
+      cancelled = true;
+    };
   }, [isOpen, categories, homePageSections]);
 
   // Get category columns with varieties dynamically

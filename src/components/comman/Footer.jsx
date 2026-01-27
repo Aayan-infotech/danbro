@@ -36,10 +36,13 @@ export const Footer = () => {
 
   const handleLinkClick = (e, path) => {
     e.preventDefault();
-    window.scrollTo({ top: 0, behavior: "smooth" });
-    setTimeout(() => {
-      navigate(path);
-    }, 100);
+    e.stopPropagation();
+    // Navigate immediately - scroll will happen naturally
+    navigate(path);
+    // Use requestAnimationFrame for non-blocking scroll
+    requestAnimationFrame(() => {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
   };
 
   useEffect(() => {

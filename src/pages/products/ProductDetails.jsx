@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, memo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import {
   Box,
   Container,
@@ -20,10 +20,7 @@ import {
 } from "@mui/material";
 import { CustomText } from "../../components/comman/CustomText";
 import {
-  FavoriteBorder as FavoriteBorderIcon,
-  Favorite as FavoriteIcon,
   CheckCircle as CheckCircleIcon,
-  ShoppingCart as ShoppingCartIcon,
   Add,
   Remove,
   FavoriteBorder,
@@ -87,22 +84,41 @@ export const ProductDetails = () => {
           return;
         }
 
-        const productId = parseInt(id);
+        // Handle both MongoDB ObjectId (string) and numeric prdcode
+        const productId = id; // Keep as string to handle MongoDB ObjectId
+        const numericId = parseInt(id); // For numeric prdcode matching
+        
         if (apiCategories && apiCategories.length > 0) {
-          try {
-            const productPromises = apiCategories.map(category => 
-              fetchProducts(category.id).catch(err => {
-                return null;
-              })
-            );
-            
-            const responses = await Promise.all(productPromises);
-            for (const response of responses) {
+          // OPTIMIZED: Fetch categories sequentially and stop once product is found
+          // This prevents unnecessary API calls
+          let foundProduct = null;
+          
+          for (const category of apiCategories) {
+            try {
+              // OPTIMIZED: Reduced limit to prevent loading too many products
+              // Search by productId first, if not found, try with smaller batches
+              const response = await fetchProducts(category.id, 1, 50, '');
+              
               if (!response) continue;
               
               const data = response?.data || response?.records;
               if (Array.isArray(data)) {
-                const foundProduct = data.find(p => p.prdcode === productId);
+                // First try to match by MongoDB ObjectId (_id or productId)
+                foundProduct = data.find(p => 
+                  p._id === productId || 
+                  p.productId === productId || 
+                  p.id === productId
+                );
+                
+                // If not found, try to match by numeric prdcode
+                if (!foundProduct && !isNaN(numericId)) {
+                  foundProduct = data.find(p => 
+                    p.prdcode === numericId || 
+                    p.prdcode?.toString() === productId
+                  );
+                }
+                
+                // Stop searching once product is found
                 if (foundProduct) {
                   setProduct(foundProduct);
                   setProductWeight(foundProduct.weight || "500g");
@@ -110,24 +126,9 @@ export const ProductDetails = () => {
                   return;
                 }
               }
-            }
-          } catch (err) {
-            for (const category of apiCategories) {
-              try {
-                const response = await fetchProducts(category.id);
-                const data = response?.data || response?.records;
-                if (Array.isArray(data)) {
-                  const foundProduct = data.find(p => p.prdcode === productId);
-                  if (foundProduct) {
-                    setProduct(foundProduct);
-                    setProductWeight(foundProduct.weight || "500g");
-                    setLoading(false);
-                    return;
-                  }
-                }
-              } catch (err) {
-                continue;
-              }
+            } catch (err) {
+              // Continue to next category if this one fails
+              continue;
             }
           }
         }
@@ -235,16 +236,50 @@ export const ProductDetails = () => {
     "Quality Guarantee\nTaste the difference"
   ];
 
-  const images = useMemo(() => [
-    "https://picsum.photos/id/1040/300/200",
-    "https://picsum.photos/id/1060/300/200",
-    "https://picsum.photos/id/1080/300/200",
-    "https://picsum.photos/id/109/300/200",
-    "https://picsum.photos/id/120/300/200",
-    "https://picsum.photos/id/121/300/200",
-    "https://picsum.photos/id/122/300/200",
-    "https://picsum.photos/id/123/300/200"
-  ], []);
+  // OPTIMIZED: Only load explore images when section is visible to reduce initial load
+  const [exploreImagesLoaded, setExploreImagesLoaded] = useState(false);
+  const exploreSectionRef = useRef(null);
+
+  useEffect(() => {
+    // Load images when Explore More section comes into viewport
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && !exploreImagesLoaded) {
+            setExploreImagesLoaded(true);
+          }
+        });
+      },
+      { threshold: 0.1, rootMargin: "200px" } // Start loading 200px before section is visible
+    );
+
+    if (exploreSectionRef.current) {
+      observer.observe(exploreSectionRef.current);
+    }
+
+    return () => {
+      if (exploreSectionRef.current) {
+        observer.unobserve(exploreSectionRef.current);
+      }
+    };
+  }, [exploreImagesLoaded]);
+
+  const images = useMemo(() => {
+    // Only return images if section is visible
+    if (!exploreImagesLoaded) {
+      return []; // Return empty array until section is visible
+    }
+    return [
+      "https://picsum.photos/id/1040/300/200",
+      "https://picsum.photos/id/1060/300/200",
+      "https://picsum.photos/id/1080/300/200",
+      "https://picsum.photos/id/109/300/200",
+      "https://picsum.photos/id/120/300/200",
+      "https://picsum.photos/id/121/300/200",
+      "https://picsum.photos/id/122/300/200",
+      "https://picsum.photos/id/123/300/200"
+    ];
+  }, [exploreImagesLoaded]);
 
   if (loading) {
     return (
@@ -299,7 +334,9 @@ export const ProductDetails = () => {
                       component="img" 
                       src={image} 
                       alt={`${productData?.name} ${index + 1}`} 
-                      loading="lazy"
+                      loading={index === 0 ? "eager" : "lazy"}
+                      fetchPriority={index === 0 ? "high" : "low"}
+                      decoding="async"
                       sx={{ width: "100%", height: "100%", objectFit: "cover", }} 
                     />
                   </Box>
@@ -311,7 +348,9 @@ export const ProductDetails = () => {
                     component="img" 
                     src={productData?.images[selectedImage]} 
                     alt={productData?.name} 
-                    loading="lazy"
+                    loading="eager"
+                    fetchPriority="high"
+                    decoding="async"
                     sx={{ width: "100%", height: "100%", objectFit: "cover", }} 
                   />
                 </Box>
@@ -598,8 +637,9 @@ export const ProductDetails = () => {
         </Box>
 
         {/* Explore More */}
-        <CustomText className="title-style" sx={{ textAlign: "center", mt: { xs: 3, md: 5 }, mb: { xs: 2, md: 4 }, fontSize: { xs: 18, sm: 22, md: 26, lg: 28 }, fontWeight: 'bold', fontFamily: "var(--fontFamily)" }}>Explore More</CustomText>
-        <Box sx={{ width: "100%", borderBottom: "1px solid #e5e5e5", overflowX: { xs: "auto", md: "visible" } }}>
+        <Box ref={exploreSectionRef}>
+          <CustomText className="title-style" sx={{ textAlign: "center", mt: { xs: 3, md: 5 }, mb: { xs: 2, md: 4 }, fontSize: { xs: 18, sm: 22, md: 26, lg: 28 }, fontWeight: 'bold', fontFamily: "var(--fontFamily)" }}>Explore More</CustomText>
+          <Box sx={{ width: "100%", borderBottom: "1px solid #e5e5e5", overflowX: { xs: "auto", md: "visible" } }}>
           <Tabs
             value={tab}
             onChange={(_, v) => setTab(v)}
@@ -633,26 +673,31 @@ export const ProductDetails = () => {
             ))}
           </Tabs>
         </Box>
-        <Grid container spacing={{ xs: 2, md: 3 }} mt={{ xs: 3, md: 4 }} sx={{ mb: 5, px: { xs: 2, md: 3, lg: 2 } }} >
-          {images?.map((img, i) => (
-            <Grid size={{ xs: 6, sm: 4, md: 3 }} key={i}>
-              <Box
-                component="img"
-                src={img}
-                loading="lazy"
-                sx={{
-                  width: "100%",
-                  height: { xs: 180, sm: 200, md: 230 },
-                  objectFit: "cover",
-                  borderRadius: 3,
-                  transition: "0.3s",
-                  cursor: "pointer",
-                  "&:hover": { transform: "scale(1.03)" }
-                }}
-              />
-            </Grid>
-          ))}
-        </Grid>
+        {images && images.length > 0 && (
+          <Grid container spacing={{ xs: 2, md: 3 }} mt={{ xs: 3, md: 4 }} sx={{ mb: 5, px: { xs: 2, md: 3, lg: 2 } }} >
+            {images.map((img, i) => (
+              <Grid size={{ xs: 6, sm: 4, md: 3 }} key={i}>
+                <Box
+                  component="img"
+                  src={img}
+                  loading="lazy"
+                  decoding="async"
+                  fetchPriority="low"
+                  sx={{
+                    width: "100%",
+                    height: { xs: 180, sm: 200, md: 230 },
+                    objectFit: "cover",
+                    borderRadius: 3,
+                    transition: "0.3s",
+                    cursor: "pointer",
+                    "&:hover": { transform: "scale(1.03)" }
+                  }}
+                />
+              </Grid>
+            ))}
+          </Grid>
+        )}
+        </Box>
       </Container>
     </Box>
   );
