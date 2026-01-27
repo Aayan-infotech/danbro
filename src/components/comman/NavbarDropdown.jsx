@@ -51,12 +51,6 @@ const getHomePageSections = (navbarLabel) => {
     ];
   }
   
-  if (label.includes("BREAD") || label.includes("RUSK")) {
-    return [
-      { title: "Bread & Rusk", groupnames: ["BREAD & RUSK"], color: "#7b1fa2" },
-    ];
-  }
-  
   if (label.includes("GIFT") || label.includes("CHOCOLATE")) {
     return [
       { title: "Gift Hampers", groupnames: ["GIFT HAMPERS"], color: "#2e7d32" },
@@ -82,9 +76,6 @@ const getCategoryKeywords = (navbarLabel) => {
   }
   if (label.includes("MITHAI") || label.includes("COOKIE")) {
     return ["MITHAI", "COOKIE", "SWEET"];
-  }
-  if (label.includes("BREAD") || label.includes("RUSK")) {
-    return ["BREAD", "RUSK"];
   }
   if (label.includes("GIFT") || label.includes("CHOCOLATE")) {
     return ["GIFT", "CHOCOLATE", "HAMPER"];
@@ -203,11 +194,20 @@ export const NavbarDropdown = ({ category, isOpen, onClose, anchorEl }) => {
         
         if (category) {
           const categoryProducts = productsData[category.id] || [];
-          const varieties = categoryProducts
-            .map((product) => product.name)
-            .filter((name) => name)
-            .filter((name, index, self) => self.indexOf(name) === index) // Remove duplicates
-            .slice(0, 10); // Limit to 10 varieties per category
+          // Create varieties with product info (name and productId)
+          const varietiesMap = new Map();
+          categoryProducts.forEach((product) => {
+            const productName = product.name;
+            if (productName && !varietiesMap.has(productName)) {
+              // Store first product with this name (for navigation)
+              varietiesMap.set(productName, {
+                name: productName,
+                productId: product.productId || product._id || product.id,
+              });
+            }
+          });
+
+          const varieties = Array.from(varietiesMap.values()).slice(0, 10); // Limit to 10 varieties per category
 
           if (varieties.length > 0) {
             columns.push({
@@ -262,12 +262,21 @@ export const NavbarDropdown = ({ category, isOpen, onClose, anchorEl }) => {
     return null;
   }
 
-  const handleVarietyClick = (varietyName, categoryId) => {
-    // Navigate to products page with search query
-    if (categoryId) {
-      navigate(`/products?category=${categoryId}&search=${encodeURIComponent(varietyName)}`);
+  const handleVarietyClick = (variety, categoryId) => {
+    // Navigate to product details page (same as home page)
+    const productId = variety.productId || variety.id;
+    const varietyName = variety.name || variety;
+    
+    if (productId) {
+      // Navigate to product details page
+      navigate(`/products/${productId}`);
     } else {
-      navigate(`/products?search=${encodeURIComponent(varietyName)}`);
+      // Fallback: Navigate to products page with search query if productId not available
+      if (categoryId) {
+        navigate(`/products?category=${categoryId}&search=${encodeURIComponent(varietyName)}`);
+      } else {
+        navigate(`/products?search=${encodeURIComponent(varietyName)}`);
+      }
     }
     onClose();
   };
@@ -354,7 +363,11 @@ export const NavbarDropdown = ({ category, isOpen, onClose, anchorEl }) => {
                   {column.varieties.map((variety, varietyIndex) => (
                     <CustomText
                       key={varietyIndex}
-                      onClick={() => handleVarietyClick(variety, column.categoryId)}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        handleVarietyClick(variety, column.categoryId);
+                      }}
                       sx={{
                         fontSize: { xs: 12, sm: 13, md: 14 },
                         color: "#333",
@@ -372,7 +385,7 @@ export const NavbarDropdown = ({ category, isOpen, onClose, anchorEl }) => {
                         },
                       }}
                     >
-                      {variety}
+                      {variety.name || variety}
                     </CustomText>
                   ))}
                 </Box>

@@ -1,17 +1,10 @@
-import { Box, Container,  Grid, Card, CardContent, Button } from "@mui/material";
+import { Box, Container, Grid, Card, CardContent, Button } from "@mui/material";
 import { CustomText } from "../../components/comman/CustomText";
-import TrendingUpIcon from "@mui/icons-material/TrendingUp";
-import LightbulbIcon from "@mui/icons-material/Lightbulb";
-import EnergySavingsLeafIcon from "@mui/icons-material/EnergySavingsLeaf";
-import BusinessCenterIcon from "@mui/icons-material/BusinessCenter";
-import RestaurantIcon from "@mui/icons-material/Restaurant";
-import FactoryIcon from "@mui/icons-material/Factory";
-import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
-import PeopleIcon from "@mui/icons-material/People";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import EmailIcon from "@mui/icons-material/Email";
 import PhoneIcon from "@mui/icons-material/Phone";
 import { useState, useEffect, useRef } from "react";
+import { whyWorkWithUs, currentOpenings } from "../../utils/careerData";
 
 export const Career = () => {
   const [activeIndex, setActiveIndex] = useState(0);
@@ -45,59 +38,10 @@ export const Career = () => {
       observers.forEach((observer) => observer.disconnect());
     };
   }, []);
-  const whyWorkWithUs = [
-    {
-      icon: TrendingUpIcon,
-      title: "Growth Opportunities",
-      description: "We invest in our employees' professional development, offering training and advancement opportunities.",
-      highlighted: true,
-    },
-    {
-      icon: LightbulbIcon,
-      title: "Creative Environment",
-      description: "We foster a culture of innovation and creativity, encouraging our team to bring their unique ideas to the table.",
-      highlighted: false,
-    },
-    {
-      icon: EnergySavingsLeafIcon,
-      title: "Commitment to Quality",
-      description: "We take pride in using the finest ingredients and time-honored techniques to create exceptional baked goods.",
-      highlighted: false,
-    },
-    {
-      icon: BusinessCenterIcon,
-      title: "Employee Benefits",
-      description: "We offer competitive salaries, comprehensive benefits packages, and a supportive work environment.",
-      highlighted: false,
-    },
-  ];
-
-  const currentOpenings = [
-    {
-      icon: RestaurantIcon,
-      title: "Bakery Chefs",
-      description: "Crafting delicious baked goods with passion and precision.",
-    },
-    {
-      icon: FactoryIcon,
-      title: "Production Staff",
-      description: "Ensuring efficient production and maintaining high standards.",
-    },
-    {
-      icon: ShoppingCartIcon,
-      title: "Retail Executives",
-      description: "Providing excellent customer service and managing retail operations.",
-    },
-    {
-      icon: PeopleIcon,
-      title: "Management Positions",
-      description: "Overseeing operations, ensuring quality, and driving team success.",
-    },
-  ];
 
   return (
-    <Box sx={{ width: "100%", overflowX: "hidden", backgroundColor: "#fff", pb: { xs: 12, sm: 8, md: 0 }, p: { xs: 1.25, sm: 1.5, md: 0 } }}>
-      <Container  sx={{ py: { xs: 4, sm: 4, md: 4, lg: 0 }, px: { xs: 2, sm: 3, md: 4, lg: 4 } }}>
+    <Box sx={{ width: "100%", overflowX: "hidden", backgroundColor: "#fff", pb: { xs: 12, sm: 8, md: 0 }, p: { xs: 1.25, sm: 1.5, md: 0 }, mb: 5 }}>
+      <Container sx={{ py: { xs: 4, sm: 4, md: 4, lg: 0 }, px: { xs: 2, sm: 3, md: 4, lg: 4 } }}>
         <Box
           ref={sectionRefs.header}
           sx={{
@@ -107,32 +51,17 @@ export const Career = () => {
             px: { xs: 0, sm: 0, md: 1, lg: 0 },
           }}
         >
-          <CustomText
-            variant="h4"
-            sx={{
-              fontWeight: 700,
-              color: "#2c2c2c",
-              mb: 3,
-              fontSize: { xs: 24, sm: 28, md: 30, lg: 32 },
-            }}
-          >
+          <CustomText variant="h4" sx={{ fontWeight: 700, color: "#2c2c2c", mb: 3, fontSize: { xs: 24, sm: 28, md: 30, lg: 32 }, }}>
             Join the Danbro Bakery Team
           </CustomText>
-          <CustomText
-            variant="body1"
-            sx={{
-              fontSize: { xs: 13, sm: 14, md: 15, lg: 16 },
-              color: "#666",
-              lineHeight: 1.8,
-            }}
-          >
+          <CustomText variant="body1" sx={{ fontSize: { xs: 13, sm: 14, md: 15, lg: 16 }, color: "#666", lineHeight: 1.8, }}>
             At Danbro Bakery, we're more than just a team; we're a family. We're passionate about crafting delicious baked goods and creating a positive work environment where everyone can thrive. If you're looking for a rewarding career in the baking industry, we invite you to explore opportunities with us.
           </CustomText>
         </Box>
       </Container>
 
       {/* Why Work With Us Section */}
-      <Container  ref={sectionRefs.whyWork} sx={{ px: { xs: 2, sm: 3, md: 4, lg: 4 }, py: { xs: 2, sm: 3, md: 3, lg: 4 } }}>
+      <Container ref={sectionRefs.whyWork} sx={{ px: { xs: 2, sm: 3, md: 4, lg: 4 }, py: { xs: 2, sm: 3, md: 3, lg: 4 } }}>
         <Box
           sx={{
             opacity: visibleSections.whyWork ? 1 : 0,
@@ -153,7 +82,7 @@ export const Career = () => {
             Why Work With Us?
           </CustomText>
           <Grid container spacing={{ xs: 2, sm: 2, md: 2.5, lg: 3 }}>
-            {whyWorkWithUs.map((item, index) => (
+            {whyWorkWithUs?.map((item, index) => (
               <Grid size={{ xs: 12, sm: 6, md: 3 }} key={index}>
                 <Card
                   onClick={() => setActiveIndex(index)}
@@ -185,38 +114,15 @@ export const Career = () => {
                 >
                   <CardContent sx={{ p: 0 }}>
                     <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
-                      <item.icon
-                        sx={{
-                          fontSize: { xs: 36, md: 40 },
-                          color: activeIndex === index ? "#ff9800" : "#2c2c2c",
-                          transition: "0.3s",
-                        }}
-                      />
+                      <item.icon sx={{ fontSize: { xs: 36, md: 40 }, color: activeIndex === index ? "#ff9800" : "#2c2c2c", transition: "0.3s", }} />
                     </Box>
 
-                    <CustomText
-                      variant="h6"
-                      sx={{
-                        fontWeight: 700,
-                        mb: 1.5,
-                        color: "#2c2c2c",
-                        fontSize: { xs: 16, sm: 17, md: 17, lg: 18 },
-                        textAlign: "center",
-                      }}
-                    >
-                      {item.title}
+                    <CustomText variant="h6" sx={{ fontWeight: 700, mb: 1.5, color: "#2c2c2c", fontSize: { xs: 16, sm: 17, md: 17, lg: 18 }, textAlign: "center", }}>
+                      {item?.title}
                     </CustomText>
 
-                    <CustomText
-                      variant="body2"
-                      sx={{
-                        color: "#666",
-                        lineHeight: 1.7,
-                        fontSize: { xs: 13, sm: 13.5, md: 13.5, lg: 14 },
-                        textAlign: "center",
-                      }}
-                    >
-                      {item.description}
+                    <CustomText variant="body2" sx={{ color: "#666", lineHeight: 1.7, fontSize: { xs: 13, sm: 13.5, md: 13.5, lg: 14 }, textAlign: "center", }}>
+                      {item?.description}
                     </CustomText>
                   </CardContent>
                 </Card>
@@ -227,7 +133,7 @@ export const Career = () => {
       </Container>
 
       {/* Current Openings Section */}
-      <Container  sx={{ py: { xs: 4, sm: 4, md: 4, lg: 0 }, px: { xs: 2, sm: 3, md: 4, lg: 4 } }} ref={sectionRefs.openings}>
+      <Container sx={{ py: { xs: 4, sm: 4, md: 4, lg: 0 }, px: { xs: 2, sm: 3, md: 4, lg: 4 } }} ref={sectionRefs.openings}>
         <Box
           sx={{
             opacity: visibleSections.openings ? 1 : 0,
@@ -248,7 +154,7 @@ export const Career = () => {
             Current Openings
           </CustomText>
           <Grid container spacing={{ xs: 2, sm: 3, md: 3, lg: 3 }}>
-            {currentOpenings.map((job, index) => {
+            {currentOpenings?.map((job, index) => {
               const IconComponent = job.icon;
               return (
                 <Grid size={12} key={index}>
@@ -278,53 +184,16 @@ export const Career = () => {
                         },
                       }}
                     >
-                      <Box
-                        sx={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: { xs: 1.5, sm: 2 },
-                          flex: 1,
-                          width: "100%",
-                        }}
-                      >
-                        <Box
-                          sx={{
-                            p: { xs: 1.2, sm: 1.5 },
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            backgroundColor: "#FFE2DA",
-                            borderRadius: 2,
-                            flexShrink: 0,
-                          }}
-                        >
-                          <IconComponent
-                            sx={{
-                              fontSize: { xs: 28, sm: 32, md: 36 },
-                              color: "#171412",
-                            }}
-                          />
+                      <Box sx={{ display: "flex", alignItems: "center", gap: { xs: 1.5, sm: 2 }, flex: 1, width: "100%", }}>
+                        <Box sx={{ p: { xs: 1.2, sm: 1.5 }, display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: "#FFE2DA", borderRadius: 2, flexShrink: 0, }}>
+                          <IconComponent sx={{ fontSize: { xs: 28, sm: 32, md: 36 }, color: "#171412", }} />
                         </Box>
                         <Box sx={{ flex: 1, minWidth: 0 }}>
-                          <CustomText
-                            variant="h6"
-                            sx={{
-                              fontWeight: 700,
-                              color: "#2c2c2c",
-                              fontSize: { xs: 16, sm: 18, md: 19, lg: 20 },
-                              mb: 0.5,
-                            }}
-                          >
-                            {job.title}
+                          <CustomText variant="h6" sx={{ fontWeight: 700, color: "#2c2c2c", fontSize: { xs: 16, sm: 18, md: 19, lg: 20 }, mb: 0.5, }}>
+                            {job?.title}
                           </CustomText>
-                          <CustomText
-                            variant="body2"
-                            sx={{
-                              color: "#666",
-                              fontSize: { xs: 12, sm: 13, md: 13.5, lg: 14 },
-                            }}
-                          >
-                            {job.description}
+                          <CustomText variant="body2" sx={{ color: "#666", fontSize: { xs: 12, sm: 13, md: 13.5, lg: 14 }, }}>
+                            {job?.description}
                           </CustomText>
                         </Box>
                       </Box>
@@ -359,7 +228,7 @@ export const Career = () => {
       </Container>
 
       {/* How to Apply Section */}
-      <Container  sx={{ py: { xs: 4, sm: 4, md: 4, lg: 0 }, px: { xs: 2, sm: 3, md: 4, lg: 4 }, mb: 5 }} ref={sectionRefs.apply}>
+      <Container sx={{ py: { xs: 4, sm: 4, md: 4, lg: 0 }, px: { xs: 2, sm: 3, md: 4, lg: 4 }, mb: 5 }} ref={sectionRefs.apply}>
         <Box
           sx={{
             opacity: visibleSections.apply ? 1 : 0,

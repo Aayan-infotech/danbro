@@ -1,4 +1,4 @@
-import { Box, Container,  Grid, Button } from "@mui/material";
+import { Box, Container, Grid, Button } from "@mui/material";
 import { CustomText } from "../../components/comman/CustomText";
 import cateringEvents from "../../assets/createevents.png";
 import createevents1 from "../../assets/createevents1.png";
@@ -100,15 +100,7 @@ export const CateringEvents = () => {
           transition: "opacity 0.8s ease-out, transform 0.8s ease-out",
         }}
       >
-        <CustomText
-          variant="h1"
-          sx={{
-            fontSize: { xs: 28, sm: 36, md: 42, lg: 56 },
-            fontWeight: 700,
-            color: "#fff",
-            mb: 2,
-          }}
-        >
+        <CustomText variant="h1" sx={{ fontSize: { xs: 28, sm: 36, md: 42, lg: 56 }, fontWeight: 700, color: "#fff", mb: 2, }}>
           Catering & Events
         </CustomText>
       </Box>
@@ -308,24 +300,10 @@ export const CateringEvents = () => {
                       },
                     }}
                   >
-                    <img
-                      src={item.image}
-                      alt={item.title}
-                      style={{
-                        width: "100%",
-                        height: "100%",
-                        objectFit: "cover",
-                      }}
-                    />
+                    <img src={item.image} alt={item.title} style={{ width: "100%", height: "100%", objectFit: "cover", }} />
                   </Box>
 
-                  <CustomText
-                    sx={{
-                      fontWeight: 700,
-                      fontSize: { xs: 15, sm: 16, md: 15, lg: 16 },
-                      color: "#2c2c2c",
-                    }}
-                  >
+                  <CustomText sx={{ fontWeight: 700, fontSize: { xs: 15, sm: 16, md: 15, lg: 16 }, color: "#2c2c2c", }}>
                     {item.title}
                   </CustomText>
                   <CustomText
@@ -383,23 +361,10 @@ export const CateringEvents = () => {
                     },
                   }}
                 >
-                  <CustomText
-                    variant="h6"
-                    sx={{
-                      fontWeight: 700,
-                      color: "#2c2c2c",
-                      fontSize: { xs: 15, sm: 16, md: 17, lg: 18 },
-                    }}
-                  >
+                  <CustomText variant="h6" sx={{ fontWeight: 700, color: "#2c2c2c", fontSize: { xs: 15, sm: 16, md: 17, lg: 18 }, }}>
                     Visit Us
                   </CustomText>
-                  <CustomText
-                    variant="body2"
-                    sx={{
-                      color: "#666",
-                      fontSize: { xs: 12, sm: 13, md: 13, lg: 14 },
-                    }}
-                  >
+                  <CustomText variant="body2" sx={{ color: "#666", fontSize: { xs: 12, sm: 13, md: 13, lg: 14 }, }}>
                     B-35, Sector-P, Aliganj, Lucknow 226024
                   </CustomText>
                 </Box>
@@ -425,23 +390,10 @@ export const CateringEvents = () => {
                     },
                   }}
                 >
-                  <CustomText
-                    variant="h6"
-                    sx={{
-                      fontWeight: 700,
-                      color: "#2c2c2c",
-                      fontSize: { xs: 15, sm: 16, md: 17, lg: 18 },
-                    }}
-                  >
+                  <CustomText variant="h6" sx={{ fontWeight: 700, color: "#2c2c2c", fontSize: { xs: 15, sm: 16, md: 17, lg: 18 }, }}>
                     Call Us
                   </CustomText>
-                  <CustomText
-                    variant="body2"
-                    sx={{
-                      color: "#666",
-                      fontSize: { xs: 12, sm: 13, md: 13, lg: 14 },
-                    }}
-                  >
+                  <CustomText variant="body2" sx={{ color: "#666", fontSize: { xs: 12, sm: 13, md: 13, lg: 14 }, }}>
                     +91-7309010623
                   </CustomText>
                 </Box>
