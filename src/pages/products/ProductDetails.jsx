@@ -387,7 +387,14 @@ export const ProductDetails = () => {
 
   return (
     <Box >
-      <Container maxWidth="false" sx={{ py: 4, px: { xs: 2, md: 3, lg: 2 } }}>
+      <Container
+        maxWidth="false"
+        sx={{
+          pt: 0, // remove top padding
+          pb: 4,
+          px: { xs: 2, md: 3, lg: 2 },
+        }}
+      >
         <Breadcrumbs sx={{ mb: 3, px: { xs: 2, md: 3, lg: 2 } }}>
           <Link component="button" variant="body1" onClick={() => navigate("/products")} sx={{ color: "#666", textDecoration: "none", cursor: "pointer", "&:hover": { color: "#FF9472", }, }}>
             Products
@@ -815,68 +822,7 @@ export const ProductDetails = () => {
           ))}
         </Box>
 
-        {/* Explore More */}
-        <Box ref={exploreSectionRef}>
-          <CustomText className="title-style" sx={{ textAlign: "center", mt: { xs: 3, md: 5 }, mb: { xs: 2, md: 4 }, fontSize: { xs: 18, sm: 22, md: 26, lg: 28 }, fontWeight: 'bold', fontFamily: "var(--fontFamily)" }}>Explore More</CustomText>
-          <Box sx={{ width: "100%", borderBottom: "1px solid #e5e5e5", overflowX: { xs: "auto", md: "visible" } }}>
-          <Tabs
-            value={tab}
-            onChange={(_, v) => setTab(v)}
-            centered={!isMobile}
-            variant={isMobile ? "scrollable" : "standard"}
-            scrollButtons="auto"
-            TabIndicatorProps={{
-              sx: {
-                backgroundColor: "#C22A00",
-                height: 10,
-                borderTopRightRadius: "10px",
-                borderTopLeftRadius: "10px",
-                borderBottomLeftRadius: 0,
-                borderBottomRightRadius: 0,
-              }
-            }}
-            sx={{
-              "& .MuiTab-root": {
-                fontSize: { xs: 14, md: 18 },
-                textTransform: "capitalize",
-                fontWeight: 500,
-                mx: { xs: 1, md: 2 },
-                minWidth: { xs: "auto", md: "auto" },
-                px: { xs: 1.5, md: 2 }
-              },
-              "& .Mui-selected": { color: "#FF643A", fontWeight: 700 }
-            }}
-          >
-            {["Cake", "Muffins", "Croissant", "Bread", "Tart", "Favorite"].map((item) => (
-              <Tab key={item} label={item} value={item.toLowerCase()} />
-            ))}
-          </Tabs>
-        </Box>
-        {images && images.length > 0 && (
-          <Grid container spacing={{ xs: 2, md: 3 }} mt={{ xs: 3, md: 4 }} sx={{ mb: 5, px: { xs: 2, md: 3, lg: 2 } }} >
-            {images.map((img, i) => (
-              <Grid size={{ xs: 6, sm: 4, md: 3 }} key={i}>
-                <Box
-                  component="img"
-                  src={img}
-                  loading="lazy"
-                  decoding="async"
-                  fetchPriority="low"
-                  sx={{
-                    width: "100%",
-                    height: { xs: 180, sm: 200, md: 230 },
-                    objectFit: "cover",
-                    borderRadius: 3,
-                    transition: "0.3s",
-                    cursor: "pointer",
-                    "&:hover": { transform: "scale(1.03)" }
-                  }}
-                />
-              </Grid>
-            ))}
-          </Grid>
-        )}
-        </Box>
+        {/* Explore More section disabled as per request */}
       </Container>
     </Box>
   );

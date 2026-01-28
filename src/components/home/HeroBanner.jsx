@@ -473,8 +473,8 @@ export const HeroBanner = () => {
                       className={isActive ? `animated ${slide?.animationType}` : ""}
                       sx={{
                         fontSize: { xs: "14px", sm: "16px", md: "18px", lg: "20px" },
-                        fontWeight: 500,
-                        fontFamily: "var(--fontFamily)",
+                        fontWeight: 400,
+                        fontFamily: "'Poppins', sans-serif",
                         color: "#666",
                         textAlign: { xs: "center", md: slide?.captionPosition === "center" ? "center" : "left" },
                         textShadow: "none",
