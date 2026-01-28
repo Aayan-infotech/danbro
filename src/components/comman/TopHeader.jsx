@@ -29,6 +29,7 @@ export const TopHeader = () => {
     const [wishlistCount, setWishlistCount] = useState(0);
     const [cartCount, setCartCount] = useState(0);
     const [isScrolled, setIsScrolled] = useState(false);
+    const [locationLabel, setLocationLabel] = useState("Location...?");
 
     // Check if on profile page to add bottom border
     const isProfilePage = location.pathname === "/profile" || location.pathname === "/user-profile";
@@ -56,6 +57,35 @@ export const TopHeader = () => {
             setCartCount(0);
         }
     }, []); // Only run once on mount
+
+    // Initialize and listen for delivery location changes
+    useEffect(() => {
+        // On mount, read any stored location and show it
+        const storedLocation = getStoredLocation();
+        if (storedLocation?.label) {
+            const label =
+                storedLocation.label.length > 28
+                    ? `${storedLocation.label.slice(0, 28)}...`
+                    : storedLocation.label;
+            setLocationLabel(label);
+        }
+
+        // Listen for updates from DeliveryCheckDialog
+        const handleLocationUpdated = (event) => {
+            const updatedLabel = event?.detail?.label || "Current location";
+            const displayLabel =
+                updatedLabel.length > 28
+                    ? `${updatedLabel.slice(0, 28)}...`
+                    : updatedLabel;
+            setLocationLabel(displayLabel);
+        };
+
+        window.addEventListener("locationUpdated", handleLocationUpdated);
+
+        return () => {
+            window.removeEventListener("locationUpdated", handleLocationUpdated);
+        };
+    }, []);
 
     // Fetch wishlist count - debounced to prevent excessive calls
     useEffect(() => {
@@ -267,7 +297,7 @@ export const TopHeader = () => {
                     startIcon={<NearMe />}
                     onClick={() => setOpenDeliveryDialog(true)}
                 >
-                    Location...?
+                    {locationLabel}
                 </AnimatedButton>
 
                 <AnimatedButton
@@ -288,7 +318,7 @@ export const TopHeader = () => {
                         minWidth: "auto",
                     }}
                 >
-                    {isMobile ? "" : "Location"}
+                    {isMobile ? "" : (locationLabel || "Location")}
                 </AnimatedButton>
             </Box>
 

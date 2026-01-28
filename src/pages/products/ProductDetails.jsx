@@ -63,6 +63,12 @@ export const ProductDetails = () => {
   // Delivery location display
   const [deliveryLocationLabel, setDeliveryLocationLabel] = useState("");
   const [hasSavedLocation, setHasSavedLocation] = useState(false);
+
+  // Image zoom state
+  const [isZooming, setIsZooming] = useState(false);
+  const [zoomPosition, setZoomPosition] = useState({ x: 0, y: 0 });
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const imageContainerRef = useRef(null);
   
   // Fetch categories and home layout data
   const { categories: apiCategories } = useItemCategories();
@@ -321,51 +327,6 @@ export const ProductDetails = () => {
     "Quality Guarantee\nTaste the difference"
   ];
 
-  // OPTIMIZED: Only load explore images when section is visible to reduce initial load
-  const [exploreImagesLoaded, setExploreImagesLoaded] = useState(false);
-  const exploreSectionRef = useRef(null);
-
-  useEffect(() => {
-    // Load images when Explore More section comes into viewport
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting && !exploreImagesLoaded) {
-            setExploreImagesLoaded(true);
-          }
-        });
-      },
-      { threshold: 0.1, rootMargin: "200px" } // Start loading 200px before section is visible
-    );
-
-    if (exploreSectionRef.current) {
-      observer.observe(exploreSectionRef.current);
-    }
-
-    return () => {
-      if (exploreSectionRef.current) {
-        observer.unobserve(exploreSectionRef.current);
-      }
-    };
-  }, [exploreImagesLoaded]);
-
-  const images = useMemo(() => {
-    // Only return images if section is visible
-    if (!exploreImagesLoaded) {
-      return []; // Return empty array until section is visible
-    }
-    // Use blank image instead of external URLs to reduce requests
-    return [
-      blankImage,
-      blankImage,
-      blankImage,
-      blankImage,
-      blankImage,
-      blankImage,
-      blankImage,
-      blankImage
-    ];
-  }, [exploreImagesLoaded]);
 
   if (loading) {
     return (
@@ -386,41 +347,59 @@ export const ProductDetails = () => {
   }
 
   return (
-    <Box >
+    <Box>
       <Container
-        maxWidth="false"
+        maxWidth="lg"
         sx={{
-          pt: 0, // remove top padding
-          pb: 4,
-          px: { xs: 2, md: 3, lg: 2 },
+          pb: 6,
+          px: { xs: 2, sm: 3, md: 4 },
         }}
       >
-        <Breadcrumbs sx={{ mb: 3, px: { xs: 2, md: 3, lg: 2 } }}>
-          <Link component="button" variant="body1" onClick={() => navigate("/products")} sx={{ color: "#666", textDecoration: "none", cursor: "pointer", "&:hover": { color: "#FF9472", }, }}>
+        <Breadcrumbs sx={{ mb: 4 }}>
+          <Link 
+            component="button" 
+            variant="body1" 
+            onClick={() => navigate("/products")} 
+            sx={{ 
+              color: "#666", 
+              textDecoration: "none", 
+              cursor: "pointer",
+              fontFamily: "'Poppins', sans-serif",
+              fontSize: 14,
+              fontWeight: 400,
+              "&:hover": { color: "#FF9472" },
+            }}
+          >
             Products
           </Link>
-          <CustomText color="text.primary" autoTitleCase={true}>{productData?.name}</CustomText>
+          <CustomText 
+            color="text.primary" 
+            autoTitleCase={true}
+            sx={{
+              fontFamily: "'Poppins', sans-serif",
+              fontSize: 14,
+              fontWeight: 400,
+            }}
+          >
+            {productData?.name}
+          </CustomText>
         </Breadcrumbs>
 
-          <Grid container spacing={{ xs: 2, md: 4, lg: 3 }} sx={{ px: { xs: 2, md: 3, lg: 2 } }}>
-            <Grid size={{ xs: 12, md: 6 }}>
-            <Box sx={{ display: "flex", gap: { xs: 1, md: 2 } }}>
-              <Box sx={{ display: { xs: "none", md: "flex" }, flexDirection: "column", gap: 1 }}>
+        <Grid container spacing={{ xs: 3, md: 5 }}>
+          <Grid size={{ xs: 12, md: 6 }}>
+            <Box sx={{ display: "flex", gap: 2, flexDirection: { xs: "column", md: "row" } }}>
+              <Box sx={{ display: { xs: "none", md: "flex" }, flexDirection: "column", gap: 1.5 }}>
                 {productData?.images?.map((image, index) => (
                   <Box
                     key={index}
                     onClick={() => setSelectedImage(index)}
                     sx={{
-                      width: 80,
-                      height: 80,
-                      borderRadius: 2,
+                      width: 70,
+                      height: 70,
+                      borderRadius: 1,
                       overflow: "hidden",
                       cursor: "pointer",
-                      border: selectedImage === index ? "2px solid #FF9472" : "2px solid transparent",
-                      transition: "all 0.3s ease",
-                      "&:hover": {
-                        border: "2px solid #FF9472",
-                      },
+                      border: selectedImage === index ? "2px solid #FF9472" : "1px solid #e0e0e0",
                     }}
                   >
                     <Box 
@@ -428,90 +407,252 @@ export const ProductDetails = () => {
                       src={image} 
                       alt={`${productData?.name} ${index + 1}`} 
                       loading={index === 0 ? "eager" : "lazy"}
-                      fetchPriority={index === 0 ? "high" : "low"}
-                      decoding="async"
-                      sx={{ width: "100%", height: "100%", objectFit: "cover", }} 
+                      sx={{ width: "100%", height: "100%", objectFit: "cover" }} 
                     />
                   </Box>
                 ))}
               </Box>
-              <Box sx={{ flex: 1 }}>
-                <Box sx={{ width: "100%", height: { xs: 300, sm: 350, md: 450 }, borderRadius: 2, overflow: "hidden", mb: 2 }}>
+              <Box sx={{ flex: 1, position: "relative" }}>
+                <Box 
+                  ref={imageContainerRef}
+                  sx={{ 
+                    width: "100%", 
+                    height: { xs: 350, sm: 400, md: 500 }, 
+                    borderRadius: 1, 
+                    overflow: "hidden",
+                    backgroundColor: "#f5f5f5",
+                    position: "relative",
+                    cursor: { xs: "default", md: isZooming ? "crosshair" : "default" },
+                  }}
+                  onMouseEnter={() => !isMobile && setIsZooming(true)}
+                  onMouseLeave={() => setIsZooming(false)}
+                  onMouseMove={(e) => {
+                    if (!imageContainerRef.current || isMobile) return;
+                    const rect = imageContainerRef.current.getBoundingClientRect();
+                    const x = ((e.clientX - rect.left) / rect.width) * 100;
+                    const y = ((e.clientY - rect.top) / rect.height) * 100;
+                    setMousePosition({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+                    setZoomPosition({ x: Math.max(0, Math.min(100, x)), y: Math.max(0, Math.min(100, y)) });
+                  }}
+                >
                   <Box 
                     component="img" 
                     src={productData?.images[selectedImage]} 
                     alt={productData?.name} 
                     loading="eager"
-                    fetchPriority="high"
-                    decoding="async"
-                    sx={{ width: "100%", height: "100%", objectFit: "cover", }} 
+                    sx={{ 
+                      width: "100%", 
+                      height: "100%", 
+                      objectFit: "cover",
+                    }} 
                   />
+                  {/* Zoom lens overlay */}
+                  {isZooming && !isMobile && (
+                    <Box
+                      sx={{
+                        position: "absolute",
+                        top: mousePosition.y - 100,
+                        left: mousePosition.x - 100,
+                        width: 200,
+                        height: 200,
+                        borderRadius: "50%",
+                        border: "2px solid #FF9472",
+                        backgroundColor: "rgba(255, 148, 114, 0.15)",
+                        pointerEvents: "none",
+                        display: { xs: "none", md: "block" },
+                        zIndex: 10,
+                        boxShadow: "0 0 0 9999px rgba(0, 0, 0, 0.3)",
+                        clipPath: "circle(100px at center)",
+                      }}
+                    />
+                  )}
                 </Box>
+                {/* Zoomed image panel */}
+                {isZooming && !isMobile && (
+                  <Box
+                    sx={{
+                      position: "absolute",
+                      top: 0,
+                      right: { xs: 0, md: -420 },
+                      width: { xs: "100%", md: 400 },
+                      height: { xs: 350, sm: 400, md: 500 },
+                      borderRadius: 1,
+                      overflow: "hidden",
+                      backgroundColor: "#fff",
+                      border: "1px solid #e0e0e0",
+                      zIndex: 20,
+                      display: { xs: "none", md: "block" },
+                      boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
+                    }}
+                  >
+                    <Box
+                      component="img"
+                      src={productData?.images[selectedImage]}
+                      alt={`${productData?.name} - Zoomed`}
+                      sx={{
+                        width: "200%",
+                        height: "200%",
+                        objectFit: "cover",
+                        position: "absolute",
+                        left: `${-zoomPosition.x * 2}%`,
+                        top: `${-zoomPosition.y * 2}%`,
+                        pointerEvents: "none",
+                      }}
+                    />
+                  </Box>
+                )}
               </Box>
             </Box>
           </Grid>
           <Grid size={{ xs: 12, md: 6 }}>
             <Box>
-              <CustomText variant="h3" autoTitleCase={true} sx={{ fontSize: { xs: 20, sm: 24, md: 30, lg: 36 }, fontWeight: 700, color: "#2c2c2c", mb: 2, }}>
+              <CustomText 
+                variant="h3" 
+                autoTitleCase={true} 
+                sx={{ 
+                  fontSize: { xs: 24, sm: 28, md: 32 },
+                  fontWeight: 600,
+                  fontFamily: "'Playfair Display', serif",
+                  color: "#2c2c2c",
+                  mb: 2,
+                  lineHeight: 1.3,
+                }}
+              >
                 {productData?.name}
               </CustomText>
-              <CustomText variant="h4" sx={{ fontSize: { xs: 20, sm: 24, md: 30, lg: 36 }, fontWeight: 700, color: "#F31400", mb: 2, display: "flex", alignItems: "center" }}>
-                {productData?.price} / <CustomText variant="body1" sx={{ fontSize: '13px', fontWeight: 600, color: "#2c2c2c", }}>
-                  {productData?.weight}
+              <Box sx={{ mb: 3 }}>
+                <CustomText 
+                  sx={{ 
+                    fontSize: { xs: 24, sm: 28, md: 32 },
+                    fontWeight: 600,
+                    fontFamily: "'Poppins', sans-serif",
+                    color: "#F31400",
+                    display: "inline-block",
+                    mr: 0.5,
+                  }}
+                >
+                  {productData?.price}
                 </CustomText>
-              </CustomText>
-              <Box>
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <CustomText 
+                  sx={{ 
+                    fontSize: 14,
+                    fontWeight: 400,
+                    fontFamily: "'Poppins', sans-serif",
+                    color: "#666",
+                  }}
+                >
+                  / {productData?.weight}
+                </CustomText>
+              </Box>
+              <Box sx={{ mb: 3 }}>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
                   <Rating value={4.5} precision={0.5} readOnly sx={{ color: "#FF643A" }} />
-                  <CustomText sx={{ fontSize: { xs: 13, sm: 14, md: 16 }, fontWeight: 600, color: "#333" }}>
-                    4.5 <span style={{ fontWeight: 400, color: "#777" }}>/ 5</span>
+                  <CustomText sx={{ 
+                    fontSize: 14,
+                    fontWeight: 500,
+                    fontFamily: "'Poppins', sans-serif",
+                    color: "#333"
+                  }}>
+                    4.5
                   </CustomText>
-                  <CustomText sx={{ fontSize: { xs: 11, sm: 12, md: 14 }, color: "#777" }}>(245 Reviews)</CustomText>
+                  <CustomText sx={{ 
+                    fontSize: 14,
+                    fontWeight: 400,
+                    fontFamily: "'Poppins', sans-serif",
+                    color: "#777"
+                  }}>
+                    (245 Reviews)
+                  </CustomText>
                 </Box>
               </Box>
-              <CustomText variant="body1" autoTitleCase={true} sx={{ color: "#666", lineHeight: 1.8, mb: 3, fontSize: { xs: 12, sm: 13, md: 15, lg: 16 }, }}>
+              <CustomText 
+                variant="body1" 
+                autoTitleCase={true} 
+                sx={{ 
+                  color: "#666",
+                  lineHeight: 1.7,
+                  mb: 4,
+                  fontSize: 15,
+                  fontWeight: 400,
+                  fontFamily: "'Poppins', sans-serif",
+                }}
+              >
                 {productData?.description}
               </CustomText>
-              <Divider sx={{ my: 2, backgroundColor: "#F31400" }} />
-              {/* Weight selection as chips – options from API only */}
+              <Divider sx={{ my: 3, backgroundColor: "#e0e0e0" }} />
+              {/* Weight selection */}
               {weightOptions.length > 0 && (
-                <Box sx={{ display: "flex", flexDirection: { xs: "column", md: "row" }, justifyContent: "space-between", alignItems: { xs: "flex-start", md: "center" }, gap: { xs: 2, md: 0 } }}>
-                  <Box sx={{ mb: { xs: 1, md: 0 } }}>
-                    <CustomText variant="body2" sx={{ fontWeight: 600, color: "#2c2c2c", fontSize: { xs: 13, md: 14 }, mb: 1 }}>
-                      Select Weight
-                    </CustomText>
-                    <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
-                      {weightOptions.map((w) => (
-                        <Chip
-                          key={w}
-                          label={w}
-                          clickable
-                          onClick={() => setProductWeight(w)}
-                          sx={{
-                            fontSize: { xs: 12, md: 13 },
-                            fontWeight: 600,
-                            borderRadius: "999px",
-                            px: 1,
-                            border: productWeight === w ? "2px solid #F31400" : "1px solid #ddd",
-                            backgroundColor: productWeight === w ? "#FFE9E3" : "#fff",
-                            color: productWeight === w ? "#F31400" : "#333",
-                          }}
-                        />
-                      ))}
-                    </Box>
-                  </Box>
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 1, backgroundColor: "#9BFF82", borderRadius: 2, p: { xs: 0.8, md: 1 }, mt: { xs: 1, md: 0 } }}>
-                    <CheckCircleIcon sx={{ color: "#4caf50", fontSize: { xs: 18, md: 20 } }} />
-                    <CustomText variant="body1" sx={{ fontWeight: 600, color: "#2c2c2c", fontSize: { xs: 13, md: 16 } }}>
-                      {productData?.stock} in stock
-                    </CustomText>
+                <Box sx={{ mb: 3 }}>
+                  <CustomText 
+                    sx={{ 
+                      fontWeight: 600,
+                      fontFamily: "'Poppins', sans-serif",
+                      color: "#2c2c2c",
+                      fontSize: 14,
+                      mb: 1.5
+                    }}
+                  >
+                    Select Weight
+                  </CustomText>
+                  <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+                    {weightOptions.map((w) => (
+                      <Chip
+                        key={w}
+                        label={w}
+                        clickable
+                        onClick={() => setProductWeight(w)}
+                        sx={{
+                          fontSize: 13,
+                          fontWeight: 500,
+                          fontFamily: "'Poppins', sans-serif",
+                          borderRadius: 1,
+                          px: 1.5,
+                          py: 0.5,
+                          border: productWeight === w ? "2px solid #F31400" : "1px solid #ddd",
+                          backgroundColor: productWeight === w ? "#FFE9E3" : "#fff",
+                          color: productWeight === w ? "#F31400" : "#333",
+                        }}
+                      />
+                    ))}
                   </Box>
                 </Box>
               )}
 
+              {/* Stock status */}
+              <Box sx={{ 
+                display: "flex", 
+                alignItems: "center", 
+                gap: 1, 
+                backgroundColor: "#f0f9f0", 
+                borderRadius: 1, 
+                p: 1.5,
+                mb: 3,
+                border: "1px solid #c8e6c9"
+              }}>
+                <CheckCircleIcon sx={{ color: "#4caf50", fontSize: 20 }} />
+                <CustomText 
+                  sx={{ 
+                    fontWeight: 500,
+                    fontFamily: "'Poppins', sans-serif",
+                    color: "#2c2c2c",
+                    fontSize: 14
+                  }}
+                >
+                  {productData?.stock} in stock
+                </CustomText>
+              </Box>
+
               {/* Cake message input */}
-              <Box sx={{ mt: 3 }}>
-                <CustomText variant="body2" sx={{ fontWeight: 600, color: "#2c2c2c", fontSize: { xs: 13, md: 14 }, mb: 0.5 }}>
+              <Box sx={{ mb: 3 }}>
+                <CustomText 
+                  sx={{ 
+                    fontWeight: 600,
+                    fontFamily: "'Poppins', sans-serif",
+                    color: "#2c2c2c",
+                    fontSize: 14,
+                    mb: 1
+                  }}
+                >
                   Cake Message
                 </CustomText>
                 <TextField
@@ -525,9 +666,9 @@ export const ProductDetails = () => {
                   size="small"
                   inputProps={{ maxLength: 25 }}
                   sx={{
-                    mt: 0.5,
                     "& .MuiOutlinedInput-root": {
-                      borderRadius: 2,
+                      borderRadius: 1,
+                      fontFamily: "'Poppins', sans-serif",
                     },
                   }}
                   helperText={`${cakeMessage.length}/25`}
@@ -535,18 +676,49 @@ export const ProductDetails = () => {
               </Box>
 
               {/* Delivery location section */}
-              <Box sx={{ mt: 3, p: 2, borderRadius: 2, border: "1px solid #eee", backgroundColor: "#FFF9F6" }}>
-                <CustomText variant="body2" sx={{ fontWeight: 600, color: "#2c2c2c", fontSize: { xs: 13, md: 14 }, mb: 1 }}>
+              <Box sx={{ 
+                mb: 3, 
+                p: 2, 
+                borderRadius: 1, 
+                border: "1px solid #e0e0e0", 
+                backgroundColor: "#fafafa"
+              }}>
+                <CustomText 
+                  sx={{ 
+                    fontWeight: 600,
+                    fontFamily: "'Poppins', sans-serif",
+                    color: "#2c2c2c",
+                    fontSize: 14,
+                    mb: 1.5
+                  }}
+                >
                   Delivery Location
                 </CustomText>
 
                 {hasSavedLocation ? (
-                  <Box sx={{ display: "flex", flexDirection: { xs: "column", sm: "row" }, justifyContent: "space-between", gap: 1.5, alignItems: { xs: "flex-start", sm: "center" } }}>
+                  <Box sx={{ 
+                    display: "flex", 
+                    flexDirection: { xs: "column", sm: "row" }, 
+                    justifyContent: "space-between", 
+                    gap: 1.5, 
+                    alignItems: { xs: "flex-start", sm: "center" }
+                  }}>
                     <Box>
-                      <CustomText sx={{ fontSize: { xs: 13, md: 14 }, fontWeight: 600 }}>
+                      <CustomText sx={{ 
+                        fontSize: 14,
+                        fontWeight: 500,
+                        fontFamily: "'Poppins', sans-serif",
+                        color: "#2c2c2c"
+                      }}>
                         {deliveryLocationLabel}
                       </CustomText>
-                      <CustomText sx={{ fontSize: { xs: 12, md: 13 }, color: "#1B9C3F", mt: 0.3 }}>
+                      <CustomText sx={{ 
+                        fontSize: 13,
+                        fontWeight: 400,
+                        fontFamily: "'Poppins', sans-serif",
+                        color: "#1B9C3F",
+                        mt: 0.5
+                      }}>
                         Awesome, we deliver to this location.
                       </CustomText>
                     </Box>
@@ -557,16 +729,17 @@ export const ProductDetails = () => {
                         window.dispatchEvent(new Event("openLocationDialog"));
                       }}
                       sx={{
-                        borderRadius: "999px",
+                        borderRadius: 1,
                         textTransform: "none",
-                        fontSize: { xs: 12, md: 13 },
-                        fontWeight: 600,
+                        fontSize: 13,
+                        fontWeight: 500,
+                        fontFamily: "'Poppins', sans-serif",
                         px: 2,
                         borderColor: "#F31400",
                         color: "#F31400",
                         "&:hover": {
                           borderColor: "#C22A00",
-                          backgroundColor: "rgba(242, 112, 156, 0.04)",
+                          backgroundColor: "rgba(255, 148, 114, 0.08)",
                         },
                       }}
                     >
@@ -574,14 +747,20 @@ export const ProductDetails = () => {
                     </Button>
                   </Box>
                 ) : (
-                  <Box sx={{ display: "flex", flexDirection: { xs: "column", sm: "row" }, gap: 1.5, alignItems: { xs: "stretch", sm: "center" } }}>
+                  <Box sx={{ 
+                    display: "flex", 
+                    flexDirection: { xs: "column", sm: "row" }, 
+                    gap: 1.5, 
+                    alignItems: { xs: "stretch", sm: "center" }
+                  }}>
                     <TextField
                       fullWidth
                       placeholder="Enter area / locality / pincode"
                       size="small"
                       sx={{
                         "& .MuiOutlinedInput-root": {
-                          borderRadius: 2,
+                          borderRadius: 1,
+                          fontFamily: "'Poppins', sans-serif",
                         },
                       }}
                       onFocus={() => {
@@ -598,10 +777,11 @@ export const ProductDetails = () => {
                         window.dispatchEvent(new Event("openLocationDialog"));
                       }}
                       sx={{
-                        borderRadius: "999px",
+                        borderRadius: 1,
                         textTransform: "none",
-                        fontSize: { xs: 12, md: 13 },
-                        fontWeight: 700,
+                        fontSize: 13,
+                        fontWeight: 500,
+                        fontFamily: "'Poppins', sans-serif",
                         px: 2.5,
                         backgroundColor: "#F31400",
                         "&:hover": {
@@ -615,21 +795,43 @@ export const ProductDetails = () => {
                 )}
               </Box>
 
-              <Grid container spacing={{ xs: 1.5, md: 2 }} mt={{ xs: 3, md: 4 }}>
-                <Grid size={{ xs: 4, md: 3 }}>
-                  <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: { xs: 1, md: 2 }, borderRadius: 10, border: "1px solid #2c2c2c", p: { xs: 0.8, md: 1 }, backgroundColor: "#gainsboro" }}>
-                    <Box onClick={() => setQuantity(Math.max(1, quantity - 1))} sx={{ cursor: "pointer" }}>
-                      <Remove sx={{ color: "#2c2c2c", fontSize: { xs: 18, md: 20 } }} />
+              {/* Quantity and Add to Cart */}
+              <Grid container spacing={2} sx={{ mt: 2 }}>
+                <Grid size={{ xs: 4, sm: 3 }}>
+                  <Box sx={{ 
+                    display: "flex", 
+                    justifyContent: "space-between", 
+                    alignItems: "center", 
+                    borderRadius: 1, 
+                    border: "1px solid #ddd", 
+                    p: 1,
+                    backgroundColor: "#fff"
+                  }}>
+                    <Box 
+                      onClick={() => setQuantity(Math.max(1, quantity - 1))} 
+                      sx={{ cursor: "pointer", display: "flex", alignItems: "center" }}
+                    >
+                      <Remove sx={{ color: "#2c2c2c", fontSize: 20 }} />
                     </Box>
-                    <CustomText variant="body2" sx={{ fontWeight: 600, color: "#2c2c2c", fontSize: { xs: 13, md: 14 } }}>
+                    <CustomText 
+                      sx={{ 
+                        fontWeight: 500,
+                        fontFamily: "'Poppins', sans-serif",
+                        color: "#2c2c2c",
+                        fontSize: 14
+                      }}
+                    >
                       {quantity}
                     </CustomText>
-                    <Box onClick={() => setQuantity(quantity + 1)} sx={{ cursor: "pointer" }}>
-                      <Add sx={{ color: "#2c2c2c", fontSize: { xs: 18, md: 20 } }} />
+                    <Box 
+                      onClick={() => setQuantity(quantity + 1)} 
+                      sx={{ cursor: "pointer", display: "flex", alignItems: "center" }}
+                    >
+                      <Add sx={{ color: "#2c2c2c", fontSize: 20 }} />
                     </Box>
                   </Box>
                 </Grid>
-                <Grid size={{ xs: 6, md: 8 }} sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+                <Grid size={{ xs: 6, sm: 7 }}>
                   <Button
                     onClick={handleAddToCart}
                     disabled={addingToCart || !product}
@@ -637,17 +839,14 @@ export const ProductDetails = () => {
                     sx={{
                       backgroundColor: "#FF9472",
                       color: "#fff",
-                      p: { xs: 0.8, md: 1 },
-                      borderRadius: "50px",
-                      fontSize: { xs: 12, sm: 14, md: 16, lg: 18 },
-                      fontWeight: 700,
+                      py: 1.2,
+                      borderRadius: 1,
+                      fontSize: 15,
+                      fontWeight: 500,
+                      fontFamily: "'Poppins', sans-serif",
                       textTransform: "none",
-                      transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-                      boxShadow: "0 4px 15px rgba(255,148,114,0.3)",
                       "&:hover": {
                         backgroundColor: "#F2709C",
-                        transform: "translateY(-3px)",
-                        boxShadow: "0 8px 25px rgba(255,148,114,0.5)",
                       },
                       "&:disabled": {
                         backgroundColor: "#ccc",
@@ -658,82 +857,196 @@ export const ProductDetails = () => {
                     {addingToCart ? (
                       <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                         <CircularProgress size={20} sx={{ color: "#fff" }} />
-                        <CustomText>Adding...</CustomText>
+                        <CustomText sx={{ fontFamily: "'Poppins', sans-serif" }}>Adding...</CustomText>
                       </Box>
                     ) : (
                       "Add to Cart"
                     )}
                   </Button>
                 </Grid>
-                <Grid size={{ xs: 2, md: 1 }} sx={{ display: "flex", justifyContent: { xs: "center", md: "end" }, alignItems: { xs: "center", md: "end" } }}>
-                  <IconButton aria-label="delete" size={isMobile ? "medium" : "large"} sx={{ backgroundColor: "#edecec", borderRadius: "50px" }}>
-                    <FavoriteBorder sx={{ color: "#2c2c2c", fontSize: { xs: 18, md: 20 } }} />
+                <Grid size={{ xs: 2, sm: 2 }}>
+                  <IconButton 
+                    aria-label="favorite" 
+                    sx={{ 
+                      backgroundColor: "#f5f5f5",
+                      borderRadius: 1,
+                      "&:hover": {
+                        backgroundColor: "#e0e0e0",
+                      }
+                    }}
+                  >
+                    <FavoriteBorder sx={{ color: "#2c2c2c", fontSize: 20 }} />
                   </IconButton>
                 </Grid>
               </Grid>
-            </Box>
-            {cartMessage && (
-              <Alert 
-                severity={cartMessage.type} 
-                sx={{ mt: 2 }}
-                onClose={() => setCartMessage(null)}
-              >
-                {cartMessage.text}
-              </Alert>
-            )}
-            <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 1, mt: { xs: 2, md: 2 }, backgroundColor: "#F0FFF4", p: { xs: 1, md: 1 }, borderRadius: 2, border: "1px solid #B5FFC9" }}>
-              <CustomText variant="subtitle1" sx={{ fontSize: { xs: 12, md: 14 }, fontWeight: 600, color: "#00A819", display: "flex", alignItems: "center", gap: 0.5, flexWrap: "wrap", justifyContent: "center" }}>
-                <LocalShipping sx={{ fontSize: { xs: 16, md: 18 } }} /> Order within 2hrs for delivery today.
-              </CustomText>
+
+              {cartMessage && (
+                <Alert 
+                  severity={cartMessage.type} 
+                  sx={{ mt: 2, borderRadius: 1 }}
+                  onClose={() => setCartMessage(null)}
+                >
+                  {cartMessage.text}
+                </Alert>
+              )}
+
+              <Box sx={{ 
+                display: "flex", 
+                alignItems: "center", 
+                gap: 1, 
+                mt: 3, 
+                backgroundColor: "#f0f9f0", 
+                p: 1.5, 
+                borderRadius: 1, 
+                border: "1px solid #c8e6c9"
+              }}>
+                <LocalShipping sx={{ fontSize: 18, color: "#00A819" }} />
+                <CustomText 
+                  sx={{ 
+                    fontSize: 13,
+                    fontWeight: 500,
+                    fontFamily: "'Poppins', sans-serif",
+                    color: "#00A819"
+                  }}
+                >
+                  Order within 2hrs for delivery today.
+                </CustomText>
+              </Box>
             </Box>
           </Grid>
         </Grid>
       </Container>
 
 
-      <Box sx={{ py: { xs: 4, md: 0 } }}>
-        <Grid container spacing={{ xs: 2, md: 3, lg: 2.5 }} justifyContent="center" alignItems="center" sx={{ backgroundColor: "#FFEFEA", height: { xs: "auto", md: "200px" }, px: { xs: 1, md: 2, lg: 1.5 }, py: { xs: 2, md: 0 } }}>
-          {features?.map((text, i) => (
-            <Grid key={i} size={{ xs: 12, sm: 6, md: 3 }}>
-              <Box sx={{ backgroundColor: "#FFEFEA", p: { xs: 2, md: 3 }, borderRadius: 3, textAlign: "start", display: "flex", justifyContent: "center", alignItems: "center", gap: { xs: 1.5, md: 2 } }}>
-                <Box sx={{ backgroundColor: "#fff", color: "#FF6F61", width: { xs: 50, md: 60 }, height: { xs: 50, md: 60 }, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: { xs: 18, md: 22 } }}>
-                  {icons[i]}
+      <Box sx={{ py: 4, backgroundColor: "#fafafa" }}>
+        <Container maxWidth="lg" sx={{ px: { xs: 2, sm: 3, md: 4 } }}>
+          <Grid container spacing={3}>
+            {features?.map((text, i) => (
+              <Grid key={i} size={{ xs: 12, sm: 6, md: 3 }}>
+                <Box sx={{ 
+                  backgroundColor: "#fff",
+                  p: 3,
+                  borderRadius: 1,
+                  border: "1px solid #e0e0e0",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 2,
+                  height: "100%"
+                }}>
+                  <Box sx={{ 
+                    backgroundColor: "#fff5f2",
+                    color: "#FF6F61",
+                    width: 50,
+                    height: 50,
+                    borderRadius: 1,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flexShrink: 0
+                  }}>
+                    {icons[i]}
+                  </Box>
+                  <CustomText 
+                    sx={{ 
+                      whiteSpace: "pre-line",
+                      fontSize: 13,
+                      fontWeight: 500,
+                      fontFamily: "'Poppins', sans-serif",
+                      color: "#515151",
+                      lineHeight: 1.6
+                    }}
+                  >
+                    {text}
+                  </CustomText>
                 </Box>
-                <CustomText fontWeight={600} sx={{ whiteSpace: "pre-line", fontSize: { xs: 12, md: 14 }, color: "#515151", fontWeight: 'bold' }}>
-                  {text}
-                </CustomText>
-              </Box>
-            </Grid>
-          ))}
-        </Grid>
+              </Grid>
+            ))}
+          </Grid>
+        </Container>
       </Box>
 
-      {/* 🔶 What's Inside + Nutrition Facts */}
-      <Container  sx={{ py: 4, px: { xs: 2, md: 3, lg: 2 } }}>
-        <Grid container spacing={{ xs: 2, md: 2 }} sx={{ px: { xs: 2, md: 3, lg: 2 } }}>
+      {/* What's Inside + Nutrition Facts */}
+      <Container maxWidth="lg" sx={{ py: 5, px: { xs: 2, sm: 3, md: 4 } }}>
+        <Grid container spacing={3}>
           <Grid size={{ xs: 12, md: 6 }}>
-            <Box sx={{ p: { xs: 2, md: 3 }, border: "1px solid #ddd", borderRadius: 2 }}>
-              <CustomText fontWeight={600} fontSize={{ xs: 16, md: 18 }}>What's Inside</CustomText>
-              <CustomText mt={1} autoTitleCase={true} fontSize={{ xs: 13, md: 14 }} color="text.secondary">
+            <Box sx={{ p: 3, border: "1px solid #e0e0e0", borderRadius: 1, backgroundColor: "#fff" }}>
+              <CustomText 
+                sx={{ 
+                  fontWeight: 600,
+                  fontFamily: "'Playfair Display', serif",
+                  fontSize: 18,
+                  mb: 2,
+                  color: "#2c2c2c"
+                }}
+              >
+                What's Inside
+              </CustomText>
+              <CustomText 
+                autoTitleCase={true} 
+                sx={{ 
+                  fontSize: 14,
+                  fontWeight: 400,
+                  fontFamily: "'Poppins', sans-serif",
+                  color: "#666",
+                  lineHeight: 1.7,
+                  mb: product.veg ? 2 : 0
+                }}
+              >
                 {productData?.ingredient || "Ingredients information not available."}
               </CustomText>
               {product.veg && (
-                <Box mt={2} sx={{ p: { xs: 1.5, md: 2 }, background: "#FFF1EE", borderRadius: 2, display: "flex", alignItems: "center", gap: { xs: 1.5, md: 2 }, border: "1px solid #FF643A" }}>
-                  <ThumbUpOffAlt sx={{ color: "#FF643A", fontSize: { xs: 18, md: 20 } }} />
+                <Box sx={{ 
+                  mt: 2,
+                  p: 2,
+                  backgroundColor: "#fff5f2",
+                  borderRadius: 1,
+                  display: "flex",
+                  alignItems: "flex-start",
+                  gap: 1.5,
+                  border: "1px solid #FF643A"
+                }}>
+                  <ThumbUpOffAlt sx={{ color: "#FF643A", fontSize: 20, mt: 0.5 }} />
                   <Box>
-                    <CustomText fontWeight={600} fontSize={{ xs: 13, md: 14 }}>Vegetarian Product</CustomText>
-                    <CustomText fontSize={{ xs: 12, md: 13 }}>{product.veg === "Y" ? "This is a vegetarian product." : "Please check ingredients for allergen information."}</CustomText>
+                    <CustomText 
+                      sx={{ 
+                        fontWeight: 600,
+                        fontFamily: "'Poppins', sans-serif",
+                        fontSize: 14,
+                        color: "#2c2c2c",
+                        mb: 0.5
+                      }}
+                    >
+                      Vegetarian Product
+                    </CustomText>
+                    <CustomText 
+                      sx={{ 
+                        fontSize: 13,
+                        fontWeight: 400,
+                        fontFamily: "'Poppins', sans-serif",
+                        color: "#666"
+                      }}
+                    >
+                      {product.veg === "Y" ? "This is a vegetarian product." : "Please check ingredients for allergen information."}
+                    </CustomText>
                   </Box>
                 </Box>
               )}
             </Box>
           </Grid>
           <Grid size={{ xs: 12, md: 6 }}>
-            <Box sx={{ p: { xs: 2, md: 3 }, border: "1px solid #ddd", borderRadius: 2 }}>
-              <CustomText fontWeight={600} fontSize={{ xs: 16, md: 18 }} mb={1}>
+            <Box sx={{ p: 3, border: "1px solid #e0e0e0", borderRadius: 1, backgroundColor: "#fff" }}>
+              <CustomText 
+                sx={{ 
+                  fontWeight: 600,
+                  fontFamily: "'Playfair Display', serif",
+                  fontSize: 18,
+                  mb: 2,
+                  color: "#2c2c2c"
+                }}
+              >
                 Nutrition Facts
               </CustomText>
-              <Box fontSize={{ xs: 13, md: 14 }}>
+              <Box>
                 {productData?.nutrition && Object.keys(productData?.nutrition).length > 0 ? (
                   Object.entries(productData?.nutrition).map(([label, value], index, array) => (
                     <Box
@@ -741,24 +1054,72 @@ export const ProductDetails = () => {
                       sx={{
                         display: "flex",
                         justifyContent: "space-between",
-                        py: { xs: 1, md: 1.2 },
-                        borderBottom: index !== array.length - 1 ? "1px solid #eee" : "none"
+                        py: 1.2,
+                        borderBottom: index !== array.length - 1 ? "1px solid #e0e0e0" : "none"
                       }}
                     >
-                      <CustomText fontSize={{ xs: 13, md: 14 }}>{label}</CustomText>
-                      <CustomText fontWeight={600} fontSize={{ xs: 13, md: 14 }}>{value}</CustomText>
+                      <CustomText 
+                        sx={{ 
+                          fontSize: 14,
+                          fontWeight: 400,
+                          fontFamily: "'Poppins', sans-serif",
+                          color: "#666"
+                        }}
+                      >
+                        {label}
+                      </CustomText>
+                      <CustomText 
+                        sx={{ 
+                          fontWeight: 500,
+                          fontFamily: "'Poppins', sans-serif",
+                          fontSize: 14,
+                          color: "#2c2c2c"
+                        }}
+                      >
+                        {value}
+                      </CustomText>
                     </Box>
                   ))
                 ) : (
-                  <CustomText fontSize={{ xs: 13, md: 14 }} color="text.secondary">
+                  <CustomText 
+                    sx={{ 
+                      fontSize: 14,
+                      fontWeight: 400,
+                      fontFamily: "'Poppins', sans-serif",
+                      color: "#666"
+                    }}
+                  >
                     Nutrition information not available.
                   </CustomText>
                 )}
               </Box>
               {product.expiryday && (
-                <Box mt={2} sx={{ p: { xs: 1.5, md: 2 }, background: "#F8F8F8", borderRadius: 2, border: "1px solid #D5D5D5" }}>
-                  <CustomText fontWeight={600} fontSize={{ xs: 13, md: 14 }}>Storage Instructions</CustomText>
-                  <CustomText fontSize={{ xs: 12, md: 13 }}>
+                <Box sx={{ 
+                  mt: 2,
+                  p: 2,
+                  backgroundColor: "#f5f5f5",
+                  borderRadius: 1,
+                  border: "1px solid #e0e0e0"
+                }}>
+                  <CustomText 
+                    sx={{ 
+                      fontWeight: 600,
+                      fontFamily: "'Poppins', sans-serif",
+                      fontSize: 14,
+                      color: "#2c2c2c",
+                      mb: 0.5
+                    }}
+                  >
+                    Storage Instructions
+                  </CustomText>
+                  <CustomText 
+                    sx={{ 
+                      fontSize: 13,
+                      fontWeight: 400,
+                      fontFamily: "'Poppins', sans-serif",
+                      color: "#666"
+                    }}
+                  >
                     Best consumed within {product.expiryday} days. Keep in a cool dry place.
                   </CustomText>
                 </Box>
@@ -768,54 +1129,187 @@ export const ProductDetails = () => {
         </Grid>
 
         {/* Rating Section */}
-        <Box mt={{ xs: 4, md: 6 }} sx={{ px: { xs: 2, md: 3, lg: 2 } }}>
-          <CustomText fontSize={{ xs: 20, sm: 24, md: 28, lg: 34 }} fontWeight={700}>4.5 ⭐</CustomText>
-          <CustomText fontSize={{ xs: 11, sm: 12, md: 13, lg: 14 }} color="text.secondary">120 reviews</CustomText>
+        <Box sx={{ mt: 5, mb: 4 }}>
+          <CustomText 
+            sx={{ 
+              fontSize: 28,
+              fontWeight: 600,
+              fontFamily: "'Playfair Display', serif",
+              color: "#2c2c2c",
+              mb: 0.5
+            }}
+          >
+            4.5 ⭐
+          </CustomText>
+          <CustomText 
+            sx={{ 
+              fontSize: 14,
+              fontWeight: 400,
+              fontFamily: "'Poppins', sans-serif",
+              color: "#666",
+              mb: 3
+            }}
+          >
+            120 reviews
+          </CustomText>
 
           {/* Rating Bars */}
           {[5, 4, 3, 2, 1].map((r, i) => (
-            <Box key={i} sx={{ display: "flex", alignItems: "center", gap: { xs: 1, md: 2 }, my: 0.5 }}>
-              <CustomText width={{ xs: 18, md: 20 }} fontSize={{ xs: 13, md: 14 }}>{r}</CustomText>
-              <Box sx={{ flex: 1, height: { xs: 6, md: 8 }, background: "#FFE1DA", borderRadius: 4, position: 'relative' }}>
+            <Box 
+              key={i} 
+              sx={{ 
+                display: "flex", 
+                alignItems: "center", 
+                gap: 2, 
+                mb: 1.5
+              }}
+            >
+              <CustomText 
+                sx={{ 
+                  width: 20,
+                  fontSize: 14,
+                  fontWeight: 500,
+                  fontFamily: "'Poppins', sans-serif",
+                  color: "#2c2c2c"
+                }}
+              >
+                {r}
+              </CustomText>
+              <Box sx={{ 
+                flex: 1, 
+                height: 8, 
+                backgroundColor: "#f0f0f0", 
+                borderRadius: 1,
+                overflow: "hidden"
+              }}>
                 <Box sx={{
                   height: "100%",
                   width: `${[40, 20, 19, 10, 7][i]}%`,
-                  bgcolor: "#FF6F61",
-                  borderRadius: 4
+                  backgroundColor: "#FF6F61",
                 }} />
               </Box>
-              <CustomText fontSize={{ xs: 12, md: 14 }}>{[40, 20, 19, 10, 7][i]}%</CustomText>
+              <CustomText 
+                sx={{ 
+                  fontSize: 14,
+                  fontWeight: 400,
+                  fontFamily: "'Poppins', sans-serif",
+                  color: "#666",
+                  width: 40,
+                  textAlign: "right"
+                }}
+              >
+                {[40, 20, 19, 10, 7][i]}%
+              </CustomText>
             </Box>
           ))}
         </Box>
 
         {/* Reviews */}
-        <Box mt={{ xs: 3, md: 4 }} sx={{ mb: 5, px: { xs: 2, md: 3, lg: 2 } }}>
+        <Box sx={{ mt: 4, mb: 5 }}>
           {[{
-            name: "Sophia Carter", time: "2 weeks ago",
+            name: "Sophia Carter", 
+            time: "2 weeks ago",
             text: "These chocolate muffins are absolutely divine! Perfect balance of sweetness and rich chocolate flavor."
           }, {
-            name: "Ethan Bennett", time: "1 month ago",
+            name: "Ethan Bennett", 
+            time: "1 month ago",
             text: "Good taste, a little too sweet for me. Texture is soft and moist overall decent treat."
           }].map((review, i) => (
-            <Box key={i} sx={{ p: { xs: 2, md: 3 }, borderRadius: 2, backgroundColor: "#FCF7FA", mt: 2 }}>
-              <Box display="flex" gap={{ xs: 1.5, md: 2 }} alignItems="center">
-                <Avatar alt="Remy Sharp" src="/static/images/avatar/1.jpg" sx={{ width: { xs: 36, md: 40 }, height: { xs: 36, md: 40 } }} />
+            <Box 
+              key={i} 
+              sx={{ 
+                p: 3, 
+                borderRadius: 1, 
+                backgroundColor: "#fafafa",
+                border: "1px solid #e0e0e0",
+                mt: 2
+              }}
+            >
+              <Box sx={{ display: "flex", gap: 2, alignItems: "center", mb: 1.5 }}>
+                <Avatar 
+                  alt={review.name} 
+                  sx={{ 
+                    width: 40, 
+                    height: 40,
+                    backgroundColor: "#FF9472"
+                  }}
+                >
+                  {review.name.charAt(0)}
+                </Avatar>
                 <Box>
-                  <CustomText fontWeight={600} fontSize={{ xs: 14, md: 16 }}>{review.name}</CustomText>
-                  <CustomText fontSize={{ xs: 11, md: 12 }} color="text.secondary">{review.time}</CustomText>
+                  <CustomText 
+                    sx={{ 
+                      fontWeight: 600,
+                      fontFamily: "'Poppins', sans-serif",
+                      fontSize: 15,
+                      color: "#2c2c2c"
+                    }}
+                  >
+                    {review.name}
+                  </CustomText>
+                  <CustomText 
+                    sx={{ 
+                      fontSize: 13,
+                      fontWeight: 400,
+                      fontFamily: "'Poppins', sans-serif",
+                      color: "#666"
+                    }}
+                  >
+                    {review.time}
+                  </CustomText>
                 </Box>
               </Box>
-              <Rating value={5 - i} readOnly size="small" sx={{ mt: 1 }} />
-              <CustomText mt={1} fontSize={{ xs: 13, md: 14 }}>{review.text}</CustomText>
-              <Box sx={{ display: "flex", gap: { xs: 2, md: 3 }, mt: 2, color: "#707070" }}>
-                <Box sx={{ display: "flex", alignItems: "center", gap: .5, cursor: "pointer" }}>
-                  <ThumbUpOffAlt sx={{ fontSize: { xs: 16, md: 18 } }} />
-                  <CustomText fontSize={{ xs: 12, md: 13 }}>12</CustomText>
+              <Rating value={5 - i} readOnly size="small" sx={{ mb: 1.5, color: "#FF643A" }} />
+              <CustomText 
+                sx={{ 
+                  fontSize: 14,
+                  fontWeight: 400,
+                  fontFamily: "'Poppins', sans-serif",
+                  color: "#666",
+                  lineHeight: 1.7,
+                  mb: 2
+                }}
+              >
+                {review.text}
+              </CustomText>
+              <Box sx={{ 
+                display: "flex", 
+                gap: 3, 
+                color: "#707070"
+              }}>
+                <Box sx={{ 
+                  display: "flex", 
+                  alignItems: "center", 
+                  gap: 0.5,
+                  cursor: "pointer"
+                }}>
+                  <ThumbUpOffAlt sx={{ fontSize: 18 }} />
+                  <CustomText 
+                    sx={{ 
+                      fontSize: 13,
+                      fontWeight: 400,
+                      fontFamily: "'Poppins', sans-serif"
+                    }}
+                  >
+                    12
+                  </CustomText>
                 </Box>
-                <Box sx={{ display: "flex", alignItems: "center", gap: .5, cursor: "pointer" }}>
-                  <ThumbDownOffAlt sx={{ fontSize: { xs: 16, md: 18 } }} />
-                  <CustomText fontSize={{ xs: 12, md: 13 }}>3</CustomText>
+                <Box sx={{ 
+                  display: "flex", 
+                  alignItems: "center", 
+                  gap: 0.5,
+                  cursor: "pointer"
+                }}>
+                  <ThumbDownOffAlt sx={{ fontSize: 18 }} />
+                  <CustomText 
+                    sx={{ 
+                      fontSize: 13,
+                      fontWeight: 400,
+                      fontFamily: "'Poppins', sans-serif"
+                    }}
+                  >
+                    3
+                  </CustomText>
                 </Box>
               </Box>
             </Box>

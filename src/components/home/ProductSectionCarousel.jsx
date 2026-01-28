@@ -262,7 +262,7 @@ export const ProductSectionCarousel = memo(({
         </IconButton>
 
         <Slider ref={(slider) => (sliderRef = slider)} {...settings}>
-          {products.map((product, index) => (
+          {products?.map((product, index) => (
             <Box
               key={product?.id || index}
               onMouseEnter={() => setHoveredIndex(index)}
@@ -389,10 +389,10 @@ export const ProductSectionCarousel = memo(({
                 </Box>
 
                 {/* Product Info */}
-                <Box sx={{ p: { xs: 2, md: 2.5 }, position: "relative", zIndex: 2 }}>
+                <Box sx={{ p: { xs: 1, md: 1.5 }, position: "relative", zIndex: 2 }}>
                   {/* Rating */}
                   {product?.rating && (
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 0.8, mb: 1 }}>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 0.8 }}>
                       <StarIcon sx={{ fontSize: 14, color: "#FFD700" }} />
                       <CustomText
                         autoTitleCase={false}
@@ -407,12 +407,9 @@ export const ProductSectionCarousel = memo(({
                   <CustomText
                     autoTitleCase={false}
                     sx={{
-                      fontSize: { xs: 16, md: 18 },
                       fontWeight: 700,
                       color: "var(--themeColor)",
-                      lineHeight: 1.3,
                       mb: 0,
-                      minHeight: { xs: 40, md: 50 },
                       display: "-webkit-box",
                       WebkitLineClamp: 2,
                       WebkitBoxOrient: "vertical",
@@ -435,7 +432,7 @@ export const ProductSectionCarousel = memo(({
                     <Box>
                       <CustomText
                         autoTitleCase={false}
-                        sx={{ fontSize: { xs: 18, md: 20 }, fontWeight: 800, color: "#d32f2f", textTransform: "none" }}
+                        sx={{ fontWeight: 800, color: "#d32f2f", textTransform: "none" }}
                       >
                         {product?.price}
                       </CustomText>

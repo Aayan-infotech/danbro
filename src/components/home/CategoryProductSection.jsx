@@ -47,9 +47,7 @@ export const CategoryProductSection = memo(({
     }
   }, [preloadedProducts]);
 
-  // Fetch products when category is found (only if preloadedProducts not provided)
   useEffect(() => {
-    // Skip API call if preloaded products are provided
     if (preloadedProducts !== null) {
       return;
     }
@@ -73,7 +71,6 @@ export const CategoryProductSection = memo(({
           return;
         }
 
-        // Transform API products to match ProductSectionCarousel format
         let productsData = [];
         if (response?.data && Array.isArray(response.data)) {
           productsData = response.data.map((product) => {
@@ -136,23 +133,13 @@ export const CategoryProductSection = memo(({
     }
   }, [category, categoryGroupname, limit, categoriesLoading, preloadedProducts]);
 
-  // Don't render if category not found or no products (only check if not using preloaded products)
   if (preloadedProducts === null && !categoriesLoading && !category) {
     return null;
   }
 
-  // Show loading state (only if not using preloaded products)
   if (preloadedProducts === null && (loading || categoriesLoading)) {
     return (
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          py: 8,
-          minHeight: "300px",
-        }}
-      >
+      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", py: 8, minHeight: "300px", }}>
         <CircularProgress sx={{ color: "var(--themeColor)" }} />
       </Box>
     );

@@ -100,12 +100,28 @@ export const DeliveryCheckDialog = ({ open, onClose }) => {
       setGettingLocation(true);
       const location = await getCurrentLocation();
 
-      // Store location
-      storeLocation(location.lat, location.long, "Current location");
+      // Try to reverse‑geocode coordinates to a readable address
+      let addressLabel = "Selected location";
+      try {
+        if (window.google && window.google.maps && window.google.maps.Geocoder) {
+          const geocoder = new window.google.maps.Geocoder();
+          const response = await geocoder.geocode({
+            location: { lat: location.lat, lng: location.long },
+          });
+          if (Array.isArray(response.results) && response.results[0]?.formatted_address) {
+            addressLabel = response.results[0].formatted_address;
+          }
+        }
+      } catch (geoError) {
+        console.error("Reverse geocoding failed:", geoError);
+      }
 
-      // Dispatch event to update location in API calls
-      window.dispatchEvent(new CustomEvent('locationUpdated', {
-        detail: { lat: location.lat, long: location.long, label: "Current location" }
+      // Store location with resolved address (or fallback label)
+      storeLocation(location.lat, location.long, addressLabel);
+
+      // Dispatch event to update location in API calls & header
+      window.dispatchEvent(new CustomEvent("locationUpdated", {
+        detail: { lat: location.lat, long: location.long, label: addressLabel }
       }));
 
       // Close dialog

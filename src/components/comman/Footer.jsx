@@ -10,7 +10,11 @@ import makeinindia from "../../assets/makeinindia.png";
 import Maskgroup from "../../assets/Maskgroup.png";
 import logo from "../../assets/logo.png";
 import postImg from "../../assets/cakeimg.png";
-import visa from "../../assets/payments.png";
+import visaLogo from "../../assets/visa-logo.svg";
+import mastercardLogo from "../../assets/mastercard-logo.svg";
+import paypalLogo from "../../assets/paypal-logo.svg";
+import amexLogo from "../../assets/amex-logo.svg";
+import razorpayLogo from "../../assets/razorpay-logo.svg";
 import { Link, useNavigate } from "react-router-dom";
 
 const FooterContainer = styled(Box)(({ theme }) => ({
@@ -544,23 +548,32 @@ export const Footer = () => {
               <Box component="img" src={Maskgroup} alt="makeinindia" sx={{ height: { xs: 20, sm: 24, md: 24, lg: 32 }, width: "auto", flexShrink: 0 }} />
               <Box component="img" src={makeinindia} alt="makeinindia" sx={{ height: { xs: 20, sm: 24, md: 24, lg: 32 }, width: "auto", flexShrink: 0 }} />
             </Box>
-            <Box sx={{ display: "flex", gap: 2, alignItems: "center", flex: { md: "0 0 auto" } }}>
-              <Box
-                component="img"
-                src={visa}
-                alt="payment methods"
-                sx={{
-                  height: { xs: 30, sm: 35, md: 32, lg: 40 },
-                  width: "auto",
-                  filter: "grayscale(0.3)",
-                  transition: "all 0.3s ease",
-                  flexShrink: 0,
-                  "&:hover": {
-                    filter: "grayscale(0)",
-                    transform: "scale(1.1)",
-                  },
-                }}
-              />
+            <Box sx={{ display: "flex", gap: { xs: 1, sm: 1.5, md: 2 }, alignItems: "center", flexWrap: "wrap", flex: { md: "0 0 auto" } }}>
+              {[
+                { src: visaLogo, alt: "Visa" },
+                { src: mastercardLogo, alt: "Mastercard" },
+                { src: paypalLogo, alt: "PayPal" },
+                { src: amexLogo, alt: "American Express" },
+                { src: razorpayLogo, alt: "Razorpay" },
+              ].map((payment, index) => (
+                <Box
+                  key={index}
+                  component="img"
+                  src={payment.src}
+                  alt={payment.alt}
+                  sx={{
+                    height: { xs: 25, sm: 30, md: 28, lg: 35 },
+                    width: "auto",
+                    filter: "grayscale(0.3)",
+                    transition: "all 0.3s ease",
+                    flexShrink: 0,
+                    "&:hover": {
+                      filter: "grayscale(0)",
+                      transform: "scale(1.1)",
+                    },
+                  }}
+                />
+              ))}
             </Box>
           </Box>
         </Container>
