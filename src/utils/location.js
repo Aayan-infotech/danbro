@@ -40,6 +40,8 @@ export const getStoredLocation = () => {
       return {
         lat: location.lat || 26.86957,
         long: location.long || 81.00935,
+        // Optional human‑readable label if stored
+        label: location.label || null,
       };
     }
   } catch (error) {
@@ -49,12 +51,22 @@ export const getStoredLocation = () => {
   return {
     lat: 26.86957,
     long: 81.00935,
+    label: null,
   };
 };
 
-export const storeLocation = (lat, long) => {
+export const storeLocation = (lat, long, label) => {
   try {
-    localStorage.setItem('userLocation', JSON.stringify({ lat, long }));
+    const payload = {
+      lat,
+      long,
+    };
+
+    if (label) {
+      payload.label = label;
+    }
+
+    localStorage.setItem('userLocation', JSON.stringify(payload));
   } catch (error) {
     console.error('Error storing location:', error);
   }

@@ -17,6 +17,7 @@ import {
   Tab,
   CircularProgress,
   Alert,
+  Chip,
 } from "@mui/material";
 import { CustomText } from "../../components/comman/CustomText";
 import {
@@ -39,6 +40,7 @@ import { useItemCategories } from "../../hooks/useItemCategories";
 import { useHomeLayout } from "../../hooks/useHomeLayout";
 import { addToCart } from "../../utils/cart";
 import { getAccessToken } from "../../utils/cookies";
+import { getStoredLocation } from "../../utils/location";
 import blankImage from "../../assets/blankimage.png";
 
 export const ProductDetails = () => {
@@ -56,10 +58,48 @@ export const ProductDetails = () => {
   const [selectOpen, setSelectOpen] = useState(false);
   const [addingToCart, setAddingToCart] = useState(false);
   const [cartMessage, setCartMessage] = useState(null);
+  const [cakeMessage, setCakeMessage] = useState("");
+
+  // Delivery location display
+  const [deliveryLocationLabel, setDeliveryLocationLabel] = useState("");
+  const [hasSavedLocation, setHasSavedLocation] = useState(false);
   
   // Fetch categories and home layout data
   const { categories: apiCategories } = useItemCategories();
   const { products: homeLayoutProducts } = useHomeLayout();
+
+  // On mount, determine if we already have a stored delivery location
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("userLocation");
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        setHasSavedLocation(true);
+        setDeliveryLocationLabel(parsed.label || "Saved delivery location");
+      } else {
+        setHasSavedLocation(false);
+        setDeliveryLocationLabel("");
+      }
+    } catch {
+      setHasSavedLocation(false);
+      setDeliveryLocationLabel("");
+    }
+  }, []);
+
+  // Update delivery label when location is changed anywhere in the app
+  useEffect(() => {
+    const handleLocationUpdated = (event) => {
+      const detail = event.detail || {};
+      const label = detail.label || getStoredLocation().label || "Saved delivery location";
+      setHasSavedLocation(true);
+      setDeliveryLocationLabel(label);
+    };
+
+    window.addEventListener("locationUpdated", handleLocationUpdated);
+    return () => {
+      window.removeEventListener("locationUpdated", handleLocationUpdated);
+    };
+  }, []);
 
   useEffect(() => {
     if (!selectOpen) return;
@@ -256,6 +296,23 @@ export const ProductDetails = () => {
     };
   }, [product]);
 
+  // Available weight options – drive strictly from API data (no static list)
+  const weightOptions = useMemo(() => {
+    if (!product) return [];
+
+    // If backend ever sends explicit options array, prefer that
+    if (Array.isArray(product.weightOptions) && product.weightOptions.length > 0) {
+      return product.weightOptions;
+    }
+
+    // Fallback: single weight string from API
+    if (typeof product.weight === "string" && product.weight.trim()) {
+      return [product.weight.trim()];
+    }
+
+    return [];
+  }, [product]);
+
   const icons = [<LocalGroceryStore />, <Handshake />, <Shield />, <Verified />];
   const features = [
     "100% Organic Flour\nLocally sourced",
@@ -409,53 +466,146 @@ export const ProductDetails = () => {
                 {productData?.description}
               </CustomText>
               <Divider sx={{ my: 2, backgroundColor: "#F31400" }} />
-              <Box sx={{ display: "flex", flexDirection: { xs: "column", md: "row" }, justifyContent: "space-between", alignItems: { xs: "flex-start", md: "center" }, gap: { xs: 2, md: 0 } }}>
-                <Box>
-                  <CustomText variant="body2" sx={{ fontWeight: 600, color: "#2c2c2c", fontSize: { xs: 13, md: 14 } }}>
-                    Weight
-                  </CustomText>
-                  <Select 
-                    value={productWeight} 
-                    size="small" 
-                    open={selectOpen}
-                    onOpen={() => setSelectOpen(true)}
-                    onClose={() => setSelectOpen(false)}
-                    onChange={(e) => {
-                      setProductWeight(e.target.value);
-                      setSelectOpen(false);
-                    }} 
-                    sx={{ width: { xs: "100%", md: 250 }, mt: 1 }}
-                    MenuProps={{
-                      disablePortal: false,
-                      disableScrollLock: true,
-                      anchorOrigin: {
-                        vertical: 'bottom',
-                        horizontal: 'left',
-                      },
-                      transformOrigin: {
-                        vertical: 'top',
-                        horizontal: 'left',
-                      },
-                      PaperProps: {
-                        sx: {
-                          maxHeight: 224,
+              {/* Weight selection as chips – options from API only */}
+              {weightOptions.length > 0 && (
+                <Box sx={{ display: "flex", flexDirection: { xs: "column", md: "row" }, justifyContent: "space-between", alignItems: { xs: "flex-start", md: "center" }, gap: { xs: 2, md: 0 } }}>
+                  <Box sx={{ mb: { xs: 1, md: 0 } }}>
+                    <CustomText variant="body2" sx={{ fontWeight: 600, color: "#2c2c2c", fontSize: { xs: 13, md: 14 }, mb: 1 }}>
+                      Select Weight
+                    </CustomText>
+                    <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+                      {weightOptions.map((w) => (
+                        <Chip
+                          key={w}
+                          label={w}
+                          clickable
+                          onClick={() => setProductWeight(w)}
+                          sx={{
+                            fontSize: { xs: 12, md: 13 },
+                            fontWeight: 600,
+                            borderRadius: "999px",
+                            px: 1,
+                            border: productWeight === w ? "2px solid #F31400" : "1px solid #ddd",
+                            backgroundColor: productWeight === w ? "#FFE9E3" : "#fff",
+                            color: productWeight === w ? "#F31400" : "#333",
+                          }}
+                        />
+                      ))}
+                    </Box>
+                  </Box>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1, backgroundColor: "#9BFF82", borderRadius: 2, p: { xs: 0.8, md: 1 }, mt: { xs: 1, md: 0 } }}>
+                    <CheckCircleIcon sx={{ color: "#4caf50", fontSize: { xs: 18, md: 20 } }} />
+                    <CustomText variant="body1" sx={{ fontWeight: 600, color: "#2c2c2c", fontSize: { xs: 13, md: 16 } }}>
+                      {productData?.stock} in stock
+                    </CustomText>
+                  </Box>
+                </Box>
+              )}
+
+              {/* Cake message input */}
+              <Box sx={{ mt: 3 }}>
+                <CustomText variant="body2" sx={{ fontWeight: 600, color: "#2c2c2c", fontSize: { xs: 13, md: 14 }, mb: 0.5 }}>
+                  Cake Message
+                </CustomText>
+                <TextField
+                  fullWidth
+                  placeholder="Write a sweet wish!"
+                  value={cakeMessage}
+                  onChange={(e) => {
+                    const value = e.target.value.slice(0, 25);
+                    setCakeMessage(value);
+                  }}
+                  size="small"
+                  inputProps={{ maxLength: 25 }}
+                  sx={{
+                    mt: 0.5,
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: 2,
+                    },
+                  }}
+                  helperText={`${cakeMessage.length}/25`}
+                />
+              </Box>
+
+              {/* Delivery location section */}
+              <Box sx={{ mt: 3, p: 2, borderRadius: 2, border: "1px solid #eee", backgroundColor: "#FFF9F6" }}>
+                <CustomText variant="body2" sx={{ fontWeight: 600, color: "#2c2c2c", fontSize: { xs: 13, md: 14 }, mb: 1 }}>
+                  Delivery Location
+                </CustomText>
+
+                {hasSavedLocation ? (
+                  <Box sx={{ display: "flex", flexDirection: { xs: "column", sm: "row" }, justifyContent: "space-between", gap: 1.5, alignItems: { xs: "flex-start", sm: "center" } }}>
+                    <Box>
+                      <CustomText sx={{ fontSize: { xs: 13, md: 14 }, fontWeight: 600 }}>
+                        {deliveryLocationLabel}
+                      </CustomText>
+                      <CustomText sx={{ fontSize: { xs: 12, md: 13 }, color: "#1B9C3F", mt: 0.3 }}>
+                        Awesome, we deliver to this location.
+                      </CustomText>
+                    </Box>
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      onClick={() => {
+                        window.dispatchEvent(new Event("openLocationDialog"));
+                      }}
+                      sx={{
+                        borderRadius: "999px",
+                        textTransform: "none",
+                        fontSize: { xs: 12, md: 13 },
+                        fontWeight: 600,
+                        px: 2,
+                        borderColor: "#F31400",
+                        color: "#F31400",
+                        "&:hover": {
+                          borderColor: "#C22A00",
+                          backgroundColor: "rgba(242, 112, 156, 0.04)",
                         },
-                      },
-                    }}
-                  >
-                    <MenuItem value={product.weight || "500g"}>{product.weight || "500g"}</MenuItem>
-                    <MenuItem value="custom">Custom</MenuItem>
-                  </Select>
-                  {productWeight === "custom" && (
-                    <TextField type="number" label="Enter weight (g)" onBlur={(e) => setProductWeight(e.target.value + "g")} size="small" sx={{ mt: 1, width: { xs: "100%", md: 150 } }} />
-                  )}
-                </Box>
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1, backgroundColor: "#9BFF82", borderRadius: 2, p: { xs: 0.8, md: 1 } }}>
-                  <CheckCircleIcon sx={{ color: "#4caf50", fontSize: { xs: 18, md: 20 } }} />
-                  <CustomText variant="body1" sx={{ fontWeight: 600, color: "#2c2c2c", fontSize: { xs: 13, md: 16 } }}>
-                    {productData?.stock} in stock
-                  </CustomText>
-                </Box>
+                      }}
+                    >
+                      Change
+                    </Button>
+                  </Box>
+                ) : (
+                  <Box sx={{ display: "flex", flexDirection: { xs: "column", sm: "row" }, gap: 1.5, alignItems: { xs: "stretch", sm: "center" } }}>
+                    <TextField
+                      fullWidth
+                      placeholder="Enter area / locality / pincode"
+                      size="small"
+                      sx={{
+                        "& .MuiOutlinedInput-root": {
+                          borderRadius: 2,
+                        },
+                      }}
+                      onFocus={() => {
+                        window.dispatchEvent(new Event("openLocationDialog"));
+                      }}
+                      onClick={() => {
+                        window.dispatchEvent(new Event("openLocationDialog"));
+                      }}
+                    />
+                    <Button
+                      variant="contained"
+                      size="small"
+                      onClick={() => {
+                        window.dispatchEvent(new Event("openLocationDialog"));
+                      }}
+                      sx={{
+                        borderRadius: "999px",
+                        textTransform: "none",
+                        fontSize: { xs: 12, md: 13 },
+                        fontWeight: 700,
+                        px: 2.5,
+                        backgroundColor: "#F31400",
+                        "&:hover": {
+                          backgroundColor: "#C22A00",
+                        },
+                      }}
+                    >
+                      Set Location
+                    </Button>
+                  </Box>
+                )}
               </Box>
 
               <Grid container spacing={{ xs: 1.5, md: 2 }} mt={{ xs: 3, md: 4 }}>

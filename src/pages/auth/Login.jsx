@@ -291,7 +291,7 @@ export const Login = () => {
   return (
     <Box
       sx={{
-        minHeight: "100vh",
+        // minHeight: "100vh",
         position: "relative",
         display: "flex",
         alignItems: "center",

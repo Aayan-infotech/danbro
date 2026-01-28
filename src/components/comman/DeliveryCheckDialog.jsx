@@ -79,11 +79,11 @@ export const DeliveryCheckDialog = ({ open, onClose }) => {
       const placeDetails = await getPlaceDetails(placeId);
 
       // Store location
-      storeLocation(placeDetails.lat, placeDetails.long);
+      storeLocation(placeDetails.lat, placeDetails.long, placeDetails.address);
 
       // Dispatch event to update location in API calls
       window.dispatchEvent(new CustomEvent('locationUpdated', {
-        detail: { lat: placeDetails.lat, long: placeDetails.long }
+        detail: { lat: placeDetails.lat, long: placeDetails.long, label: placeDetails.address }
       }));
 
       // Close dialog
@@ -101,11 +101,11 @@ export const DeliveryCheckDialog = ({ open, onClose }) => {
       const location = await getCurrentLocation();
 
       // Store location
-      storeLocation(location.lat, location.long);
+      storeLocation(location.lat, location.long, "Current location");
 
       // Dispatch event to update location in API calls
       window.dispatchEvent(new CustomEvent('locationUpdated', {
-        detail: { lat: location.lat, long: location.long }
+        detail: { lat: location.lat, long: location.long, label: "Current location" }
       }));
 
       // Close dialog

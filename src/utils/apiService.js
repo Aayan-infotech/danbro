@@ -774,4 +774,3 @@ export const fetchProductById = async (productId) => {
     );
   }
 };
-

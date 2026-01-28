@@ -367,27 +367,6 @@ export const ProductSectionCarousel = memo(({
                     </Box>
                   )}
 
-                  {/* Discount */}
-                  {product?.discount && (
-                    <Box
-                      sx={{
-                        position: "absolute",
-                        top: 12,
-                        right: 12,
-                        bgcolor: "#0A1234",
-                        color: "#fff",
-                        px: 1.5,
-                        py: 0.5,
-                        borderRadius: 2,
-                        fontSize: 11,
-                        fontWeight: 800,
-                        zIndex: 2,
-                      }}
-                    >
-                      {product?.discount}
-                    </Box>
-                  )}
-
                   {/* Favorite Icon */}
                   <IconButton
                     sx={{
@@ -450,13 +429,6 @@ export const ProductSectionCarousel = memo(({
                       return text;
                     })()}
                   </CustomText>
-
-                  {/* SKU */}
-                  {product?.sku && (
-                    <CustomText autoTitleCase={false} sx={{ fontSize: 11, color: "#999", textTransform: "none" }}>
-                      SKU: {product?.sku}
-                    </CustomText>
-                  )}
 
                   {/* Price and Add to Cart */}
                   <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
