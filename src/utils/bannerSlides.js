@@ -1,5 +1,5 @@
 import slider5 from "../assets/slider-5.png";
-import bannerSlide1 from "../assets/banner-slide-1.jpg";
+import bannerSlide1 from "../assets/danbro-by-mr-brown-cyber-heights-vibhuti-khand-lucknow-bakeries-k4sgy7ldta.avif";
 import bannerSlide2 from "../assets/banner-slide-2.jpg";
 import bannerSlide3 from "../assets/banner-slide-3.jpg";
 import bannerSlide4 from "../assets/banner-slide-4.jpg";
@@ -9,8 +9,8 @@ export const bannerSlides = [
   {
     id: 1,
     img: slider5,
-    alt: "Fresh bakery products",
-    title: "Fresh Baked Daily",
+    alt: "Danbro by Mr Brown Bakery",
+    title: "Danbro by Mr Brown Bakery",
     subtitle: "Warm breads & pastries straight from the oven, made with love",
     animationType: "flipInX",
     captionPosition: "left"
