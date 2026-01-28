@@ -1,4 +1,4 @@
-import { Box, Container,  Grid, Card, CardContent, Button } from "@mui/material";
+import { Box, Container,  Grid, Card, CardContent, Button, Avatar } from "@mui/material";
 import { CustomText } from "../../components/comman/CustomText";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import logo from "../../assets/logo.png";
@@ -6,10 +6,14 @@ import { useEffect, useRef, useState } from "react";
 import blogHero from "../../assets/blog.png";
 import planning from "../../assets/2f1c127d9f6293a74bd052f2c516c77a6713fa7f.jpg";
 import { YouTubeVideosSection } from "../../components/home/YouTubeVideosSection";
+import BusinessIcon from "@mui/icons-material/Business";
+import PersonIcon from "@mui/icons-material/Person";
+import founderImage from "../../assets/founderImage.jpeg";
 
 export const AboutUs = () => {
   const [visibleSections, setVisibleSections] = useState({});
   const [active, setActive] = useState(0);
+  const [founderImageError, setFounderImageError] = useState(false);
 
   const sectionRefs = {
     header: useRef(null),
@@ -17,6 +21,7 @@ export const AboutUs = () => {
     whyChoose: useRef(null),
     specialties: useRef(null),
     contact: useRef(null),
+    founder: useRef(null),
   };
 
   useEffect(() => {
@@ -168,6 +173,316 @@ export const AboutUs = () => {
           </CustomText>
         </Box>
       </Container>
+
+      {/*================ FOUNDER SECTION =================*/}
+      <Box 
+        ref={sectionRefs.founder}
+        sx={{ 
+          py: { xs: 8, md: 12 },
+          position: "relative",
+          overflow: "hidden",
+          background: "linear-gradient(180deg, rgba(255,255,255,1) 0%, rgba(255,248,245,0.6) 50%, rgba(255,255,255,1) 100%)",
+          "&::before": {
+            content: '""',
+            position: "absolute",
+            top: "-30%",
+            right: "-5%",
+            width: "600px",
+            height: "600px",
+            borderRadius: "50%",
+            background: "radial-gradient(circle, rgba(255,148,114,0.12) 0%, transparent 70%)",
+            filter: "blur(80px)",
+            animation: "float 6s ease-in-out infinite",
+            "@keyframes float": {
+              "0%, 100%": { transform: "translateY(0px) translateX(0px)" },
+              "50%": { transform: "translateY(-20px) translateX(-10px)" },
+            },
+          },
+          "&::after": {
+            content: '""',
+            position: "absolute",
+            bottom: "-20%",
+            left: "-5%",
+            width: "500px",
+            height: "500px",
+            borderRadius: "50%",
+            background: "radial-gradient(circle, rgba(95,41,48,0.08) 0%, transparent 70%)",
+            filter: "blur(60px)",
+            animation: "floatReverse 8s ease-in-out infinite",
+            "@keyframes floatReverse": {
+              "0%, 100%": { transform: "translateY(0px) translateX(0px)" },
+              "50%": { transform: "translateY(15px) translateX(10px)" },
+            },
+          },
+        }}
+      >
+        <Container sx={{ px: { xs: 3, sm: 3, md: 4 }, position: "relative", zIndex: 1 }}>
+          {/* Header Section */}
+          <Box
+            sx={{
+              textAlign: "center",
+              mb: { xs: 6, md: 8 },
+              opacity: visibleSections.founder ? 1 : 0,
+              transform: visibleSections.founder ? "translateY(0)" : "translateY(30px)",
+              transition: "all 0.8s cubic-bezier(0.4, 0, 0.2, 1)",
+            }}
+          >
+            <Box
+              sx={{
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                width: { xs: 70, md: 90 },
+                height: { xs: 70, md: 90 },
+                borderRadius: "50%",
+                bgcolor: "rgba(255,148,114,0.1)",
+                mb: 3,
+                position: "relative",
+                animation: visibleSections.founder ? "pulse 2s ease-in-out infinite" : "none",
+                "@keyframes pulse": {
+                  "0%, 100%": { transform: "scale(1)" },
+                  "50%": { transform: "scale(1.05)" },
+                },
+              }}
+            >
+              <BusinessIcon sx={{ fontSize: { xs: 35, md: 45 }, color: "#FF9472" }} />
+            </Box>
+            <CustomText 
+              sx={{ 
+                fontSize: { xs: 11, md: 13 }, 
+                fontWeight: 700, 
+                color: "#FF9472", 
+                textTransform: "uppercase",
+                letterSpacing: 3,
+                mb: 2,
+              }}
+            >
+              Our Founder
+            </CustomText>
+            <CustomText 
+              sx={{ 
+                fontSize: { xs: 32, sm: 42, md: 56 }, 
+                fontWeight: 800, 
+                color: "var(--themeColor)",
+                fontFamily: "'Playfair Display', serif",
+                mb: 2,
+                background: "linear-gradient(135deg, var(--themeColor) 0%, #7a2d3a 100%)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                backgroundClip: "text",
+                lineHeight: 1.2,
+              }}
+            >
+              Meet The Visionary
+            </CustomText>
+          </Box>
+
+          {/* Main Content Grid */}
+          <Grid container spacing={{ xs: 4, md: 6 }} alignItems="center">
+            {/* Founder Image */}
+            <Grid size={{ xs: 12, md: 5 }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  position: "relative",
+                  opacity: visibleSections.founder ? 1 : 0,
+                  transform: visibleSections.founder ? "translateX(0)" : "translateX(-50px)",
+                  transition: "all 0.8s cubic-bezier(0.4, 0, 0.2, 1) 0.2s",
+                }}
+              >
+                <Box
+                  sx={{
+                    position: "relative",
+                    "&::before": {
+                      content: '""',
+                      position: "absolute",
+                      inset: -12,
+                      borderRadius: "50%",
+                      background: "linear-gradient(135deg, #FF9472, #FFB5A1, #FF9472, #FF9472)",
+                      backgroundSize: "300% 300%",
+                      animation: "rotateGradient 4s linear infinite",
+                      "@keyframes rotateGradient": {
+                        "0%": { backgroundPosition: "0% 50%" },
+                        "100%": { backgroundPosition: "300% 50%" },
+                      },
+                      zIndex: 0,
+                    },
+                    "&::after": {
+                      content: '""',
+                      position: "absolute",
+                      inset: -6,
+                      borderRadius: "50%",
+                      bgcolor: "#fff",
+                      zIndex: 1,
+                    },
+                  }}
+                >
+                  <Box
+                    sx={{
+                      width: { xs: 220, md: 300 },
+                      height: { xs: 220, md: 300 },
+                      borderRadius: "50%",
+                      border: "6px solid #fff",
+                      boxShadow: "0 25px 70px rgba(255,148,114,0.35)",
+                      position: "relative",
+                      zIndex: 2,
+                      overflow: "hidden",
+                      bgcolor: "rgba(255,148,114,0.1)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      transition: "all 0.5s ease",
+                      "&:hover": {
+                        transform: "scale(1.05)",
+                        boxShadow: "0 30px 80px rgba(255,148,114,0.45)",
+                      },
+                    }}
+                  >
+                    {founderImageError ? (
+                      <PersonIcon 
+                        sx={{ 
+                          fontSize: { xs: 110, md: 150 },
+                          color: "rgba(255,148,114,0.4)",
+                        }} 
+                      />
+                    ) : (
+                      <Box
+                        component="img"
+                        src={founderImage}
+                        alt="Vikash Malik - Founder & CEO"
+                        onError={() => setFounderImageError(true)}
+                        sx={{
+                          width: "100%",
+                          height: "100%",
+                          objectFit: "cover",
+                        }}
+                      />
+                    )}
+                  </Box>
+                </Box>
+              </Box>
+            </Grid>
+
+            {/* Founder Info */}
+            <Grid size={{ xs: 12, md: 7 }}>
+              <Box
+                sx={{
+                  bgcolor: "#fff",
+                  borderRadius: { xs: 3, md: 5 },
+                  p: { xs: 4, md: 5 },
+                  boxShadow: "0 15px 50px rgba(0,0,0,0.1)",
+                  position: "relative",
+                  overflow: "hidden",
+                  opacity: visibleSections.founder ? 1 : 0,
+                  transform: visibleSections.founder ? "translateX(0)" : "translateX(50px)",
+                  transition: "all 0.8s cubic-bezier(0.4, 0, 0.2, 1) 0.4s",
+                  "&::before": {
+                    content: '""',
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    width: "8px",
+                    height: "100%",
+                    background: "linear-gradient(180deg, #FF9472 0%, #FFB5A1 50%, #FF9472 100%)",
+                    backgroundSize: "100% 200%",
+                    animation: "gradientFlow 3s ease infinite",
+                    "@keyframes gradientFlow": {
+                      "0%, 100%": { backgroundPosition: "0% 0%" },
+                      "50%": { backgroundPosition: "0% 100%" },
+                    },
+                  },
+                  "&:hover": {
+                    boxShadow: "0 20px 60px rgba(255,148,114,0.2)",
+                    transform: "translateY(-5px)",
+                  },
+                }}
+              >
+                {/* Name and Title */}
+                <Box sx={{ mb: 4 }}>
+                  <CustomText 
+                    sx={{ 
+                      fontSize: { xs: 28, md: 38 }, 
+                      fontWeight: 800, 
+                      color: "var(--themeColor)",
+                      fontFamily: "'Playfair Display', serif",
+                      mb: 1,
+                      lineHeight: 1.2,
+                    }}
+                  >
+                    Vikash Malik
+                  </CustomText>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+                    <Box
+                      sx={{
+                        width: 4,
+                        height: 4,
+                        borderRadius: "50%",
+                        bgcolor: "#FF9472",
+                        animation: "blink 2s ease-in-out infinite",
+                        "@keyframes blink": {
+                          "0%, 100%": { opacity: 1 },
+                          "50%": { opacity: 0.3 },
+                        },
+                      }}
+                    />
+                    <CustomText 
+                      sx={{ 
+                        fontSize: { xs: 15, md: 18 }, 
+                        color: "#FF9472", 
+                        fontWeight: 700,
+                        textTransform: "uppercase",
+                        letterSpacing: 2,
+                      }}
+                    >
+                      Founder & CEO
+                    </CustomText>
+                  </Box>
+                </Box>
+
+                {/* Content */}
+                <Box sx={{ pl: { xs: 0, md: 2 } }}>
+                  <CustomText 
+                    sx={{ 
+                      fontSize: { xs: 15, md: 17 }, 
+                      color: "#444", 
+                      lineHeight: 1.85,
+                      mb: 3,
+                      fontWeight: 400,
+                    }}
+                  >
+                    Vikash Malik is the visionary founder and CEO of Danbro, a leading bakery brand that has revolutionized the art of baking in India. With an unwavering passion for creating exceptional culinary experiences, Vikash has transformed Danbro from a small family-owned pastry shop into a renowned brand with multiple locations across Lucknow, Kanpur, and Delhi.
+                  </CustomText>
+
+                  <CustomText 
+                    sx={{ 
+                      fontSize: { xs: 15, md: 17 }, 
+                      color: "#444", 
+                      lineHeight: 1.85,
+                      mb: 3,
+                      fontWeight: 400,
+                    }}
+                  >
+                    Under Vikash's leadership, Danbro has become synonymous with innovation, quality, and excellence. His vision of blending traditional Asian flavors with modern baking techniques has resulted in unique creations like baked mithai innovations, premium mousse cakes, and artisan tarts that have delighted thousands of customers.
+                  </CustomText>
+
+                  <CustomText 
+                    sx={{ 
+                      fontSize: { xs: 15, md: 17 }, 
+                      color: "#444", 
+                      lineHeight: 1.85,
+                      fontWeight: 400,
+                    }}
+                  >
+                    With a commitment to using only the freshest ingredients and maintaining the highest standards of quality, Vikash has built Danbro into a trusted name for weddings, corporate events, and everyday celebrations. His dedication to customer satisfaction and continuous innovation continues to drive Danbro's success and growth.
+                  </CustomText>
+                </Box>
+              </Box>
+            </Grid>
+          </Grid>
+        </Container>
+      </Box>
 
       {/*================ COUNT + RIGHT IMAGE =================*/}
 

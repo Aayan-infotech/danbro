@@ -1,4 +1,4 @@
-import { Box, Container, IconButton } from "@mui/material";
+import { Box, Container, IconButton, Avatar, Chip, Stack } from "@mui/material";
 import { CustomText } from "../comman/CustomText";
 import Slider from "react-slick";
 import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
@@ -6,6 +6,7 @@ import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import { useRef, useEffect, useState } from "react";
 import StarIcon from "@mui/icons-material/Star";
 import FormatQuoteIcon from "@mui/icons-material/FormatQuote";
+import VerifiedIcon from "@mui/icons-material/Verified";
 import user1 from "../../assets/174fadede8628f65c914092552741f716b9b8039.jpg";
 
 const testimonials = [
@@ -83,125 +84,142 @@ export const TestimonialsCarousel = () => {
 
   const settings = {
     infinite: true,
-    speed: 800,
-    slidesToShow: 3,
+    speed: 600,
+    slidesToShow: 1,
     slidesToScroll: 1,
     arrows: false,
     dots: true,
     autoplay: true,
     autoplaySpeed: 5000,
     pauseOnHover: true,
-    cssEase: "cubic-bezier(0.25, 0.46, 0.45, 0.94)",
+    fade: true,
+    cssEase: "cubic-bezier(0.4, 0, 0.2, 1)",
     beforeChange: (current, next) => setCurrentSlide(next),
-    responsive: [
-      { breakpoint: 1200, settings: { slidesToShow: 3 } },
-      { breakpoint: 992, settings: { slidesToShow: 3 } },
-      { breakpoint: 768, settings: { slidesToShow: 2 } },
-      { breakpoint: 576, settings: { slidesToShow: 1 } },
-    ],
   };
 
   return (
-    <Box ref={sectionRef} sx={{ py: { xs: 6, md: 10 } }}>
+    <Box
+      ref={sectionRef} >
       <Container
-        maxWidth={false}
+        maxWidth="lg"
         sx={{
-          px: { xs: 2, md: 3 },
+          px: { xs: 2, md: 4 },
           position: "relative",
           zIndex: 1,
+          mt:4
         }}
       >
         {/* Section Header */}
         <Box sx={{ textAlign: "center", mb: { xs: 6, md: 8 } }}>
-          <Box
+
+          <CustomText
             sx={{
-              display: "inline-flex",
-              alignItems: "center",
-              justifyContent: "center",
-              width: 70,
-              height: 70,
-              borderRadius: "50%",
-              bgcolor: "rgba(255,181,161,0.15)",
+              fontSize: { xs: 32, sm: 40, md: 52 },
+              fontWeight: 800,
+              color: "var(--themeColor)",
               mb: 2,
-              animation: visible ? "pulseIcon 2s ease-in-out infinite" : "none",
-              "@keyframes pulseIcon": {
-                "0%, 100%": { transform: "scale(1)" },
-                "50%": { transform: "scale(1.1)" },
-              },
+              fontFamily: "'Playfair Display', serif",
+              lineHeight: 1.2,
             }}
           >
-            <FormatQuoteIcon sx={{ fontSize: 40, color: "#FF9472" }} />
-          </Box>
-          <CustomText sx={{ fontSize: { xs: 12, md: 14 }, fontWeight: 600, color: "#FF9472", textTransform: "uppercase", letterSpacing: 2, mb: 1, }}>
-            Testimonials
-          </CustomText>
-          <CustomText sx={{ fontSize: { xs: 32, sm: 38, md: 48 }, fontWeight: 800, color: "var(--themeColor)", mb: 2, }}>
             What Our Customers Say
           </CustomText>
-          <CustomText sx={{ fontSize: { xs: 14, md: 16 }, color: "#666", maxWidth: 600, mx: "auto", }}>
-            Don't just take our word for it - hear from our satisfied customers
+
+          <CustomText
+            sx={{
+              fontSize: { xs: 14, md: 16 },
+              color: "#666",
+              maxWidth: 600,
+              mx: "auto",
+              lineHeight: 1.7,
+            }}
+          >
+            Real experiences from our valued customers
           </CustomText>
         </Box>
 
-        {/* Testimonials Carousel */}
-        <Box sx={{ position: "relative", zIndex: 1 }}>
+        {/* Single Card Carousel */}
+        <Box sx={{ position: "relative", maxWidth: { xs: "100%", md: "900px" }, mx: "auto" }}>
+          {/* Navigation Buttons */}
           <IconButton
             onClick={() => sliderRef?.slickPrev()}
             sx={{
               position: "absolute",
-              left: { xs: -15, md: -25 },
+              left: { xs: -10, md: -70 },
               top: "50%",
               transform: "translateY(-50%)",
               zIndex: 10,
               bgcolor: "#fff",
               color: "var(--themeColor)",
-              width: { xs: 45, md: 55 },
-              height: { xs: 45, md: 55 },
-              boxShadow: "0 6px 20px rgba(0,0,0,0.12)",
-              border: "2px solid rgba(255,181,161,0.2)",
-              transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+              width: { xs: 50, md: 64 },
+              height: { xs: 50, md: 64 },
+              boxShadow: "0 8px 24px rgba(0,0,0,0.15)",
+              border: "2px solid rgba(255,148,114,0.15)",
+              transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
               "&:hover": {
                 bgcolor: "var(--themeColor)",
                 color: "#fff",
                 transform: "translateY(-50%) scale(1.1)",
-                boxShadow: "0 8px 25px rgba(95,41,48,0.3)",
+                boxShadow: "0 12px 32px rgba(95,41,48,0.4)",
+                borderColor: "var(--themeColor)",
               },
             }}
           >
-            <ArrowBackIosNewIcon sx={{ fontSize: { xs: 20, md: 24 } }} />
+            <ArrowBackIosNewIcon sx={{ fontSize: { xs: 22, md: 26 } }} />
           </IconButton>
 
+          <IconButton
+            onClick={() => sliderRef?.slickNext()}
+            sx={{
+              position: "absolute",
+              right: { xs: -10, md: -70 },
+              top: "50%",
+              transform: "translateY(-50%)",
+              zIndex: 10,
+              bgcolor: "#fff",
+              color: "var(--themeColor)",
+              width: { xs: 50, md: 64 },
+              height: { xs: 50, md: 64 },
+              boxShadow: "0 8px 24px rgba(0,0,0,0.15)",
+              border: "2px solid rgba(255,148,114,0.15)",
+              transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
+              "&:hover": {
+                bgcolor: "var(--themeColor)",
+                color: "#fff",
+                transform: "translateY(-50%) scale(1.1)",
+                boxShadow: "0 12px 32px rgba(95,41,48,0.4)",
+                borderColor: "var(--themeColor)",
+              },
+            }}
+          >
+            <ArrowForwardIosIcon sx={{ fontSize: { xs: 22, md: 26 } }} />
+          </IconButton>
+
+          {/* Carousel Slider */}
           <Slider ref={(slider) => (sliderRef = slider)} {...settings}>
             {testimonials?.map((testimonial, index) => {
-              const isActive = currentSlide === index || currentSlide === index - 1;
+              const isActive = currentSlide === index;
               return (
-                <Box key={testimonial?.id} sx={{ px: { xs: 1, md: 1.5 } }}>
+                <Box key={testimonial?.id} sx={{ px: { xs: 1, md: 2 } }}>
                   <Box
                     sx={{
                       bgcolor: "#fff",
-                      borderRadius: { xs: 3, md: 4 },
-                      p: { xs: 3.5, md: 4.5 },
-                      boxShadow: "0 8px 30px rgba(0,0,0,0.08)",
-                      height: "100%",
+                      borderRadius: { xs: 4, md: 6 },
+                      p: { xs: 4, md: 6 },
+                      boxShadow: "0 10px 40px rgba(0,0,0,0.1), 0 0 0 1px rgba(255,148,114,0.08)",
                       position: "relative",
-                      transition: "all 0.6s cubic-bezier(0.4, 0, 0.2, 1)",
-                      border: "1px solid rgba(255,181,161,0.1)",
                       overflow: "hidden",
                       opacity: visible ? 1 : 0,
-                      transform: visible ? "translateY(0)" : "translateY(50px)",
-                      animation: visible ? `fadeInUp 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) ${index * 0.15}s both` : "none",
-                      "@keyframes fadeInUp": {
-                        "0%": { opacity: 0, transform: "translateY(50px)" },
-                        "100%": { opacity: 1, transform: "translateY(0)" },
-                      },
+                      transform: visible ? "scale(1)" : "scale(0.95)",
+                      transition: "all 0.6s cubic-bezier(0.4, 0, 0.2, 1)",
                       "&::before": {
                         content: '""',
                         position: "absolute",
                         top: 0,
                         left: 0,
                         right: 0,
-                        height: "4px",
-                        background: "linear-gradient(90deg, #FF9472, #FFB5A1, #FF9472)",
+                        height: "6px",
+                        background: "linear-gradient(90deg, #FF9472 0%, #FFB5A1 50%, #FF9472 100%)",
                         backgroundSize: "200% 100%",
                         animation: isActive ? "gradientShift 3s ease infinite" : "none",
                         "@keyframes gradientShift": {
@@ -209,119 +227,128 @@ export const TestimonialsCarousel = () => {
                           "50%": { backgroundPosition: "100% 50%" },
                         },
                       },
-                      "&:hover": {
-                        transform: "translateY(-12px) scale(1.02)",
-                        boxShadow: "0 16px 50px rgba(255,181,161,0.25)",
-                        borderColor: "rgba(255,181,161,0.3)",
-                        "& .quote-icon": {
-                          color: "rgba(255,181,161,0.5)",
-                          transform: "scale(1.2) rotate(5deg)",
-                        },
-                        "& .testimonial-image": {
-                          transform: "scale(1.1)",
-                          boxShadow: "0 8px 25px rgba(255,181,161,0.4)",
-                        },
-                      },
                     }}
                   >
-                    {/* Quote Icon with Enhanced Animation */}
+                    {/* Decorative Quote Icon */}
                     <Box
-                      className="quote-icon"
                       sx={{
                         position: "absolute",
-                        top: 15,
-                        right: 15,
-                        color: "rgba(255,181,161,0.15)",
-                        transition: "all 0.5s cubic-bezier(0.4, 0, 0.2, 1)",
+                        top: 30,
+                        right: 30,
+                        color: "rgba(255,148,114,0.06)",
                         zIndex: 0,
                       }}
                     >
                       <FormatQuoteIcon
                         sx={{
-                          fontSize: { xs: 70, md: 90 },
+                          fontSize: { xs: 120, md: 150 },
                           transform: "rotate(180deg)",
-                          transition: "all 0.5s cubic-bezier(0.4, 0, 0.2, 1)",
-                          filter: "drop-shadow(0 4px 8px rgba(0,0,0,0.1))",
                         }}
                       />
                     </Box>
 
-                    {/* Rating with Animation */}
-                    <Box
-                      sx={{
-                        display: "flex",
-                        gap: 0.5,
-                        mb: 2.5,
-                        position: "relative",
-                        zIndex: 1,
-                      }}
-                    >
-                      {[...Array(testimonial?.rating)].map((_, i) => (
-                        <StarIcon
-                          key={i}
+                    {/* Content */}
+                    <Box sx={{ position: "relative", zIndex: 1 }}>
+                      {/* Customer Image and Info - Top Section */}
+                      <Stack
+                        direction={{ xs: "column", md: "row" }}
+                        spacing={3}
+                        alignItems="center"
+                        sx={{ mb: 4 }}
+                      >
+                        <Avatar
+                          src={testimonial?.image}
+                          alt={testimonial?.name}
                           sx={{
-                            fontSize: { xs: 22, md: 24 },
-                            color: "#FFD700",
-                            transition: "all 0.3s ease",
-                            animation: isActive ? `starPulse ${0.5 + i * 0.1}s ease-in-out infinite` : "none",
-                            "@keyframes starPulse": {
-                              "0%, 100%": { transform: "scale(1)" },
-                              "50%": { transform: "scale(1.2)" },
+                            width: { xs: 100, md: 120 },
+                            height: { xs: 100, md: 120 },
+                            border: "4px solid rgba(255,148,114,0.2)",
+                            boxShadow: "0 8px 30px rgba(255,148,114,0.25)",
+                            transition: "all 0.5s ease",
+                            "&:hover": {
+                              transform: "scale(1.05)",
+                              boxShadow: "0 12px 40px rgba(255,148,114,0.35)",
                             },
-                            filter: "drop-shadow(0 2px 4px rgba(255,215,0,0.3))",
                           }}
                         />
-                      ))}
-                    </Box>
+                        <Box sx={{ textAlign: { xs: "center", md: "left" }, flex: 1 }}>
+                          <Box sx={{ display: "flex", alignItems: "center", gap: 1, justifyContent: { xs: "center", md: "flex-start" }, mb: 1 }}>
+                            <CustomText
+                              sx={{
+                                fontSize: { xs: 22, md: 28 },
+                                fontWeight: 700,
+                                color: "var(--themeColor)",
+                              }}
+                            >
+                              {testimonial?.name}
+                            </CustomText>
+                            <VerifiedIcon
+                              sx={{
+                                fontSize: { xs: 20, md: 24 },
+                                color: "#4CAF50",
+                              }}
+                            />
+                          </Box>
+                          <CustomText
+                            sx={{
+                              fontSize: { xs: 14, md: 16 },
+                              color: "#888",
+                              fontWeight: 500,
+                              mb: 2,
+                            }}
+                          >
+                            {testimonial?.role}
+                          </CustomText>
+                          {/* Rating Stars */}
+                          <Box
+                            sx={{
+                              display: "flex",
+                              gap: 0.5,
+                              justifyContent: { xs: "center", md: "flex-start" },
+                            }}
+                          >
+                            {[...Array(testimonial?.rating)].map((_, i) => (
+                              <StarIcon
+                                key={i}
+                                sx={{
+                                  fontSize: { xs: 24, md: 28 },
+                                  color: "#FFD700",
+                                  filter: "drop-shadow(0 2px 4px rgba(255,215,0,0.4))",
+                                }}
+                              />
+                            ))}
+                          </Box>
+                        </Box>
+                      </Stack>
 
-                    {/* Comment */}
-                    <CustomText sx={{ fontSize: { xs: 15, md: 16 }, color: "#555", lineHeight: 1.9, mb: 3.5, position: "relative", zIndex: 1, fontStyle: "italic", }}>
-                      "{testimonial?.comment}"
-                    </CustomText>
-
-                    {/* Author Section */}
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 2, position: "relative", zIndex: 1, pt: 2, borderTop: "1px solid rgba(255,181,161,0.15)", }}>
+                      {/* Testimonial Comment */}
                       <Box
                         sx={{
                           position: "relative",
-                          "&::before": {
-                            content: '""',
-                            position: "absolute",
-                            top: "-3px",
-                            left: "-3px",
-                            right: "-3px",
-                            bottom: "-3px",
-                            borderRadius: "50%",
-                            background: "linear-gradient(135deg, rgba(255,181,161,0.3), rgba(95,41,48,0.2))",
-                            opacity: 0,
-                            transition: "opacity 0.3s ease",
-                            zIndex: -1,
-                          },
+                          pl: { xs: 2, md: 3 },
+                          borderLeft: "4px solid rgba(255,148,114,0.3)",
                         }}
                       >
-                        <Box
-                          className="testimonial-image"
-                          component="img"
-                          src={testimonial?.image}
-                          alt={testimonial?.name}
-                          loading="lazy"
+                        <FormatQuoteIcon
                           sx={{
-                            width: { xs: 65, md: 75 },
-                            height: { xs: 65, md: 75 },
-                            borderRadius: "50%",
-                            objectFit: "cover",
-                            border: "3px solid rgba(255,181,161,0.3)",
-                            transition: "all 0.5s cubic-bezier(0.4, 0, 0.2, 1)",
-                            boxShadow: "0 4px 15px rgba(0,0,0,0.1)",
+                            fontSize: { xs: 40, md: 50 },
+                            color: "rgba(255,148,114,0.3)",
+                            position: "absolute",
+                            top: -10,
+                            left: -5,
                           }}
                         />
-                      </Box>
-                      <Box>
-                        <CustomText sx={{ fontSize: { xs: 17, md: 18 }, fontWeight: 700, color: "var(--themeColor)", mb: 0.5, }}>
-                          {testimonial?.name}
-                        </CustomText>
-                        <CustomText sx={{ fontSize: { xs: 13, md: 14 }, color: "#999", fontWeight: 500, }}>
-                          {testimonial?.role}
+                        <CustomText
+                          sx={{
+                            fontSize: { xs: 16, md: 20 },
+                            color: "#444",
+                            lineHeight: 1.8,
+                            fontStyle: "italic",
+                            fontWeight: 400,
+                            pt: 2,
+                          }}
+                        >
+                          {testimonial?.comment}
                         </CustomText>
                       </Box>
                     </Box>
@@ -331,67 +358,43 @@ export const TestimonialsCarousel = () => {
             })}
           </Slider>
 
-          <IconButton
-            onClick={() => sliderRef?.slickNext()}
-            sx={{
-              position: "absolute",
-              right: { xs: -15, md: -25 },
-              top: "50%",
-              transform: "translateY(-50%)",
-              zIndex: 10,
-              bgcolor: "#fff",
-              color: "var(--themeColor)",
-              width: { xs: 45, md: 55 },
-              height: { xs: 45, md: 55 },
-              boxShadow: "0 6px 20px rgba(0,0,0,0.12)",
-              border: "2px solid rgba(255,181,161,0.2)",
-              transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-              "&:hover": {
-                bgcolor: "var(--themeColor)",
-                color: "#fff",
-                transform: "translateY(-50%) scale(1.1)",
-                boxShadow: "0 8px 25px rgba(95,41,48,0.3)",
-              },
-            }}
-          >
-            <ArrowForwardIosIcon sx={{ fontSize: { xs: 20, md: 24 } }} />
-          </IconButton>
-
           {/* Custom Dots */}
           <Box
             sx={{
               display: "flex",
               justifyContent: "center",
-              gap: 1,
-              mt: 4,
+              gap: 1.5,
+              mt: 5,
               "& .slick-dots": {
                 position: "relative",
                 bottom: "auto",
                 display: "flex !important",
                 justifyContent: "center",
-                gap: 1,
+                gap: 1.5,
                 "& li": {
                   width: "auto",
                   height: "auto",
                   margin: 0,
                   "& button": {
-                    width: { xs: "30px", md: "40px" },
-                    height: { xs: "4px", md: "5px" },
+                    width: { xs: 40, md: 50 },
+                    height: { xs: 6, md: 8 },
                     padding: 0,
-                    borderRadius: "20px",
-                    backgroundColor: "rgba(255,181,161,0.3)",
+                    borderRadius: "10px",
+                    backgroundColor: "rgba(255,148,114,0.25)",
                     transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
                     "&:before": {
                       display: "none",
                     },
                     "&:hover": {
-                      backgroundColor: "rgba(255,181,161,0.6)",
+                      backgroundColor: "rgba(255,148,114,0.5)",
+                      transform: "scaleY(1.3)",
                     },
                   },
                   "&.slick-active button": {
                     backgroundColor: "#FF9472",
-                    width: { xs: "40px", md: "50px" },
-                    boxShadow: "0 0 15px rgba(255,148,114,0.5)",
+                    width: { xs: 50, md: 70 },
+                    boxShadow: "0 0 20px rgba(255,148,114,0.6)",
+                    transform: "scaleY(1.2)",
                   },
                 },
               },
