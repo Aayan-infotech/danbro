@@ -660,3 +660,118 @@ export const submitContactForm = async (contactData) => {
   }
 };
 
+/**
+ * Fetch home layout data from the API
+ * @returns {Promise<Object>} Response object with menus, categories, and products
+ */
+export const fetchHomeLayout = async () => {
+  try {
+    const url = `${API_BASE_URL}/product/homeLayout`;
+    const location = getStoredLocation();
+    
+    const response = await axios.get(url, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'lat': location.lat.toString(),
+        'long': location.long.toString(),
+      },
+      withCredentials: false,
+      timeout: 30000,
+    });
+    
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching home layout:', error);
+    
+    if (error.code === 'ECONNABORTED' || error.message.includes('timeout')) {
+      throw new Error(
+        'Request timeout: The server is taking too long to respond. Please try again or check your network connection.'
+      );
+    }
+    
+    if (!error.response) {
+      if (error.code === 'ERR_NETWORK' || error.message.includes('Network Error')) {
+        throw new Error(
+          'Network error: Unable to connect to the API. Please check your internet connection or try again later.'
+        );
+      }
+      throw new Error(
+        'Network error: Unable to connect to the API. Please check your internet connection or try again later.'
+      );
+    }
+    
+    throw new Error(
+      error.response?.data?.message ||
+      `HTTP error! status: ${error.response.status}`
+    );
+  }
+};
+
+/**
+ * Fetch product by ID from the API
+ * @param {string} productId - Product ID
+ * @returns {Promise<Object>} Response object with product data
+ */
+export const fetchProductById = async (productId) => {
+  try {
+    const url = `${API_BASE_URL}/product/getById/${productId}`;
+    const location = getStoredLocation();
+    
+    const response = await axios.get(url, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'lat': location.lat.toString(),
+        'long': location.long.toString(),
+      },
+      withCredentials: false,
+      timeout: 30000,
+      responseType: 'text', // Get as text first to handle potential JSON parsing issues
+    });
+
+    let data;
+    
+    try {
+      // First try parsing without sanitization
+      data = JSON.parse(response.data);
+    } catch (parseError) {
+      // If that fails, try sanitizing and parsing again
+      try {
+        const sanitizedText = sanitizeJsonString(response.data);
+        data = JSON.parse(sanitizedText);
+      } catch (sanitizeError) {
+        console.error('Failed to parse response as JSON:', sanitizeError);
+        console.error('Response text (first 500 chars):', response.data.substring(0, 500));
+        throw new Error(`Invalid response format from API: ${sanitizeError.message}`);
+      }
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('Error fetching product by ID:', error);
+    
+    if (error.code === 'ECONNABORTED' || error.message.includes('timeout')) {
+      throw new Error(
+        'Request timeout: The server is taking too long to respond. Please try again or check your network connection.'
+      );
+    }
+    
+    if (!error.response) {
+      if (error.code === 'ERR_NETWORK' || error.message.includes('Network Error')) {
+        throw new Error(
+          'Network error: Unable to connect to the API. Please check your internet connection or try again later.'
+        );
+      }
+      throw new Error(
+        'Network error: Unable to connect to the API. Please check your internet connection or try again later.'
+      );
+    }
+    
+    throw new Error(
+      error.response?.data?.message ||
+      `HTTP error! status: ${error.response.status}`
+    );
+  }
+};
+

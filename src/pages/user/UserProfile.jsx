@@ -22,6 +22,7 @@ import { SavedAddressesTab } from "../../components/user/SavedAddressesTab";
 import { MyCouponsTab } from "../../components/user/MyCouponsTab";
 import { WishlistTab } from "../../components/user/WishlistTab";
 import { SettingsTab } from "../../components/user/SettingsTab";
+import blankImage from "../../assets/blankimage.png";
 
 export const UserProfile = () => {
   const theme = useTheme();
@@ -33,10 +34,10 @@ export const UserProfile = () => {
   );
 
   const favoriteItems = [
-    { id: 1, name: "Chocolate Cake", image: "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=400&h=400&fit=crop", price: "₹450" },
-    { id: 2, name: "Red Velvet Cake", image: "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=400&h=400&fit=crop", price: "₹550" },
-    { id: 3, name: "Black Forest Cake", image: "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=400&h=400&fit=crop", price: "₹500" },
-    { id: 4, name: "Vanilla Cake", image: "https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=400&h=400&fit=crop", price: "₹400" },
+    { id: 1, name: "Chocolate Cake", image: blankImage, price: "₹450" },
+    { id: 2, name: "Red Velvet Cake", image: blankImage, price: "₹550" },
+    { id: 3, name: "Black Forest Cake", image: blankImage, price: "₹500" },
+    { id: 4, name: "Vanilla Cake", image: blankImage, price: "₹400" },
   ];
 
   const orders = [

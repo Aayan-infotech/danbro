@@ -2,9 +2,9 @@ import { Box,  IconButton, Drawer, useMediaQuery, useTheme } from "@mui/material
 import { CustomText } from "../comman/CustomText";
 import MenuIcon from "@mui/icons-material/Menu";
 import CloseIcon from "@mui/icons-material/Close";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { categoryItems } from "../../utils/navigationItems";
+import { useHomeLayout } from "../../hooks/useHomeLayout";
 import { NavbarDropdown } from "./NavbarDropdown";
 
 export const Navbar = () => {
@@ -18,25 +18,40 @@ export const Navbar = () => {
     const [isVisible, setIsVisible] = useState(true);
     const lastScrollY = useRef(0);
     const navbarRef = useRef(null);
+    const { menus } = useHomeLayout();
+    
+    // Transform menus to navbar items format - memoized to prevent re-renders
+    const menuItems = useMemo(() => {
+        return menus?.map((menu) => ({
+            label: menu.categoryName,
+            categoryId: menu.categoryId,
+            hasProducts: menu.products && menu.products.length > 0,
+        })) || [];
+    }, [menus]);
+    
+    // Add PRODUCTS heading at the beginning - memoized
+    const navbarItems = useMemo(() => [
+        {
+            label: "PRODUCTS",
+            categoryId: null,
+            hasProducts: false,
+            path: "/products",
+        },
+        ...menuItems
+    ], [menuItems]);
 
     // Sticky header with hide/show on scroll
     useEffect(() => {
         const handleScroll = () => {
             const currentScrollY = window.scrollY;
-            
-            // Add shadow when scrolled
             setIsScrolled(currentScrollY > 50);
-            
-            // Hide/show navbar on scroll
             if (currentScrollY > lastScrollY.current && currentScrollY > 100) {
-                setIsVisible(false); // Scrolling down - hide
+                setIsVisible(false);
             } else {
-                setIsVisible(true); // Scrolling up - show
+                setIsVisible(true);
             }
-            
             lastScrollY.current = currentScrollY;
         };
-
         window.addEventListener("scroll", handleScroll, { passive: true });
         return () => window.removeEventListener("scroll", handleScroll);
     }, []);
@@ -87,27 +102,31 @@ export const Navbar = () => {
                         },
                     }}
                 >
-                    {categoryItems?.map(({ label, path }) => {
-                        // Don't show dropdown for PRODUCTS and EVENTS
-                        const showDropdown = label !== "PRODUCTS" && label !== "EVENTS";
+                    {navbarItems?.map(({ label, categoryId, hasProducts, path: itemPath }) => {
+                        const showDropdown = hasProducts;
+                        const path = itemPath || `/products?categoryId=${categoryId}`;
                         
                         return (
                             <Box
-                                key={label}
+                                key={categoryId || label}
                                 sx={{
                                     position: "relative",
                                 }}
                                 onMouseEnter={(e) => {
                                     if (showDropdown) {
+                                        e.preventDefault();
+                                        e.stopPropagation();
                                         setHoveredItem(label);
                                         setAnchorEl(e.currentTarget);
                                     }
                                 }}
-                                onMouseLeave={() => {
-                                    if (showDropdown) {
-                                        // Close immediately when cursor leaves the label
-                                        setHoveredItem(null);
-                                        setAnchorEl(null);
+                                onMouseLeave={(e) => {
+                                    const relatedTarget = e.relatedTarget;
+                                    if (relatedTarget && !relatedTarget.closest('[role="presentation"]')) {
+                                        if (showDropdown) {
+                                            setHoveredItem(null);
+                                            setAnchorEl(null);
+                                        }
                                     }
                                 }}
                             >
@@ -122,13 +141,7 @@ export const Navbar = () => {
                                         fontWeight: 600,
                                         fontSize: { xs: 12, sm: 13, md: 14 },
                                         cursor: "pointer",
-                                        color: label === "ADDONS" ? "#fff" : location.pathname === path ? "var(--themeColor)" : "var(--themeColor)",
-                                        ...(label === "ADDONS" && {
-                                            backgroundColor: "#00b53d",
-                                            borderRadius: 2,
-                                            px: { xs: 1.5, md: 2 },
-                                            py: 0.5,
-                                        }),
+                                        color: location.pathname === path || (path === "/products" && location.pathname.startsWith("/products")) ? "var(--themeColor)" : "var(--themeColor)",
                                         whiteSpace: "nowrap",
                                         position: "relative",
                                         transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
@@ -149,9 +162,10 @@ export const Navbar = () => {
                                 >
                                     {label}
                                 </CustomText>
-                                {showDropdown && hoveredItem === label && (
+                                {showDropdown && (
                                     <NavbarDropdown
                                         category={label}
+                                        categoryId={categoryId}
                                         isOpen={hoveredItem === label}
                                         onClose={() => {
                                             setHoveredItem(null);
@@ -227,41 +241,37 @@ export const Navbar = () => {
                         px: 3,
                     }}
                 >
-                    {categoryItems.map(({ label, path }, index) => (
-                        <CustomText
-                            key={label}
-                            autoTitleCase={true}
-                            onClick={() => {
-                                navigate(path);
-                                handleDrawerToggle();  // close drawer after navigating
-                            }}
-                            sx={{
-                                fontWeight: 600,
-                                fontSize: 14,
-                                cursor: "pointer",
-                                color: label === "ADDONS" ? "#fff" : "var(--themeColor)",
-                                ...(label === "ADDONS" && {
-                                    backgroundColor: "#00b53d",
-                                    borderRadius: 2,
-                                    px: 2,
-                                    py: 0.8,
-                                    textAlign: "center",
-                                }),
-                                transition: "all 0.3s ease",
-                                animation: `slideIn 0.3s ease ${index * 0.1}s both`,
-                                "@keyframes slideIn": {
-                                    "0%": { opacity: 0, transform: "translateX(20px)" },
-                                    "100%": { opacity: 1, transform: "translateX(0)" },
-                                },
-                                "&:hover": {
-                                    opacity: 0.8,
-                                    transform: "translateX(5px)",
-                                },
-                            }}
-                        >
-                            {label}
-                        </CustomText>
-                    ))}
+                    {navbarItems.map(({ label, categoryId, path: itemPath }, index) => {
+                        const path = itemPath || `/products?categoryId=${categoryId}`;
+                        return (
+                            <CustomText
+                                key={categoryId || label}
+                                autoTitleCase={true}
+                                onClick={() => {
+                                    navigate(path);
+                                    handleDrawerToggle();  // close drawer after navigating
+                                }}
+                                sx={{
+                                    fontWeight: 600,
+                                    fontSize: 14,
+                                    cursor: "pointer",
+                                    color: "var(--themeColor)",
+                                    transition: "all 0.3s ease",
+                                    animation: `slideIn 0.3s ease ${index * 0.1}s both`,
+                                    "@keyframes slideIn": {
+                                        "0%": { opacity: 0, transform: "translateX(20px)" },
+                                        "100%": { opacity: 1, transform: "translateX(0)" },
+                                    },
+                                    "&:hover": {
+                                        opacity: 0.8,
+                                        transform: "translateX(5px)",
+                                    },
+                                }}
+                            >
+                                {label}
+                            </CustomText>
+                        );
+                    })}
 
                 </Box>
             </Drawer>

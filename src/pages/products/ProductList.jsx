@@ -19,6 +19,7 @@ import { CategoryTabs } from "../../components/comman/CategoryTabs";
 import { ProductGrid } from "../../components/products/ProductGrid";
 import { RecommendedProducts } from "../../components/products/RecommendedProducts";
 import { CustomButton } from "../../components/comman/CustomButton";
+import blankImage from "../../assets/blankimage.png";
 
 export const ProductList = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -98,7 +99,7 @@ export const ProductList = () => {
 
       const productImage = product.images && product.images.length > 0 && product.images[0].url
         ? product.images[0].url
-        : "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=400&h=400&fit=crop&auto=format&q=80";
+        : blankImage;
 
       return {
         id: product.prdcode,
@@ -170,37 +171,37 @@ export const ProductList = () => {
       id: 1,
       name: "Blueberry Cake",
       description: "Sweet blueberry delight",
-      image: "https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=400&h=400&fit=crop",
+      image: blankImage,
     },
     {
       id: 2,
       name: "Cinnamon Roll",
       description: "Warm cinnamon spice",
-      image: "https://images.unsplash.com/photo-1627834377411-8da5f4f09de8?w=400&h=400&fit=crop",
+      image: blankImage,
     },
     {
       id: 3,
       name: "Lemon Tart",
       description: "Tangy lemon filling",
-      image: "https://images.unsplash.com/photo-1621303837174-89787a7d4729?w=400&h=400&fit=crop",
+      image: blankImage,
     },
     {
       id: 4,
       name: "Lemon Tart",
       description: "Tangy lemon filling",
-      image: "https://images.unsplash.com/photo-1621303837174-89787a7d4729?w=400&h=400&fit=crop",
+      image: blankImage,
     },
     {
       id: 5,
       name: "Lemon Tart",
       description: "Tangy lemon filling",
-      image: "https://images.unsplash.com/photo-1621303837174-89787a7d4729?w=400&h=400&fit=crop",
+      image: blankImage,
     },
     {
       id: 5,
       name: "Lemon Tart",
       description: "Tangy lemon filling",
-      image: "https://images.unsplash.com/photo-1621303837174-89787a7d4729?w=400&h=400&fit=crop",
+      image: blankImage,
     },
   ];
 

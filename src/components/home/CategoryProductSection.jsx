@@ -1,8 +1,9 @@
-import { useEffect, useState, useMemo, memo } from "react";
+import { useEffect, useState, useMemo, memo, useCallback } from "react";
 import { useItemCategories } from "../../hooks/useItemCategories";
 import { fetchProducts } from "../../utils/apiService";
 import { ProductSectionCarousel } from "./ProductSectionCarousel";
 import { Box, CircularProgress, Alert } from "@mui/material";
+import blankImage from "../../assets/blankimage.png";
 
 /**
  * Component that fetches products by category groupname and displays them
@@ -86,7 +87,7 @@ export const CategoryProductSection = memo(({
             const productImage =
               product.images && product.images.length > 0 && product.images[0].url
                 ? product.images[0].url
-                : "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=400&h=400&fit=crop&auto=format&q=80";
+                : blankImage;
 
             // Calculate discount if applicable
             let discount = null;

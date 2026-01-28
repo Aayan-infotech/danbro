@@ -1,0 +1,144 @@
+import { useState, useEffect, useRef } from 'react';
+import { fetchHomeLayout } from '../utils/apiService';
+import blankImage from '../assets/blankimage.png';
+
+// Cache for home layout data to prevent multiple API calls
+const homeLayoutCache = {
+  data: null,
+  timestamp: null,
+  CACHE_DURATION: 5 * 60 * 1000, // 5 minutes cache
+};
+
+/**
+ * Custom hook to fetch home layout data from the new API with caching
+ * @returns {Object} Object containing menus, categories, products, loading state, and error
+ */
+export const useHomeLayout = () => {
+  const [data, setData] = useState({
+    menus: [],
+    categories: [],
+    products: [],
+  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const isMountedRef = useRef(true);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadHomeLayout = async () => {
+      // Check cache first
+      const now = Date.now();
+      if (
+        homeLayoutCache.data &&
+        homeLayoutCache.timestamp &&
+        (now - homeLayoutCache.timestamp) < homeLayoutCache.CACHE_DURATION
+      ) {
+        if (!cancelled) {
+          setData(homeLayoutCache.data);
+          setLoading(false);
+          return;
+        }
+      }
+
+      try {
+        setLoading(true);
+        setError(null);
+
+        const response = await fetchHomeLayout();
+
+        if (!cancelled) {
+          if (response?.success && response?.data) {
+            const newData = {
+              menus: response.data.menus || [],
+              categories: response.data.categories || [],
+              products: response.data.products || [],
+            };
+            // Update cache
+            homeLayoutCache.data = newData;
+            homeLayoutCache.timestamp = Date.now();
+            setData(newData);
+          } else {
+            setData({
+              menus: [],
+              categories: [],
+              products: [],
+            });
+          }
+        }
+      } catch (err) {
+        if (!cancelled) {
+          console.error('Error loading home layout:', err);
+          setError(err.message || 'Failed to load home layout data');
+          setData({
+            menus: [],
+            categories: [],
+            products: [],
+          });
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadHomeLayout();
+
+    return () => {
+      cancelled = true;
+      isMountedRef.current = false;
+    };
+  }, []);
+
+  return {
+    menus: data.menus,
+    categories: data.categories,
+    products: data.products,
+    loading,
+    error,
+  };
+};
+
+/**
+ * Transform API product format to match CategoryProductSection expected format
+ * @param {Object} apiProduct - Product from API
+ * @param {number} categoryId - Category ID
+ * @returns {Object} Transformed product object
+ */
+export const transformProduct = (apiProduct, categoryId) => {
+  const priceObj = apiProduct.price || {};
+  const displayPrice = priceObj.rate || priceObj.mrp || 0;
+  const originalPrice = priceObj.mrp || priceObj.rate || 0;
+
+  const productImage =
+    apiProduct.image ||
+    blankImage;
+
+  // Calculate discount if applicable
+  let discount = null;
+  if (originalPrice > displayPrice && originalPrice > 0) {
+    const discountPercent = Math.round(
+      ((originalPrice - displayPrice) / originalPrice) * 100
+    );
+    discount = `${discountPercent}% OFF`;
+  }
+
+  return {
+    id: apiProduct.productId,
+    productId: apiProduct.productId,
+    name: apiProduct.name,
+    title: apiProduct.name,
+    description: apiProduct.name,
+    price: `₹${displayPrice}`,
+    originalPrice: originalPrice > displayPrice ? `₹${originalPrice}` : null,
+    image: productImage,
+    discount: discount,
+    rating: 4.5,
+    reviews: 75,
+    sku: apiProduct.productId,
+    badge: 'New',
+    badgeColor: '#FF9472',
+    categoryId: categoryId,
+  };
+};

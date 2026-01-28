@@ -1,8 +1,6 @@
 import { Container, Box, CircularProgress, Typography } from "@mui/material";
 import { CategoryCarousel } from "../components/home/CategoryCarousel";
 import { HeroBanner } from "../components/home/HeroBanner";
-import { FeaturedProductsCarousel } from "../components/home/FeaturedProductsCarousel";
-import { SpecialOffersSection } from "../components/home/SpecialOffersSection";
 import { AboutBakerySection } from "../components/home/AboutBakerySection";
 import { BakeryServicesSection } from "../components/home/BakeryServicesSection";
 import { TestimonialsCarousel } from "../components/home/TestimonialsCarousel";
@@ -10,14 +8,12 @@ import { NewsletterSection } from "../components/home/NewsletterSection";
 import { YouTubeVideosSection } from "../components/home/YouTubeVideosSection";
 import { CategoryProductSection } from "../components/home/CategoryProductSection";
 import { BackgroundDecorations } from "../components/home/BackgroundDecorations";
-import { useHomePageData } from "../hooks/useHomePageData";
+import { useHomeLayout, transformProduct } from "../hooks/useHomeLayout";
 import { useMemo } from "react";
 import CakeIcon from "@mui/icons-material/Cake";
 import RestaurantIcon from "@mui/icons-material/Restaurant";
-import LocalCafeIcon from "@mui/icons-material/LocalCafe";
 import CardGiftcardIcon from "@mui/icons-material/CardGiftcard";
 import FastfoodIcon from "@mui/icons-material/Fastfood";
-import LocalFireDepartmentIcon from "@mui/icons-material/LocalFireDepartment";
 import BreakfastDiningIcon from "@mui/icons-material/BreakfastDining";
 import LocalPizzaIcon from "@mui/icons-material/LocalPizza";
 import CelebrationIcon from "@mui/icons-material/Celebration";
@@ -26,44 +22,32 @@ import CookieIcon from "@mui/icons-material/Cookie";
 import AcUnitIcon from "@mui/icons-material/AcUnit";
 import LocalDiningIcon from "@mui/icons-material/LocalDining";
 
-// Define all category configurations for home page - moved outside component to prevent re-creation on every render
-const categoryConfigs = [
-  { categoryGroupname: "COOKIES", limit: 10 },
-  { categoryGroupname: "CAKES WEB AND APP", limit: 10 },
-  { categoryGroupname: "CAKES", limit: 10 },
-  { categoryGroupname: "SNB CREAMLESS CAKES", limit: 10 },
-  { categoryGroupname: "FAST FOOD", limit: 10 },
-  { categoryGroupname: "ITALIAN SNACKS", limit: 10 },
-  { categoryGroupname: "GIFT HAMPERS", limit: 10 },
-  { categoryGroupname: "BREAKFAST SPECIAL", limit: 10 },
-  { categoryGroupname: "PIZZA AND BURGERS", limit: 10 },
-  { categoryGroupname: "CELEBRATION ITEMS", limit: 10 },
-  { categoryGroupname: "CHOCOLATES", limit: 10 },
-  { categoryGroupname: "DANBREW MOCKTAILS", limit: 10 },
-  { categoryGroupname: "DRY CAKES AND MUFFINS", limit: 10 },
-  { categoryGroupname: "FROZEN PRODUCTS", limit: 10 },
-  { categoryGroupname: "MITHAI", limit: 10 },
-  { categoryGroupname: "NAMKEEN", limit: 10 },
-  { categoryGroupname: "NAMKEEN SHYAM", limit: 10 },
-];
+// Map category names from API to section configs
+const getCategoryProducts = (products, categoryName) => {
+  const category = products.find(
+    (cat) => cat.categoryName?.toUpperCase() === categoryName?.toUpperCase()
+  );
+  if (!category || !category.products) return [];
+  return category.products.map((product) => transformProduct(product, category.categoryId));
+};
 
 const Home = () => {
-  // Fetch all category products in parallel
-  const { productsData, loading, error } = useHomePageData(categoryConfigs);
+  // Fetch home layout data from new API (cached)
+  const { products: productsData, categories, loading, error } = useHomeLayout();
 
-  // Memoize merged products arrays to prevent unnecessary re-renders
+  // Memoize products for each section - prevent unnecessary recalculations
   const cakesProducts = useMemo(() => {
-    return [
-      ...(productsData["CAKES WEB AND APP"]?.products || []),
-      ...(productsData["CAKES"]?.products || [])
-    ];
+    if (!productsData || productsData.length === 0) return [];
+    const cakesWebApp = getCategoryProducts(productsData, "CAKES WEB AND APP");
+    const cakes = getCategoryProducts(productsData, "CAKES");
+    return [...cakesWebApp, ...cakes];
   }, [productsData]);
 
   const namkeenProducts = useMemo(() => {
-    return [
-      ...(productsData["NAMKEEN"]?.products || []),
-      ...(productsData["NAMKEEN SHYAM"]?.products || [])
-    ];
+    if (!productsData || productsData.length === 0) return [];
+    const namkeen = getCategoryProducts(productsData, "NAMKEEN");
+    const namkeenShyam = getCategoryProducts(productsData, "NAMKEEN SHYAM");
+    return [...namkeen, ...namkeenShyam];
   }, [productsData]);
 
   // Show loading screen while all data is being fetched
@@ -101,21 +85,7 @@ const Home = () => {
       
       <Container maxWidth={false} sx={{ px: { xs: 2, md: 3 }, py: { xs: 4, md: 6 }, position: "relative", zIndex: 1 }}>
         {/* Category Carousel */}
-        <CategoryCarousel />
-        
-        {/* Featured Products / Bestsellers */}
-        <FeaturedProductsCarousel />
-        
-        {/* Our Best Selling Products - From API */}
-        <CategoryProductSection
-          categoryGroupname="COOKIES"
-          title="Our Best Selling Products"
-          subtitle="Top Picks"
-          icon={LocalFireDepartmentIcon}
-          bgColor="rgba(255,248,245,0.5)"
-          limit={10}
-          preloadedProducts={productsData["COOKIES"]?.products || []}
-        />
+        <CategoryCarousel categories={categories} />
         
         {/* Cakes - Merged Section (Birthday Cakes + Beautiful Cakes) */}
         <CategoryProductSection
@@ -128,9 +98,6 @@ const Home = () => {
           preloadedProducts={cakesProducts.slice(0, 20)}
         />
         
-        {/* Special Offers / Deals */}
-        <SpecialOffersSection />
-        
         {/* Hunger Bites - From API */}
         <CategoryProductSection
           categoryGroupname="FAST FOOD"
@@ -139,7 +106,7 @@ const Home = () => {
           icon={FastfoodIcon}
           bgColor="rgba(255,248,245,0.5)"
           limit={10}
-          preloadedProducts={productsData["FAST FOOD"]?.products || []}
+          preloadedProducts={getCategoryProducts(productsData, "FAST FOOD")}
         />
         
         {/* Fillers - From API */}
@@ -149,7 +116,7 @@ const Home = () => {
           subtitle="Snack Time"
           icon={RestaurantIcon}
           limit={10}
-          preloadedProducts={productsData["ITALIAN SNACKS"]?.products || []}
+          preloadedProducts={getCategoryProducts(productsData, "ITALIAN SNACKS")}
         />
         
         {/* Take me Along - From API */}
@@ -161,7 +128,7 @@ const Home = () => {
           bgColor="rgba(255,248,245,0.5)"
           showBadge={false}
           limit={10}
-          preloadedProducts={productsData["GIFT HAMPERS"]?.products || []}
+          preloadedProducts={getCategoryProducts(productsData, "GIFT HAMPERS")}
         />
         
         {/* Breakfast Special - From API */}
@@ -171,7 +138,7 @@ const Home = () => {
           subtitle="Morning Delights"
           icon={BreakfastDiningIcon}
           limit={10}
-          preloadedProducts={productsData["BREAKFAST SPECIAL"]?.products || []}
+          preloadedProducts={getCategoryProducts(productsData, "BREAKFAST SPECIAL")}
         />
         
         {/* Pizza and Burgers - From API */}
@@ -182,7 +149,7 @@ const Home = () => {
           icon={LocalPizzaIcon}
           bgColor="rgba(255,248,245,0.5)"
           limit={10}
-          preloadedProducts={productsData["PIZZA AND BURGERS"]?.products || []}
+          preloadedProducts={getCategoryProducts(productsData, "PIZZA AND BURGERS")}
         />
         
         {/* Celebration Items - From API */}
@@ -192,7 +159,7 @@ const Home = () => {
           subtitle="Party Essentials"
           icon={CelebrationIcon}
           limit={10}
-          preloadedProducts={productsData["CELEBRATION ITEMS"]?.products || []}
+          preloadedProducts={getCategoryProducts(productsData, "CELEBRATION ITEMS")}
         />
         
         {/* Chocolates - From API */}
@@ -203,7 +170,7 @@ const Home = () => {
           icon={CookieIcon}
           bgColor="rgba(255,248,245,0.5)"
           limit={10}
-          preloadedProducts={productsData["CHOCOLATES"]?.products || []}
+          preloadedProducts={getCategoryProducts(productsData, "CHOCOLATES")}
         />
         
         {/* Danbrew Mocktails - From API */}
@@ -213,7 +180,7 @@ const Home = () => {
           subtitle="Refreshing Drinks"
           icon={LiquorIcon}
           limit={10}
-          preloadedProducts={productsData["DANBREW MOCKTAILS"]?.products || []}
+          preloadedProducts={getCategoryProducts(productsData, "DANBREW MOCKTAILS")}
         />
         
         {/* Frozen Products - From API */}
@@ -223,7 +190,7 @@ const Home = () => {
           subtitle="Chilled Delights"
           icon={AcUnitIcon}
           limit={10}
-          preloadedProducts={productsData["FROZEN PRODUCTS"]?.products || []}
+          preloadedProducts={getCategoryProducts(productsData, "FROZEN PRODUCTS")}
         />
         
         {/* Mithai - From API */}
@@ -234,7 +201,7 @@ const Home = () => {
           icon={LocalDiningIcon}
           bgColor="rgba(255,248,245,0.5)"
           limit={10}
-          preloadedProducts={productsData["MITHAI"]?.products || []}
+          preloadedProducts={getCategoryProducts(productsData, "MITHAI")}
         />
         
         {/* Namkeen - Merged Section (Namkeen + Namkeen Shyam) */}

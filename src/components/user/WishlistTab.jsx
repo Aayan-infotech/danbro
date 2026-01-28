@@ -4,6 +4,7 @@ import { Favorite as FavoriteIcon } from "@mui/icons-material";
 import { CustomText } from "../comman/CustomText";
 import api from "../../utils/api";
 import { getStoredLocation } from "../../utils/location";
+import blankImage from "../../assets/blankimage.png";
 
 export const WishlistTab = ({ onRemoveFromWishlist }) => {
   const [wishlistItems, setWishlistItems] = useState([]);
@@ -34,7 +35,7 @@ export const WishlistTab = ({ onRemoveFromWishlist }) => {
           // Extract image - images is an array of objects with url
           const image = product.images && Array.isArray(product.images) && product.images.length > 0
             ? product.images[0].url
-            : "https://via.placeholder.com/300";
+            : blankImage;
 
           return {
             id: item?._id || item?.id || product.productId || product._id,

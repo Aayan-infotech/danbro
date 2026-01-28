@@ -34,10 +34,12 @@ import {
 } from "@mui/icons-material";
 import { useNavigate, useParams } from "react-router-dom";
 import { useMediaQuery, useTheme } from "@mui/material";
-import { fetchProducts } from "../../utils/apiService";
+import { fetchProducts, fetchProductById } from "../../utils/apiService";
 import { useItemCategories } from "../../hooks/useItemCategories";
+import { useHomeLayout } from "../../hooks/useHomeLayout";
 import { addToCart } from "../../utils/cart";
 import { getAccessToken } from "../../utils/cookies";
+import blankImage from "../../assets/blankimage.png";
 
 export const ProductDetails = () => {
   const navigate = useNavigate();
@@ -55,8 +57,9 @@ export const ProductDetails = () => {
   const [addingToCart, setAddingToCart] = useState(false);
   const [cartMessage, setCartMessage] = useState(null);
   
-  // Fetch categories to get all products
+  // Fetch categories and home layout data
   const { categories: apiCategories } = useItemCategories();
+  const { products: homeLayoutProducts } = useHomeLayout();
 
   useEffect(() => {
     if (!selectOpen) return;
@@ -83,68 +86,94 @@ export const ProductDetails = () => {
           setLoading(false);
           return;
         }
-
-        // Handle both MongoDB ObjectId (string) and numeric prdcode
-        const productId = id; // Keep as string to handle MongoDB ObjectId
-        const numericId = parseInt(id); // For numeric prdcode matching
+        const productId = id;
         
-        if (apiCategories && apiCategories.length > 0) {
-          // OPTIMIZED: Fetch categories sequentially and stop once product is found
-          // This prevents unnecessary API calls
-          let foundProduct = null;
-          
-          for (const category of apiCategories) {
-            try {
-              // OPTIMIZED: Reduced limit to prevent loading too many products
-              // Search by productId first, if not found, try with smaller batches
-              const response = await fetchProducts(category.id, 1, 50, '');
-              
-              if (!response) continue;
-              
-              const data = response?.data || response?.records;
-              if (Array.isArray(data)) {
-                // First try to match by MongoDB ObjectId (_id or productId)
-                foundProduct = data.find(p => 
-                  p._id === productId || 
-                  p.productId === productId || 
-                  p.id === productId
-                );
-                
-                // If not found, try to match by numeric prdcode
-                if (!foundProduct && !isNaN(numericId)) {
-                  foundProduct = data.find(p => 
-                    p.prdcode === numericId || 
-                    p.prdcode?.toString() === productId
-                  );
-                }
-                
-                // Stop searching once product is found
-                if (foundProduct) {
+        // OPTIMIZATION 1: Use direct API endpoint to get product by ID (fastest)
+        try {
+          const response = await fetchProductById(productId);
+          if (response?.success && response?.data) {
+            setProduct(response.data);
+            setProductWeight(response.data.weight || "500g");
+            setLoading(false);
+            return;
+          } else if (response?.data) {
+            // Some APIs return data directly without success flag
+            setProduct(response.data);
+            setProductWeight(response.data.weight || "500g");
+            setLoading(false);
+            return;
+          }
+        } catch (err) {
+          console.log('Direct product fetch failed, trying fallback methods...', err);
+        }
+        
+        // FALLBACK 1: Check homeLayout products data (already loaded)
+        if (homeLayoutProducts && homeLayoutProducts.length > 0) {
+          for (const categoryData of homeLayoutProducts) {
+            if (categoryData.products && Array.isArray(categoryData.products)) {
+              const foundProduct = categoryData.products.find(p => 
+                p.productId === productId || 
+                p._id === productId ||
+                p.id === productId
+              );
+              if (foundProduct) {
+                // Try to get full product details
+                try {
+                  const response = await fetchProductById(productId);
+                  if (response?.success && response?.data) {
+                    setProduct(response.data);
+                    setProductWeight(response.data.weight || "500g");
+                    setLoading(false);
+                    return;
+                  }
+                } catch (err) {
+                  // Use the product from homeLayout as fallback
                   setProduct(foundProduct);
                   setProductWeight(foundProduct.weight || "500g");
                   setLoading(false);
                   return;
                 }
               }
-            } catch (err) {
-              // Continue to next category if this one fails
-              continue;
             }
           }
         }
         
+        // FALLBACK 2: Search without category filter
+        try {
+          const response = await fetchProducts(null, 1, 100, productId);
+          if (response?.success && response?.data && Array.isArray(response.data)) {
+            const foundProduct = response.data.find(p => 
+              p._id === productId || 
+              p.productId === productId || 
+              p.id === productId ||
+              p.productId?.toString() === productId ||
+              p._id?.toString() === productId
+            );
+            if (foundProduct) {
+              setProduct(foundProduct);
+              setProductWeight(foundProduct.weight || "500g");
+              setLoading(false);
+              return;
+            }
+          }
+        } catch (err) {
+          console.log('Search without category failed');
+        }
+        
         setError("Product not found");
       } catch (err) {
+        console.error('Error loading product:', err);
         setError(err.message || "Failed to load product");
       } finally {
         setLoading(false);
       }
     };
 
-    if (apiCategories && apiCategories.length > 0) {
+    // Load product immediately when id is available
+    if (id) {
       loadProduct();
     }
-  }, [id, apiCategories]);
+  }, [id, apiCategories, homeLayoutProducts]);
 
   const handleAddToCart = async () => {
     if (!product) return;
@@ -207,13 +236,12 @@ export const ProductDetails = () => {
       });
     }
     
-    const placeholderImage = "https://images.unsplash.com/photo-1607958996333-41aef7caefaa?w=400&h=400&fit=crop&auto=format&q=80";
     let images = [];
     
     if (product.images && Array.isArray(product.images) && product.images.length > 0) {
-      images = product.images.map(img => img.url || placeholderImage);
+      images = product.images.map(img => img.url || blankImage);
     } else {
-      images = [placeholderImage, placeholderImage, placeholderImage, placeholderImage];
+      images = [blankImage, blankImage, blankImage, blankImage];
     }
     
     return {
@@ -269,15 +297,16 @@ export const ProductDetails = () => {
     if (!exploreImagesLoaded) {
       return []; // Return empty array until section is visible
     }
+    // Use blank image instead of external URLs to reduce requests
     return [
-      "https://picsum.photos/id/1040/300/200",
-      "https://picsum.photos/id/1060/300/200",
-      "https://picsum.photos/id/1080/300/200",
-      "https://picsum.photos/id/109/300/200",
-      "https://picsum.photos/id/120/300/200",
-      "https://picsum.photos/id/121/300/200",
-      "https://picsum.photos/id/122/300/200",
-      "https://picsum.photos/id/123/300/200"
+      blankImage,
+      blankImage,
+      blankImage,
+      blankImage,
+      blankImage,
+      blankImage,
+      blankImage,
+      blankImage
     ];
   }, [exploreImagesLoaded]);
 

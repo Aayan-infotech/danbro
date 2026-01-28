@@ -30,12 +30,22 @@ const AppContent = () => {
   const hideNavbar = pathname === "/profile" || pathname === "/user-profile";
 
   useEffect(() => {
+    // Check if location is already set
+    const hasLocation = localStorage.getItem('userLocation');
     const hasSeenDialog = localStorage.getItem("deliveryDialogShown");
-    if (!hasSeenDialog) {
+    
+    // Show dialog if location is not set OR if user hasn't seen the dialog
+    if (!hasLocation || !hasSeenDialog) {
       setTimeout(() => {
         setShowDeliveryDialog(true);
       }, 500);
     }
+  }, []);
+
+  useEffect(() => {
+    const openDialog = () => setShowDeliveryDialog(true);
+    window.addEventListener("openLocationDialog", openDialog);
+    return () => window.removeEventListener("openLocationDialog", openDialog);
   }, []);
 
   const handleCloseDeliveryDialog = () => {

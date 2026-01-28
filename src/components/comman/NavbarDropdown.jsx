@@ -1,9 +1,8 @@
-import { Box, Popover, Grid, CircularProgress } from "@mui/material";
+import { Box, Popover } from "@mui/material";
 import { CustomText } from "./CustomText";
 import { useNavigate } from "react-router-dom";
-import { useItemCategories } from "../../hooks/useItemCategories";
-import { useMemo, useState, useEffect } from "react";
-import { fetchProducts } from "../../utils/apiService";
+import { useHomeLayout } from "../../hooks/useHomeLayout";
+import { useMemo } from "react";
 
 /**
  * NavbarDropdown Component
@@ -16,55 +15,55 @@ import { fetchProducts } from "../../utils/apiService";
  * @param {Object} props.anchorEl - Anchor element for popover positioning
  */
 
-// Map category groupnames to display names (like home page subtitles)
-const getCategoryDisplayName = (groupname) => {
-  const name = groupname?.toUpperCase() || "";
-  
+// Map category groupnames/categoryNames to display names (like home page subtitles)
+const getCategoryDisplayName = (categoryName) => {
+  const name = categoryName?.toUpperCase() || "";
+
   // Cakes mapping
   if (name === "CAKES WEB AND APP") return "Birthday Cakes";
   if (name === "CAKES") return "Beautiful Cakes";
   if (name === "SNB CREAMLESS CAKES") return "Creamless Cakes";
   if (name === "DRY CAKES AND MUFFINS") return "Dry Cakes and Muffins";
-  
-  // Other categories - use formatted groupname
-  return groupname || "Category";
+
+  // Other categories - use formatted categoryName
+  return categoryName || "Category";
 };
 
 // Map navbar labels to home page sections with items (like MainLayout.jsx)
 const getHomePageSections = (navbarLabel) => {
   const label = navbarLabel?.toUpperCase() || "";
-  
+
   if (label.includes("CAKE")) {
     return [
-      { 
-        title: "Cakes", 
+      {
+        title: "Cakes",
         groupnames: ["CAKES WEB AND APP", "CAKES", "SNB CREAMLESS CAKES", "DRY CAKES AND MUFFINS"],
-        color: "#d32f2f" 
+        color: "#d32f2f"
       },
     ];
   }
-  
+
   if (label.includes("MITHAI") || label.includes("COOKIE")) {
     return [
       { title: "Mithai", groupnames: ["MITHAI"], color: "#00897b" },
       { title: "Cookies", groupnames: ["COOKIES"], color: "#d32f2f" },
     ];
   }
-  
+
   if (label.includes("GIFT") || label.includes("CHOCOLATE")) {
     return [
       { title: "Gift Hampers", groupnames: ["GIFT HAMPERS"], color: "#2e7d32" },
       { title: "Chocolates", groupnames: ["CHOCOLATES"], color: "#f57c00" },
     ];
   }
-  
+
   if (label.includes("ADDON")) {
     return [
       { title: "Addons", groupnames: ["ADDONS"], color: "#00b53d" },
       { title: "Celebration Items", groupnames: ["CELEBRATION ITEMS"], color: "#00b53d" },
     ];
   }
-  
+
   return [];
 };
 
@@ -86,187 +85,65 @@ const getCategoryKeywords = (navbarLabel) => {
   return [];
 };
 
-export const NavbarDropdown = ({ category, isOpen, onClose, anchorEl }) => {
+export const NavbarDropdown = ({ category, categoryId, isOpen, onClose, anchorEl }) => {
   const navigate = useNavigate();
-  const { categories, loading: categoriesLoading } = useItemCategories();
-  const [productsData, setProductsData] = useState({});
-  const [loadingProducts, setLoadingProducts] = useState(false);
+  const { menus } = useHomeLayout();
 
-  // Get home page sections for this navbar label
-  const homePageSections = useMemo(() => {
-    return getHomePageSections(category);
-  }, [category]);
-
-  // Get keywords for additional filtering
-  const keywords = useMemo(() => {
-    return getCategoryKeywords(category);
-  }, [category]);
-
-  // Fetch products for each category to get varieties - OPTIMIZED with cancellation
-  useEffect(() => {
-    if (!isOpen || !categories || categories.length === 0 || homePageSections.length === 0) {
-      return;
-    }
-
-    let cancelled = false; // Flag to cancel requests if dropdown closes
-
-    const loadProducts = async () => {
-      setLoadingProducts(true);
-      const productsMap = {};
-
-      try {
-        // Get all categories for this section
-        const allCategoryIds = [];
-        homePageSections.forEach((section) => {
-          const sectionCategories = categories.filter((cat) => {
-            const groupname = (cat.groupname || "").toUpperCase();
-            return section.groupnames.some((gn) => groupname === gn.toUpperCase());
-          });
-          sectionCategories.forEach((cat) => {
-            if (cat.id && !allCategoryIds.includes(cat.id)) {
-              allCategoryIds.push(cat.id);
-            }
-          });
-        });
-
-        // OPTIMIZED: Reduce limit and add batching to prevent overwhelming server
-        const BATCH_SIZE = 3; // Process 3 categories at a time
-        for (let i = 0; i < allCategoryIds.length; i += BATCH_SIZE) {
-          if (cancelled) break; // Stop if dropdown closed
-
-          const batch = allCategoryIds.slice(i, i + BATCH_SIZE);
-          
-          // Fetch products for batch in parallel
-          const productPromises = batch.map(async (categoryId) => {
-            try {
-              const response = await fetchProducts(categoryId, 1, 10, ""); // Reduced from 50 to 10 products
-              if (response?.success && response?.data && Array.isArray(response.data)) {
-                return { categoryId, products: response.data };
-              }
-              return { categoryId, products: [] };
-            } catch (error) {
-              console.error(`Error fetching products for category ${categoryId}:`, error);
-              return { categoryId, products: [] };
-            }
-          });
-
-          const results = await Promise.all(productPromises);
-          results.forEach(({ categoryId, products }) => {
-            productsMap[categoryId] = products;
-          });
-
-          // Update state incrementally for better UX
-          if (!cancelled) {
-            setProductsData({ ...productsMap });
-          }
-        }
-      } catch (error) {
-        console.error("Error loading products:", error);
-      } finally {
-        if (!cancelled) {
-          setLoadingProducts(false);
-          setProductsData(productsMap);
-        }
-      }
-    };
-
-    loadProducts();
-
-    // Cleanup: cancel requests if dropdown closes
-    return () => {
-      cancelled = true;
-    };
-  }, [isOpen, categories, homePageSections]);
-
-  // Get category columns with varieties dynamically
+  // Get category columns with varieties from menus - use cached data immediately
   const dropdownData = useMemo(() => {
-    if (!categories || categories.length === 0) {
+    if (!menus || menus.length === 0) {
       return { columns: [] };
     }
 
-    // Flatten all categories into columns (one per category heading)
-    const columns = [];
-    homePageSections.forEach((section) => {
-      section.groupnames.forEach((groupname) => {
-        const category = categories.find(
-          (cat) => cat.groupname?.toUpperCase() === groupname.toUpperCase()
-        );
-        
-        if (category) {
-          const categoryProducts = productsData[category.id] || [];
-          // Create varieties with product info (name and productId)
-          const varietiesMap = new Map();
-          categoryProducts.forEach((product) => {
-            const productName = product.name;
-            if (productName && !varietiesMap.has(productName)) {
-              // Store first product with this name (for navigation)
-              varietiesMap.set(productName, {
-                name: productName,
-                productId: product.productId || product._id || product.id,
-              });
-            }
-          });
+    const menu = menus.find((m) => m.categoryId === categoryId);
 
-          const varieties = Array.from(varietiesMap.values()).slice(0, 10); // Limit to 10 varieties per category
+    if (!menu || !menu.products || menu.products.length === 0) {
+      return { columns: [] };
+    }
 
-          if (varieties.length > 0) {
-            columns.push({
-              heading: getCategoryDisplayName(category.groupname),
-              color: section.color,
-              categoryId: category.id,
-              varieties: varieties,
-            });
-          }
-        }
-      });
-    });
+    const homePageSections = getHomePageSections(category);
 
-    return { columns };
-  }, [categories, homePageSections, productsData]);
+    const matchingSection = homePageSections.find((section) =>
+      section.groupnames.some((gn) =>
+        (menu.categoryName || "").toUpperCase().includes(gn.toUpperCase())
+      )
+    );
+
+    // Create varieties from products
+    const varieties = menu.products
+      .slice(0, 10) // Limit to 10 products per category
+      .map((product) => ({
+        name: product.name,
+        productId: product.productId,
+      }));
+
+    if (varieties.length === 0) {
+      return { columns: [] };
+    }
+
+    // Return single column with the menu's products
+    return {
+      columns: [{
+        heading: getCategoryDisplayName(menu.categoryName),
+        color: matchingSection?.color || "#FF9472",
+        categoryId: menu.categoryId,
+        varieties: varieties,
+      }]
+    };
+  }, [menus, category, categoryId]);
 
   if (!isOpen) {
     return null;
   }
 
-  if (categoriesLoading || loadingProducts) {
-    return (
-      <Popover
-        open={isOpen}
-        anchorEl={anchorEl}
-        onClose={onClose}
-        anchorOrigin={{
-          vertical: "bottom",
-          horizontal: "left",
-        }}
-        transformOrigin={{
-          vertical: "top",
-          horizontal: "left",
-        }}
-        sx={{
-          mt: 1,
-          "& .MuiPaper-root": {
-            borderRadius: 2,
-            boxShadow: "0 8px 24px rgba(0,0,0,0.15)",
-            p: 3,
-          },
-        }}
-      >
-        <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", py: 2 }}>
-          <CircularProgress size={24} />
-        </Box>
-      </Popover>
-    );
-  }
-
-  if (!dropdownData.columns || dropdownData.columns.length === 0) {
-    return null;
-  }
+  // Show empty state if no data yet (but still render the popover)
+  const hasData = dropdownData.columns && dropdownData.columns.length > 0;
 
   const handleVarietyClick = (variety, categoryId) => {
     // Navigate to product details page (same as home page)
-    const productId = variety.productId || variety.id;
-    const varietyName = variety.name || variety;
-    
+    const productId = variety?.productId || variety?.id;
+    const varietyName = variety?.name || variety;
+
     if (productId) {
       // Navigate to product details page
       navigate(`/products/${productId}`);
@@ -281,6 +158,15 @@ export const NavbarDropdown = ({ category, isOpen, onClose, anchorEl }) => {
     onClose();
   };
 
+  // Calculate width based on content
+  const columnCount = hasData ? dropdownData.columns.length : 0;
+  const maxProducts = hasData ? Math.max(...dropdownData.columns.map(col => col.varieties.length), 0) : 0;
+  const estimatedWidth = columnCount === 1
+    ? Math.min(350, Math.max(250, maxProducts * 20 + 100))
+    : columnCount > 0
+      ? Math.min(columnCount * 280 + 40, 800)
+      : 300;
+
   return (
     <Popover
       open={isOpen}
@@ -288,112 +174,142 @@ export const NavbarDropdown = ({ category, isOpen, onClose, anchorEl }) => {
       onClose={onClose}
       anchorOrigin={{
         vertical: "bottom",
-        horizontal: "left",
+        horizontal: "center",
       }}
       transformOrigin={{
         vertical: "top",
-        horizontal: "left",
+        horizontal: "center",
       }}
+      disableRestoreFocus
+      disableAutoFocus
+      disableEnforceFocus
       sx={{
-        mt: 1,
+        mt: 0.5,
+        pointerEvents: "auto",
+        "& .MuiBackdrop-root": {
+          display: "none", // Remove backdrop for instant display
+        },
         "& .MuiPaper-root": {
-          borderRadius: 3,
-          boxShadow: "0 12px 40px rgba(0,0,0,0.15)",
-          maxWidth: { xs: "95vw", sm: "1100px", md: "1200px" },
-          width: { xs: "95vw", sm: "1100px", md: "1200px" },
-          maxHeight: "75vh",
+          borderRadius: 2,
+          boxShadow: "0 8px 24px rgba(0,0,0,0.15)",
+          width: "auto",
+          minWidth: { xs: "280px", sm: "300px" },
+          maxWidth: { xs: "90vw", sm: `${estimatedWidth}px` },
+          maxHeight: "70vh",
           overflowY: "auto",
           overflowX: "hidden",
           backgroundColor: "#fff",
           border: "1px solid rgba(255,148,114,0.2)",
-          transition: "all 0.3s ease",
+          animation: "none", // Remove any animations
         },
       }}
       onMouseEnter={(e) => {
         e.stopPropagation();
       }}
       onMouseLeave={(e) => {
-        onClose();
+        const relatedTarget = e.relatedTarget;
+        if (!relatedTarget || !e.currentTarget.contains(relatedTarget)) {
+          onClose();
+        }
       }}
-      transitionDuration={200}
+      transitionDuration={0}
+      slotProps={{
+        paper: {
+          onMouseEnter: (e) => {
+            e.stopPropagation();
+          },
+          onMouseLeave: (e) => {
+            const relatedTarget = e.relatedTarget;
+            if (!relatedTarget || !e.currentTarget.contains(relatedTarget)) {
+              onClose();
+            }
+          },
+        },
+      }}
     >
       <Box
         sx={{
-          py: { xs: 2.5, md: 3.5 },
-          px: { xs: 2, sm: 3, md: 4 },
+          py: { xs: 2, md: 2.5 },
+          px: { xs: 2, sm: 2.5, md: 3 },
+          width: "100%",
+          minHeight: hasData ? "auto" : "100px",
         }}
       >
-        <Grid container spacing={{ xs: 2, md: 3 }}>
-          {dropdownData.columns.map((column, index) => {
-            const firstColumnColor = dropdownData.columns[0]?.color || column.color;
+        {hasData ? (
+          dropdownData.columns.map((column, index) => {
+            const firstColumnColor = dropdownData.columns[0]?.color || column?.color;
             return (
-            <Grid item xs={12} sm={6} md={4} key={index}>
               <Box
+                key={index}
                 sx={{
-                  height: "100%",
-                  transition: "all 0.3s ease",
-                  "&:hover": {
-                    transform: "translateY(-2px)",
-                  },
+                  width: "100%",
+                  mb: index < dropdownData.columns.length - 1 ? 2 : 0,
                 }}
               >
-                {/* Category Heading (Not Clickable) */}
                 <CustomText
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    navigate(`/products?categoryId=${column?.categoryId}`);
+                    onClose();
+                  }}
                   sx={{
-                    fontSize: { xs: 14, sm: 15, md: 17 },
+                    fontSize: { xs: 15, sm: 16, md: 17 },
                     fontWeight: 700,
                     color: firstColumnColor,
-                    mb: 1.5,
+                    mb: 1,
                     textTransform: "capitalize",
                     letterSpacing: "0.3px",
+                    cursor: "pointer",
+                    "&:hover": {
+                      textDecoration: "underline",
+                    },
                   }}
                 >
-                  {column.heading}
+                  {column?.heading}
                 </CustomText>
 
-                {/* Varieties (Clickable) */}
-                <Box
-                  sx={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: 0.6,
-                    pl: 1.5,
-                  }}
-                >
-                  {column.varieties.map((variety, varietyIndex) => (
+                <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5, pl: 1, }}>
+                  {column?.varieties.map((variety, varietyIndex) => (
                     <CustomText
                       key={varietyIndex}
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
-                        handleVarietyClick(variety, column.categoryId);
+                        handleVarietyClick(variety, column?.categoryId);
                       }}
                       sx={{
-                        fontSize: { xs: 12, sm: 13, md: 14 },
+                        fontSize: { xs: 13, sm: 14, md: 14 },
                         color: "#333",
                         cursor: "pointer",
-                        transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
-                        py: 0.5,
-                        px: 1,
-                        borderRadius: 1.5,
+                        transition: "all 0.2s ease",
+                        py: 0.6,
+                        px: 0,
+                        borderRadius: 1,
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
                         "&:hover": {
-                          color: column.color,
-                          backgroundColor: `${column.color}12`,
-                          transform: "translateX(6px)",
+                          color: column?.color,
+                          backgroundColor: `${column?.color}15`,
+                          transform: "translateX(4px)",
                           fontWeight: 500,
-                          paddingLeft: "12px",
                         },
                       }}
+                      title={variety?.name || variety}
                     >
-                      {variety.name || variety}
+                      {variety?.name || variety}
                     </CustomText>
                   ))}
                 </Box>
               </Box>
-            </Grid>
             );
-          })}
-        </Grid>
+          })
+        ) : (
+          <Box sx={{ py: 2, textAlign: "center", color: "#999" }}>
+            <CustomText sx={{ fontSize: 14 }}>Loading products...</CustomText>
+          </Box>
+        )}
       </Box>
     </Popover>
   );

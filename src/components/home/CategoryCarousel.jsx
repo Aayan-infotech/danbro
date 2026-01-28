@@ -15,12 +15,16 @@ const getCategoryImage = (categoryName, index) => {
   return images[index % images.length];
 };
 
-export const CategoryCarousel = () => {
+export const CategoryCarousel = ({ categories: propCategories }) => {
   let sliderRef = null;
-  const { categories, loading, error } = useItemCategories();
+  const { categories: hookCategories, loading, error } = useItemCategories();
   const navigate = useNavigate();
   const [visible, setVisible] = useState(false);
   const sectionRef = useRef(null);
+  
+  // Use prop categories if provided, otherwise use hook categories
+  const categories = propCategories || hookCategories;
+  const isLoading = propCategories ? false : loading;
 
   useEffect(() => {
     // Set visible immediately if component is already in viewport
@@ -57,9 +61,9 @@ export const CategoryCarousel = () => {
   }, []);
 
   const items = categories?.map((category, index) => ({
-    id: category?.id,
-    title: category?.groupname,
-    img: category?.image || getCategoryImage(category?.groupname, index),
+    id: category?.categoryId || category?.id,
+    title: category?.categoryName || category?.groupname,
+    img: category?.image || getCategoryImage(category?.categoryName || category?.groupname, index),
     brand: category?.brand,
     brandid: category?.brandid,
   }));
@@ -87,7 +91,7 @@ export const CategoryCarousel = () => {
   }
 
   return (
-    loading ? (
+    isLoading ? (
       <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", py: 8 }}>
         <CircularProgress sx={{ color: "var(--themeColor)" }} />
       </Box>

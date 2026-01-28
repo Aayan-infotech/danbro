@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useItemCategories } from './useItemCategories';
 import { fetchProducts } from '../utils/apiService';
+import blankImage from '../assets/blankimage.png';
 
 /**
  * Custom hook to fetch all category products for home page in parallel
@@ -108,7 +109,7 @@ export const useHomePageData = (categoryConfigs = []) => {
                 const productImage =
                   product.images && product.images.length > 0 && product.images[0].url
                     ? product.images[0].url
-                    : 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=400&h=400&fit=crop&auto=format&q=80';
+                    : blankImage;
 
                 // Calculate discount if applicable
                 let discount = null;

@@ -31,6 +31,7 @@ import api from "../../utils/api";
 import { getMyAddresses } from "../../utils/apiService";
 import { Radio, RadioGroup, FormControlLabel } from "@mui/material";
 import { AddressFormDialog } from "../../components/user/AddressFormDialog";
+import blankImage from "../../assets/blankimage.png";
 
 export const Cart = () => {
   const navigate = useNavigate();
@@ -434,7 +435,7 @@ export const Cart = () => {
                               (item.images && Array.isArray(item.images) && item.images.length > 0 && item.images[0].url) ||
                               item.image || 
                               item.product?.image || 
-                              "https://via.placeholder.com/200"
+                              blankImage
                             }
                             alt={item.name || item.product?.name || "Product"}
                             style={{

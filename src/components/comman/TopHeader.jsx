@@ -33,14 +33,14 @@ export const TopHeader = () => {
     // Check if on profile page to add bottom border
     const isProfilePage = location.pathname === "/profile" || location.pathname === "/user-profile";
 
-    // Check if user is logged in and fetch profile
+    // Check if user is logged in and fetch profile - optimized to prevent unnecessary calls
     useEffect(() => {
         const token = getAccessToken();
         const loggedIn = !!token;
         setIsLoggedIn(loggedIn);
 
-        // Fetch user profile if logged in
-        if (loggedIn) {
+        // Fetch user profile if logged in (only once, not on every route change)
+        if (loggedIn && !userProfile) {
             api.get('/user/getById')
                 .then((response) => {
                     if (response.data && response.data.user) {
@@ -50,22 +50,22 @@ export const TopHeader = () => {
                 .catch((error) => {
                     console.error("Error fetching user profile:", error);
                 });
-        } else {
+        } else if (!loggedIn) {
             setUserProfile(null);
             setWishlistCount(0);
+            setCartCount(0);
         }
-    }, [location.pathname]);
+    }, []); // Only run once on mount
 
-    // Fetch wishlist count
+    // Fetch wishlist count - debounced to prevent excessive calls
     useEffect(() => {
-        const fetchWishlistCount = async () => {
-            if (!isLoggedIn) {
-                setWishlistCount(0);
-                return;
-            }
+        if (!isLoggedIn) {
+            setWishlistCount(0);
+            return;
+        }
 
+        const timeoutId = setTimeout(async () => {
             try {
-                // lat and long are automatically added via API interceptor
                 const wishlistData = await getWishlist();
                 if (wishlistData && wishlistData.data && Array.isArray(wishlistData.data)) {
                     setWishlistCount(wishlistData.data.length);
@@ -76,19 +76,19 @@ export const TopHeader = () => {
                 console.error("Error fetching wishlist count:", error);
                 setWishlistCount(0);
             }
-        };
+        }, 300); // Debounce by 300ms
 
-        fetchWishlistCount();
-    }, [isLoggedIn, location.pathname]);
+        return () => clearTimeout(timeoutId);
+    }, [isLoggedIn]); // Only depend on isLoggedIn, not location
 
-    // Fetch cart count
+    // Fetch cart count - debounced to prevent excessive calls
     useEffect(() => {
-        const fetchCartCount = async () => {
-            if (!isLoggedIn) {
-                setCartCount(0);
-                return;
-            }
+        if (!isLoggedIn) {
+            setCartCount(0);
+            return;
+        }
 
+        const timeoutId = setTimeout(async () => {
             try {
                 const cartData = await getCart();
                 // Handle different response structures
@@ -112,10 +112,10 @@ export const TopHeader = () => {
                 console.error("Error fetching cart count:", error);
                 setCartCount(0);
             }
-        };
+        }, 300); // Debounce by 300ms
 
-        fetchCartCount();
-    }, [isLoggedIn, location.pathname]);
+        return () => clearTimeout(timeoutId);
+    }, [isLoggedIn]); // Only depend on isLoggedIn, not location
 
     // Listen for cart updates
     useEffect(() => {
