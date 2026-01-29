@@ -30,10 +30,10 @@ export const ProductGrid = memo(({ products, isVisible }) => {
     setIsLoggedIn(!!token);
   }, []);
 
-  // Check which products are in wishlist - OPTIMIZED: Fetch wishlist once instead of N times
+  // Check which products are in wishlist (works for guest and logged-in)
   useEffect(() => {
     const checkWishlistItems = async () => {
-      if (!isLoggedIn || !products || products.length === 0) {
+      if (!products || products.length === 0) {
         setWishlistItems(new Set());
         return;
       }
@@ -48,10 +48,8 @@ export const ProductGrid = memo(({ products, isVisible }) => {
           const wishlistProductIds = new Set();
           wishlistData.data.forEach((item) => {
             const product = item.product || item;
-            const productId = product.productId || product._id || item.productId;
-            if (productId) {
-              wishlistProductIds.add(productId);
-            }
+            const productId = product?.productId || product?._id || item?.productId;
+            if (productId) wishlistProductIds.add(productId);
           });
 
           // Check which products are in wishlist
@@ -84,15 +82,6 @@ export const ProductGrid = memo(({ products, isVisible }) => {
         open: true,
         message: "Product ID is missing. Please try again.",
         severity: "error",
-        loading: false,
-      });
-      return;
-    }
-    if (!isLoggedIn) {
-      setToast({
-        open: true,
-        message: "Please login to add items to wishlist",
-        severity: "warning",
         loading: false,
       });
       return;
@@ -162,15 +151,6 @@ export const ProductGrid = memo(({ products, isVisible }) => {
       return;
     }
 
-    if (!isLoggedIn) {
-      setToast({
-        open: true,
-        message: "Please login to add items to cart",
-        severity: "warning",
-        loading: false,
-      });
-      return;
-    }
 
     const productId = product.productId;
     setLoadingCart((prev) => new Set(prev).add(productId));

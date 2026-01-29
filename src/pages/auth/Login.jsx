@@ -328,8 +328,11 @@ export const Login = () => {
       <Container
         maxWidth="sm"
         sx={{
-          mt: { xs: 6, md: 8 }, // small gap below navbar/top header
-          mb: { xs: 6, md: 8 },
+          mt: { xs: 5, md: 6 },
+          mb: { xs: 4, md: 6 },
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
         }}
       >
         {isRedirecting ? (
@@ -359,9 +362,11 @@ export const Login = () => {
             sx={{
               position: "relative",
               zIndex: 1,
+              width: "100%",
+              maxWidth: 400,
               backgroundColor: "transparent",
-              borderRadius: { xs: "20px", md: "30px" },
-              p: { xs: 3, sm: 4, md: 5 },
+              borderRadius: { xs: "16px", md: "20px" },
+              p: { xs: 2, sm: 2.5, md: 3 },
               boxShadow: "0 20px 60px rgba(0,0,0,0.3)",
               backdropFilter: "blur(10px)",
               opacity: 0,
@@ -372,11 +377,11 @@ export const Login = () => {
           >
             <CustomText
               sx={{
-                fontSize: { xs: 28, sm: 32, md: 40 },
+                fontSize: { xs: 22, sm: 24, md: 26 },
                 fontWeight: 'bold',
                 color: "white",
                 textAlign: "center",
-                mb: { xs: 3, md: 4 },
+                mb: { xs: 2, md: 2.5 },
                 animation: "fadeInDown 0.6s ease-out",
                 "@keyframes fadeInDown": {
                   "0%": { opacity: 0, transform: "translateY(-20px)" },
@@ -628,9 +633,11 @@ export const Login = () => {
           sx={{
             position: "relative",
             zIndex: 1,
+            width: "100%",
+            maxWidth: 400,
             backgroundColor: "transparent",
-            borderRadius: { xs: "20px", md: "30px" },
-            p: { xs: 3, sm: 4, md: 5 },
+            borderRadius: { xs: "16px", md: "20px" },
+            p: { xs: 2, sm: 2.5, md: 3 },
             boxShadow: "0 20px 60px rgba(0,0,0,0.3)",
             backdropFilter: "blur(10px)",
             opacity: 0,
@@ -641,11 +648,11 @@ export const Login = () => {
         >
           <CustomText
             sx={{
-              fontSize: { xs: 28, sm: 32, md: 40 },
+              fontSize: { xs: 22, sm: 24, md: 26 },
               fontWeight: 'bold',
               color: "white",
               textAlign: "center",
-              mb: { xs: 3, md: 4 },
+              mb: { xs: 2, md: 2.5 },
               animation: "fadeInDown 0.6s ease-out",
               "@keyframes fadeInDown": {
                 "0%": { opacity: 0, transform: "translateY(-20px)" },

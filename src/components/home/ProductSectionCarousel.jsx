@@ -7,9 +7,10 @@ import { useRef, useEffect, useState, memo, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import StarIcon from "@mui/icons-material/Star";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
+import FavoriteIcon from "@mui/icons-material/Favorite";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import { addToCart } from "../../utils/cart";
-import { getAccessToken } from "../../utils/cookies";
+import { addToWishlist, removeFromWishlist, getWishlist } from "../../utils/wishlist";
 import { CustomToast } from "../comman/CustomToast";
 
 export const ProductSectionCarousel = memo(({
@@ -32,13 +33,34 @@ export const ProductSectionCarousel = memo(({
     severity: "success", 
     loading: false 
   });
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [wishlistIds, setWishlistIds] = useState(new Set());
+  const [loadingWishlist, setLoadingWishlist] = useState(new Set());
 
-  // Check if user is logged in
-  useEffect(() => {
-    const token = getAccessToken();
-    setIsLoggedIn(!!token);
+  const loadWishlistIds = useCallback(async () => {
+    try {
+      const data = await getWishlist();
+      const list = data?.data ?? [];
+      const ids = new Set();
+      list.forEach((item) => {
+        const product = item?.product || item;
+        const id = product?.productId || product?._id || item?.productId;
+        if (id) ids.add(id);
+      });
+      setWishlistIds(ids);
+    } catch {
+      setWishlistIds(new Set());
+    }
   }, []);
+
+  useEffect(() => {
+    loadWishlistIds();
+  }, [loadWishlistIds]);
+
+  useEffect(() => {
+    const handler = () => loadWishlistIds();
+    window.addEventListener("wishlistUpdated", handler);
+    return () => window.removeEventListener("wishlistUpdated", handler);
+  }, [loadWishlistIds]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -66,17 +88,6 @@ export const ProductSectionCarousel = memo(({
         severity: "error",
         loading: false,
       });
-      return;
-    }
-
-    if (!isLoggedIn) {
-      setToast({
-        open: true,
-        message: "Please login to add items to cart",
-        severity: "warning",
-        loading: false,
-      });
-      setTimeout(() => setToast((prev) => ({ ...prev, open: false })), 3000);
       return;
     }
 
@@ -120,7 +131,42 @@ export const ProductSectionCarousel = memo(({
         return newSet;
       });
     }
-  }, [isLoggedIn]);
+  }, []);
+
+  const handleWishlistToggle = useCallback(async (e, product) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const productId = product?.productId || product?.id || product?._id;
+    if (!productId) return;
+    setLoadingWishlist((prev) => new Set(prev).add(productId));
+    try {
+      const isInWishlist = wishlistIds.has(productId);
+      if (isInWishlist) {
+        await removeFromWishlist(productId);
+        setWishlistIds((prev) => {
+          const next = new Set(prev);
+          next.delete(productId);
+          return next;
+        });
+        setToast({ open: true, message: "Removed from wishlist", severity: "info", loading: false });
+      } else {
+        await addToWishlist(productId);
+        setWishlistIds((prev) => new Set(prev).add(productId));
+        setToast({ open: true, message: "Added to wishlist!", severity: "success", loading: false });
+      }
+      window.dispatchEvent(new CustomEvent("wishlistUpdated"));
+      setTimeout(() => setToast((prev) => ({ ...prev, open: false })), 2000);
+    } catch (err) {
+      setToast({ open: true, message: err?.response?.data?.message || "Failed to update wishlist", severity: "error", loading: false });
+      setTimeout(() => setToast((prev) => ({ ...prev, open: false })), 3000);
+    } finally {
+      setLoadingWishlist((prev) => {
+        const next = new Set(prev);
+        next.delete(productId);
+        return next;
+      });
+    }
+  }, [wishlistIds]);
 
   const settings = {
     infinite: true,
@@ -369,6 +415,8 @@ export const ProductSectionCarousel = memo(({
 
                   {/* Favorite Icon */}
                   <IconButton
+                    onClick={(e) => handleWishlistToggle(e, product)}
+                    disabled={loadingWishlist.has(product?.productId || product?.id || product?._id)}
                     sx={{
                       position: "absolute",
                       bottom: 12,
@@ -384,7 +432,11 @@ export const ProductSectionCarousel = memo(({
                       },
                     }}
                   >
-                    <FavoriteBorderIcon sx={{ fontSize: 18, color: "var(--themeColor)" }} />
+                    {wishlistIds.has(product?.productId || product?.id || product?._id) ? (
+                      <FavoriteIcon sx={{ fontSize: 18, color: "#f44336" }} />
+                    ) : (
+                      <FavoriteBorderIcon sx={{ fontSize: 18, color: "var(--themeColor)" }} />
+                    )}
                   </IconButton>
                 </Box>
 

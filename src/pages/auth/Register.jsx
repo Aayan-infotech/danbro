@@ -247,10 +247,11 @@ export const Register = () => {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        py: { xs: 4, md: 0 },
-        pb: { xs: 12, md: 0 },
         overflow: "hidden",
-        p: { xs: 1.25, md: 0 },
+        pt: { xs: 10, sm: 12, md: 14 },
+        pb: { xs: 8, sm: 10, md: 12 },
+        px: { xs: 1.25, md: 2 },
+        boxSizing: "border-box",
       }}
     >
       {/* Blurred Background */}
@@ -278,31 +279,42 @@ export const Register = () => {
       />
 
       {/* Register Form */}
-      <Container maxWidth="sm" sx={{ mb: { xs: 6, md: 8 } }}>
+      <Container
+        maxWidth="sm"
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          maxWidth: "100%",
+          width: "100%",
+          boxSizing: "border-box",
+        }}
+      >
         <Box
           ref={formRef}
           sx={{
             position: "relative",
             zIndex: 1,
+            width: "100%",
+            maxWidth: 400,
             backgroundColor: "rgba(0,0,0,0.45)",
             backdropFilter: "blur(25px) saturate(180%)",
-            borderRadius: { xs: "20px", md: "30px" },
-            p: { xs: 2, sm: 3, md: 4 },
+            borderRadius: { xs: "16px", md: "20px" },
+            p: { xs: 2, sm: 2.5, md: 3 },
             boxShadow: "0 20px 60px rgba(0,0,0,0.3)",
             opacity: 0,
             transform: "translateY(30px)",
             transition: "opacity 0.8s ease-out, transform 0.8s ease-out",
             border: "1px solid rgba(173, 216, 230, 0.3)",
-            my: 4,
           }}
         >
           <CustomText
             sx={{
-              fontSize: { xs: 28, sm: 32, md: 40 },
+              fontSize: { xs: 22, sm: 24, md: 26 },
               fontWeight: 'bold',
               color: "#fff",
               textAlign: "center",
-              mb: { xs: 1, md: 2 },
+              mb: { xs: 1.5, md: 2 },
               animation: "fadeInDown 0.6s ease-out",
               "@keyframes fadeInDown": {
                 "0%": { opacity: 0, transform: "translateY(-20px)" },
@@ -339,7 +351,7 @@ export const Register = () => {
                 We've sent a 6-digit OTP to <strong>{registeredEmail}</strong>. Please enter it below to verify your email.
               </CustomText>
 
-              <InputLabel sx={{ fontSize: 14, color: "#fff", mb: 1 }}>Enter OTP</InputLabel>
+              <InputLabel sx={{ fontSize: 13, color: "#fff", mb: 0.5 }}>Enter OTP</InputLabel>
               <CustomTextField
                 fullWidth
                 placeholder="Enter 6-digit OTP"
@@ -454,7 +466,7 @@ export const Register = () => {
                 {recaptchaError}
               </Alert>
             )}
-            <InputLabel sx={{ fontSize: 14, color: "#fff", mb: 1 }}>Full Name</InputLabel>
+            <InputLabel sx={{ fontSize: 13, color: "#fff", mb: 0.5 }}>Full Name</InputLabel>
             <CustomTextField
               fullWidth
               name="fullName"
@@ -462,10 +474,11 @@ export const Register = () => {
               required
               value={formData.fullName}
               onChange={handleChange}
+              sx={{ mb: 1.5 }}
             />
 
             {/* Email Field */}
-            <InputLabel sx={{ fontSize: 14, color: "#fff", mb: 1 }}>Email Address</InputLabel>
+            <InputLabel sx={{ fontSize: 13, color: "#fff", mb: 0.5 }}>Email Address</InputLabel>
             <CustomTextField
               fullWidth
               name="email"
@@ -474,10 +487,11 @@ export const Register = () => {
               required
               value={formData.email}
               onChange={handleChange}
+              sx={{ mb: 1.5 }}
             />
 
             {/* Mobile Field */}
-            <InputLabel sx={{ fontSize: 14, color: "#fff", mb: 1 }}>Mobile Number</InputLabel>
+            <InputLabel sx={{ fontSize: 13, color: "#fff", mb: 0.5 }}>Mobile Number</InputLabel>
             <CustomTextField
               fullWidth
               name="mobile"
@@ -486,10 +500,11 @@ export const Register = () => {
               required
               value={formData.mobile}
               onChange={handleChange}
+              sx={{ mb: 1.5 }}
             />
 
             {/* Password Field */}
-            <InputLabel sx={{ fontSize: 14, color: "#fff", mb: 1 }}>Password</InputLabel>
+            <InputLabel sx={{ fontSize: 13, color: "#fff", mb: 0.5 }}>Password</InputLabel>
             <Box sx={{ position: "relative", mb: 2 }}>
               <CustomTextField
                 fullWidth
@@ -531,7 +546,7 @@ export const Register = () => {
             </Box>
 
             {/* Confirm Password Field */}
-            <InputLabel sx={{ fontSize: 14, color: "#fff", mb: 1 }}>Confirm Password</InputLabel>
+            <InputLabel sx={{ fontSize: 13, color: "#fff", mb: 0.5 }}>Confirm Password</InputLabel>
             <Box sx={{ position: "relative", mb: 2 }}>
               <CustomTextField
                 fullWidth

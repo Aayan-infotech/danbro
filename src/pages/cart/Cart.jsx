@@ -28,7 +28,7 @@ import { useNavigate } from "react-router-dom";
 import { getCart, increaseItemCount, decreaseItemCount } from "../../utils/cart";
 import { getAccessToken } from "../../utils/cookies";
 import api from "../../utils/api";
-import { getMyAddresses } from "../../utils/apiService";
+import { getMyAddresses, fetchProductById } from "../../utils/apiService";
 import { Radio, RadioGroup, FormControlLabel } from "@mui/material";
 import { AddressFormDialog } from "../../components/user/AddressFormDialog";
 import blankImage from "../../assets/blankimage.png";
@@ -163,30 +163,84 @@ export const Cart = () => {
       setLoading(true);
       setError(null);
       const token = getAccessToken();
+      const response = await getCart();
+
       if (!token) {
-        setError("Please login to view your cart");
+        // Guest cart: response.data is array of { productId, quantity, weight, productSnapshot }
+        const rawItems = response?.data && Array.isArray(response.data) ? response.data : [];
+        const displayItems = [];
+        for (const it of rawItems) {
+          let name, images, price, lineTotal, displayWeight = it.weight ?? it.productSnapshot?.weight ?? "N/A";
+          const qty = Number(it.quantity) || 1;
+          const itemWeight = it.weight ?? it.productSnapshot?.weight ?? null;
+          if (it.productSnapshot && (it.productSnapshot.name != null || it.productSnapshot.price != null)) {
+            const p = it.productSnapshot;
+            if (displayWeight === "N/A" && p.weight) displayWeight = p.weight;
+            const priceArr = Array.isArray(p.price) ? p.price : [];
+            const matchWeight = (pw) => (pw || "").toString().trim().toLowerCase();
+            const matchedPrice = itemWeight && priceArr.length > 0
+              ? priceArr.find((pr) => matchWeight(pr.weight) === matchWeight(itemWeight))
+              : null;
+            const firstPrice = matchedPrice || (priceArr[0] || null);
+            const rate = firstPrice != null
+              ? (Number(firstPrice.rate) || Number(firstPrice.mrp) || 0)
+              : (typeof p.price === "number" ? p.price : 0);
+            name = p.name || "Product";
+            images = Array.isArray(p.images) ? p.images : (p.image ? [{ url: p.image }] : []);
+            price = firstPrice ? { rate: Number(firstPrice.rate) || Number(firstPrice.mrp) || 0, mrp: Number(firstPrice.mrp) || Number(firstPrice.rate) || 0 } : { rate, mrp: rate };
+            lineTotal = rate * qty;
+          } else {
+            try {
+              const res = await fetchProductById(it.productId);
+              const p = res?.data?.product ?? res?.data ?? res?.product ?? res ?? {};
+              if (displayWeight === "N/A" && p?.weight) displayWeight = p.weight;
+              const priceArr = Array.isArray(p?.price) ? p.price : [];
+              const matchWeight = (pw) => (pw || "").toString().trim().toLowerCase();
+              const matchedPrice = itemWeight && priceArr.length > 0
+                ? priceArr.find((pr) => matchWeight(pr.weight) === matchWeight(itemWeight))
+                : null;
+              const firstPrice = matchedPrice || priceArr[0] || null;
+              const rate = firstPrice != null ? (Number(firstPrice.rate) || Number(firstPrice.mrp) || 0) : 0;
+              name = p?.name || "Product";
+              images = Array.isArray(p?.images) ? p.images : [];
+              price = firstPrice ? { rate: Number(firstPrice.rate) || Number(firstPrice.mrp) || 0, mrp: Number(firstPrice.mrp) || Number(firstPrice.rate) || 0 } : { rate: 0, mrp: 0 };
+              lineTotal = rate * qty;
+            } catch {
+              name = "Product";
+              images = [];
+              price = { rate: 0, mrp: 0 };
+              lineTotal = 0;
+            }
+          }
+          displayItems.push({
+            productId: it.productId,
+            id: it.productId,
+            quantity: qty,
+            weight: displayWeight,
+            rawWeight: it.weight ?? null,
+            name,
+            images,
+            price,
+            lineTotal: Number(lineTotal.toFixed(2)),
+          });
+        }
+        setCartItems(displayItems);
+        // Guest: cartTotal = sum of line totals (price), not quantity
+        setCartTotal(displayItems.reduce((sum, i) => sum + (i.lineTotal || 0), 0));
         setLoading(false);
         return;
       }
-      const response = await getCart();
-      
-      // Handle API response structure: { success: true, data: [...], cartTotal: ... }
+
+      // Logged-in: API response
       if (response?.data && Array.isArray(response.data)) {
         setCartItems(response.data);
-        // Set cartTotal if available in response
-        if (response.cartTotal !== undefined) {
-          setCartTotal(response.cartTotal);
-        }
+        if (response.cartTotal !== undefined) setCartTotal(response.cartTotal);
       } else if (response?.data?.data && Array.isArray(response.data.data)) {
         setCartItems(response.data.data);
-        if (response.data.cartTotal !== undefined) {
-          setCartTotal(response.data.cartTotal);
-        }
+        if (response.data.cartTotal !== undefined) setCartTotal(response.data.cartTotal);
       } else if (response?.data?.items) {
         setCartItems(response.data.items);
-        if (response.data.cartTotal !== undefined) {
-          setCartTotal(response.data.cartTotal);
-        }
+        if (response.data.cartTotal !== undefined) setCartTotal(response.data.cartTotal);
       } else if (response?.items) {
         setCartItems(response.items);
       } else if (Array.isArray(response)) {
@@ -204,40 +258,34 @@ export const Cart = () => {
     }
   };
 
-  const updateQuantity = async (productId, change) => {
+  const updateQuantity = async (productId, change, weight) => {
     if (updatingItems.has(productId)) return;
-    
     try {
       setUpdatingItems((prev) => new Set(prev).add(productId));
-      
       if (change > 0) {
-        await increaseItemCount(productId);
+        await increaseItemCount(productId, weight);
       } else {
-        await decreaseItemCount(productId);
+        await decreaseItemCount(productId, weight);
       }
-      
-      // Reload cart to get updated data
       await loadCart();
-      // Dispatch event to update cart count in header
-      window.dispatchEvent(new CustomEvent('cartUpdated'));
+      window.dispatchEvent(new CustomEvent("cartUpdated"));
     } catch (err) {
       console.error("Error updating quantity:", err);
       setError(err.response?.data?.message || err.message || "Failed to update quantity");
     } finally {
       setUpdatingItems((prev) => {
-        const newSet = new Set(prev);
-        newSet.delete(productId);
-        return newSet;
+        const next = new Set(prev);
+        next.delete(productId);
+        return next;
       });
     }
   };
 
-  const removeItem = async (productId) => {
+  const removeItem = async (productId, weight) => {
     try {
-      await decreaseItemCount(productId);
+      await decreaseItemCount(productId, weight);
       await loadCart();
-      // Dispatch event to update cart count in header
-      window.dispatchEvent(new CustomEvent('cartUpdated'));
+      window.dispatchEvent(new CustomEvent("cartUpdated"));
     } catch (err) {
       console.error("Error removing item:", err);
       setError(err.response?.data?.message || err.message || "Failed to remove item");
@@ -292,19 +340,20 @@ export const Cart = () => {
     setCouponError("");
   };
 
-  // Calculate subtotal from cart items
+  // Calculate subtotal from cart items (guest items have lineTotal = rate * qty already)
   const subtotal = cartItems?.reduce((sum, item) => {
-    // Handle price - can be array or number
+    if (item.lineTotal != null && !isNaN(item.lineTotal)) {
+      return sum + Number(item.lineTotal);
+    }
     let itemPrice = 0;
     if (Array.isArray(item.price) && item.price.length > 0) {
       itemPrice = item.price[0].rate || item.price[0].mrp || 0;
-    } else if (typeof item.price === 'number') {
+    } else if (typeof item.price === "object" && item.price && (item.price.rate != null || item.price.mrp != null)) {
+      itemPrice = Number(item.price.rate) || Number(item.price.mrp) || 0;
+    } else if (typeof item.price === "number") {
       itemPrice = item.price;
-    } else if (item.lineTotal) {
-      itemPrice = item.lineTotal;
     }
-    
-    const quantity = typeof item.quantity === 'number' ? item.quantity : parseInt(item.quantity) || 0;
+    const quantity = typeof item.quantity === "number" ? item.quantity : parseInt(item.quantity, 10) || 0;
     return sum + itemPrice * quantity;
   }, 0);
 
@@ -432,9 +481,9 @@ export const Cart = () => {
                         >
                           <img
                             src={
-                              (item.images && Array.isArray(item.images) && item.images.length > 0 && item.images[0].url) ||
-                              item.image || 
-                              item.product?.image || 
+                              (item.images && Array.isArray(item.images) && item.images.length > 0 && (item.images[0].url || item.images[0])) ||
+                              item.image ||
+                              item.product?.image ||
                               blankImage
                             }
                             alt={item.name || item.product?.name || "Product"}
@@ -466,7 +515,7 @@ export const Cart = () => {
                                 mb: { xs: 1, md: 1.5 },
                               }}
                             >
-                              Weight: {item.weight || item.product?.weight || "N/A"}
+                              Weight: {item.weight ?? item.product?.weight ?? "N/A"}
                             </CustomText>
                             <CustomText
                               sx={{
@@ -476,11 +525,13 @@ export const Cart = () => {
                               }}
                             >
                               ₹{
-                                item.lineTotal 
-                                  ? item.lineTotal.toFixed(2)
+                                (item.lineTotal != null && item.lineTotal > 0)
+                                  ? Number(item.lineTotal).toFixed(2)
                                   : (Array.isArray(item.price) && item.price.length > 0)
-                                    ? (item.price[0].rate || item.price[0].mrp || 0).toFixed(2)
-                                    : (typeof item.price === 'number' ? item.price : parseFloat(item.price || 0)).toFixed(2)
+                                    ? (Number(item.price[0].rate) || Number(item.price[0].mrp) || 0).toFixed(2)
+                                    : (item.price && typeof item.price === "object" && (item.price.rate != null || item.price.mrp != null))
+                                      ? (Number(item.price.rate) || Number(item.price.mrp) || 0).toFixed(2)
+                                      : (typeof item.price === "number" ? item.price : 0).toFixed(2)
                               }
                             </CustomText>
                           </Box>
@@ -506,7 +557,7 @@ export const Cart = () => {
                             >
                               <IconButton
                                 size="small"
-                                onClick={() => updateQuantity(productId, -1)}
+                                onClick={() => updateQuantity(productId, -1, item.rawWeight ?? item.weight)}
                                 disabled={isUpdating}
                                 sx={{
                                   color: "var(--themeColor)",
@@ -532,7 +583,7 @@ export const Cart = () => {
                               </CustomText>
                               <IconButton
                                 size="small"
-                                onClick={() => updateQuantity(productId, 1)}
+                                onClick={() => updateQuantity(productId, 1, item.rawWeight ?? item.weight)}
                                 disabled={isUpdating}
                                 sx={{
                                   color: "var(--themeColor)",
@@ -549,7 +600,7 @@ export const Cart = () => {
                             </Box>
 
                             <IconButton
-                              onClick={() => removeItem(productId)}
+                              onClick={() => removeItem(productId, item.rawWeight ?? item.weight)}
                               disabled={isUpdating}
                               sx={{
                                 color: "#d32f2f",
@@ -1013,7 +1064,13 @@ export const Cart = () => {
                   <Button
                     variant="contained"
                     fullWidth
-                    onClick={() => navigate("/checkout")}
+                    onClick={() => {
+                      if (!getAccessToken()) {
+                        navigate("/login", { state: { from: "cart", returnUrl: "/cart" } });
+                        return;
+                      }
+                      navigate("/checkout");
+                    }}
                     sx={{
                       backgroundColor: "var(--themeColor)",
                       color: "#fff",
@@ -1027,7 +1084,7 @@ export const Cart = () => {
                       },
                     }}
                   >
-                    Proceed to Checkout
+                    {getAccessToken() ? "Proceed to Checkout" : "Login to proceed to checkout"}
                   </Button>
 
                   <Box

@@ -1,68 +1,76 @@
 // Wishlist utility functions
 
 import api from './api';
+import { getAccessToken } from './cookies';
+import { store } from '../store/store';
+import { addToGuestWishlist, removeFromGuestWishlist } from '../store/guestSlice';
+
+const WISHLIST_ICON_LOADING_EVENT = 'headerWishlistLoading';
 
 /**
- * Add a product to wishlist
+ * Add a product to wishlist (guest: LocalStorage + Redux; logged-in: API)
  * @param {string} productId - The product ID to add
- * @returns {Promise} API response
+ * @returns {Promise} API response or guest success object
  */
 export const addToWishlist = async (productId) => {
+  window.dispatchEvent(new CustomEvent(WISHLIST_ICON_LOADING_EVENT, { detail: { loading: true } }));
   try {
-    if (!productId) {
-      throw new Error('ProductId is required');
+    if (!productId) throw new Error('ProductId is required');
+    const token = getAccessToken();
+    if (!token) {
+      store.dispatch(addToGuestWishlist(productId));
+      window.dispatchEvent(new CustomEvent('wishlistUpdated'));
+      return { success: true, message: 'Added to wishlist', data: [] };
     }
-    
-    // Payload matches the API format exactly
-    const payload = {
-      productId: productId,
-    };
-    
-    // API call - axios instance already has Content-Type and Authorization headers
+    const payload = { productId };
     const response = await api.post('/wishlist/add', payload);
-    
     return response.data;
   } catch (error) {
     console.error('Error adding to wishlist:', error);
-    console.error('ProductId sent:', productId);
-    console.error('Error response:', error.response?.data);
     throw error;
+  } finally {
+    window.dispatchEvent(new CustomEvent(WISHLIST_ICON_LOADING_EVENT, { detail: { loading: false } }));
   }
 };
 
 /**
- * Remove a product from wishlist
+ * Remove a product from wishlist (guest: Redux; logged-in: API)
  * @param {string} productId - The product ID to remove
- * @returns {Promise} API response
+ * @returns {Promise} API response or guest success
  */
 export const removeFromWishlist = async (productId) => {
+  window.dispatchEvent(new CustomEvent(WISHLIST_ICON_LOADING_EVENT, { detail: { loading: true } }));
   try {
-    if (!productId) {
-      throw new Error('ProductId is required');
+    if (!productId) throw new Error('ProductId is required');
+    const token = getAccessToken();
+    if (!token) {
+      store.dispatch(removeFromGuestWishlist(productId));
+      window.dispatchEvent(new CustomEvent('wishlistUpdated'));
+      return { success: true };
     }
-    
-    const payload = {
-      productId: productId,
-    };
-    
+    const payload = { productId };
     const response = await api.post('/wishlist/remove', payload);
     return response.data;
   } catch (error) {
     console.error('Error removing from wishlist:', error);
-    console.error('ProductId sent:', productId);
     throw error;
+  } finally {
+    window.dispatchEvent(new CustomEvent(WISHLIST_ICON_LOADING_EVENT, { detail: { loading: false } }));
   }
 };
 
 /**
- * Get wishlist items
- * @param {number} lat - Latitude (optional, will use stored location if not provided)
- * @param {number} long - Longitude (optional, will use stored location if not provided)
- * @returns {Promise} API response with wishlist items
+ * Get wishlist items (guest: from Redux/LocalStorage; logged-in: API)
+ * @returns {Promise} API response or guest wishlist data { data: productIds[] }
  */
-export const getWishlist = async (lat, long) => {
+export const getWishlist = async () => {
+  const token = getAccessToken();
+  if (!token) {
+    const state = store.getState();
+    const ids = state.guest?.guestWishlist ?? [];
+    return { data: ids.map((id) => ({ productId: id })), success: true };
+  }
   try {
-    // Headers (lat/long) are automatically added by the axios interceptor
     const response = await api.get('/wishlist/get');
     return response.data;
   } catch (error) {
@@ -72,23 +80,24 @@ export const getWishlist = async (lat, long) => {
 };
 
 /**
- * Check if a product is in wishlist
+ * Check if a product is in wishlist (guest: from Redux; logged-in: API)
  * @param {string} productId - The product ID to check
- * @param {number} lat - Latitude
- * @param {number} long - Longitude
- * @returns {Promise<boolean>} True if product is in wishlist
+ * @returns {Promise<boolean>} True if in wishlist
  */
-export const isInWishlist = async (productId, lat, long) => {
+export const isInWishlist = async (productId) => {
   try {
-    const wishlistData = await getWishlist(lat, long);
+    const token = getAccessToken();
+    if (!token) {
+      const state = store.getState();
+      const ids = state.guest?.guestWishlist ?? [];
+      return ids.includes(productId);
+    }
+    const wishlistData = await getWishlist();
     if (wishlistData && wishlistData.data && Array.isArray(wishlistData.data)) {
       return wishlistData.data.some(
         (item) => {
-          // Support both old structure (item.product) and new structure (item directly)
           const product = item.product || item;
-          return product.productId === productId || 
-                 product._id === productId || 
-                 item.productId === productId;
+          return product.productId === productId || product._id === productId || item.productId === productId;
         }
       );
     }

@@ -42,7 +42,6 @@ import { fetchProducts, fetchProductById } from "../../utils/apiService";
 import { useItemCategories } from "../../hooks/useItemCategories";
 import { useHomeLayout } from "../../hooks/useHomeLayout";
 import { addToCart } from "../../utils/cart";
-import { getAccessToken } from "../../utils/cookies";
 import { getStoredLocation } from "../../utils/location";
 import blankImage from "../../assets/blankimage.png";
 
@@ -227,26 +226,15 @@ export const ProductDetails = () => {
 
   const handleAddToCart = async () => {
     if (!product) return;
-
-    const token = getAccessToken();
-    if (!token) {
-      setCartMessage({ type: "error", text: "Please login to add items to cart" });
-      setTimeout(() => setCartMessage(null), 3000);
-      return;
-    }
-
     try {
       setAddingToCart(true);
       setCartMessage(null);
-
-      // Get productId - could be _id, productId, or prdcode
       const productId = product._id || product.productId || product.id || product.prdcode?.toString();
-
       if (!productId) {
         throw new Error("Product ID not found");
       }
-
-      const response = await addToCart(productId, quantity);
+      const options = productData ? { weight: productWeight, productSnapshot: { name: productData.name, price: product.price, images: product.images, weight: productWeight } } : {};
+      const response = await addToCart(productId, quantity, options);
 
       setCartMessage({
         type: "success",

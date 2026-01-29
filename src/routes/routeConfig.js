@@ -99,6 +99,14 @@ export const publicRoutes = [
     path: "/corporate-queries",
     component: CorporateQueries,
   },
+  {
+    path: "/cart",
+    component: Cart,
+  },
+  {
+    path: "/wishlist",
+    component: Wishlist,
+  },
 ];
 
 /**
@@ -128,16 +136,8 @@ export const privateRoutes = [
     component: UserProfile,
   },
   {
-    path: "/wishlist",
-    component: Wishlist,
-  },
-  {
     path: "/track-order",
     component: TrackOrder,
-  },
-  {
-    path: "/cart",
-    component: Cart,
   },
 ];
 

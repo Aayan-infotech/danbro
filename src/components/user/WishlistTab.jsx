@@ -1,94 +1,96 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Box, Grid, Card, CardContent, Button, IconButton, CircularProgress, Alert, Typography } from "@mui/material";
 import { Favorite as FavoriteIcon } from "@mui/icons-material";
 import { CustomText } from "../comman/CustomText";
-import api from "../../utils/api";
-import { getStoredLocation } from "../../utils/location";
+import { getWishlist, removeFromWishlist } from "../../utils/wishlist";
+import { getAccessToken } from "../../utils/cookies";
+import { fetchProductById } from "../../utils/apiService";
 import blankImage from "../../assets/blankimage.png";
 
 export const WishlistTab = ({ onRemoveFromWishlist }) => {
+  const navigate = useNavigate();
   const [wishlistItems, setWishlistItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [removingId, setRemovingId] = useState(null);
 
-  // Fetch wishlist items
+  const formatWishlistItem = (item) => {
+    const product = item?.product || item;
+    const priceArr = Array.isArray(product?.price) ? product.price : [];
+    const priceObj = priceArr[0] ?? (product?.price && typeof product.price === "object" ? product.price : null);
+    const rate = priceObj != null ? (Number(priceObj.rate) || Number(priceObj.mrp) || 0) : 0;
+    const imgFirst = product?.images?.[0];
+    const image = imgFirst != null ? (typeof imgFirst === "string" ? imgFirst : imgFirst?.url) || blankImage : blankImage;
+    return {
+      id: item?._id || item?.id || product?.productId || product?._id,
+      productId: product?.productId || product?._id || item?.productId,
+      prdcode: product?.prdcode ?? null,
+      name: product?.name || "Unknown Product",
+      image,
+      price: rate > 0 ? `₹${rate}` : "Price not available",
+      mrp: priceObj?.mrp ?? null,
+      rate: priceObj?.rate ?? null,
+      weight: product?.weight ?? null,
+      category: product?.category ?? null,
+      subcategory: product?.subcategory ?? null,
+    };
+  };
+
   const fetchWishlist = async () => {
     setLoading(true);
     setError(null);
     try {
-      // Headers (lat/long) are automatically added by axios interceptor
-      const response = await api.get('/wishlist/get');
-
-      if (response.data && response.data.data && Array.isArray(response.data.data)) {
-        // Format wishlist items - API returns products directly in data array
-        const formattedItems = response.data.data.map((item) => {
-          // Product data is directly in item (new API structure)
-          // Support both old structure (item?.product) and new structure (item directly)
-          const product = item?.product || item;
-
-          // Extract price - price is an array
-          const price = product.price && Array.isArray(product.price) && product.price.length > 0
-            ? product.price[0]
-            : null;
-
-          // Extract image - images is an array of objects with url
-          const image = product.images && Array.isArray(product.images) && product.images.length > 0
-            ? product.images[0].url
-            : blankImage;
-
-          return {
-            id: item?._id || item?.id || product.productId || product._id,
-            productId: product.productId || product._id || item?.productId,
-            prdcode: product.prdcode || null,
-            name: product.name || "Unknown Product",
-            image: image,
-            price: price
-              ? `₹${price.rate || price.mrp || "N/A"}`
-              : "Price not available",
-            mrp: price?.mrp || null,
-            rate: price?.rate || null,
-            weight: product.weight || null,
-            category: product.category || null,
-            subcategory: product.subcategory || null,
-          };
-        });
-        setWishlistItems(formattedItems);
-      } else {
+      const response = await getWishlist();
+      const rawData = response?.data && Array.isArray(response.data) ? response.data : (response?.data?.data && Array.isArray(response.data.data) ? response.data.data : []);
+      if (!Array.isArray(rawData)) {
         setWishlistItems([]);
+        setLoading(false);
+        return;
       }
-    } catch (error) {
-      console.error('Error fetching wishlist:', error);
-      setError('Failed to load wishlist. Please try again later.');
+      const isGuest = !getAccessToken();
+      const isGuestShape = rawData.length > 0 && rawData[0]?.productId != null && rawData[0]?.product == null && rawData[0]?.name == null;
+      if (isGuest && isGuestShape) {
+        const formatted = [];
+        for (const it of rawData) {
+          const pid = it.productId ?? it;
+          if (pid == null || pid === "") continue;
+          const pidStr = String(pid);
+          try {
+            const res = await fetchProductById(pidStr);
+            const product = res?.data?.product ?? res?.data ?? res?.product ?? res ?? null;
+            if (product && (product.name != null || product.productId != null || product._id != null)) {
+              formatted.push(formatWishlistItem({ product, productId: pidStr }));
+            } else {
+              formatted.push(formatWishlistItem({ product: { productId: pidStr, name: "Unknown Product" }, productId: pidStr }));
+            }
+          } catch {
+            formatted.push(formatWishlistItem({ product: { productId: pidStr, name: "Unknown Product" }, productId: pidStr }));
+          }
+        }
+        setWishlistItems(formatted);
+      } else {
+        setWishlistItems(rawData.map((item) => formatWishlistItem(item)));
+      }
+    } catch (err) {
+      console.error("Error fetching wishlist:", err);
+      setError("Failed to load wishlist. Please try again later.");
       setWishlistItems([]);
     } finally {
       setLoading(false);
     }
   };
 
-  // Remove item from wishlist
   const handleRemoveFromWishlist = async (productId) => {
     setRemovingId(productId);
     try {
-      const response = await api.post('/wishlist/remove', {
-        productId: productId,
-      });
-
-      if (response.data) {
-        // Remove from local state
-        setWishlistItems((prev) => prev.filter((item) => item?.productId !== productId));
-
-        // Call parent callback if provided
-        if (onRemoveFromWishlist) {
-          onRemoveFromWishlist(productId);
-        }
-
-        // Dispatch event to update wishlist count in TopHeader
-        window.dispatchEvent(new CustomEvent('wishlistUpdated'));
-      }
+      await removeFromWishlist(productId);
+      setWishlistItems((prev) => prev.filter((item) => item?.productId !== productId));
+      if (onRemoveFromWishlist) onRemoveFromWishlist(productId);
+      window.dispatchEvent(new CustomEvent("wishlistUpdated"));
     } catch (error) {
-      console.error('Error removing from wishlist:', error);
-      setError('Failed to remove item from wishlist. Please try again.');
+      console.error("Error removing from wishlist:", error);
+      setError("Failed to remove item from wishlist. Please try again.");
     } finally {
       setRemovingId(null);
     }
@@ -129,7 +131,7 @@ export const WishlistTab = ({ onRemoveFromWishlist }) => {
   }
 
   return (
-    <Box>
+    <Box sx={{ mb: 5 }}>
       <CustomText variant="h4" sx={{ fontSize: { xs: 20, md: 32 }, fontWeight: 700, color: "var(--themeColor)", mb: { xs: 2, md: 2 }, }}>
         My Wishlist
       </CustomText>
@@ -248,10 +250,9 @@ export const WishlistTab = ({ onRemoveFromWishlist }) => {
                       fullWidth
                       variant="contained"
                       onClick={() => {
-                        if (item?.prdcode) {
-                          window.location.href = `/products/${item?.prdcode}`;
-                        } else if (item?.productId) {
-                          window.location.href = `/products/${item?.productId}`;
+                        const productId = item?.productId || item?.id;
+                        if (productId) {
+                          navigate(`/products/${productId}`);
                         }
                       }}
                       sx={{

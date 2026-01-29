@@ -1,6 +1,5 @@
-import { Box, Button, IconButton, useMediaQuery, useTheme, Avatar, Badge } from "@mui/material";
+import { Box, Button, IconButton, useMediaQuery, useTheme, Avatar, Badge, CircularProgress } from "@mui/material";
 import { NearMe, ShoppingCart, Favorite } from "@mui/icons-material";
-import SearchIcon from "@mui/icons-material/Search";
 import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
 import ShoppingBagOutlinedIcon from "@mui/icons-material/ShoppingBagOutlined";
 import { Link, useNavigate, useLocation } from "react-router-dom";
@@ -14,6 +13,8 @@ import api from "../../utils/api";
 import { getWishlist } from "../../utils/wishlist";
 import { getCart } from "../../utils/cart";
 import { getStoredLocation } from "../../utils/location";
+import { useAppSelector } from "../../store/hooks";
+import { getGuestCart, getGuestWishlist } from "../../store/guestSlice";
 
 
 export const TopHeader = () => {
@@ -30,6 +31,10 @@ export const TopHeader = () => {
     const [cartCount, setCartCount] = useState(0);
     const [isScrolled, setIsScrolled] = useState(false);
     const [locationLabel, setLocationLabel] = useState("Location...?");
+    const [cartIconLoading, setCartIconLoading] = useState(false);
+    const [wishlistIconLoading, setWishlistIconLoading] = useState(false);
+    const guestCart = useAppSelector(getGuestCart);
+    const guestWishlist = useAppSelector(getGuestWishlist);
 
     // Check if on profile page to add bottom border
     const isProfilePage = location.pathname === "/profile" || location.pathname === "/user-profile";
@@ -53,8 +58,6 @@ export const TopHeader = () => {
                 });
         } else if (!loggedIn) {
             setUserProfile(null);
-            setWishlistCount(0);
-            setCartCount(0);
         }
     }, []); // Only run once on mount
 
@@ -87,13 +90,12 @@ export const TopHeader = () => {
         };
     }, []);
 
-    // Fetch wishlist count - debounced to prevent excessive calls
+    // Fetch wishlist count (guest: from Redux; logged-in: API)
     useEffect(() => {
         if (!isLoggedIn) {
-            setWishlistCount(0);
+            setWishlistCount(guestWishlist?.length ?? 0);
             return;
         }
-
         const timeoutId = setTimeout(async () => {
             try {
                 const wishlistData = await getWishlist();
@@ -106,96 +108,83 @@ export const TopHeader = () => {
                 console.error("Error fetching wishlist count:", error);
                 setWishlistCount(0);
             }
-        }, 300); // Debounce by 300ms
-
+        }, 300);
         return () => clearTimeout(timeoutId);
-    }, [isLoggedIn]); // Only depend on isLoggedIn, not location
+    }, [isLoggedIn, guestWishlist?.length]);
 
-    // Fetch cart count - debounced to prevent excessive calls
+    // Fetch cart count (guest: from Redux; logged-in: API)
     useEffect(() => {
         if (!isLoggedIn) {
-            setCartCount(0);
+            const total = (guestCart ?? []).reduce((sum, i) => sum + (i.quantity || 0), 0);
+            setCartCount(total);
             return;
         }
-
         const timeoutId = setTimeout(async () => {
             try {
                 const cartData = await getCart();
-                // Handle different response structures
                 let items = [];
-                if (cartData && Array.isArray(cartData.data)) {
-                    items = cartData.data;
-                } else if (cartData && cartData.data && Array.isArray(cartData.data)) {
-                    items = cartData.data;
-                } else if (cartData && cartData.data?.data && Array.isArray(cartData.data.data)) {
-                    items = cartData.data.data;
-                } else if (Array.isArray(cartData)) {
-                    items = cartData;
-                }
-
-                // Calculate total quantity
-                const totalQuantity = items.reduce((sum, item) => {
-                    return sum + (item.quantity || 0);
-                }, 0);
+                if (cartData && Array.isArray(cartData.data)) items = cartData.data;
+                else if (cartData?.data && Array.isArray(cartData.data)) items = cartData.data;
+                else if (cartData?.data?.data && Array.isArray(cartData.data.data)) items = cartData.data.data;
+                else if (Array.isArray(cartData)) items = cartData;
+                const totalQuantity = items.reduce((sum, item) => sum + (item.quantity || 0), 0);
                 setCartCount(totalQuantity);
             } catch (error) {
                 console.error("Error fetching cart count:", error);
                 setCartCount(0);
             }
-        }, 300); // Debounce by 300ms
-
+        }, 300);
         return () => clearTimeout(timeoutId);
-    }, [isLoggedIn]); // Only depend on isLoggedIn, not location
+    }, [isLoggedIn, guestCart]);
+
+    // Listen for header cart icon loading (when add to cart is in progress)
+    useEffect(() => {
+        const handleCartLoading = (e) => setCartIconLoading(!!e?.detail?.loading);
+        window.addEventListener("headerCartLoading", handleCartLoading);
+        return () => window.removeEventListener("headerCartLoading", handleCartLoading);
+    }, []);
+
+    // Listen for header wishlist icon loading (when add/remove wishlist is in progress)
+    useEffect(() => {
+        const handleWishlistLoading = (e) => setWishlistIconLoading(!!e?.detail?.loading);
+        window.addEventListener("headerWishlistLoading", handleWishlistLoading);
+        return () => window.removeEventListener("headerWishlistLoading", handleWishlistLoading);
+    }, []);
 
     // Listen for cart updates
     useEffect(() => {
         const handleCartUpdate = async () => {
             if (!isLoggedIn) {
-                setCartCount(0);
+                const total = (guestCart ?? []).reduce((sum, i) => sum + (i.quantity || 0), 0);
+                setCartCount(total);
                 return;
             }
-
             try {
                 const cartData = await getCart();
-                // Handle different response structures
                 let items = [];
-                if (cartData && Array.isArray(cartData.data)) {
-                    items = cartData.data;
-                } else if (cartData && cartData.data && Array.isArray(cartData.data)) {
-                    items = cartData.data;
-                } else if (cartData && cartData.data?.data && Array.isArray(cartData.data.data)) {
-                    items = cartData.data.data;
-                } else if (Array.isArray(cartData)) {
-                    items = cartData;
-                }
-
-                // Calculate total quantity
-                const totalQuantity = items.reduce((sum, item) => {
-                    return sum + (item.quantity || 0);
-                }, 0);
+                if (cartData && Array.isArray(cartData.data)) items = cartData.data;
+                else if (cartData?.data && Array.isArray(cartData.data)) items = cartData.data;
+                else if (cartData?.data?.data && Array.isArray(cartData.data.data)) items = cartData.data.data;
+                else if (Array.isArray(cartData)) items = cartData;
+                const totalQuantity = items.reduce((sum, item) => sum + (item.quantity || 0), 0);
                 setCartCount(totalQuantity);
             } catch (error) {
                 console.error("Error fetching cart count:", error);
             }
         };
+        window.addEventListener("cartUpdated", handleCartUpdate);
+        return () => window.removeEventListener("cartUpdated", handleCartUpdate);
+    }, [isLoggedIn, guestCart]);
 
-        window.addEventListener('cartUpdated', handleCartUpdate);
-        return () => {
-            window.removeEventListener('cartUpdated', handleCartUpdate);
-        };
-    }, [isLoggedIn]);
-
-    // Listen for wishlist updates from custom event
+    // Listen for wishlist updates
     useEffect(() => {
         const handleWishlistUpdate = async () => {
             if (!isLoggedIn) {
-                setWishlistCount(0);
+                setWishlistCount(guestWishlist?.length ?? 0);
                 return;
             }
-
             try {
-                const userLocation = getStoredLocation();
-                const wishlistData = await getWishlist(userLocation.lat, userLocation.long);
+                const wishlistData = await getWishlist();
                 if (wishlistData && wishlistData.data) {
                     setWishlistCount(wishlistData.data.length);
                 } else {
@@ -212,7 +201,7 @@ export const TopHeader = () => {
         return () => {
             window.removeEventListener('wishlistUpdated', handleWishlistUpdate);
         };
-    }, [isLoggedIn]);
+    }, [isLoggedIn, guestWishlist?.length]);
 
     // Handle scroll detection for sticky header
     useEffect(() => {
@@ -231,7 +220,7 @@ export const TopHeader = () => {
         if (isLoggedIn) {
             navigate("/profile", { state: { activeTab: "wishlist" } });
         } else {
-            navigate("/login");
+            navigate("/wishlist");
         }
     };
 
@@ -401,24 +390,8 @@ export const TopHeader = () => {
             >
                 <IconButton
                     size="small"
-                    sx={{
-                        color: "var(--themeColor)",
-                        padding: { xs: 0.5, md: 0.75 },
-                        width: { xs: 36, md: 40 },
-                        height: { xs: 36, md: 40 },
-                        transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-                        "&:hover": {
-                            transform: "translateY(-3px) scale(1.1)",
-                            backgroundColor: "rgba(95,41,48,0.08)",
-                            color: "var(--themeColor)",
-                        },
-                    }}
-                >
-                    <SearchIcon sx={{ fontSize: { xs: 22, md: 24 } }} />
-                </IconButton>
-                <IconButton
-                    size="small"
                     onClick={handleWishlistClick}
+                    disabled={wishlistIconLoading}
                     sx={{
                         color: "var(--themeColor)",
                         padding: { xs: 0.5, md: 0.75 },
@@ -436,7 +409,11 @@ export const TopHeader = () => {
                     <Badge
                         badgeContent={wishlistCount}
                         color="error" >
-                        <Favorite sx={{ fontSize: { xs: 22, md: 24 } }} />
+                        {wishlistIconLoading ? (
+                            <CircularProgress size={22} sx={{ color: "var(--themeColor)" }} />
+                        ) : (
+                            <Favorite sx={{ fontSize: { xs: 22, md: 24 } }} />
+                        )}
                     </Badge>
                 </IconButton>
 
@@ -499,6 +476,7 @@ export const TopHeader = () => {
                 <Link to="/cart">
                     <IconButton
                         size="small"
+                        disabled={cartIconLoading}
                         sx={{
                             color: "var(--themeColor)",
                             padding: { xs: 0.5, md: 0.75 },
@@ -516,7 +494,11 @@ export const TopHeader = () => {
                         <Badge
                             badgeContent={cartCount}
                             color="error" >
-                            <ShoppingCart sx={{ fontSize: { xs: 22, md: 24 } }} />
+                            {cartIconLoading ? (
+                                <CircularProgress size={22} sx={{ color: "var(--themeColor)" }} />
+                            ) : (
+                                <ShoppingCart sx={{ fontSize: { xs: 22, md: 24 } }} />
+                            )}
                         </Badge>
                     </IconButton>
                 </Link>
