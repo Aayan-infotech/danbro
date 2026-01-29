@@ -34,6 +34,7 @@ const youtubeVideos = [
 export const YouTubeVideosSection = () => {
   const [visible, setVisible] = useState(false);
   const [selectedVideo, setSelectedVideo] = useState(null);
+  const [hoveredVideoId, setHoveredVideoId] = useState(null);
   const sectionRef = useRef(null);
 
   useEffect(() => {
@@ -135,6 +136,8 @@ export const YouTubeVideosSection = () => {
               <Grid size={{ xs: 12, sm: 6, md: 3 }} key={video.id}>
                 <Box
                   onClick={() => openVideo(video.videoId)}
+                  onMouseEnter={() => setHoveredVideoId(video.videoId)}
+                  onMouseLeave={() => setHoveredVideoId(null)}
                   sx={{
                     position: "relative",
                     borderRadius: 3,
@@ -162,7 +165,7 @@ export const YouTubeVideosSection = () => {
                     },
                   }}
                 >
-                  {/* Thumbnail */}
+                  {/* Thumbnail or playing video on hover */}
                   <Box
                     sx={{
                       position: "relative",
@@ -172,76 +175,97 @@ export const YouTubeVideosSection = () => {
                       bgcolor: "#000",
                     }}
                   >
-                    <Box
-                      className="video-thumbnail"
-                      component="img"
-                      src={video.thumbnail}
-                      alt={video.title}
-                      onError={(e) => {
-                        e.target.src = `https://img.youtube.com/vi/${video.videoId}/hqdefault.jpg`;
-                      }}
-                      sx={{
-                        width: "100%",
-                        height: "100%",
-                        objectFit: "cover",
-                        transition: "transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)",
-                      }}
-                    />
-                    
-                    {/* Overlay */}
-                    <Box
-                      sx={{
-                        position: "absolute",
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        bottom: 0,
-                        background: "linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.3) 100%)",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                      }}
-                    >
-                      {/* Play Button */}
-                      <IconButton
-                        className="play-button"
+                    {hoveredVideoId === video.videoId ? (
+                      <Box
+                        component="iframe"
+                        src={`https://www.youtube.com/embed/${video.videoId}?autoplay=1&mute=1&rel=0`}
+                        title={video.title}
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
                         sx={{
-                          bgcolor: "rgba(255, 0, 0, 0.8)",
+                          position: "absolute",
+                          top: 0,
+                          left: 0,
+                          width: "100%",
+                          height: "100%",
+                          border: "none",
+                          pointerEvents: "auto",
+                        }}
+                      />
+                    ) : (
+                      <>
+                        <Box
+                          className="video-thumbnail"
+                          component="img"
+                          src={video.thumbnail}
+                          alt={video.title}
+                          onError={(e) => {
+                            e.target.src = `https://img.youtube.com/vi/${video.videoId}/hqdefault.jpg`;
+                          }}
+                          sx={{
+                            width: "100%",
+                            height: "100%",
+                            objectFit: "cover",
+                            transition: "transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)",
+                          }}
+                        />
+                        {/* Overlay */}
+                        <Box
+                          sx={{
+                            position: "absolute",
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            bottom: 0,
+                            background: "linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.3) 100%)",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                          }}
+                        >
+                          <IconButton
+                            className="play-button"
+                            sx={{
+                              bgcolor: "rgba(255, 0, 0, 0.8)",
+                              color: "#fff",
+                              width: { xs: 70, md: 80 },
+                              height: { xs: 70, md: 80 },
+                              transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                              boxShadow: "0 8px 25px rgba(255, 0, 0, 0.4)",
+                              "&:hover": {
+                                bgcolor: "rgba(255, 0, 0, 0.95)",
+                              },
+                            }}
+                          >
+                            <PlayCircleIcon sx={{ fontSize: { xs: 50, md: 60 } }} />
+                          </IconButton>
+                        </Box>
+                      </>
+                    )}
+
+                    {/* YouTube Badge - show when not playing */}
+                    {hoveredVideoId !== video.videoId && (
+                      <Box
+                        sx={{
+                          position: "absolute",
+                          top: 10,
+                          right: 10,
+                          bgcolor: "#FF0000",
                           color: "#fff",
-                          width: { xs: 70, md: 80 },
-                          height: { xs: 70, md: 80 },
-                          transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-                          boxShadow: "0 8px 25px rgba(255, 0, 0, 0.4)",
-                          "&:hover": {
-                            bgcolor: "rgba(255, 0, 0, 0.95)",
-                          },
+                          px: 1.5,
+                          py: 0.5,
+                          borderRadius: 2,
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 0.5,
+                          fontSize: 12,
+                          fontWeight: 700,
                         }}
                       >
-                        <PlayCircleIcon sx={{ fontSize: { xs: 50, md: 60 } }} />
-                      </IconButton>
-                    </Box>
-
-                    {/* YouTube Badge */}
-                    <Box
-                      sx={{
-                        position: "absolute",
-                        top: 10,
-                        right: 10,
-                        bgcolor: "#FF0000",
-                        color: "#fff",
-                        px: 1.5,
-                        py: 0.5,
-                        borderRadius: 2,
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 0.5,
-                        fontSize: 12,
-                        fontWeight: 700,
-                      }}
-                    >
-                      <YouTubeIcon sx={{ fontSize: 16 }} />
-                      YouTube
-                    </Box>
+                        <YouTubeIcon sx={{ fontSize: 16 }} />
+                        YouTube
+                      </Box>
+                    )}
                   </Box>
 
                   {/* Video Title */}

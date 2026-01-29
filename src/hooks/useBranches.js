@@ -16,15 +16,22 @@ export const useBranches = () => {
         setLoading(true);
         setError(null);
         const response = await fetchBranches();
-        
-        if (response.status === 'sucess' && response.records) {
-          setBranches(response.records);
+
+        const records =
+          response?.records ??
+          response?.data?.records ??
+          response?.data ??
+          (Array.isArray(response) ? response : null);
+
+        if (Array.isArray(records)) {
+          setBranches(records);
         } else {
-          throw new Error('Invalid response format');
+          setBranches([]);
         }
       } catch (err) {
         setError(err.message || 'Failed to fetch branches');
         console.error('Error loading branches:', err);
+        setBranches([]);
       } finally {
         setLoading(false);
       }

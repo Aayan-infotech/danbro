@@ -225,7 +225,7 @@ export const Footer = () => {
               Contact
             </Box>
           </Box>
-          <Box sx={{ mt: { xs: 6, sm: 8, md: 10, lg: 10 }, display: 'flex', flexDirection: { xs: "column", sm: "row" }, justifyContent: { xs: "flex-start", sm: "space-between", md: "space-between" }, alignItems: { xs: "flex-start", sm: "center" }, gap: { xs: 2, sm: 2, md: 2, lg: 0 }, mb: { xs: 6, sm: 8, md: 8, lg: 12 }, px: { xs: 1, sm: 1, md: 1, lg: 0 } }}>
+          <Box sx={{ mt: { xs: 6, sm: 8, md: 10, lg: 10 }, display: 'flex', flexDirection: { xs: "column", sm: "row" }, justifyContent: { xs: "flex-start", sm: "space-between", md: "space-between" }, alignItems: { xs: "flex-start", sm: "center" }, gap: { xs: 2, sm: 2, md: 2, lg: 0 }, mb: 4, px: { xs: 1, sm: 1, md: 1, lg: 0 } }}>
             <Box
               component="img"
               src={logo}

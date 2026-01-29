@@ -29,6 +29,7 @@ const AppContent = () => {
   // Hide Navbar on profile page
   const hideNavbar = pathname === "/profile" || pathname === "/user-profile";
   const isAuthPage = pathname === "/login" || pathname === "/register" || pathname === "/verify-otp";
+  const isStorePage = pathname === "/store";
 
   useEffect(() => {
     // Check if location is already set
@@ -84,7 +85,7 @@ const AppContent = () => {
             // Add padding-top to account for fixed TopHeader / Navbar on most pages.
             // For auth pages (login/register/verify-otp) we remove this padding so the hero background
             // can sit directly behind the header without extra blank space.
-            pt: isAuthPage
+            pt: isAuthPage || isStorePage
               ? { xs: "0px", sm: "0px", md: "0px", lg: "0px" }
               : hideNavbar 
                 ? { xs: "65px", sm: "70px", md: "65px", lg: "70px" } // Profile page: only TopHeader

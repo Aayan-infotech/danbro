@@ -35,41 +35,27 @@ export const Store = () => {
     }, []);
 
     const navigate = useNavigate();
-    const [selectedCity, setSelectedCity] = useState(null);
 
     // Fetch branches from API
     const { branches, loading, error } = useBranches();
 
-    const categories = useMemo(() => {
-        if (!branches || branches.length === 0) return [];
-        const cityMap = new Map();
-        branches.forEach(branch => {
-            if (branch?.city) {
-                const normalizedCity = branch.city.trim();
-                if (normalizedCity) {
-                    const titleCaseCity = normalizedCity.charAt(0).toUpperCase() + normalizedCity.slice(1).toLowerCase();
-                    if (!cityMap.has(titleCaseCity)) {
-                        cityMap.set(titleCaseCity, normalizedCity);
-                    }
-                }
-            }
-        });
-        const uniqueCities = Array.from(cityMap.keys()).sort();
-        console.log('Extracted cities:', uniqueCities);
-        return uniqueCities;
-    }, [branches]);
+    // Only Lucknow store for now – filter to Lucknow or show single default
+    const LUCKNOW_STORE_DEFAULT = {
+        name: "Lucknow Store",
+        city: "Lucknow",
+        address: "Cyber Heights, Vibhuti Khand, Lucknow",
+        phone: "",
+        lat: "",
+        long: "",
+    };
 
-    // Filter branches by selected city (show all if no city selected)
     const filteredBranches = useMemo(() => {
-        if (!branches || branches.length === 0) return [];
-        if (!selectedCity) return branches;
-        return branches.filter(branch => {
-            if (!branch?.city) return false;
-            const branchCity = branch.city.trim();
-            const selectedCityNormalized = selectedCity.trim();
-            return branchCity.toLowerCase() === selectedCityNormalized.toLowerCase();
-        });
-    }, [branches, selectedCity]);
+        if (!branches || branches.length === 0) return [LUCKNOW_STORE_DEFAULT];
+        const lucknowOnly = branches.filter(
+            (branch) => branch?.city && String(branch.city).trim().toLowerCase() === "lucknow"
+        );
+        return lucknowOnly.length > 0 ? lucknowOnly : [LUCKNOW_STORE_DEFAULT];
+    }, [branches]);
 
     return (
         <div>
@@ -124,23 +110,9 @@ export const Store = () => {
                                 transition: "0.8s"
                             }}>
                                 <Divider sx={{ borderColor: "#000", borderBottomWidth: 2, mb: 2 }} />
-
-                                <Box sx={{ display: "flex", justifyContent: "center", flexWrap: "wrap" }}>
-                                    {categories?.map((cat, i) => (
-                                        <Box key={i}
-                                            sx={{ px: { xs: 1, sm: 2 }, borderRight: i !== categories.length - 1 ? "2px solid #000" : "none" }}>
-                                            <Button disableRipple
-                                                onClick={() => setSelectedCity(selectedCity === cat ? null : cat)}
-                                                sx={{
-                                                    fontSize: { xs: 11, sm: 13 }, fontWeight: 500,
-                                                    color: selectedCity === cat ? "#ED7D2B" : "#000",
-                                                    "&:hover": { color: "#ED7D2B", bg: "transparent" }
-                                                }}>
-                                                {cat}
-                                            </Button>
-                                        </Box>
-                                    ))}
-                                </Box>
+                                <CustomText sx={{ textAlign: "center", fontSize: { xs: 18, md: 22 }, fontWeight: 700, mb: 2 }}>
+                                    OUR STORES
+                                </CustomText>
                                 <Divider sx={{ borderColor: "#000", borderBottomWidth: 2, mt: 2 }} />
                             </Box>
                         </Box>

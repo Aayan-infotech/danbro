@@ -122,11 +122,10 @@ export const Navbar = () => {
                                 }}
                                 onMouseLeave={(e) => {
                                     const relatedTarget = e.relatedTarget;
-                                    if (relatedTarget && !relatedTarget.closest('[role="presentation"]')) {
-                                        if (showDropdown) {
-                                            setHoveredItem(null);
-                                            setAnchorEl(null);
-                                        }
+                                    const isInsidePopover = relatedTarget && typeof relatedTarget.closest === "function" && relatedTarget.closest('[role="presentation"]');
+                                    if (!isInsidePopover && showDropdown) {
+                                        setHoveredItem(null);
+                                        setAnchorEl(null);
                                     }
                                 }}
                             >
