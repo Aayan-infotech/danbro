@@ -18,6 +18,9 @@ import {
   CircularProgress,
   Alert,
   Chip,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
 } from "@mui/material";
 import { CustomText } from "../../components/comman/CustomText";
 import {
@@ -31,6 +34,7 @@ import {
   LocalShipping,
   ThumbUpOffAlt,
   ThumbDownOffAlt,
+  ExpandMore,
 } from "@mui/icons-material";
 import { useNavigate, useParams } from "react-router-dom";
 import { useMediaQuery, useTheme } from "@mui/material";
@@ -58,6 +62,7 @@ export const ProductDetails = () => {
   const [addingToCart, setAddingToCart] = useState(false);
   const [cartMessage, setCartMessage] = useState(null);
   const [cakeMessage, setCakeMessage] = useState("");
+  const [expanded, setExpanded] = useState(false);
 
   // Delivery location display
   const [deliveryLocationLabel, setDeliveryLocationLabel] = useState("");
@@ -294,7 +299,6 @@ export const ProductDetails = () => {
       description: product.ingredient || product.name || "",
       price: `₹${displayPrice}`,
       weight: product.weight || "500g",
-      stock: 235, // API doesn't provide stock, using default
       images: images,
       nutrition: nutritionObj,
       ingredient: product.ingredient || "",
@@ -370,9 +374,9 @@ export const ProductDetails = () => {
           </CustomText>
         </Breadcrumbs>
 
-        <Grid container spacing={{ xs: 3, md: 5 }}>
-          <Grid size={{ xs: 12, md: 6 }}>
-            <Box sx={{ display: "flex", gap: 2, flexDirection: { xs: "column", md: "row" } }}>
+        <Grid container spacing={{ xs: 3, md: 5 }} sx={{ alignItems: "stretch" }}>
+          <Grid size={{ xs: 12, md: 6 }} sx={{ display: { md: "flex" } }}>
+            <Box sx={{ display: "flex", gap: 2, flexDirection: { xs: "column", md: "row" }, height: { xs: "auto", md: "100%" }, width: "100%" }}>
               <Box sx={{ display: { xs: "none", md: "flex" }, flexDirection: "column", gap: 1.5 }}>
                 {productData?.images?.map((image, index) => (
                   <Box
@@ -397,12 +401,12 @@ export const ProductDetails = () => {
                   </Box>
                 ))}
               </Box>
-              <Box sx={{ flex: 1, position: "relative" }}>
+              <Box sx={{ flex: 1, position: "relative", minHeight: 0 }}>
                 <Box
                   ref={imageContainerRef}
                   sx={{
                     width: "100%",
-                    height: { xs: 350, sm: 400, md: 500 },
+                    height: { xs: 350, sm: 400, md: "100%" },
                     borderRadius: 1,
                     overflow: "hidden",
                     backgroundColor: "#f5f5f5",
@@ -431,25 +435,6 @@ export const ProductDetails = () => {
                       objectFit: "cover",
                     }}
                   />
-                  {/* Stock badge - top right on main image */}
-                  <Box
-                    sx={{
-                      position: "absolute",
-                      top: 12,
-                      right: 12,
-                      backgroundColor: "rgba(0,0,0,0.65)",
-                      color: "#fff",
-                      px: 1.5,
-                      py: 0.75,
-                      borderRadius: 1,
-                      fontSize: 13,
-                      fontWeight: 600,
-                      fontFamily: "'Poppins', sans-serif",
-                      zIndex: 5,
-                    }}
-                  >
-                    {productData?.stock} in stock
-                  </Box>
                   {/* Zoom lens overlay */}
                   {isZooming && !isMobile && (
                     <Box
@@ -560,24 +545,9 @@ export const ProductDetails = () => {
               {/* Weight selection */}
               {weightOptions.length > 0 && (
                 <Box sx={{ mb: 1 }}>
-                  <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1.5 }}>
-                    <CustomText sx={{ fontWeight: 600, fontFamily: "'Poppins', sans-serif", color: "#2c2c2c", fontSize: 14 }}>
-                      Select Weight
-                    </CustomText>
-                    <Chip
-                      label={`${productData?.stock ?? 0} in stock`}
-                      size="small"
-                      sx={{
-                        fontSize: 12,
-                        fontWeight: 500,
-                        fontFamily: "'Poppins', sans-serif",
-                        borderRadius: 1,
-                        backgroundColor: "#f0f9f0",
-                        color: "#2e7d32",
-                        border: "1px solid #c8e6c9",
-                      }}
-                    />
-                  </Box>
+                  <CustomText sx={{ fontWeight: 600, fontFamily: "'Poppins', sans-serif", color: "#2c2c2c", fontSize: 14, mb: 1.5 }}>
+                    Select Weight
+                  </CustomText>
                   <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
                     {weightOptions?.map((w) => (
                       <Chip
@@ -973,97 +943,162 @@ export const ProductDetails = () => {
             </Box>
           </Grid>
           <Grid size={{ xs: 12, md: 6 }}>
-            <Box sx={{ p: 3, border: "1px solid #e0e0e0", borderRadius: 1, backgroundColor: "#fff" }}>
-              <CustomText
+            <Accordion
+              expanded={expanded}
+              onChange={() => setExpanded(!expanded)}
+              sx={{
+                border: "1px solid #e0e0e0",
+                borderRadius: 1,
+                backgroundColor: "#fff",
+                "&:before": { display: "none" },
+                boxShadow: "none"
+              }}
+            >
+              <AccordionSummary
+                expandIcon={<ExpandMore sx={{ color: "#2c2c2c" }} />}
                 sx={{
-                  fontWeight: 600,
-                  fontFamily: "'Playfair Display', serif",
-                  fontSize: 18,
-                  mb: 2,
-                  color: "#2c2c2c"
+                  px: 3,
+                  py: 1.5,
+                  minHeight: 56,
+                  "& .MuiAccordionSummary-content": {
+                    display: "block",
+                    my: 1
+                  }
                 }}
               >
-                Nutrition Facts
-              </CustomText>
-              <Box>
-                {productData?.nutrition && Object.keys(productData?.nutrition).length > 0 ? (
-                  Object.entries(productData?.nutrition).map(([label, value], index, array) => (
+                <Box>
+                  <CustomText
+                    sx={{
+                      fontWeight: 600,
+                      fontFamily: "'Playfair Display', serif",
+                      fontSize: 18,
+                      color: "#2c2c2c"
+                    }}
+                  >
+                    Nutrition Facts
+                  </CustomText>
+                  {product?.expiryday && (
                     <Box
-                      key={index}
                       sx={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        py: 1.2,
-                        borderBottom: index !== array.length - 1 ? "1px solid #e0e0e0" : "none"
+                        mt: 2,
+                        p: 2,
+                        backgroundColor: "#fff5f2",
+                        borderRadius: 1,
+                        border: "1px solid #FF643A"
                       }}
                     >
                       <CustomText
                         sx={{
                           fontSize: 14,
+                          fontWeight: 600,
+                          fontFamily: "'Poppins', sans-serif",
+                          color: "#2c2c2c",
+                          mb: 0.5
+                        }}
+                      >
+                        Storage Instructions
+                      </CustomText>
+                      <CustomText
+                        sx={{
+                          fontSize: 13,
                           fontWeight: 400,
                           fontFamily: "'Poppins', sans-serif",
                           color: "#666"
                         }}
                       >
-                        {label}
-                      </CustomText>
-                      <CustomText
-                        sx={{
-                          fontWeight: 500,
-                          fontFamily: "'Poppins', sans-serif",
-                          fontSize: 14,
-                          color: "#2c2c2c"
-                        }}
-                      >
-                        {value}
+                        Best consumed within {product.expiryday} days.
+                        Keep in a cool dry place.
                       </CustomText>
                     </Box>
-                  ))
-                ) : (
-                  <CustomText
-                    sx={{
-                      fontSize: 14,
-                      fontWeight: 400,
-                      fontFamily: "'Poppins', sans-serif",
-                      color: "#666"
-                    }}
-                  >
-                    Nutrition information not available.
-                  </CustomText>
-                )}
-              </Box>
-              {product.expiryday && (
-                <Box sx={{
-                  mt: 2,
-                  p: 2,
-                  backgroundColor: "#f5f5f5",
-                  borderRadius: 1,
-                  border: "1px solid #e0e0e0"
-                }}>
-                  <CustomText
-                    sx={{
-                      fontWeight: 600,
-                      fontFamily: "'Poppins', sans-serif",
-                      fontSize: 14,
-                      color: "#2c2c2c",
-                      mb: 0.5
-                    }}
-                  >
-                    Storage Instructions
-                  </CustomText>
-                  <CustomText
-                    sx={{
-                      fontSize: 13,
-                      fontWeight: 400,
-                      fontFamily: "'Poppins', sans-serif",
-                      color: "#666"
-                    }}
-                  >
-                    Best consumed within {product.expiryday} days. Keep in a cool dry place.
-                  </CustomText>
+                  )}
                 </Box>
-              )}
-            </Box>
+              </AccordionSummary>
+
+              <AccordionDetails sx={{ pt: 0, px: 3, pb: 3 }}>
+                <Box>
+                  {productData?.nutrition && Object.keys(productData?.nutrition).length > 0 ? (
+                    Object.entries(productData?.nutrition).map(([label, value], index, array) => (
+                      <Box
+                        key={index}
+                        sx={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          py: 1.2,
+                          borderBottom: index !== array.length - 1 ? "1px solid #e0e0e0" : "none"
+                        }}
+                      >
+                        <CustomText
+                          sx={{
+                            fontSize: 14,
+                            fontWeight: 400,
+                            fontFamily: "'Poppins', sans-serif",
+                            color: "#666"
+                          }}
+                        >
+                          {label}
+                        </CustomText>
+                        <CustomText
+                          sx={{
+                            fontWeight: 500,
+                            fontFamily: "'Poppins', sans-serif",
+                            fontSize: 14,
+                            color: "#2c2c2c"
+                          }}
+                        >
+                          {value}
+                        </CustomText>
+                      </Box>
+                    ))
+                  ) : (
+                    <CustomText
+                      sx={{
+                        fontSize: 14,
+                        fontWeight: 400,
+                        fontFamily: "'Poppins', sans-serif",
+                        color: "#666"
+                      }}
+                    >
+                      Nutrition information not available.
+                    </CustomText>
+                  )}
+                </Box>
+                {product?.expiryday && (
+                  <Box
+                    sx={{
+                      mt: 2,
+                      p: 2,
+                      backgroundColor: "#f5f5f5",
+                      borderRadius: 1,
+                      border: "1px solid #e0e0e0"
+                    }}
+                  >
+                    <CustomText
+                      sx={{
+                        fontWeight: 600,
+                        fontFamily: "'Poppins', sans-serif",
+                        fontSize: 14,
+                        color: "#2c2c2c",
+                        mb: 0.5
+                      }}
+                    >
+                      Storage Instructions
+                    </CustomText>
+                    <CustomText
+                      sx={{
+                        fontSize: 13,
+                        fontWeight: 400,
+                        fontFamily: "'Poppins', sans-serif",
+                        color: "#666"
+                      }}
+                    >
+                      Best consumed within {product.expiryday} days.
+                      <br />
+                      Keep in a cool dry place.
+                    </CustomText>
+                  </Box>
+                )}
+              </AccordionDetails>
+            </Accordion>
           </Grid>
         </Grid>
 

@@ -82,6 +82,32 @@ const getApiUrl = () => {
 };
 
 /**
+ * Check if delivery service is available at given coordinates
+ * @param {string|number} latitude
+ * @param {string|number} longitude
+ * @returns {Promise<{ success: boolean, message: string }>}
+ */
+export const checkServiceAvailability = async (latitude, longitude) => {
+  try {
+    const response = await axios.post(
+      `${API_BASE_URL}/location/checkServiceAvailability`,
+      {
+        latitude: String(latitude),
+        longitude: String(longitude),
+      },
+      {
+        headers: { 'Content-Type': 'application/json' },
+        timeout: 15000,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    const message = error.response?.data?.message || 'Unable to check service availability. Please try again.';
+    return { success: false, message };
+  }
+};
+
+/**
  * Fetch item categories from the external API
  * @returns {Promise<Object>} Response object with status and records array
  */

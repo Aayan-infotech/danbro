@@ -13,9 +13,9 @@ import api from "../../utils/api";
 
 const RECAPTCHA_SITE_KEY = "6LfBFCwsAAAAAIiTPg_1ZGCaKId4TwkCDcvBNBq0";
 
-// Check if we're in development mode (localhost)
-// Set to false if you want to test reCAPTCHA even on localhost
-const FORCE_RECAPTCHA = false; // Set to true to force reCAPTCHA even in dev
+// Set to true to skip reCAPTCHA (e.g. when using IP like 34.206.193.218:5556 - domain not in reCAPTCHA admin).
+// Set to false when proper domain is added in Google reCAPTCHA admin.
+const SKIP_RECAPTCHA = true;
 
 export const Login = () => {
   const dispatch = useAppDispatch();
@@ -834,8 +834,8 @@ export const Login = () => {
 
             </Box>
 
-            {/* reCAPTCHA Error Display */}
-            {recaptchaError && (
+            {/* reCAPTCHA - hidden when SKIP_RECAPTCHA is true (e.g. IP without domain) */}
+            {!SKIP_RECAPTCHA && recaptchaError && (
               <Box sx={{ mb: 2 }}>
                 <Alert
                   severity="error"
@@ -854,21 +854,22 @@ export const Login = () => {
               </Box>
             )}
 
-            {/* reCAPTCHA Enterprise Checkbox - Above Login Button */}
-            <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
-              <Box
-                ref={recaptchaWidgetRef}
-                sx={{
-                  transform: { xs: "scale(0.92)", md: "scale(1)" },
-                  transformOrigin: "top left",
-                }}
-              />
-            </Box>
+            {!SKIP_RECAPTCHA && (
+              <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
+                <Box
+                  ref={recaptchaWidgetRef}
+                  sx={{
+                    transform: { xs: "scale(0.92)", md: "scale(1)" },
+                    transformOrigin: "top left",
+                  }}
+                />
+              </Box>
+            )}
 
             <CustomButton
               type="submit"
               fullWidth
-              disabled={isLoading || !recaptchaToken}
+              disabled={isLoading || (!SKIP_RECAPTCHA && !recaptchaToken)}
               sx={{ mb: 3 }}
             >
               {isLoading ? (

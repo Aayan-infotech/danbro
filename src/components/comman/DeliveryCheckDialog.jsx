@@ -7,17 +7,21 @@ import MyLocationIcon from "@mui/icons-material/MyLocation";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import { getCurrentLocation, storeLocation } from "../../utils/location";
 import { initGooglePlaces, getPlacePredictions, getPlaceDetails } from "../../utils/googlePlaces";
+import { checkServiceAvailability } from "../../utils/apiService";
 
 export const DeliveryCheckDialog = ({ open, onClose }) => {
   const [predictions, setPredictions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [gettingLocation, setGettingLocation] = useState(false);
   const [inputValue, setInputValue] = useState("");
+  const [serviceMessage, setServiceMessage] = useState(null);
+  const [checkingAvailability, setCheckingAvailability] = useState(false);
   const autocompleteRef = useRef(null);
   const debounceTimer = useRef(null);
 
   useEffect(() => {
     if (open) {
+      setServiceMessage(null);
       // Initialize Google Places when dialog opens
       initGooglePlaces().catch((error) => {
         console.error('Failed to initialize Google Places:', error);
@@ -76,31 +80,47 @@ export const DeliveryCheckDialog = ({ open, onClose }) => {
 
     try {
       setLoading(true);
+      setServiceMessage(null);
       const placeDetails = await getPlaceDetails(placeId);
 
-      // Store location
-      storeLocation(placeDetails.lat, placeDetails.long, placeDetails.address);
+      setCheckingAvailability(true);
+      const availability = await checkServiceAvailability(placeDetails.lat, placeDetails.long);
+      setCheckingAvailability(false);
 
-      // Dispatch event to update location in API calls
+      if (!availability.success) {
+        setServiceMessage({ success: false, message: availability.message });
+        return;
+      }
+
+      storeLocation(placeDetails.lat, placeDetails.long, placeDetails.address);
       window.dispatchEvent(new CustomEvent('locationUpdated', {
         detail: { lat: placeDetails.lat, long: placeDetails.long, label: placeDetails.address }
       }));
-
-      // Close dialog
       onClose();
     } catch (error) {
       console.error('Error getting place details:', error);
+      setServiceMessage({ success: false, message: 'Something went wrong. Please try again.' });
     } finally {
       setLoading(false);
+      setCheckingAvailability(false);
     }
   };
 
   const handleUseCurrentLocation = async () => {
     try {
       setGettingLocation(true);
+      setServiceMessage(null);
       const location = await getCurrentLocation();
 
-      // Try to reverse‑geocode coordinates to a readable address
+      setCheckingAvailability(true);
+      const availability = await checkServiceAvailability(location.lat, location.long);
+      setCheckingAvailability(false);
+
+      if (!availability.success) {
+        setServiceMessage({ success: false, message: availability.message });
+        return;
+      }
+
       let addressLabel = "Selected location";
       try {
         if (window.google && window.google.maps && window.google.maps.Geocoder) {
@@ -116,20 +136,17 @@ export const DeliveryCheckDialog = ({ open, onClose }) => {
         console.error("Reverse geocoding failed:", geoError);
       }
 
-      // Store location with resolved address (or fallback label)
       storeLocation(location.lat, location.long, addressLabel);
-
-      // Dispatch event to update location in API calls & header
       window.dispatchEvent(new CustomEvent("locationUpdated", {
         detail: { lat: location.lat, long: location.long, label: addressLabel }
       }));
-
-      // Close dialog
       onClose();
     } catch (error) {
       console.error('Error getting current location:', error);
+      setServiceMessage({ success: false, message: 'Something went wrong. Please try again.' });
     } finally {
       setGettingLocation(false);
+      setCheckingAvailability(false);
     }
   };
 
@@ -243,6 +260,7 @@ export const DeliveryCheckDialog = ({ open, onClose }) => {
           inputValue={inputValue}
           onInputChange={(event, newInputValue) => {
             setInputValue(newInputValue);
+            if (serviceMessage) setServiceMessage(null);
           }}
           onChange={(event, newValue) => {
             if (newValue && newValue.place_id) {
@@ -317,8 +335,40 @@ export const DeliveryCheckDialog = ({ open, onClose }) => {
               {children}
             </Paper>
           )}
-          sx={{ mb: 3 }}
+          sx={{ mb: 2 }}
         />
+
+        {/* Service availability message */}
+        {(serviceMessage || checkingAvailability) && (
+          <Box
+            sx={{
+              mb: 2,
+              p: 2,
+              borderRadius: "8px",
+              backgroundColor: serviceMessage?.success ? "rgba(46, 125, 50, 0.08)" : "rgba(211, 47, 47, 0.08)",
+              border: `1px solid ${serviceMessage?.success ? "#2e7d32" : "#d32f2f"}`,
+            }}
+          >
+            {checkingAvailability ? (
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <CircularProgress size={18} sx={{ color: "#d32f2f" }} />
+                <CustomText sx={{ fontSize: 14, color: "#666" }}>
+                  Checking service availability...
+                </CustomText>
+              </Box>
+            ) : (
+              <CustomText
+                sx={{
+                  fontSize: 14,
+                  fontWeight: 500,
+                  color: serviceMessage?.success ? "#2e7d32" : "#d32f2f",
+                }}
+              >
+                {serviceMessage?.message}
+              </CustomText>
+            )}
+          </Box>
+        )}
 
         {/* Use Current Location Button */}
         <Box
