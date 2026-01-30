@@ -44,13 +44,18 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    withCredentials([string(
-                        credentialsId: 'vite-google-maps-api-key',
-                        variable: 'VITE_GOOGLE_MAPS_API_KEY'
-                    )]) {
-                        sh '''
-                            docker build --build-arg VITE_GOOGLE_MAPS_API_KEY=$VITE_GOOGLE_MAPS_API_KEY -t $IMAGE_NAME:$IMAGE_TAG .
-                        '''
+                    try {
+                        withCredentials([string(
+                            credentialsId: 'vite-google-maps-api-key',
+                            variable: 'VITE_GOOGLE_MAPS_API_KEY'
+                        )]) {
+                            sh """
+                                docker build --build-arg VITE_GOOGLE_MAPS_API_KEY=\$VITE_GOOGLE_MAPS_API_KEY -t $IMAGE_NAME:$IMAGE_TAG .
+                            """
+                        }
+                    } catch (Exception e) {
+                        echo "⚠️ Credential 'vite-google-maps-api-key' not found. Building without Google Maps API key. Add it in Jenkins Credentials to enable Maps in production."
+                        sh "docker build -t $IMAGE_NAME:$IMAGE_TAG ."
                     }
                 }
             }
