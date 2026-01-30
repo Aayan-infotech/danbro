@@ -336,16 +336,13 @@ export const ProductDetails = () => {
     };
   }, [product]);
 
-  // Available weight options – drive strictly from API data (no static list)
   const weightOptions = useMemo(() => {
     if (!product) return [];
 
-    // If backend ever sends explicit options array, prefer that
     if (Array.isArray(product.weightOptions) && product.weightOptions.length > 0) {
       return product.weightOptions;
     }
 
-    // Fallback: single weight string from API
     if (typeof product.weight === "string" && product.weight.trim()) {
       return [product.weight.trim()];
     }
