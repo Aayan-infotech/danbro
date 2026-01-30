@@ -1,5 +1,4 @@
 import slider5 from "../assets/slider-5.png";
-import bannerSlide1 from "../assets/danbro-by-mr-brown-cyber-heights-vibhuti-khand-lucknow-bakeries-k4sgy7ldta.avif";
 import bannerSlide2 from "../assets/banner-slide-2.jpg";
 import bannerSlide3 from "../assets/banner-slide-3.jpg";
 import bannerSlide4 from "../assets/banner-slide-4.jpg";
@@ -17,15 +16,6 @@ export const bannerSlides = [
   },
   {
     id: 2,
-    img: bannerSlide1,
-    alt: "Fresh bakery products",
-    title: "Fresh Baked Daily",
-    subtitle: "Warm breads & pastries straight from the oven, made with love",
-    animationType: "flipInX",
-    captionPosition: "left"
-  },
-  {
-    id: 3,
     img: bannerSlide2,
     alt: "Beautiful cake",
     title: "Handcrafted Cakes",
@@ -34,7 +24,7 @@ export const bannerSlides = [
     captionPosition: "right"
   },
   {
-    id: 4,
+    id: 3,
     img: bannerSlide3,
     alt: "Chocolate desserts",
     title: "Chocolate Delights",
@@ -43,7 +33,7 @@ export const bannerSlides = [
     captionPosition: "center"
   },
   {
-    id: 5,
+    id: 4,
     img: bannerSlide4,
     alt: "Bakery pastries",
     title: "Premium Bakery Treats",
@@ -52,7 +42,7 @@ export const bannerSlides = [
     captionPosition: "left"
   },
   {
-    id: 6,
+    id: 5,
     img: bannerSlide5,
     alt: "Fresh bakery products",
     title: "Fresh Baked Daily",
