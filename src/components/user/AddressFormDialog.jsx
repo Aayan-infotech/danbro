@@ -18,8 +18,9 @@ import {
 } from "@mui/material";
 import { CustomText } from "../comman/CustomText";
 import { addAddress, updateAddress } from "../../utils/apiService";
-import { getStoredLocation } from "../../utils/location";
+import { getStoredLocation, getCurrentLocation, storeLocation } from "../../utils/location";
 import { getAccessToken } from "../../utils/cookies";
+import { MyLocation as MyLocationIcon } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 
 export const AddressFormDialog = ({ open, onClose, address = null, onSuccess }) => {
@@ -37,6 +38,7 @@ export const AddressFormDialog = ({ open, onClose, address = null, onSuccess }) 
   });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const [locating, setLocating] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -70,6 +72,35 @@ export const AddressFormDialog = ({ open, onClose, address = null, onSuccess }) 
     setErrors({});
     setError("");
   }, [address, open]);
+
+  const handleUseCurrentLocation = async () => {
+    setError("");
+    setLocating(true);
+    try {
+      const { lat, long } = await getCurrentLocation();
+      storeLocation(lat, long);
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${long}&format=json&addressdetails=1`,
+        { headers: { "Accept-Language": "en" } }
+      );
+      const data = await res.json();
+      const addr = data?.address || {};
+      setFormData((prev) => ({
+        ...prev,
+        zipCode: addr.postcode?.replace(/\s.*/, "") || prev.zipCode,
+        city: addr.city || addr.town || addr.village || addr.county || prev.city,
+        state: addr.state || prev.state,
+        area: addr.suburb || addr.neighbourhood || addr.village || addr.locality || prev.area,
+        streetName: addr.road || prev.streetName,
+        houseNumber: addr.house_number || prev.houseNumber,
+        landmark: addr.amenity || prev.landmark,
+      }));
+    } catch (err) {
+      setError(err.message || "Could not get current location. Check permissions or try again.");
+    } finally {
+      setLocating(false);
+    }
+  };
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -189,6 +220,27 @@ export const AddressFormDialog = ({ open, onClose, address = null, onSuccess }) 
           )}
 
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+            <Button
+              type="button"
+              variant="outlined"
+              startIcon={<MyLocationIcon />}
+              onClick={handleUseCurrentLocation}
+              disabled={locating}
+              sx={{
+                borderColor: "var(--themeColor)",
+                color: "var(--themeColor)",
+                textTransform: "none",
+                py: 1,
+                "&:hover": {
+                  borderColor: "var(--specialColor)",
+                  color: "var(--specialColor)",
+                  backgroundColor: "rgba(195, 46, 6, 0.05)",
+                },
+              }}
+            >
+              {locating ? "Locating..." : "Use current location"}
+            </Button>
+
             <FormControl fullWidth>
               <InputLabel>Address Type</InputLabel>
               <Select

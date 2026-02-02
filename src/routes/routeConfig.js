@@ -21,6 +21,7 @@ const VerifyOtp = createLazyComponent(() => import("../pages/auth/VerifyOtp"), "
 const UserProfile = createLazyComponent(() => import("../pages/user/UserProfile"), "UserProfile");
 const Wishlist = createLazyComponent(() => import("../pages/user/Wishlist"), "Wishlist");
 const TrackOrder = createLazyComponent(() => import("../pages/order/TrackOrder"), "TrackOrder");
+const OrderSuccess = createLazyComponent(() => import("../pages/order/OrderSuccess"), "OrderSuccess");
 const ProductList = createLazyComponent(() => import("../pages/products/ProductList"), "ProductList");
 const ProductDetails = createLazyComponent(() => import("../pages/products/ProductDetails"), "ProductDetails");
 const Store = createLazyComponent(() => import("../pages/home/Store"), "Store");
@@ -111,6 +112,10 @@ export const publicRoutes = [
   {
     path: "/track-order",
     component: TrackOrder,
+  },
+  {
+    path: "/order-success",
+    component: OrderSuccess,
   },
 ];
 

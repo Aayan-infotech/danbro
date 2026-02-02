@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Card,
   CardContent,
+  CardHeader,
   Box,
   Button,
   CircularProgress,
@@ -14,10 +15,15 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  IconButton,
+  Autocomplete,
+  InputAdornment,
 } from "@mui/material";
+import { Delete as DeleteIcon, Search as SearchIcon, LocationOn as LocationOnIcon } from "@mui/icons-material";
 import { CustomText } from "../comman/CustomText";
 import { AddressFormDialog } from "../user/AddressFormDialog";
 import { getAccessToken } from "../../utils/cookies";
+import { deleteAddress } from "../../utils/apiService";
 
 export const AddressSection = ({
   addresses,
@@ -78,6 +84,33 @@ export const AddressSection = ({
   const [recipientDialogOpen, setRecipientDialogOpen] = useState(false);
   const [recipientDraft, setRecipientDraft] = useState(someoneElseData);
 
+  // Delete address confirmation
+  const [addressToDelete, setAddressToDelete] = useState(null);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [deletingId, setDeletingId] = useState(null);
+
+  const handleDeleteAddressClick = (address) => {
+    setAddressToDelete(address);
+    setDeleteConfirmOpen(true);
+  };
+
+  const handleDeleteAddressConfirm = async () => {
+    if (!addressToDelete) return;
+    const id = addressToDelete._id || addressToDelete.id;
+    try {
+      setDeletingId(id);
+      await deleteAddress(id);
+      if (selectedAddress === id) setSelectedAddress(null);
+      handleAddressSuccess();
+      setDeleteConfirmOpen(false);
+      setAddressToDelete(null);
+    } catch (err) {
+      console.error("Error deleting address:", err);
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
   const openRecipientDialog = () => {
     setRecipientDraft(someoneElseData || {
       name: "",
@@ -90,6 +123,8 @@ export const AddressSection = ({
       state: "",
       zipCode: "",
     });
+    setAddressSearchQuery("");
+    setAddressSearchOptions([]);
     setRecipientDialogOpen(true);
   };
 
@@ -99,6 +134,88 @@ export const AddressSection = ({
       ...prev,
       [field]: value,
     }));
+  };
+
+  // Address search (Nominatim) for Recipient Details
+  const [addressSearchQuery, setAddressSearchQuery] = useState("");
+  const [addressSearchOptions, setAddressSearchOptions] = useState([]);
+  const [addressSearchLoading, setAddressSearchLoading] = useState(false);
+  const [zipLoading, setZipLoading] = useState(false);
+
+  const fetchAddressSuggestions = useCallback(async (query) => {
+    if (!query || query.length < 3) {
+      setAddressSearchOptions([]);
+      return;
+    }
+    setAddressSearchLoading(true);
+    try {
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&addressdetails=1&limit=5`,
+        { headers: { "Accept-Language": "en" } }
+      );
+      const data = await res.json();
+      setAddressSearchOptions(Array.isArray(data) ? data : []);
+    } catch (err) {
+      setAddressSearchOptions([]);
+    } finally {
+      setAddressSearchLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    const t = setTimeout(() => {
+      if (recipientDialogOpen && addressSearchQuery) fetchAddressSuggestions(addressSearchQuery);
+      else if (!addressSearchQuery) setAddressSearchOptions([]);
+    }, 400);
+    return () => clearTimeout(t);
+  }, [addressSearchQuery, recipientDialogOpen, fetchAddressSuggestions]);
+
+  const onAddressSearchSelect = (option) => {
+    if (!option) return;
+    const addr = option.address || {};
+    setRecipientDraft((prev) => ({
+      ...prev,
+      zipCode: addr.postcode?.replace(/\s.*/, "") || prev.zipCode,
+      city: addr.city || addr.town || addr.village || addr.county || prev.city,
+      state: addr.state || prev.state,
+      area: addr.suburb || addr.neighbourhood || addr.village || addr.locality || prev.area,
+      streetName: addr.road || prev.streetName,
+      houseNumber: addr.house_number || prev.houseNumber,
+      landmark: addr.amenity || prev.landmark,
+    }));
+    setAddressSearchQuery("");
+    setAddressSearchOptions([]);
+  };
+
+  const fetchPincodeDetails = useCallback(async (pincode) => {
+    if (!pincode || pincode.length !== 6 || !/^\d{6}$/.test(pincode)) return;
+    setZipLoading(true);
+    try {
+      const res = await fetch(`https://api.postalpincode.in/pincode/${pincode}`);
+      const data = await res.json();
+      const first = data?.[0];
+      if (first?.Status === "Success" && first?.PostOffice?.length > 0) {
+        const po = first.PostOffice[0];
+        const state = po.State || "";
+        const district = po.District || "";
+        const areaName = po.Name || po.Block || district;
+        setRecipientDraft((prev) => ({
+          ...prev,
+          state,
+          city: district,
+          area: areaName,
+        }));
+      }
+    } catch (err) {
+      console.warn("Pincode lookup failed:", err);
+    } finally {
+      setZipLoading(false);
+    }
+  }, []);
+
+  const handleRecipientZipBlur = () => {
+    const zip = (recipientDraft?.zipCode || "").trim();
+    if (zip.length === 6) fetchPincodeDetails(zip);
   };
 
   const isRecipientDraftValid = () => {
@@ -124,24 +241,28 @@ export const AddressSection = ({
         mb: 2,
       }}
     >
-      <CardContent sx={{ p: { xs: 2, md: 2.5 } }}>
-        <CustomText
-          sx={{
+      <CardHeader
+        title="Delivery Address"
+        sx={{
+          px: { xs: 2, md: 2.5 },
+          pt: { xs: 2, md: 2.5 },
+          pb: 0,
+          "& .MuiCardHeader-title": {
             fontSize: { xs: 18, md: 22 },
             fontWeight: 700,
             color: "#2c2c2c",
-            mb: { xs: 1.5, md: 2 },
-          }}
-        >
-          Delivery Address
-        </CustomText>
-
+          },
+        }}
+      />
+      <CardContent sx={{ p: { xs: 2, md: 2.5 }, pt: { xs: 1, md: 1.5 } }}>
         {/* Delivery Type Radio Buttons (only when logged in) */}
         {isLoggedIn && (
           <RadioGroup
+            row
             value={deliveryType}
             onChange={(e) => setDeliveryType(e.target.value)}
-            sx={{ mb: 2 }}
+            name="delivery-type-radio"
+            sx={{ mb: 2, gap: { xs: 1, md: 2 } }}
           >
             <FormControlLabel
               value="self"
@@ -216,38 +337,56 @@ export const AddressSection = ({
                       }}
                     >
                       <CardContent sx={{ p: 1.5, "&:last-child": { pb: 1.5 } }}>
-                        <FormControlLabel
-                          value={addressId}
-                          control={<Radio sx={{ color: "var(--themeColor)" }} />}
-                          label={
-                            <Box>
-                              <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 0.5 }}>
-                                <CustomText sx={{ fontWeight: 600, fontSize: { xs: 14, md: 16 } }}>
-                                  {address.addressType || "Address"}
+                        <Box sx={{ display: "flex", alignItems: "flex-start", gap: 0.5 }}>
+                          <FormControlLabel
+                            value={addressId}
+                            control={<Radio sx={{ color: "var(--themeColor)" }} />}
+                            label={
+                              <Box>
+                                <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 0.5 }}>
+                                  <CustomText sx={{ fontWeight: 600, fontSize: { xs: 14, md: 16 } }}>
+                                    {address.addressType || "Address"}
+                                  </CustomText>
+                                  {address.isDefault && (
+                                    <Box
+                                      sx={{
+                                        px: 1,
+                                        py: 0.2,
+                                        borderRadius: 1,
+                                        backgroundColor: "#FFB5A1",
+                                        color: "#000",
+                                        fontSize: 10,
+                                        fontWeight: 600,
+                                      }}
+                                    >
+                                      Default
+                                    </Box>
+                                  )}
+                                </Box>
+                                <CustomText sx={{ fontSize: { xs: 12, md: 14 }, color: "#666" }}>
+                                  {formatAddress(address)}
                                 </CustomText>
-                                {address.isDefault && (
-                                  <Box
-                                    sx={{
-                                      px: 1,
-                                      py: 0.2,
-                                      borderRadius: 1,
-                                      backgroundColor: "#FFB5A1",
-                                      color: "#000",
-                                      fontSize: 10,
-                                      fontWeight: 600,
-                                    }}
-                                  >
-                                    Default
-                                  </Box>
-                                )}
                               </Box>
-                              <CustomText sx={{ fontSize: { xs: 12, md: 14 }, color: "#666" }}>
-                                {formatAddress(address)}
-                              </CustomText>
-                            </Box>
-                          }
-                          sx={{ width: "100%", m: 0, alignItems: "flex-start" }}
-                        />
+                            }
+                            sx={{ flex: 1, m: 0, alignItems: "flex-start" }}
+                          />
+                          <IconButton
+                            size="small"
+                            onClick={(e) => { e.stopPropagation(); handleDeleteAddressClick(address); }}
+                            disabled={deletingId === addressId}
+                            sx={{
+                              color: "#d32f2f",
+                              "&:hover": { backgroundColor: "rgba(211, 47, 47, 0.08)" },
+                            }}
+                            aria-label="Delete address"
+                          >
+                            {deletingId === addressId ? (
+                              <CircularProgress size={20} />
+                            ) : (
+                              <DeleteIcon fontSize="small" />
+                            )}
+                          </IconButton>
+                        </Box>
                       </CardContent>
                     </Card>
                   );
@@ -290,6 +429,7 @@ export const AddressSection = ({
               <Card
                 sx={{
                   mb: 1.5,
+                  mt: 1.5,
                   borderRadius: 2,
                   border: "1px solid #e0e0e0",
                   boxShadow: "0 1px 4px rgba(0,0,0,0.05)",
@@ -355,6 +495,42 @@ export const AddressSection = ({
         onSuccess={handleAddressSuccess}
       />
 
+      {/* Delete address confirmation */}
+      <Dialog open={deleteConfirmOpen} onClose={() => !deletingId && setDeleteConfirmOpen(false)}>
+        <DialogTitle>
+          <CustomText sx={{ fontWeight: 600 }}>Delete address?</CustomText>
+        </DialogTitle>
+        <DialogContent>
+          <CustomText sx={{ color: "#666" }}>
+            Are you sure you want to delete this address? This action cannot be undone.
+          </CustomText>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button onClick={() => setDeleteConfirmOpen(false)} disabled={deletingId} sx={{ textTransform: "none" }}>
+            Cancel
+          </Button>
+          <Button
+            variant="contained"
+            onClick={handleDeleteAddressConfirm}
+            disabled={deletingId}
+            sx={{
+              backgroundColor: "#d32f2f",
+              textTransform: "none",
+              "&:hover": { backgroundColor: "#b71c1c" },
+            }}
+          >
+            {deletingId ? (
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <CircularProgress size={18} sx={{ color: "#fff" }} />
+                Deleting...
+              </Box>
+            ) : (
+              "Delete"
+            )}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
       {/* Recipient Details Dialog (for orderFor: OTHER) */}
       <Dialog
         open={recipientDialogOpen}
@@ -369,6 +545,50 @@ export const AddressSection = ({
         </DialogTitle>
         <DialogContent sx={{ pt: 2, pb: 1.5 }}>
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+            <Autocomplete
+              freeSolo
+              options={addressSearchOptions}
+              getOptionLabel={(opt) => (typeof opt === "string" ? opt : opt?.display_name || "")}
+              loading={addressSearchLoading}
+              inputValue={addressSearchQuery}
+              onInputChange={(_, value) => setAddressSearchQuery(value)}
+              onChange={(_, value) => {
+                if (value && typeof value === "object") onAddressSearchSelect(value);
+              }}
+              renderOption={(props, option) => (
+                <Box component="li" {...props} key={option?.place_id}>
+                  <LocationOnIcon sx={{ mr: 1, color: "#666", fontSize: 20 }} />
+                  <CustomText sx={{ fontSize: 13 }}>{option?.display_name || ""}</CustomText>
+                </Box>
+              )}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  size="small"
+                  label="Search address, area or pincode"
+                  placeholder="Type to search and auto-fill address"
+                  InputProps={{
+                    ...params.InputProps,
+                    startAdornment: (
+                      <>
+                        <InputAdornment position="start">
+                          <SearchIcon sx={{ color: "#999", fontSize: 20 }} />
+                        </InputAdornment>
+                        {params.InputProps.startAdornment}
+                      </>
+                    ),
+                    endAdornment: (
+                      <>
+                        {addressSearchLoading ? <CircularProgress size={20} /> : null}
+                        {params.InputProps.endAdornment}
+                      </>
+                    ),
+                  }}
+                  sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
+                />
+              )}
+            />
+
             <TextField
               fullWidth
               size="small"
@@ -481,6 +701,17 @@ export const AddressSection = ({
                 label="PIN Code"
                 value={recipientDraft?.zipCode || ""}
                 onChange={handleRecipientDraftChange("zipCode")}
+                onBlur={handleRecipientZipBlur}
+                placeholder="6 digits – auto-fills city & state"
+                disabled={zipLoading}
+                helperText={zipLoading ? "Fetching city & state..." : null}
+                InputProps={{
+                  endAdornment: zipLoading ? (
+                    <InputAdornment position="end">
+                      <CircularProgress size={20} />
+                    </InputAdornment>
+                  ) : null,
+                }}
                 sx={{
                   "& .MuiOutlinedInput-root": {
                     borderRadius: 2,

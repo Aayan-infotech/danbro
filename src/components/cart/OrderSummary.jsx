@@ -17,7 +17,6 @@ import {
   LocalShipping as LocalShippingIcon,
   Payment as PaymentIcon,
   CheckCircle as CheckCircleIcon,
-  Error as ErrorIcon,
 } from "@mui/icons-material";
 import { getAccessToken } from "../../utils/cookies";
 
@@ -52,12 +51,14 @@ export const OrderSummary = ({
     if (deliveryType === 'self') {
       return !selectedAddress;
     } else if (deliveryType === 'someone_else') {
-      return !someoneElseData.name || 
-             !someoneElseData.phone || 
-             !someoneElseData.address || 
-             !someoneElseData.city || 
-             !someoneElseData.state || 
-             !someoneElseData.pincode;
+      return !someoneElseData?.name ||
+             !someoneElseData?.phone ||
+             !someoneElseData?.houseNumber ||
+             !someoneElseData?.streetName ||
+             !someoneElseData?.area ||
+             !someoneElseData?.city ||
+             !someoneElseData?.state ||
+             !someoneElseData?.zipCode;
     }
     return true;
   };
@@ -280,13 +281,6 @@ export const OrderSummary = ({
             />
           </Box>
 
-          {/* Order Error */}
-          {orderError && (
-            <Alert severity="error" sx={{ mt: 2 }}>
-              {orderError}
-            </Alert>
-          )}
-
           {/* Payment Success */}
           {paymentStatus === 'success' && (
             <Alert 
@@ -295,17 +289,6 @@ export const OrderSummary = ({
               sx={{ mt: 2 }}
             >
               Payment successful! Redirecting to order confirmation...
-            </Alert>
-          )}
-
-          {/* Payment Failure */}
-          {paymentStatus === 'failure' && (
-            <Alert 
-              severity="error" 
-              icon={<ErrorIcon />}
-              sx={{ mt: 2 }}
-            >
-              Payment failed. Please try again.
             </Alert>
           )}
 

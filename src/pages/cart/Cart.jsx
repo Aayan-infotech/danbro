@@ -77,6 +77,13 @@ export const Cart = () => {
     loadCoupons();
   }, [dispatch]);
 
+  // Scroll to top when order error appears so user sees it without scrolling
+  useEffect(() => {
+    if (orderError) {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }, [orderError]);
+
   const loadAddresses = async () => {
     try {
       setAddressesLoading(true);
@@ -218,12 +225,27 @@ export const Cart = () => {
         });
       }
 
-      // Order initiated successfully, now verify payment
-      if (orderResponse?.data?.orderId) {
-        await handleVerifyPayment(orderResponse.data.orderId);
-      } else {
+      // API returns response.data, so orderResponse is the body (orderId, paymentUrl, etc.)
+      const orderId = orderResponse?.orderId ?? orderResponse?.data?.orderId;
+      const paymentUrl =
+        orderResponse?.paymentUrl ??
+        orderResponse?.paymentLink ??
+        orderResponse?.data?.paymentUrl ??
+        orderResponse?.data?.short_url;
+
+      if (!orderId) {
         throw new Error("Order initiation failed: No order ID received");
       }
+
+      // If Razorpay payment URL returned, open it and verify after user returns
+      if (paymentUrl) {
+        sessionStorage.setItem("pendingOrderId", orderId);
+        window.location.href = paymentUrl;
+        return;
+      }
+
+      // No payment URL (e.g. COD): verify immediately
+      await handleVerifyPayment(orderId);
 
     } catch (error) {
       console.error("Order initiation error:", error);
@@ -254,7 +276,7 @@ export const Cart = () => {
         }, 2000);
       } else {
         setPaymentStatus('failure');
-        setOrderError(verificationResponse?.message || "Payment verification failed");
+        setOrderError(verificationResponse?.message || "Payment failed. Please try again.");
       }
     } catch (error) {
       console.error("Payment verification error:", error);
@@ -368,37 +390,31 @@ export const Cart = () => {
   return (
     <Box sx={{ minHeight: "100vh", backgroundColor: "#fff", p: { xs: 1, sm: 2, md: 3 }, pt: { xs: 2, sm: 3, md: 4 }, pb: { xs: 12, md: 6 } }}>
       <Container sx={{ px: { xs: 1, sm: 2, md: 3 }, maxWidth: "100%" }}>
-        {/* Headers */}
-        <Grid container spacing={2}>
-          <Grid size={8}>
-            <Box sx={{ mb: { xs: 2, md: 3 } }}>
-              <CustomText
-                variant="h4"
-                sx={{
-                  fontSize: { xs: 22, md: 28 },
-                  fontWeight: 700,
-                  color: "var(--themeColor)",
-                  mb: 0.5,
-                }}
-              >
-                Shopping Cart
-              </CustomText>
-              <CustomText sx={{ fontSize: { xs: 13, md: 15 }, color: "#666" }}>
-                {cartItems?.length || 0} {cartItems?.length === 1 ? "item" : "items"} in your cart
-              </CustomText>
-            </Box>
-          </Grid>
-          <Grid size={4}>
-            <Box sx={{ mb: { xs: 2, md: 3 } }}>
-              <CustomText variant="h4" sx={{ fontSize: { xs: 22, md: 28 }, fontWeight: 700, color: "var(--themeColor)", mb: 0.5, }}>
-                Order Summary
-              </CustomText>
-            </Box>
-          </Grid>
-        </Grid>
+        {/* Header */}
+        <Box sx={{ mb: { xs: 2, md: 3 } }}>
+          <CustomText
+            variant="h4"
+            sx={{
+              fontSize: { xs: 22, md: 28 },
+              fontWeight: 700,
+              color: "var(--themeColor)",
+              mb: 0.5,
+            }}
+          >
+            Shopping Cart
+          </CustomText>
+          <CustomText sx={{ fontSize: { xs: 13, md: 15 }, color: "#666" }}>
+            {cartItems?.length || 0} {cartItems?.length === 1 ? "item" : "items"} in your cart
+          </CustomText>
+        </Box>
 
-        {/* Error Alert */}
-        {error && (
+        {/* Error Alerts - show at top */}
+        {orderError && (
+          <Alert severity="error" sx={{ mb: 2 }} onClose={() => setOrderError("")}>
+            {orderError}
+          </Alert>
+        )}
+        {error && !orderError && (
           <Alert severity="error" sx={{ mb: 2 }}>
             {error}
           </Alert>
