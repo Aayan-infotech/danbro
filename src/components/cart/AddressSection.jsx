@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -10,6 +10,10 @@ import {
   FormControlLabel,
   TextField,
   Typography,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from "@mui/material";
 import { CustomText } from "../comman/CustomText";
 import { AddressFormDialog } from "../user/AddressFormDialog";
@@ -48,20 +52,67 @@ export const AddressSection = ({
   };
 
   const isSomeoneElseFormValid = () => {
-    return someoneElseData.name && 
-           someoneElseData.phone && 
-           someoneElseData.address && 
-           someoneElseData.city && 
-           someoneElseData.state && 
-           someoneElseData.pincode;
+    return (
+      someoneElseData.name &&
+      someoneElseData.phone &&
+      someoneElseData.houseNumber &&
+      someoneElseData.streetName &&
+      someoneElseData.area &&
+      someoneElseData.city &&
+      someoneElseData.state &&
+      someoneElseData.zipCode
+    );
   };
 
   const token = getAccessToken();
-  
-  // Don't render address section for guest users
-  if (!token) {
-    return null;
-  }
+  const isLoggedIn = !!token;
+
+  // In guest mode, force "someone_else" delivery type so user can fill address
+  useEffect(() => {
+    if (!isLoggedIn && deliveryType !== "someone_else") {
+      setDeliveryType("someone_else");
+    }
+  }, [isLoggedIn, deliveryType, setDeliveryType]);
+
+  // Dialog state for recipient details (orderFor: OTHER)
+  const [recipientDialogOpen, setRecipientDialogOpen] = useState(false);
+  const [recipientDraft, setRecipientDraft] = useState(someoneElseData);
+
+  const openRecipientDialog = () => {
+    setRecipientDraft(someoneElseData || {
+      name: "",
+      phone: "",
+      houseNumber: "",
+      streetName: "",
+      area: "",
+      landmark: "",
+      city: "",
+      state: "",
+      zipCode: "",
+    });
+    setRecipientDialogOpen(true);
+  };
+
+  const handleRecipientDraftChange = (field) => (event) => {
+    const value = event.target.value;
+    setRecipientDraft((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
+  const isRecipientDraftValid = () => {
+    return (
+      recipientDraft?.name &&
+      recipientDraft?.phone &&
+      recipientDraft?.houseNumber &&
+      recipientDraft?.streetName &&
+      recipientDraft?.area &&
+      recipientDraft?.city &&
+      recipientDraft?.state &&
+      recipientDraft?.zipCode
+    );
+  };
 
   return (
     <Card
@@ -85,34 +136,36 @@ export const AddressSection = ({
           Delivery Address
         </CustomText>
 
-        {/* Delivery Type Radio Buttons */}
-        <RadioGroup
-          value={deliveryType}
-          onChange={(e) => setDeliveryType(e.target.value)}
-          sx={{ mb: 2 }}
-        >
-          <FormControlLabel
-            value="self"
-            control={<Radio sx={{ color: "var(--themeColor)" }} />}
-            label={
-              <CustomText sx={{ fontSize: { xs: 14, md: 16 }, fontWeight: 500 }}>
-                Deliver to My Address
-              </CustomText>
-            }
-          />
-          <FormControlLabel
-            value="someone_else"
-            control={<Radio sx={{ color: "var(--themeColor)" }} />}
-            label={
-              <CustomText sx={{ fontSize: { xs: 14, md: 16 }, fontWeight: 500 }}>
-                Deliver to Someone Else
-              </CustomText>
-            }
-          />
-        </RadioGroup>
+        {/* Delivery Type Radio Buttons (only when logged in) */}
+        {isLoggedIn && (
+          <RadioGroup
+            value={deliveryType}
+            onChange={(e) => setDeliveryType(e.target.value)}
+            sx={{ mb: 2 }}
+          >
+            <FormControlLabel
+              value="self"
+              control={<Radio sx={{ color: "var(--themeColor)" }} />}
+              label={
+                <CustomText sx={{ fontSize: { xs: 14, md: 16 }, fontWeight: 500 }}>
+                  Deliver to My Address
+                </CustomText>
+              }
+            />
+            <FormControlLabel
+              value="someone_else"
+              control={<Radio sx={{ color: "var(--themeColor)" }} />}
+              label={
+                <CustomText sx={{ fontSize: { xs: 14, md: 16 }, fontWeight: 500 }}>
+                  Deliver to Someone Else
+                </CustomText>
+              }
+            />
+          </RadioGroup>
+        )}
 
-        {/* Self Address Section */}
-        {deliveryType === 'self' && (
+        {/* Self Address Section (only when logged in) */}
+        {isLoggedIn && deliveryType === 'self' && (
           <>
             {addressesLoading ? (
               <Box sx={{ display: "flex", justifyContent: "center", py: 1.5 }}>
@@ -226,113 +279,69 @@ export const AddressSection = ({
           </>
         )}
 
-        {/* Someone Else Form Section */}
+        {/* Someone Else Section - address via dialog */}
         {deliveryType === 'someone_else' && (
           <Box sx={{ mb: 1.5 }}>
-            <CustomText sx={{ fontSize: { xs: 14, md: 16 }, fontWeight: 600, color: "#2c2c2c", mb: 2 }}>
+            <CustomText sx={{ fontSize: { xs: 14, md: 16 }, fontWeight: 600, color: "#2c2c2c", mb: 1.5 }}>
               Recipient Details
             </CustomText>
-            
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-              <TextField
-                fullWidth
-                size="small"
-                label="Recipient Name"
-                value={someoneElseData.name}
-                onChange={handleSomeoneElseChange('name')}
+
+            {isSomeoneElseFormValid() ? (
+              <Card
                 sx={{
-                  "& .MuiOutlinedInput-root": {
-                    borderRadius: 2,
-                  },
+                  mb: 1.5,
+                  borderRadius: 2,
+                  border: "1px solid #e0e0e0",
+                  boxShadow: "0 1px 4px rgba(0,0,0,0.05)",
                 }}
-              />
-              
-              <TextField
-                fullWidth
-                size="small"
-                label="Phone Number"
-                value={someoneElseData.phone}
-                onChange={handleSomeoneElseChange('phone')}
-                sx={{
-                  "& .MuiOutlinedInput-root": {
-                    borderRadius: 2,
-                  },
-                }}
-              />
-              
-              <TextField
-                fullWidth
-                size="small"
-                label="Delivery Address"
-                value={someoneElseData.address}
-                onChange={handleSomeoneElseChange('address')}
-                multiline
-                rows={2}
-                sx={{
-                  "& .MuiOutlinedInput-root": {
-                    borderRadius: 2,
-                  },
-                }}
-              />
-              
-              <TextField
-                fullWidth
-                size="small"
-                label="Landmark (Optional)"
-                value={someoneElseData.landmark}
-                onChange={handleSomeoneElseChange('landmark')}
-                sx={{
-                  "& .MuiOutlinedInput-root": {
-                    borderRadius: 2,
-                  },
-                }}
-              />
-              
-              <Box sx={{ display: "flex", gap: 2 }}>
-                <TextField
-                  fullWidth
-                  size="small"
-                  label="City"
-                  value={someoneElseData.city}
-                  onChange={handleSomeoneElseChange('city')}
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      borderRadius: 2,
-                    },
-                  }}
-                />
-                
-                <TextField
-                  fullWidth
-                  size="small"
-                  label="State"
-                  value={someoneElseData.state}
-                  onChange={handleSomeoneElseChange('state')}
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      borderRadius: 2,
-                    },
-                  }}
-                />
-                
-                <TextField
-                  fullWidth
-                  size="small"
-                  label="PIN Code"
-                  value={someoneElseData.pincode}
-                  onChange={handleSomeoneElseChange('pincode')}
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      borderRadius: 2,
-                    },
-                  }}
-                />
-              </Box>
-            </Box>
-            
+              >
+                <CardContent sx={{ p: 1.5, "&:last-child": { pb: 1.5 } }}>
+                  <CustomText sx={{ fontWeight: 600, fontSize: { xs: 14, md: 15 }, mb: 0.5 }}>
+                    {someoneElseData.name} • {someoneElseData.phone}
+                  </CustomText>
+                  <CustomText sx={{ fontSize: { xs: 12, md: 13 }, color: "#666" }}>
+                    {formatAddress({
+                      houseNumber: someoneElseData.houseNumber,
+                      streetName: someoneElseData.streetName,
+                      area: someoneElseData.area,
+                      landmark: someoneElseData.landmark,
+                      city: someoneElseData.city,
+                      state: someoneElseData.state,
+                      zipCode: someoneElseData.zipCode,
+                    })}
+                  </CustomText>
+                </CardContent>
+              </Card>
+            ) : (
+              <CustomText sx={{ fontSize: 12, color: "#666", mb: 1 }}>
+                No recipient address added yet. Please add recipient details to place order for someone else.
+              </CustomText>
+            )}
+
+            <Button
+              variant="outlined"
+              fullWidth
+              onClick={openRecipientDialog}
+              sx={{
+                borderColor: "var(--themeColor)",
+                color: "var(--themeColor)",
+                textTransform: "none",
+                mt: 0.5,
+                py: 1,
+                fontSize: { xs: 13, md: 14 },
+                fontWeight: 600,
+                "&:hover": {
+                  borderColor: "var(--themeColor)",
+                  backgroundColor: "#fbeeee",
+                },
+              }}
+            >
+              {isSomeoneElseFormValid() ? "Edit Recipient Address" : "Add Recipient Address"}
+            </Button>
+
             {!isSomeoneElseFormValid() && (
               <CustomText sx={{ fontSize: 12, color: "#d32f2f", mt: 1 }}>
-                Please fill all required fields
+                Please fill all required fields before placing the order.
               </CustomText>
             )}
           </Box>
@@ -345,6 +354,172 @@ export const AddressSection = ({
         onClose={() => setAddressDialogOpen(false)}
         onSuccess={handleAddressSuccess}
       />
+
+      {/* Recipient Details Dialog (for orderFor: OTHER) */}
+      <Dialog
+        open={recipientDialogOpen}
+        onClose={() => setRecipientDialogOpen(false)}
+        fullWidth
+        maxWidth="sm"
+      >
+        <DialogTitle>
+          <CustomText sx={{ fontSize: { xs: 18, md: 20 }, fontWeight: 700 }}>
+            Recipient Details
+          </CustomText>
+        </DialogTitle>
+        <DialogContent sx={{ pt: 2, pb: 1.5 }}>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+            <TextField
+              fullWidth
+              size="small"
+              label="Recipient Name"
+              value={recipientDraft?.name || ""}
+              onChange={handleRecipientDraftChange("name")}
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: 2,
+                },
+              }}
+            />
+
+            <TextField
+              fullWidth
+              size="small"
+              label="Phone Number"
+              value={recipientDraft?.phone || ""}
+              onChange={handleRecipientDraftChange("phone")}
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: 2,
+                },
+              }}
+            />
+
+            <Box sx={{ display: "flex", gap: 2 }}>
+              <TextField
+                fullWidth
+                size="small"
+                label="House / Flat No."
+                value={recipientDraft?.houseNumber || ""}
+                onChange={handleRecipientDraftChange("houseNumber")}
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    borderRadius: 2,
+                  },
+                }}
+              />
+              <TextField
+                fullWidth
+                size="small"
+                label="Street Name"
+                value={recipientDraft?.streetName || ""}
+                onChange={handleRecipientDraftChange("streetName")}
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    borderRadius: 2,
+                  },
+                }}
+              />
+            </Box>
+
+            <TextField
+              fullWidth
+              size="small"
+              label="Area / Locality"
+              value={recipientDraft?.area || ""}
+              onChange={handleRecipientDraftChange("area")}
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: 2,
+                },
+              }}
+            />
+
+            <TextField
+              fullWidth
+              size="small"
+              label="Landmark (Optional)"
+              value={recipientDraft?.landmark || ""}
+              onChange={handleRecipientDraftChange("landmark")}
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: 2,
+                },
+              }}
+            />
+
+            <Box sx={{ display: "flex", gap: 2 }}>
+              <TextField
+                fullWidth
+                size="small"
+                label="City"
+                value={recipientDraft?.city || ""}
+                onChange={handleRecipientDraftChange("city")}
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    borderRadius: 2,
+                  },
+                }}
+              />
+
+              <TextField
+                fullWidth
+                size="small"
+                label="State"
+                value={recipientDraft?.state || ""}
+                onChange={handleRecipientDraftChange("state")}
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    borderRadius: 2,
+                  },
+                }}
+              />
+
+              <TextField
+                fullWidth
+                size="small"
+                label="PIN Code"
+                value={recipientDraft?.zipCode || ""}
+                onChange={handleRecipientDraftChange("zipCode")}
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    borderRadius: 2,
+                  },
+                }}
+              />
+            </Box>
+
+            {!isRecipientDraftValid() && (
+              <CustomText sx={{ fontSize: 12, color: "#d32f2f", mt: 0.5 }}>
+                Please fill all required fields.
+              </CustomText>
+            )}
+          </Box>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button
+            onClick={() => setRecipientDialogOpen(false)}
+            sx={{ textTransform: "none" }}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="contained"
+            onClick={() => {
+              if (!isRecipientDraftValid()) return;
+              setSomeoneElseData(recipientDraft);
+              setRecipientDialogOpen(false);
+            }}
+            sx={{
+              textTransform: "none",
+              bgcolor: "var(--themeColor)",
+              "&:hover": { bgcolor: "#7a2d3a" },
+            }}
+          >
+            Save Recipient
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Card>
   );
 };

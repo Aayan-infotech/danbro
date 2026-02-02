@@ -174,7 +174,9 @@ export const verifyOrderPayment = async (orderId) => {
       'Authorization': `Bearer ${token}`,
     };
     
-    const response = await axios.post(`${API_BASE_URL}/order/verify?orderId=${orderId}`, {}, {
+    // Updated as per latest backend spec:
+    // POST /api/order/verify/:orderId  (no body)
+    const response = await axios.post(`${API_BASE_URL}/order/verify/${orderId}`, {}, {
       headers,
       withCredentials: false,
       timeout: 30000,

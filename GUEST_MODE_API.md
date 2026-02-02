@@ -75,7 +75,7 @@ If your backend uses a different endpoint (e.g. multiple `POST /cart/add` calls)
 
 After guest has logged in and cart is merged (or user had already added items while logged in), **checkout/payment** uses the **logged-in user’s cart** from the backend (e.g. `GET /cart/get`). No “guest payload” is sent at payment; payment APIs use **Bearer token + normal cart APIs**.
 
-**Example – Get cart before payment:**
+### 4.1 Get cart before payment
 
 ```bash
 curl -X GET 'http://34.206.193.218:5656/api/cart/get' \
@@ -85,22 +85,71 @@ curl -X GET 'http://34.206.193.218:5656/api/cart/get' \
   -H 'long: 81.00935'
 ```
 
-**Example – Create order / payment (placeholder):**
+### 4.2 Initiate order (final APIs)
+
+#### (A) Order for SELF – use saved address
 
 ```bash
-curl -X POST 'http://34.206.193.218:5656/api/order/create' \
+curl -X POST 'http://34.206.193.218:5656/api/order/initiate' \
+  -H 'lat: 26.8467' \
+  -H 'long: 80.9462' \
   -H 'Content-Type: application/json' \
   -H 'Authorization: Bearer <ACCESS_TOKEN>' \
-  -H 'lat: 26.86957' \
-  -H 'long: 81.00935' \
   -d '{
-    "addressId": "ADDRESS_ID",
-    "paymentMethod": "ONLINE",
-    "couponCode": ""
+    "orderFor": "SELF",
+    "addressId": "69731cb93a9e6dde905ecf60",
+    "paymentMode": "UPI",
+    "instructions": "Leave order at the door"
   }'
 ```
 
-(Replace endpoint and body with your actual order/payment API.)
+#### (B) Order for OTHER – custom delivery address (e.g. guest flow after login)
+
+```bash
+curl -X POST 'http://localhost:5656/api/order/initiate' \
+  -H 'lat: 26.8467' \
+  -H 'long: 80.9462' \
+  -H 'Content-Type: application/json' \
+  -H 'Authorization: Bearer <ACCESS_TOKEN>' \
+  -d '{
+    "orderFor": "OTHER",
+    "deliveryAddress": {
+      "name": "Amit Sharma",
+      "phone": "9876543210",
+      "houseNumber": "12A",
+      "streetName": "MG Road",
+      "area": "Gomti Nagar",
+      "landmark": "Near Metro Station",
+      "city": "Lucknow",
+      "state": "Uttar Pradesh",
+      "zipCode": "226010",
+      "coordinates": {
+        "lat": 26.8467,
+        "long": 80.9462
+      }
+    },
+    "paymentMode": "UPI",
+    "instructions": "Call before delivery"
+  }'
+```
+
+> Note: **Guest mode** is only frontend (LocalStorage + Redux).  
+> At payment time, user **must be logged in** and a valid `Authorization: Bearer <ACCESS_TOKEN>` header is always required. The payload is the same for both guest-converted users and normal logged‑in users.
+
+### 4.3 Verify order payment
+
+After `/order/initiate` returns an `orderId`, verify payment with:
+
+```bash
+curl -X POST 'http://localhost:5656/api/order/verify/<ORDER_ID>' \
+  -H 'Content-Type: application/json' \
+  -H 'Authorization: Bearer <ACCESS_TOKEN>'
+```
+
+Frontend helper `verifyOrderPayment(orderId)` now calls:
+
+- `POST /api/order/verify/:orderId` (path param, no body)
+- With headers: `Content-Type`, `Accept`, `Authorization: Bearer <token>`
 
 ---
 

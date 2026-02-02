@@ -32,7 +32,7 @@ export const HeroBanner = () => {
     }
     intervalRef.current = setInterval(() => {
       nextSlide();
-    }, 1000);
+    }, 2000);
   };
 
   const stopAutoSlide = () => {

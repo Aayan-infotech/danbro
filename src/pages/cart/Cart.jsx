@@ -23,16 +23,16 @@ import { EmptyCart } from "../../components/cart/EmptyCart";
 export const Cart = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  
+
   // Redux state
-  const { 
-    items: cartItems, 
-    cartTotal, 
-    loading, 
-    error, 
-    updatingItems, 
+  const {
+    items: cartItems,
+    cartTotal,
+    loading,
+    error,
+    updatingItems,
     updatingAction,
-    isGuest 
+    isGuest
   } = useAppSelector((state) => state.cart);
 
   // Local state for addresses and coupons
@@ -41,14 +41,17 @@ export const Cart = () => {
   const [addressesLoading, setAddressesLoading] = useState(false);
   const [addressDialogOpen, setAddressDialogOpen] = useState(false);
   const [deliveryType, setDeliveryType] = useState('self'); // 'self' or 'someone_else'
+  // For "OTHER" orders (guest-style address entry)
   const [someoneElseData, setSomeoneElseData] = useState({
-    name: '',
-    phone: '',
-    address: '',
-    landmark: '',
-    city: '',
-    state: '',
-    pincode: '',
+    name: "",
+    phone: "",
+    houseNumber: "",
+    streetName: "",
+    area: "",
+    landmark: "",
+    city: "",
+    state: "",
+    zipCode: "",
   });
   const [coupons, setCoupons] = useState([]);
   const [couponsLoading, setCouponsLoading] = useState(false);
@@ -111,10 +114,10 @@ export const Cart = () => {
       if (response.data && response.data.data) {
         const formattedCoupons = response.data.data.map((coupon) => {
           const isPercentage = coupon.discountType === "ITEM_DISCOUNT_PERCENTAGE";
-          const discount = isPercentage 
-            ? `${coupon.discountPercentage}%` 
+          const discount = isPercentage
+            ? `${coupon.discountPercentage}%`
             : `₹${coupon.discountAmount}`;
-          
+
           // Check if coupon is still valid
           const now = new Date();
           const validUntil = new Date(coupon.validTo);
@@ -127,8 +130,8 @@ export const Cart = () => {
             discountType: coupon.discountType,
             discountPercentage: coupon.discountPercentage,
             discountAmount: coupon.discountAmount,
-            description: isPercentage 
-              ? `Get ${coupon.discountPercentage}% off on your order` 
+            description: isPercentage
+              ? `Get ${coupon.discountPercentage}% off on your order`
               : `Flat ₹${coupon.discountAmount} off on your order`,
             isValid: isValid,
           };
@@ -176,7 +179,7 @@ export const Cart = () => {
           setOrderError("Please select a delivery address");
           return;
         }
-        
+
         orderResponse = await initiateOrderSelf({
           addressId: selectedAddress,
           paymentMode: paymentMode,
@@ -184,8 +187,17 @@ export const Cart = () => {
         });
       } else {
         // someone_else delivery
-        if (!someoneElseData.name || !someoneElseData.phone) {
-          setOrderError("Please fill in recipient name and phone number");
+        if (
+          !someoneElseData.name ||
+          !someoneElseData.phone ||
+          !someoneElseData.houseNumber ||
+          !someoneElseData.streetName ||
+          !someoneElseData.area ||
+          !someoneElseData.city ||
+          !someoneElseData.state ||
+          !someoneElseData.zipCode
+        ) {
+          setOrderError("Please fill in all required delivery address fields");
           return;
         }
 
@@ -193,13 +205,13 @@ export const Cart = () => {
           deliveryAddress: {
             name: someoneElseData.name,
             phone: someoneElseData.phone,
-            houseNumber: someoneElseData.address,
-            streetName: "",
-            area: someoneElseData.address,
+            houseNumber: someoneElseData.houseNumber,
+            streetName: someoneElseData.streetName,
+            area: someoneElseData.area,
             landmark: someoneElseData.landmark,
             city: someoneElseData.city,
             state: someoneElseData.state,
-            zipCode: someoneElseData.pincode,
+            zipCode: someoneElseData.zipCode,
           },
           paymentMode: paymentMode,
           instructions: deliveryInstructions,
@@ -231,15 +243,13 @@ export const Cart = () => {
 
       if (verificationResponse?.success) {
         setPaymentStatus('success');
-        // Clear cart after successful order
         dispatch(loadCartItems());
-        // Navigate to order success page after a delay
         setTimeout(() => {
-          navigate('/order-success', { 
-            state: { 
+          navigate('/order-success', {
+            state: {
               orderId: orderId,
-              message: 'Order placed successfully!' 
-            } 
+              message: 'Order placed successfully!'
+            }
           });
         }, 2000);
       } else {
@@ -258,10 +268,9 @@ export const Cart = () => {
   const updateQuantity = async (productId, change, weight) => {
     const itemKey = getItemKey(productId, weight);
     if (updatingItems.has(itemKey)) return;
-    
+
     try {
       await dispatch(updateCartItemQuantity({ productId, change, weight }));
-      // Reload cart after update
       await dispatch(loadCartItems());
       window.dispatchEvent(new CustomEvent("cartUpdated"));
     } catch (err) {
@@ -272,7 +281,6 @@ export const Cart = () => {
   const removeItem = async (productId, weight) => {
     try {
       await dispatch(removeCartItem({ productId, weight }));
-      // Reload cart after removal
       await dispatch(loadCartItems());
       window.dispatchEvent(new CustomEvent("cartUpdated"));
     } catch (err) {
@@ -341,7 +349,7 @@ export const Cart = () => {
 
   // Use cartTotal from API if available, otherwise calculate
   const finalSubtotal = cartTotal > 0 ? cartTotal : subtotal;
-  
+
   // Calculate discount based on coupon type
   let discount = 0;
   if (appliedCoupon) {
@@ -353,36 +361,50 @@ export const Cart = () => {
       discount = appliedCoupon.discountAmount;
     }
   }
-  
+
   const shipping = finalSubtotal > 50 ? 0 : 5.0;
   const total = finalSubtotal - discount + shipping;
 
   return (
-    <Box sx={{ minHeight: "100vh", backgroundColor: "#fff", p: { xs: 1, sm: 2, md: 3 }, pt: { xs: 1, sm: 2, md: 3 }, pb: { xs: 12, md: 4 }, mb: 4 }}>
+    <Box sx={{ minHeight: "100vh", backgroundColor: "#fff", p: { xs: 1, sm: 2, md: 3 }, pt: { xs: 2, sm: 3, md: 4 }, pb: { xs: 12, md: 6 } }}>
       <Container sx={{ px: { xs: 1, sm: 2, md: 3 }, maxWidth: "100%" }}>
-        <Box sx={{ mb: { xs: 2, md: 3 } }}>
-          <CustomText
-            variant="h4"
-            sx={{
-              fontSize: { xs: 22, md: 28 },
-              fontWeight: 700,
-              color: "var(--themeColor)",
-              mb: 0.5,
-            }}
-          >
-            Shopping Cart
-          </CustomText>
-          <CustomText sx={{ fontSize: { xs: 13, md: 15 }, color: "#666" }}>
-            {cartItems?.length} {cartItems?.length === 1 ? "item" : "items"} in your cart
-          </CustomText>
-        </Box>
+        {/* Headers */}
+        <Grid container spacing={2}>
+          <Grid size={8}>
+            <Box sx={{ mb: { xs: 2, md: 3 } }}>
+              <CustomText
+                variant="h4"
+                sx={{
+                  fontSize: { xs: 22, md: 28 },
+                  fontWeight: 700,
+                  color: "var(--themeColor)",
+                  mb: 0.5,
+                }}
+              >
+                Shopping Cart
+              </CustomText>
+              <CustomText sx={{ fontSize: { xs: 13, md: 15 }, color: "#666" }}>
+                {cartItems?.length || 0} {cartItems?.length === 1 ? "item" : "items"} in your cart
+              </CustomText>
+            </Box>
+          </Grid>
+          <Grid size={4}>
+            <Box sx={{ mb: { xs: 2, md: 3 } }}>
+              <CustomText variant="h4" sx={{ fontSize: { xs: 22, md: 28 }, fontWeight: 700, color: "var(--themeColor)", mb: 0.5, }}>
+                Order Summary
+              </CustomText>
+            </Box>
+          </Grid>
+        </Grid>
 
+        {/* Error Alert */}
         {error && (
           <Alert severity="error" sx={{ mb: 2 }}>
             {error}
           </Alert>
         )}
 
+        {/* Main Content */}
         {loading ? (
           <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", py: 8 }}>
             <CircularProgress />
@@ -390,9 +412,9 @@ export const Cart = () => {
         ) : cartItems?.length === 0 ? (
           <EmptyCart navigate={navigate} />
         ) : (
-          <Grid container spacing={{ xs: 2, md: 3 }}>
-            {/* Cart Items */}
-            <Grid size={{ xs: 12, md: 8 }}>
+          <Grid container spacing={2}>
+            {/* Left Column - Cart Items */}
+            <Grid size={8}>
               <Box sx={{ display: "flex", flexDirection: "column", gap: { xs: 1.5, md: 2 } }}>
                 {cartItems?.map((item) => (
                   <CartItem
@@ -432,48 +454,50 @@ export const Cart = () => {
               </Box>
             </Grid>
 
-            {/* Address Section and Order Summary */}
-            <Grid size={{ xs: 12, md: 4 }}>
-              <AddressSection
-                addresses={addresses}
-                selectedAddress={selectedAddress}
-                setSelectedAddress={setSelectedAddress}
-                addressesLoading={addressesLoading}
-                addressDialogOpen={addressDialogOpen}
-                setAddressDialogOpen={setAddressDialogOpen}
-                handleAddressSuccess={handleAddressSuccess}
-                deliveryType={deliveryType}
-                setDeliveryType={setDeliveryType}
-                someoneElseData={someoneElseData}
-                setSomeoneElseData={setSomeoneElseData}
-              />
-              
-              <OrderSummary
-                finalSubtotal={finalSubtotal}
-                discount={discount}
-                shipping={shipping}
-                total={total}
-                appliedCoupon={appliedCoupon}
-                couponCode={couponCode}
-                couponError={couponError}
-                applyingCoupon={applyingCoupon}
-                setCouponCode={setCouponCode}
-                handleApplyCoupon={handleApplyCoupon}
-                handleRemoveCoupon={handleRemoveCoupon}
-                selectedAddress={selectedAddress}
-                cartItems={cartItems}
-                deliveryType={deliveryType}
-                someoneElseData={someoneElseData}
-                onInitiateOrder={handleInitiateOrder}
-                orderInitiating={orderInitiating}
-                orderError={orderError}
-                paymentMode={paymentMode}
-                setPaymentMode={setPaymentMode}
-                deliveryInstructions={deliveryInstructions}
-                setDeliveryInstructions={setDeliveryInstructions}
-                paymentStatus={paymentStatus}
-                paymentVerifying={paymentVerifying}
-              />
+            {/* Right Column - Address & Order Summary */}
+            <Grid size={4}>
+              <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}>
+                <AddressSection
+                  addresses={addresses}
+                  selectedAddress={selectedAddress}
+                  setSelectedAddress={setSelectedAddress}
+                  addressesLoading={addressesLoading}
+                  addressDialogOpen={addressDialogOpen}
+                  setAddressDialogOpen={setAddressDialogOpen}
+                  handleAddressSuccess={handleAddressSuccess}
+                  deliveryType={deliveryType}
+                  setDeliveryType={setDeliveryType}
+                  someoneElseData={someoneElseData}
+                  setSomeoneElseData={setSomeoneElseData}
+                />
+
+                <OrderSummary
+                  finalSubtotal={finalSubtotal}
+                  discount={discount}
+                  shipping={shipping}
+                  total={total}
+                  appliedCoupon={appliedCoupon}
+                  couponCode={couponCode}
+                  couponError={couponError}
+                  applyingCoupon={applyingCoupon}
+                  setCouponCode={setCouponCode}
+                  handleApplyCoupon={handleApplyCoupon}
+                  handleRemoveCoupon={handleRemoveCoupon}
+                  selectedAddress={selectedAddress}
+                  cartItems={cartItems}
+                  deliveryType={deliveryType}
+                  someoneElseData={someoneElseData}
+                  onInitiateOrder={handleInitiateOrder}
+                  orderInitiating={orderInitiating}
+                  orderError={orderError}
+                  paymentMode={paymentMode}
+                  setPaymentMode={setPaymentMode}
+                  deliveryInstructions={deliveryInstructions}
+                  setDeliveryInstructions={setDeliveryInstructions}
+                  paymentStatus={paymentStatus}
+                  paymentVerifying={paymentVerifying}
+                />
+              </Box>
             </Grid>
           </Grid>
         )}
