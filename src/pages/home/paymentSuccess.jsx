@@ -34,8 +34,9 @@ const PaymentSuccess = () => {
       return;
     }
 
-    // Razorpay redirect: verify with intentId (from URL or sessionStorage)
+    // Razorpay redirect: intentId from backend callback URL (razorpay_payment_link_id) or sessionStorage
     const intentId =
+      searchParams.get("razorpay_payment_link_id") ||
       searchParams.get("intentId") ||
       searchParams.get("intent_id") ||
       sessionStorage.getItem("pendingIntentId") ||
@@ -80,7 +81,11 @@ const PaymentSuccess = () => {
 
   const details = orderDetails || {};
   const amount = details.amount ?? details.totalAmount ?? details.amountPaid;
-  const paymentId = details.paymentId ?? details.razorpay_payment_id ?? details.payment_id;
+  const paymentId =
+    details.paymentId ??
+    details.razorpay_payment_id ??
+    details.payment_id ??
+    searchParams.get("razorpay_payment_id");
   const currency = details.currency ?? "INR";
 
   return (

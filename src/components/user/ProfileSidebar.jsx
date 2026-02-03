@@ -7,7 +7,6 @@ import {
   Person as PersonIcon,
   LocalOffer as LocalOfferIcon,
   Favorite as FavoriteIcon,
-  Settings as SettingsIcon,
   Logout as LogoutIcon,
 } from "@mui/icons-material";
 import { CustomText } from "../comman/CustomText";
@@ -24,7 +23,6 @@ const menuItems = [
   { id: "account", label: "Account Details", icon: <PersonIcon /> },
   { id: "coupons", label: "My Coupons", icon: <LocalOfferIcon /> },
   { id: "wishlist", label: "Wishlist", icon: <FavoriteIcon /> },
-  { id: "settings", label: "Settings", icon: <SettingsIcon /> },
   { id: "logout", label: "Logout", icon: <LogoutIcon /> },
 ];
 

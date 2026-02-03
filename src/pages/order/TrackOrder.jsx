@@ -7,13 +7,6 @@ import {
   TextField,
   Button,
   CircularProgress,
-  Typography,
-  Stepper,
-  Step,
-  StepLabel,
-  Paper,
-  Grid,
-  Divider,
   Alert,
 } from "@mui/material";
 import { CustomText } from "../../components/comman/CustomText";
@@ -56,28 +49,32 @@ export const TrackOrder = () => {
     }
   };
 
-  const getActiveStep = (status) => {
+  const getActiveStep = (s) => {
+    const raw = (s || "").toLowerCase();
     const statusMap = {
-      'pending': 0,
-      'confirmed': 1,
-      'preparing': 2,
-      'out_for_delivery': 3,
-      'delivered': 4,
-      'cancelled': -1
+      pending: 0,
+      confirmed: 1,
+      preparing: 2,
+      out_for_delivery: 3,
+      delivered: 4,
+      cancelled: -1,
+      paid: 1,
     };
-    return statusMap[status] || 0;
+    return statusMap[raw] ?? 0;
   };
 
-  const formatOrderStatus = (status) => {
+  const formatOrderStatus = (s) => {
+    const raw = (s || "").toLowerCase();
     const statusMap = {
-      'pending': 'Order Pending',
-      'confirmed': 'Order Confirmed',
-      'preparing': 'Preparing',
-      'out_for_delivery': 'Out for Delivery',
-      'delivered': 'Delivered',
-      'cancelled': 'Cancelled'
+      pending: "Order Pending",
+      confirmed: "Order Confirmed",
+      preparing: "Preparing",
+      out_for_delivery: "Out for Delivery",
+      delivered: "Delivered",
+      cancelled: "Cancelled",
+      paid: "Paid",
     };
-    return statusMap[status] || status;
+    return statusMap[raw] || s || "—";
   };
 
   const formatDate = (dateString) => {
@@ -90,14 +87,6 @@ export const TrackOrder = () => {
       minute: '2-digit'
     });
   };
-
-  const steps = [
-    'Order Placed',
-    'Order Confirmed',
-    'Preparing',
-    'Out for Delivery',
-    'Delivered'
-  ];
 
   return (
     <Box sx={{ minHeight: "100vh", backgroundColor: "#f8f9fa", py: 4 }}>
@@ -167,219 +156,169 @@ export const TrackOrder = () => {
           </Alert>
         )}
 
-        {/* Order Details */}
-        {orderData && (
-          <>
-            {/* Order Status */}
-            <Card sx={{ mb: 4, borderRadius: 3, boxShadow: "0 4px 20px rgba(0,0,0,0.08)" }}>
-              <CardContent sx={{ p: { xs: 3, md: 4 } }}>
-                <CustomText
+        {/* Order Details - single card */}
+        {orderData && (() => {
+          const orderIdVal = orderData._id || orderData.orderId;
+          const orderStatus = orderData.order_state || orderData.status;
+          const totalAmount = orderData.totalAmount ?? (Array.isArray(orderData.items) && orderData.items.length
+            ? orderData.items.reduce((sum, i) => sum + (Number(i.total) || 0), 0)
+            : 0);
+          const addr = orderData.deliveryAddress || {};
+          return (
+            <Card
+              sx={{
+                borderRadius: 3,
+                boxShadow: "0 8px 32px rgba(0,0,0,0.08)",
+                overflow: "hidden",
+                border: "1px solid #eee",
+              }}
+            >
+              <CardContent sx={{ p: { xs: 2.5, md: 4 } }}>
+                {/* Header: Order ID + Status badge */}
+                <Box
                   sx={{
-                    fontSize: { xs: 18, md: 20 },
-                    fontWeight: 600,
-                    color: "#2c2c2c",
+                    display: "flex",
+                    flexWrap: "wrap",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    gap: 2,
+                    pb: 2,
+                    mb: 2,
+                    borderBottom: "2px solid #f0f0f0",
+                  }}
+                >
+                  <CustomText sx={{ fontSize: { xs: 15, md: 17 }, fontWeight: 700, color: "#2c2c2c" }}>
+                    Order #{orderIdVal}
+                  </CustomText>
+                  <Box
+                    sx={{
+                      px: 2,
+                      py: 0.75,
+                      borderRadius: 2,
+                      fontWeight: 600,
+                      fontSize: 13,
+                      textTransform: "capitalize",
+                      backgroundColor:
+                        (orderStatus || "").toLowerCase() === "cancelled"
+                          ? "rgba(211, 47, 47, 0.12)"
+                          : (orderStatus || "").toLowerCase() === "delivered"
+                            ? "rgba(46, 125, 50, 0.12)"
+                            : "rgba(var(--themeColor-rgb, 230, 120, 80), 0.15)",
+                      color:
+                        (orderStatus || "").toLowerCase() === "cancelled"
+                          ? "#d32f2f"
+                          : (orderStatus || "").toLowerCase() === "delivered"
+                            ? "#2e7d32"
+                            : "var(--themeColor)",
+                    }}
+                  >
+                    {formatOrderStatus(orderStatus)}
+                  </Box>
+                </Box>
+
+                {/* Order info row */}
+                <Box
+                  sx={{
+                    display: "grid",
+                    gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr", md: "1fr 1fr 1fr" },
+                    gap: 2,
                     mb: 3,
                   }}
                 >
-                  Order Status
-                </CustomText>
-
-                <Stepper
-                  activeStep={getActiveStep(orderData.status)}
-                  alternativeLabel
-                  sx={{ mb: 3 }}
-                >
-                  {steps.map((label) => (
-                    <Step key={label}>
-                      <StepLabel>{label}</StepLabel>
-                    </Step>
-                  ))}
-                </Stepper>
-
-                <Box sx={{ textAlign: "center", py: 2 }}>
-                  <CustomText
-                    sx={{
-                      fontSize: { xs: 16, md: 18 },
-                      fontWeight: 600,
-                      color: orderData.status === 'delivered' ? "#2e7d32" :
-                        orderData.status === 'cancelled' ? "#d32f2f" : "var(--themeColor)",
-                    }}
-                  >
-                    {formatOrderStatus(orderData.status)}
-                  </CustomText>
-                  {orderData.estimatedDelivery && (
-                    <CustomText sx={{ fontSize: { xs: 12, md: 14 }, color: "#666", mt: 1 }}>
-                      Estimated Delivery: {formatDate(orderData.estimatedDelivery)}
+                  <Box>
+                    <CustomText sx={{ fontSize: 11, color: "#888", textTransform: "uppercase", letterSpacing: 0.5, mb: 0.5 }}>
+                      Order Date
                     </CustomText>
+                    <CustomText sx={{ fontSize: 14, fontWeight: 500 }}>
+                      {formatDate(orderData.createdAt)}
+                    </CustomText>
+                  </Box>
+                  <Box>
+                    <CustomText sx={{ fontSize: 11, color: "#888", textTransform: "uppercase", letterSpacing: 0.5, mb: 0.5 }}>
+                      Payment
+                    </CustomText>
+                    <CustomText sx={{ fontSize: 14, fontWeight: 500 }}>
+                      {orderData.paymentStatus || orderData.paymentMethod || "—"}
+                    </CustomText>
+                  </Box>
+                  <Box>
+                    <CustomText sx={{ fontSize: 11, color: "#888", textTransform: "uppercase", letterSpacing: 0.5, mb: 0.5 }}>
+                      Total Amount
+                    </CustomText>
+                    <CustomText sx={{ fontSize: 16, fontWeight: 700, color: "var(--themeColor)" }}>
+                      ₹{Number(totalAmount).toFixed(2)}
+                    </CustomText>
+                  </Box>
+                </Box>
+
+                {/* Delivery address */}
+                <Box sx={{ mb: 3 }}>
+                  <CustomText sx={{ fontSize: 11, color: "#888", textTransform: "uppercase", letterSpacing: 0.5, mb: 1 }}>
+                    Delivery Address
+                  </CustomText>
+                  <Box sx={{ bgcolor: "#fafafa", borderRadius: 2, p: 2, border: "1px solid #f0f0f0" }}>
+                    <CustomText sx={{ fontSize: 14, fontWeight: 600, color: "#2c2c2c" }}>
+                      {addr.name || "—"}
+                    </CustomText>
+                    {addr.phone && (
+                      <CustomText sx={{ fontSize: 13, color: "#666", mt: 0.5 }}>Phone: {addr.phone}</CustomText>
+                    )}
+                    <CustomText sx={{ fontSize: 13, color: "#666", mt: 0.5 }}>
+                      {[addr.houseNumber, addr.streetName, addr.area, addr.landmark].filter(Boolean).join(", ") || "—"}
+                    </CustomText>
+                    <CustomText sx={{ fontSize: 13, color: "#666" }}>
+                      {[addr.city, addr.state].filter(Boolean).join(", ")}
+                      {addr.zipCode ? ` - ${addr.zipCode}` : ""}
+                      {!addr.city && !addr.state && !addr.zipCode ? "—" : ""}
+                    </CustomText>
+                  </Box>
+                </Box>
+
+                {/* Order items - no image */}
+                <Box>
+                  <CustomText sx={{ fontSize: 11, color: "#888", textTransform: "uppercase", letterSpacing: 0.5, mb: 1.5 }}>
+                    Order Items
+                  </CustomText>
+                  {orderData.items && orderData.items.length > 0 ? (
+                    <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+                      {orderData.items.map((item, index) => {
+                        const rate = item.rate ?? item.price ?? 0;
+                        const lineTotal = item.total ?? (item.quantity * rate);
+                        return (
+                          <Box
+                            key={item.product || index}
+                            sx={{
+                              display: "flex",
+                              justifyContent: "space-between",
+                              alignItems: "center",
+                              py: 1.5,
+                              px: 2,
+                              borderRadius: 2,
+                              bgcolor: "#fafafa",
+                              border: "1px solid #f0f0f0",
+                            }}
+                          >
+                            <Box>
+                              <CustomText sx={{ fontSize: 14, fontWeight: 600 }}>{item.name || "—"}</CustomText>
+                              <CustomText sx={{ fontSize: 12, color: "#666" }}>
+                                Qty: {item.quantity} × ₹{Number(rate).toFixed(2)}
+                              </CustomText>
+                            </Box>
+                            <CustomText sx={{ fontSize: 14, fontWeight: 600, color: "var(--themeColor)" }}>
+                              ₹{Number(lineTotal).toFixed(2)}
+                            </CustomText>
+                          </Box>
+                        );
+                      })}
+                    </Box>
+                  ) : (
+                    <CustomText sx={{ fontSize: 13, color: "#666" }}>No items in this order</CustomText>
                   )}
                 </Box>
               </CardContent>
             </Card>
-
-            {/* Order Information */}
-            <Grid container spacing={3}>
-              <Grid size={{ xs: 12, md: 6 }}>
-                <Card sx={{ borderRadius: 3, boxShadow: "0 4px 20px rgba(0,0,0,0.08)" }}>
-                  <CardContent sx={{ p: { xs: 3, md: 4 } }}>
-                    <CustomText
-                      sx={{
-                        fontSize: { xs: 16, md: 18 },
-                        fontWeight: 600,
-                        color: "#2c2c2c",
-                        mb: 2,
-                      }}
-                    >
-                      Order Information
-                    </CustomText>
-
-                    <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
-                      <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-                        <CustomText sx={{ fontSize: { xs: 13, md: 14 }, color: "#666" }}>
-                          Order ID
-                        </CustomText>
-                        <CustomText sx={{ fontSize: { xs: 13, md: 14 }, fontWeight: 500 }}>
-                          {orderData.orderId}
-                        </CustomText>
-                      </Box>
-
-                      <Divider />
-
-                      <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-                        <CustomText sx={{ fontSize: { xs: 13, md: 14 }, color: "#666" }}>
-                          Order Date
-                        </CustomText>
-                        <CustomText sx={{ fontSize: { xs: 13, md: 14 }, fontWeight: 500 }}>
-                          {formatDate(orderData.createdAt)}
-                        </CustomText>
-                      </Box>
-
-                      <Divider />
-
-                      <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-                        <CustomText sx={{ fontSize: { xs: 13, md: 14 }, color: "#666" }}>
-                          Total Amount
-                        </CustomText>
-                        <CustomText sx={{ fontSize: { xs: 13, md: 14 }, fontWeight: 600, color: "var(--themeColor)" }}>
-                          ₹{orderData.totalAmount?.toFixed(2) || "0.00"}
-                        </CustomText>
-                      </Box>
-
-                      <Divider />
-
-                      <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-                        <CustomText sx={{ fontSize: { xs: 13, md: 14 }, color: "#666" }}>
-                          Payment Method
-                        </CustomText>
-                        <CustomText sx={{ fontSize: { xs: 13, md: 14 }, fontWeight: 500 }}>
-                          {orderData.paymentMethod || "N/A"}
-                        </CustomText>
-                      </Box>
-                    </Box>
-                  </CardContent>
-                </Card>
-              </Grid>
-
-              <Grid size={{ xs: 12, md: 6 }}>
-                <Card sx={{ borderRadius: 3, boxShadow: "0 4px 20px rgba(0,0,0,0.08)" }}>
-                  <CardContent sx={{ p: { xs: 3, md: 4 } }}>
-                    <CustomText
-                      sx={{
-                        fontSize: { xs: 16, md: 18 },
-                        fontWeight: 600,
-                        color: "#2c2c2c",
-                        mb: 2,
-                      }}
-                    >
-                      Delivery Address
-                    </CustomText>
-
-                    <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
-                      {orderData.deliveryAddress ? (
-                        <>
-                          <CustomText sx={{ fontSize: { xs: 13, md: 14 }, fontWeight: 500 }}>
-                            {orderData.deliveryAddress.name || "N/A"}
-                          </CustomText>
-                          <CustomText sx={{ fontSize: { xs: 12, md: 13 }, color: "#666" }}>
-                            {orderData.deliveryAddress.address || "N/A"}
-                          </CustomText>
-                          <CustomText sx={{ fontSize: { xs: 12, md: 13 }, color: "#666" }}>
-                            {orderData.deliveryAddress.city && orderData.deliveryAddress.state &&
-                              `${orderData.deliveryAddress.city}, ${orderData.deliveryAddress.state}`
-                            }
-                            {orderData.deliveryAddress.pinCode &&
-                              ` - ${orderData.deliveryAddress.pinCode}`
-                            }
-                          </CustomText>
-                          {orderData.deliveryAddress.phone && (
-                            <CustomText sx={{ fontSize: { xs: 12, md: 13 }, color: "#666" }}>
-                              Phone: {orderData.deliveryAddress.phone}
-                            </CustomText>
-                          )}
-                        </>
-                      ) : (
-                        <CustomText sx={{ fontSize: { xs: 12, md: 13 }, color: "#666" }}>
-                          Delivery address not available
-                        </CustomText>
-                      )}
-                    </Box>
-                  </CardContent>
-                </Card>
-              </Grid>
-            </Grid>
-
-            {/* Order Items */}
-            <Card sx={{ mt: 3, borderRadius: 3, boxShadow: "0 4px 20px rgba(0,0,0,0.08)" }}>
-              <CardContent sx={{ p: { xs: 3, md: 4 } }}>
-                <CustomText
-                  sx={{
-                    fontSize: { xs: 16, md: 18 },
-                    fontWeight: 600,
-                    color: "#2c2c2c",
-                    mb: 2,
-                  }}
-                >
-                  Order Items
-                </CustomText>
-
-                {orderData.items && orderData.items.length > 0 ? (
-                  <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                    {orderData.items.map((item, index) => (
-                      <Box key={index} sx={{ display: "flex", gap: 2, alignItems: "center" }}>
-                        <Box
-                          component="img"
-                          src={item.image || "/placeholder-product.jpg"}
-                          alt={item.name}
-                          sx={{
-                            width: 60,
-                            height: 60,
-                            borderRadius: 2,
-                            objectFit: "cover",
-                            backgroundColor: "#f5f5f5",
-                          }}
-                        />
-                        <Box sx={{ flex: 1 }}>
-                          <CustomText sx={{ fontSize: { xs: 13, md: 14 }, fontWeight: 500 }}>
-                            {item.name}
-                          </CustomText>
-                          <CustomText sx={{ fontSize: { xs: 12, md: 13 }, color: "#666" }}>
-                            Qty: {item.quantity} × ₹{item.price?.toFixed(2) || "0.00"}
-                          </CustomText>
-                        </Box>
-                        <CustomText sx={{ fontSize: { xs: 13, md: 14 }, fontWeight: 600 }}>
-                          ₹{(item.quantity * item.price)?.toFixed(2) || "0.00"}
-                        </CustomText>
-                      </Box>
-                    ))}
-                  </Box>
-                ) : (
-                  <CustomText sx={{ fontSize: { xs: 12, md: 13 }, color: "#666" }}>
-                    No items found in this order
-                  </CustomText>
-                )}
-              </CardContent>
-            </Card>
-          </>
-        )}
+          );
+        })()}
       </Container>
     </Box>
   );

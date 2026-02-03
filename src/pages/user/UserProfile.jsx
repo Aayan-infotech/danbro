@@ -21,7 +21,6 @@ import { DownloadsTab } from "../../components/user/DownloadsTab";
 import { SavedAddressesTab } from "../../components/user/SavedAddressesTab";
 import { MyCouponsTab } from "../../components/user/MyCouponsTab";
 import { WishlistTab } from "../../components/user/WishlistTab";
-import { SettingsTab } from "../../components/user/SettingsTab";
 import blankImage from "../../assets/blankimage.png";
 
 export const UserProfile = () => {
@@ -410,10 +409,6 @@ export const UserProfile = () => {
 
               {activeTab === "wishlist" && (
                 <WishlistTab />
-              )}
-
-              {activeTab === "settings" && (
-                <SettingsTab />
               )}
             </Box>
           </Box>

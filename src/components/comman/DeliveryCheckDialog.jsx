@@ -194,8 +194,7 @@ export const DeliveryCheckDialog = ({ open, onClose }) => {
         e.stopPropagation();
       }}
       onClick={(e) => {
-        // Don't close on backdrop click - user must select location
-        // onClose();
+        if (e.target === e.currentTarget) onClose();
       }}
     >
       <Box
@@ -413,6 +412,25 @@ export const DeliveryCheckDialog = ({ open, onClose }) => {
           >
             Use my current location
           </CustomText>
+        </Box>
+
+        {/* Skip / Close without setting location */}
+        <Box sx={{ textAlign: "center", mt: 2 }}>
+          <Button
+            variant="text"
+            onClick={onClose}
+            sx={{
+              textTransform: "none",
+              fontSize: 14,
+              color: "#666",
+              "&:hover": {
+                backgroundColor: "rgba(0,0,0,0.04)",
+                color: "#333",
+              },
+            }}
+          >
+            Skip for now
+          </Button>
         </Box>
       </Box>
     </Box>
