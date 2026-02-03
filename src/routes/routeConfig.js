@@ -30,7 +30,7 @@ const PrivacyPolicy = createLazyComponent(() => import("../pages/home/PrivacyPol
 const TermsAndConditions = createLazyComponent(() => import("../pages/home/TermsAndConditions"), "TermsAndConditions");
 const RefundReturnsPolicy = createLazyComponent(() => import("../pages/home/RefundReturnsPolicy"), "RefundReturnsPolicy");
 const CorporateQueries = createLazyComponent(() => import("../pages/home/CorporateQueries"), "CorporateQueries");
-const PaymentSuccess = createLazyComponent(() => import("../pages/home/paymentSuccess"), "paymentSuccess");
+const PaymentSuccess = createLazyComponent(() => import("../pages/home/paymentSuccess"));
 const PaymentFailure = createLazyComponent(() => import("../pages/home/paymentFailure"), "paymentFailure");
 
 /**
