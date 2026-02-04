@@ -51,17 +51,18 @@ export const CategoryCarousel = ({ categories: propCategories }) => {
   }, []);
 
   const items = categories?.map((category, index) => ({
-    id: category?.categoryId || category?.id,
+    id: category?.id ?? category?.categoryId,
+    categoryId: category?.categoryId ?? category?.id,
     title: category?.categoryName || category?.groupname,
     img: category?.image || getCategoryImage(category?.categoryName || category?.groupname, index),
     brand: category?.brand,
     brandid: category?.brandid,
   }));
 
-
   const handleToProductList = (categoryId) => {
-    navigate(`/products?categoryId=${categoryId}`)
-  }
+    if (categoryId == null) return;
+    navigate(`/products?categoryId=${encodeURIComponent(String(categoryId))}`);
+  };
 
   return (
     isLoading ? (
@@ -178,7 +179,7 @@ export const CategoryCarousel = ({ categories: propCategories }) => {
                   >
                     <Box
                       className="category-card"
-                      onClick={() => handleToProductList(item?.id)}
+                      onClick={() => handleToProductList(item?.categoryId)}
                       sx={{
                         backdropFilter: "blur(10px)",
                         borderRadius: { xs: "20px", md: "25px" },

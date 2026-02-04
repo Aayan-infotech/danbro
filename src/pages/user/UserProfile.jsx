@@ -153,17 +153,18 @@ export const UserProfile = () => {
 
         const mapped = (Array.isArray(list) ? list : []).map((p) => {
           const pid = p?._id || p?.productId || p?.id;
-          const img =
+          const rawImg =
             (Array.isArray(p?.images) && p.images[0]) ||
             p?.image ||
-            p?.thumbnail ||
-            blankImage;
+            p?.thumbnail;
+          const imageUrl =
+            typeof rawImg === "string" ? rawImg : rawImg?.url || blankImage;
           const priceVal =
-            p?.salePrice ?? p?.discountedPrice ?? p?.price ?? p?.mrp ?? p?.rate;
+            p?.salePrice ?? p?.discountedPrice ?? (Array.isArray(p?.price) ? p?.price?.[0]?.rate ?? p?.price?.[0]?.mrp : p?.price) ?? p?.mrp ?? p?.rate;
           return {
             id: pid,
             name: p?.name || p?.productName || "—",
-            image: img || blankImage,
+            image: imageUrl || blankImage,
             price: priceVal != null ? `₹${priceVal}` : "—",
           };
         });
@@ -486,6 +487,7 @@ export const UserProfile = () => {
                   isMobile={isMobile}
                   userProfile={userProfile}
                   recentOrder={recentOrderForDashboard}
+                  recentOrderRaw={recentOrder}
                   ordersLoading={recentOrderLoading}
                 />
               )}

@@ -549,6 +549,7 @@ export const TopHeader = () => {
             <DeliveryCheckDialog
                 open={openDeliveryDialog}
                 onClose={() => setOpenDeliveryDialog(false)}
+                initialLocationLabel={fullLocationLabel && fullLocationLabel !== "Location...?" ? fullLocationLabel : ""}
             />
             <BusinessDialog
                 open={openBusinessDialog}

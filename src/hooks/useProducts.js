@@ -1,15 +1,19 @@
 import { useState, useEffect } from 'react';
-import { fetchProducts } from '../utils/apiService';
+import { fetchProducts, fetchProductSearch } from '../utils/apiService';
 
 /**
- * Custom hook to fetch and manage products with pagination
- * @param {number} categoryId - Optional category ID to filter products
+ * Custom hook to fetch and manage products with pagination.
+ * When search is non-empty, uses GET /product/search (with optional price range).
+ * Otherwise uses getProductsByCategory.
+ * @param {string|null} categoryId - Category ID (for category mode)
  * @param {number} page - Page number (default: 1)
  * @param {number} limit - Number of items per page (default: 20)
- * @param {string} search - Search query (default: '')
- * @returns {Object} Object containing products, loading state, error, pagination info, and loadMore function
+ * @param {string} search - Search query (default: ''); when set, uses search API
+ * @param {number|null} minPrice - Min price for search (optional)
+ * @param {number|null} maxPrice - Max price for search (optional)
+ * @returns {Object} products, loading, error, pagination
  */
-export const useProducts = (categoryId = null, page = 1, limit = 20, search = '') => {
+export const useProducts = (categoryId = null, page = 1, limit = 20, search = '', minPrice = null, maxPrice = null) => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -21,16 +25,50 @@ export const useProducts = (categoryId = null, page = 1, limit = 20, search = ''
     hasMore: false
   });
 
+  const isSearchMode = typeof search === 'string' && search.trim() !== '';
+
   useEffect(() => {
     const loadProducts = async () => {
       try {
         setLoading(true);
         setError(null);
-        
-        // If no category is selected, set empty products and return
+
+        if (isSearchMode) {
+          const response = await fetchProductSearch(
+            search.trim(),
+            page,
+            limit,
+            minPrice,
+            maxPrice,
+            categoryId || null
+          );
+          let productsData = [];
+          if (response?.data && Array.isArray(response.data)) {
+            productsData = response.data;
+          }
+          if (response?.pagination) {
+            setPagination({
+              page: response.pagination.page || page,
+              limit: response.pagination.limit || limit,
+              total: response.pagination.total || 0,
+              totalPages: response.pagination.totalPages || 0,
+              hasMore: (response.pagination.page || page) < (response.pagination.totalPages || 0)
+            });
+          } else {
+            setPagination({
+              page,
+              limit,
+              total: 0,
+              totalPages: 0,
+              hasMore: productsData.length === limit
+            });
+          }
+          setProducts(productsData);
+          return;
+        }
+
         if (!categoryId) {
           setProducts([]);
-          setLoading(false);
           setPagination({
             page: 1,
             limit: 20,
@@ -38,14 +76,15 @@ export const useProducts = (categoryId = null, page = 1, limit = 20, search = ''
             totalPages: 0,
             hasMore: false
           });
+          setLoading(false);
           return;
         }
-        
-        const response = await fetchProducts(categoryId, page, limit, search);
-        
+
+        const response = await fetchProducts(categoryId, page, limit, '');
+
         if (!response?.success) {
           setProducts([]);
-          setError(null); 
+          setError(null);
           setPagination({
             page: 1,
             limit: 20,
@@ -53,18 +92,17 @@ export const useProducts = (categoryId = null, page = 1, limit = 20, search = ''
             totalPages: 0,
             hasMore: false
           });
+          setLoading(false);
           return;
         }
-        
-        // Check for success and data array
+
         let productsData = [];
         if (response?.success && response?.data && Array.isArray(response.data)) {
           productsData = response.data;
         } else if (response?.data && Array.isArray(response.data)) {
           productsData = response.data;
         }
-        
-        // Update pagination info if available
+
         if (response?.pagination) {
           setPagination({
             page: response.pagination.page || page,
@@ -74,18 +112,16 @@ export const useProducts = (categoryId = null, page = 1, limit = 20, search = ''
             hasMore: (response.pagination.page || page) < (response.pagination.totalPages || 0)
           });
         } else {
-          // If no pagination metadata, estimate based on data length
           const hasMore = productsData.length === limit;
           setPagination({
-            page: page,
-            limit: limit,
+            page,
+            limit,
             total: 0,
             totalPages: 0,
-            hasMore: hasMore
+            hasMore
           });
         }
-        
-        // Always set products to current page data (component will handle accumulation)
+
         setProducts(productsData);
       } catch (err) {
         setError(err.message || 'Failed to fetch products');
@@ -104,7 +140,7 @@ export const useProducts = (categoryId = null, page = 1, limit = 20, search = ''
     };
 
     loadProducts();
-  }, [categoryId, page, limit, search]);
+  }, [categoryId, page, limit, search, minPrice, maxPrice]);
 
   return { products, loading, error, pagination };
 };

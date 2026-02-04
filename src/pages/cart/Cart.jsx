@@ -177,9 +177,7 @@ export const Cart = () => {
       setOrderInitiating(true);
       setOrderError("");
       setPaymentStatus(null);
-
       let orderResponse;
-
       if (isGuest) {
         if (
           !someoneElseData?.name ||
@@ -262,19 +260,17 @@ export const Cart = () => {
       const orderId = orderResponse?.orderId;
       const paymentLink = orderResponse?.paymentLink;
       const intentId = orderResponse?.intentId;
+      const responsePaymentMode = (orderResponse?.paymentMode || paymentMode || "").toString().toUpperCase();
 
       if (!orderId) {
         throw new Error("Order initiation failed: No order ID received");
       }
 
-      if (paymentLink && intentId) {
-        sessionStorage.setItem("pendingIntentId", intentId);
-        sessionStorage.setItem("pendingOrderId", orderId);
-        window.location.href = paymentLink;
-        return;
-      }
-
-      if (!paymentLink) {
+      if (responsePaymentMode === "COD") {
+        if (intentId) {
+          sessionStorage.setItem("pendingIntentId", intentId);
+          sessionStorage.setItem("pendingOrderId", orderId);
+        }
         dispatch(loadCartItems());
         navigate("/order-success", {
           state: {
@@ -282,9 +278,18 @@ export const Cart = () => {
             orderDetails: {
               orderId,
               amount: orderResponse?.amount,
+              intentId,
             },
+            intentId,
           },
         });
+        return;
+      }
+
+      if (paymentLink && intentId) {
+        sessionStorage.setItem("pendingIntentId", intentId);
+        sessionStorage.setItem("pendingOrderId", orderId);
+        window.location.href = paymentLink;
         return;
       }
 

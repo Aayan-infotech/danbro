@@ -79,6 +79,15 @@ export const OrderHistoryTab = ({
 
       const totalLabel =
         total != null && !Number.isNaN(Number(total)) ? `₹${Number(total).toFixed(2)}` : "—";
+      const subtotal = o?.order_subtotal ?? o?.subtotal;
+      const subtotalLabel =
+        subtotal != null && !Number.isNaN(Number(subtotal)) ? `₹${Number(subtotal).toFixed(2)}` : null;
+      const taxVal = o?.order_level_total_taxes ?? o?.item_taxes ?? null;
+      const taxLabel =
+        taxVal != null && !Number.isNaN(Number(taxVal)) ? `₹${Number(taxVal).toFixed(2)}` : null;
+      const discountVal = o?.discount ?? null;
+      const discountLabel =
+        discountVal != null && !Number.isNaN(Number(discountVal)) ? `₹${Number(discountVal).toFixed(2)}` : null;
 
       return {
         raw: o,
@@ -86,6 +95,9 @@ export const OrderHistoryTab = ({
         dateLabel,
         itemsCount,
         totalLabel,
+        subtotalLabel,
+        taxLabel,
+        discountLabel,
         statusRaw,
         statusLabel: statusMeta.label,
         statusColor: statusMeta.color,
@@ -130,6 +142,21 @@ export const OrderHistoryTab = ({
                       <CustomText variant="body2" sx={{ color: "#666", mb: 0.5 }}>
                         Items: {o.itemsCount}
                       </CustomText>
+                      {o.subtotalLabel && (
+                        <CustomText variant="body2" sx={{ color: "#666", mb: 0.5 }}>
+                          Subtotal: {o.subtotalLabel}
+                        </CustomText>
+                      )}
+                      {o.taxLabel && (
+                        <CustomText variant="body2" sx={{ color: "#666", mb: 0.5 }}>
+                          Tax: {o.taxLabel}
+                        </CustomText>
+                      )}
+                      {o.discountLabel && (
+                        <CustomText variant="body2" sx={{ color: "#666", mb: 0.5 }}>
+                          Discount: {o.discountLabel}
+                        </CustomText>
+                      )}
                       <CustomText variant="body2" sx={{ color: "#666", fontWeight: 600, mt: 1 }}>
                         Total: {o.totalLabel}
                       </CustomText>

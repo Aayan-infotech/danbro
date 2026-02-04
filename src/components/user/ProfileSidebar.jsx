@@ -42,11 +42,11 @@ export const ProfileSidebar = ({
     try {
       setIsLoggingOut(true);
       await logout();
-      navigate("/login");
+      navigate("/home");
     } catch (error) {
       console.error("Logout error:", error);
-      // Even if API fails, still redirect to login (cookies already cleared)
-      navigate("/login");
+      // Even if API fails, still redirect to home (cookies already cleared)
+      navigate("/home");
     } finally {
       setIsLoggingOut(false);
     }

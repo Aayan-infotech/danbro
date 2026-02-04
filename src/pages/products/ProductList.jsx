@@ -6,6 +6,10 @@ import {
   InputAdornment,
   CircularProgress,
   Alert,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
 } from "@mui/material";
 import { CustomText } from "../../components/comman/CustomText";
 import {
@@ -21,11 +25,19 @@ import { RecommendedProducts } from "../../components/products/RecommendedProduc
 import { CustomButton } from "../../components/comman/CustomButton";
 import blankImage from "../../assets/blankimage.png";
 
+const PRICE_RANGE_OPTIONS = [
+  { value: "", label: "Price range" },
+  { value: "0-100", label: "₹0 - ₹100", min: 0, max: 100 },
+  { value: "100-2000", label: "₹100 - ₹2000", min: 100, max: 2000 },
+  { value: "2000-above", label: "₹2000 - Above", min: 2000, max: null },
+];
+
 export const ProductList = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [selectedCategory, setSelectedCategory] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
+  const [priceRange, setPriceRange] = useState("");
   const [isVisible, setIsVisible] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [displayedProducts, setDisplayedProducts] = useState([]);
@@ -42,7 +54,11 @@ export const ProductList = () => {
 
   useEffect(() => {
     if (categoryIdFromUrl && apiCategories && apiCategories.length > 0) {
-      const categoryIndex = apiCategories.findIndex(cat => cat?.id === parseInt(categoryIdFromUrl));
+      const categoryIndex = apiCategories.findIndex(
+        (cat) =>
+          cat?.categoryId === categoryIdFromUrl ||
+          String(cat?.id) === categoryIdFromUrl
+      );
       if (categoryIndex !== -1) {
         setSelectedCategory(categoryIndex);
       }
@@ -58,31 +74,46 @@ export const ProductList = () => {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
+  // API expects categoryId (string e.g. "696602a929c5a42df91ef599"), not numeric id
   const selectedCategoryId = useMemo(() => {
-    const categoryId = apiCategories?.[selectedCategory]?.id || null;
-    return categoryId;
-  }, [apiCategories, selectedCategory, categoryIdFromUrl]);
+    const cat = apiCategories?.[selectedCategory];
+    return cat?.categoryId ?? cat?.id ?? null;
+  }, [apiCategories, selectedCategory]);
 
   const handleCategoryChange = (event, newValue) => {
     setSelectedCategory(newValue);
-    const categoryId = apiCategories?.[newValue]?.id;
-    if (categoryId) {
-      setSearchParams({ categoryId: categoryId.toString() });
+    const cat = apiCategories?.[newValue];
+    const categoryId = cat?.categoryId ?? cat?.id;
+    if (categoryId != null) {
+      setSearchParams(
+        (prev) => {
+          const next = new URLSearchParams(prev);
+          next.set("categoryId", String(categoryId));
+          return next;
+        },
+        { replace: true }
+      );
     }
   };
 
-  // Reset pagination when category or search changes
+  // Reset pagination when category, search or price range changes
   useEffect(() => {
     setCurrentPage(1);
     setDisplayedProducts([]);
     setAllProducts([]);
-  }, [selectedCategoryId, debouncedSearchQuery]);
+  }, [selectedCategoryId, debouncedSearchQuery, priceRange]);
+
+  const selectedRange = PRICE_RANGE_OPTIONS.find((r) => r.value === priceRange);
+  const minPriceNum = selectedRange?.min ?? null;
+  const maxPriceNum = selectedRange?.max ?? null;
 
   const { products: apiProducts, loading: productsLoading, error: productsError, pagination } = useProducts(
     selectedCategoryId,
     currentPage,
     ITEMS_PER_PAGE,
-    debouncedSearchQuery
+    debouncedSearchQuery,
+    minPriceNum,
+    maxPriceNum
   );
 
   // Transform products when API data changes
@@ -122,20 +153,8 @@ export const ProductList = () => {
     }
   }, [apiProducts, currentPage]);
 
-  const filteredProducts = useMemo(() => {
-    if (!debouncedSearchQuery) return displayedProducts;
-    const apiFiltered = displayedProducts.filter(
-      (product) =>
-        product.name.toLowerCase().includes(debouncedSearchQuery.toLowerCase()) ||
-        product.description.toLowerCase().includes(debouncedSearchQuery.toLowerCase())
-    );
-
-    return apiFiltered.length > 0 ? apiFiltered : displayedProducts;
-  }, [displayedProducts, debouncedSearchQuery]);
-
-  console.log(filteredProducts, 'filteredProducts')
-
-  const products = filteredProducts;
+  // Search and price filter are done by API; no client-side filter needed
+  const products = displayedProducts;
   const categories = apiCategories?.map(cat => cat.groupname) || [];
   const hasMore = pagination?.hasMore || (apiProducts && apiProducts.length === ITEMS_PER_PAGE);
 
@@ -238,35 +257,72 @@ export const ProductList = () => {
           <CustomText variant="h4" sx={{ fontSize: { xs: 22, sm: 24, md: 32 }, fontWeight: 700, color: "#2c2c2c", transition: "color 0.3s ease", }}>
             Categories
           </CustomText>
-          <TextField
-            placeholder="Search for products"
-            value={searchQuery}
-            size="small"
-            onChange={(e) => setSearchQuery(e.target.value)}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchIcon sx={{ color: "#666", transition: "color 0.3s ease" }} />
-                </InputAdornment>
-              ),
-            }}
-            sx={{
-              width: { xs: "100%", sm: 280, md: 300 },
-              "& .MuiOutlinedInput-root": {
-                borderRadius: 2,
-                backgroundColor: "#f5f5f5",
-                transition: "all 0.3s ease",
-                "&:hover": {
-                  backgroundColor: "#fff",
-                  boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+          <Box sx={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 1.5 }}>
+            <TextField
+              placeholder="Search for products"
+              value={searchQuery}
+              size="small"
+              onChange={(e) => setSearchQuery(e.target.value)}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon sx={{ color: "#666", transition: "color 0.3s ease" }} />
+                  </InputAdornment>
+                ),
+              }}
+              sx={{
+                width: { xs: "100%", sm: 200, md: 240 },
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: 2,
+                  backgroundColor: "#f5f5f5",
+                  transition: "all 0.3s ease",
+                  "&:hover": { backgroundColor: "#fff", boxShadow: "0 2px 8px rgba(0,0,0,0.1)" },
+                  "&.Mui-focused": { backgroundColor: "#fff", boxShadow: "0 4px 12px rgba(255,100,58,0.2)" },
                 },
-                "&.Mui-focused": {
-                  backgroundColor: "#fff",
-                  boxShadow: "0 4px 12px rgba(255,100,58,0.2)",
-                },
-              },
-            }}
-          />
+              }}
+            />
+            <FormControl
+              size="small"
+              sx={{
+                width: 160,
+                minWidth: 160,
+                flexShrink: 0,
+              }}
+            >
+              <InputLabel id="price-range-label">Price range</InputLabel>
+              <Select
+                labelId="price-range-label"
+                value={priceRange}
+                label="Price range"
+                onChange={(e) => setPriceRange(e.target.value)}
+                MenuProps={{
+                  disableScrollLock: true,
+                  PaperProps: {
+                    sx: {
+                      maxHeight: 320,
+                      mt: 1.5,
+                      boxShadow: "0 4px 20px rgba(0,0,0,0.12)",
+                      borderRadius: 2,
+                    },
+                  },
+                  anchorOrigin: { vertical: "bottom", horizontal: "left" },
+                  transformOrigin: { vertical: "top", horizontal: "left" },
+                }}
+                sx={{
+                  borderRadius: 2,
+                  backgroundColor: "#f5f5f5",
+                  "&:hover": { backgroundColor: "#fff" },
+                  "&.Mui-focused": { backgroundColor: "#fff", boxShadow: "0 4px 12px rgba(255,100,58,0.2)" },
+                }}
+              >
+                {PRICE_RANGE_OPTIONS.map((opt) => (
+                  <MenuItem key={opt.value || "all"} value={opt.value}>
+                    {opt.label}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Box>
         </Box>
         <CategoryTabs categories={categories} selectedCategory={selectedCategory} onChange={handleCategoryChange} />
         <Box ref={productRef} sx={{ px: { xs: 2, md: 3, lg: 2 } }}>

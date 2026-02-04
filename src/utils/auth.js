@@ -16,8 +16,8 @@ export const logout = async () => {
     // Clear cookies regardless of API response
     clearAuthCookies();
     
-    // Reload window to update cart quantity in header
-    window.location.reload();
+    // Redirect to home page (not login)
+    window.location.href = '/home';
     
     return response.data;
   } catch (error) {
@@ -25,8 +25,8 @@ export const logout = async () => {
     console.error('Error during logout:', error);
     clearAuthCookies();
     
-    // Reload window to update cart quantity in header
-    window.location.reload();
+    // Redirect to home page (not login)
+    window.location.href = '/home';
     
     // Return error for handling in UI if needed
     throw error;

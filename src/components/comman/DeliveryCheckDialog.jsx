@@ -8,7 +8,7 @@ import { getCurrentLocation, storeLocation } from "../../utils/location";
 import { initGooglePlaces, getPlacePredictions, getPlaceDetails } from "../../utils/googlePlaces";
 import { checkServiceAvailability } from "../../utils/apiService";
 
-export const DeliveryCheckDialog = ({ open, onClose }) => {
+export const DeliveryCheckDialog = ({ open, onClose, initialLocationLabel = "" }) => {
   const [predictions, setPredictions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [gettingLocation, setGettingLocation] = useState(false);
@@ -21,6 +21,8 @@ export const DeliveryCheckDialog = ({ open, onClose }) => {
   useEffect(() => {
     if (open) {
       setServiceMessage(null);
+      // Pre-fill search with current selected location (same as shown in header)
+      setInputValue(initialLocationLabel || "");
       // Initialize Google Places when dialog opens
       initGooglePlaces().catch((error) => {
         console.error('Failed to initialize Google Places:', error);
@@ -42,7 +44,7 @@ export const DeliveryCheckDialog = ({ open, onClose }) => {
         window.scrollTo(0, scrollY);
       };
     }
-  }, [open]);
+  }, [open, initialLocationLabel]);
 
   // Debounced search for autocomplete
   useEffect(() => {

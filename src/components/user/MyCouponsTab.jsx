@@ -1,5 +1,5 @@
-import { Box, Grid, Card, CardContent, Button, CircularProgress, Alert } from "@mui/material";
-import { Celebration as CelebrationIcon, LocalOffer as OfferIcon, ContentCopy as ContentCopyIcon } from "@mui/icons-material";
+import { Box, Grid, Card, CardContent, CircularProgress, Alert } from "@mui/material";
+import { Celebration as CelebrationIcon, LocalOffer as OfferIcon } from "@mui/icons-material";
 import { CustomText } from "../comman/CustomText";
 
 export const MyCouponsTab = ({ coupons, couponsLoading, couponsError }) => {
@@ -205,42 +205,6 @@ export const MyCouponsTab = ({ coupons, couponsLoading, couponsError }) => {
                         {coupon.validTo}
                       </CustomText>
                     </Box>
-                  </Box>
-
-                  {/* Copy Button */}
-                  <Box sx={{ mt: "auto" }}>
-                    <Button
-                      fullWidth
-                      variant="contained"
-                      disabled={!coupon.isValid}
-                      onClick={() => {
-                        navigator.clipboard.writeText(coupon.code);
-                      }}
-                      startIcon={coupon.isValid ? <ContentCopyIcon /> : null}
-                      sx={{
-                        backgroundColor: coupon.isValid ? "#fff" : "#e0e0e0",
-                        color: coupon.isValid ? "var(--themeColor)" : "#999",
-                        textTransform: "none",
-                        borderRadius: 2,
-                        fontWeight: 700,
-                        py: 1.25,
-                        fontSize: { xs: 13, md: 14 },
-                        boxShadow: coupon.isValid ? "0 2px 8px rgba(0,0,0,0.15)" : "none",
-                        transition: "all 0.3s ease",
-                        "&:hover": {
-                          backgroundColor: coupon.isValid ? "#fff" : "#e0e0e0",
-                          transform: coupon.isValid ? "translateY(-2px)" : "none",
-                          boxShadow: coupon.isValid ? "0 4px 12px rgba(0,0,0,0.2)" : "none",
-                        },
-                        "&:disabled": {
-                          backgroundColor: "#e0e0e0",
-                          color: "#999",
-                          cursor: "not-allowed",
-                        },
-                      }}
-                    >
-                      {coupon.isValid ? "Copy Code" : "Expired"}
-                    </Button>
                   </Box>
                 </CardContent>
               </Card>

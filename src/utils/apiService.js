@@ -634,8 +634,71 @@ const getExternalApiUrl = (level, params = {}) => {
 };
 
 /**
- * Fetch products from the API
- * @param {number} categoryId - Category ID to filter products
+ * Search products via GET /product/search
+ * @param {string} search - Search query
+ * @param {number} page - Page number (default: 1)
+ * @param {number} limit - Number of items per page (default: 20)
+ * @param {number|null} minPrice - Min price filter (optional)
+ * @param {number|null} maxPrice - Max price filter (optional)
+ * @param {string|null} categoryId - Category filter (optional)
+ * @returns {Promise<Object>} Response object with success, data array, pagination
+ */
+export const fetchProductSearch = async (search, page = 1, limit = 20, minPrice = null, maxPrice = null, categoryId = null) => {
+  const location = getStoredLocation();
+  const params = new URLSearchParams();
+  if (search) params.append('search', search);
+  if (page) params.append('page', page.toString());
+  if (limit) params.append('limit', limit.toString());
+  if (minPrice != null && minPrice !== '') params.append('minPrice', String(minPrice));
+  if (maxPrice != null && maxPrice !== '') params.append('maxPrice', String(maxPrice));
+  if (categoryId) params.append('categoryId', String(categoryId));
+  const url = `${API_BASE_URL}/product/search?${params.toString()}`;
+  const response = await axios.get(url, {
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'lat': location.lat.toString(),
+      'long': location.long.toString(),
+    },
+    withCredentials: false,
+    timeout: 15000,
+  });
+  return response.data;
+};
+
+/**
+ * Fetch products by category from the API (getProductsByCategory)
+ * @param {string} categoryId - Category ID
+ * @param {number} page - Page number (default: 1)
+ * @param {number} limit - Number of items per page (default: 20)
+ * @param {string} search - Search query (default: '')
+ * @returns {Promise<Object>} Response object with success, data array, pagination
+ */
+export const fetchProductsByCategory = async (categoryId, page = 1, limit = 20, search = '') => {
+  const location = getStoredLocation();
+  const params = new URLSearchParams();
+  if (page) params.append('page', page.toString());
+  if (limit) params.append('limit', limit.toString());
+  if (search) params.append('search', search);
+  const query = params.toString();
+  const url = `${API_BASE_URL}/product/getProductsByCategory/${encodeURIComponent(categoryId)}${query ? `?${query}` : ''}`;
+
+  const response = await axios.get(url, {
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'lat': location.lat.toString(),
+      'long': location.long.toString(),
+    },
+    withCredentials: false,
+    timeout: 15000,
+  });
+  return response.data;
+};
+
+/**
+ * Fetch products from the API (uses getProductsByCategory when categoryId is set)
+ * @param {number|string} categoryId - Category ID to filter products
  * @param {number} page - Page number (default: 1)
  * @param {number} limit - Number of items per page (default: 20)
  * @param {string} search - Search query (default: '')
@@ -643,19 +706,18 @@ const getExternalApiUrl = (level, params = {}) => {
  */
 export const fetchProducts = async (categoryId = null, page = 1, limit = 20, search = '') => {
   try {
+    if (categoryId != null && categoryId !== '') {
+      return await fetchProductsByCategory(String(categoryId), page, limit, search);
+    }
+
     const baseUrl = `${API_BASE_URL}/product/getAll`;
     const params = new URLSearchParams();
-    
-    if (categoryId) {
-      params.append('category', categoryId.toString());
-    }
     params.append('page', page.toString());
     params.append('limit', limit.toString());
     params.append('search', search);
-    
     const url = `${baseUrl}?${params.toString()}`;
     const location = getStoredLocation();
-    
+
     const response = await axios.get(url, {
       headers: {
         'Content-Type': 'application/json',

@@ -22,6 +22,54 @@ const PaymentSuccess = () => {
   useEffect(() => {
     const stateOrderId = location.state?.orderId;
     const stateDetails = location.state?.orderDetails;
+    // intentId: from state (COD) or URL/sessionStorage (UPI) — send to confirm payment API in both cases
+    const intentId =
+      location.state?.intentId ||
+      location.state?.orderDetails?.intentId ||
+      searchParams.get("razorpay_payment_link_id") ||
+      searchParams.get("intentId") ||
+      searchParams.get("intent_id") ||
+      sessionStorage.getItem("pendingIntentId") ||
+      "";
+
+    const verify = async () => {
+      try {
+        const token = getAccessToken();
+        const res = token
+          ? await verifyOrderPayment(intentId)
+          : await verifyOrderPaymentGuest(intentId);
+
+        const ok = res?.status === 200 || res?.success === true;
+        const order = res?.order ?? res?.data ?? res;
+        const id = res?.orderId ?? order?.orderId ?? order?._id ?? stateOrderId ?? intentId;
+        if (ok && id) {
+          sessionStorage.removeItem("pendingIntentId");
+          sessionStorage.removeItem("pendingOrderId");
+          if (!token) {
+            dispatch(setGuestCart([]));
+            window.dispatchEvent(new CustomEvent("cartUpdated", { detail: { cartCount: 0 } }));
+          } else {
+            window.dispatchEvent(new CustomEvent("cartUpdated", { detail: { cartCount: 0 } }));
+          }
+          dispatch(loadCartItems());
+          setOrderDetails(order || stateDetails);
+          setOrderId(id);
+          setStatus("success");
+        } else {
+          setStatus("failure");
+          setError(res?.message || "Payment verification failed.");
+        }
+      } catch (err) {
+        setStatus("failure");
+        setError(err?.message || "Payment verification failed. Please try again.");
+      }
+    };
+
+    if (intentId) {
+      verify();
+      return;
+    }
+
     if (stateOrderId) {
       setOrderId(stateOrderId);
       if (stateDetails) setOrderDetails(stateDetails);
@@ -36,54 +84,8 @@ const PaymentSuccess = () => {
       return;
     }
 
-    // Razorpay redirect: intentId from backend callback URL (razorpay_payment_link_id) or sessionStorage
-    const intentId =
-      searchParams.get("razorpay_payment_link_id") ||
-      searchParams.get("intentId") ||
-      searchParams.get("intent_id") ||
-      sessionStorage.getItem("pendingIntentId") ||
-      "";
-
-    if (!intentId) {
-      setStatus("failure");
-      setError("Invalid return. No payment intent found.");
-      return;
-    }
-
-    const verify = async () => {
-      try {
-        const token = getAccessToken();
-        const res = token
-          ? await verifyOrderPayment(intentId)
-          : await verifyOrderPaymentGuest(intentId);
-
-        const ok = res?.status === 200 || res?.success === true;
-        const order = res?.order ?? res?.data ?? res;
-        const id = res?.orderId ?? order?.orderId ?? intentId;
-        if (ok && id) {
-          sessionStorage.removeItem("pendingIntentId");
-          sessionStorage.removeItem("pendingOrderId");
-          if (!token) {
-            dispatch(setGuestCart([]));
-            window.dispatchEvent(new CustomEvent("cartUpdated", { detail: { cartCount: 0 } }));
-          } else {
-            window.dispatchEvent(new CustomEvent("cartUpdated", { detail: { cartCount: 0 } }));
-          }
-          dispatch(loadCartItems());
-          setOrderDetails(order);
-          setOrderId(id);
-          setStatus("success");
-        } else {
-          setStatus("failure");
-          setError(res?.message || "Payment verification failed.");
-        }
-      } catch (err) {
-        setStatus("failure");
-        setError(err?.message || "Payment verification failed. Please try again.");
-      }
-    };
-
-    verify();
+    setStatus("failure");
+    setError("Invalid return. No payment intent or order found.");
   }, [searchParams, location.state, dispatch]);
 
   const details = orderDetails || {};
