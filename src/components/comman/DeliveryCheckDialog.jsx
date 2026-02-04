@@ -98,6 +98,7 @@ export const DeliveryCheckDialog = ({ open, onClose, initialLocationLabel = "" }
         detail: { lat: placeDetails.lat, long: placeDetails.long, label: placeDetails.address }
       }));
       onClose();
+      window.location.reload();
     } catch (error) {
       console.error('Error getting place details:', error);
       setServiceMessage({ success: false, message: 'Something went wrong. Please try again.' });
@@ -153,6 +154,7 @@ export const DeliveryCheckDialog = ({ open, onClose, initialLocationLabel = "" }
         detail: { lat: location.lat, long: location.long, label: addressLabel }
       }));
       onClose();
+      window.location.reload();
     } catch (error) {
       console.error('Error getting current location:', error);
       setServiceMessage({ success: false, message: 'Something went wrong. Please try again.' });

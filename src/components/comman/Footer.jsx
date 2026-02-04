@@ -328,7 +328,7 @@ export const Footer = () => {
                   lineHeight: 1.6,
                 }}
               >
-                Blending Asian traditions with modern flavors, Danbro crafts
+                Blending Asian traditions with modern flavors, Danbro crafts 
                 exquisite, world-class bakery delights, from wedding cakes to
                 innovative baked mithai, ensuring every celebration is
                 unforgettable.
@@ -389,6 +389,7 @@ export const Footer = () => {
                   key={index}
                   to={item.link}
                   className="text-decoration-none"
+                  style={{ textDecoration: "none" }}
                   onClick={(e) => handleLinkClick(e, item.link)}
                 >
                   <CustomText
@@ -429,6 +430,7 @@ export const Footer = () => {
                   key={index}
                   to={item?.link}
                   className="text-decoration-none"
+                  style={{ textDecoration: "none" }}
                   onClick={(e) => handleLinkClick(e, item.link)}
                 >
                   <CustomText
