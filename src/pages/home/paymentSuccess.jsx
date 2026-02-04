@@ -52,7 +52,11 @@ const PaymentSuccess = () => {
             window.dispatchEvent(new CustomEvent("cartUpdated", { detail: { cartCount: 0 } }));
           }
           dispatch(loadCartItems());
-          setOrderDetails(order || stateDetails);
+          setOrderDetails({
+            ...(order || stateDetails || {}),
+            message: res?.message,
+            receipt: order?.receipt ?? res?.receipt,
+          });
           setOrderId(id);
           setStatus("success");
         } else {
@@ -90,7 +94,12 @@ const PaymentSuccess = () => {
 
   const details = orderDetails || {};
   const pricing = details.pricing || {};
-  const amount = pricing.grandTotal ?? details.amount ?? details.totalAmount ?? details.amountPaid;
+  const amount =
+    details.total_charges ??
+    pricing.grandTotal ??
+    details.amount ??
+    details.totalAmount ??
+    details.amountPaid;
   const paymentId =
     details.paymentId ??
     details.razorpay_payment_id ??
@@ -99,6 +108,7 @@ const PaymentSuccess = () => {
   const currency = details.currency ?? "INR";
   const orderItems = details.items || [];
   const deliveryAddress = details.deliveryAddress || {};
+  const isCOD = (details.paymentMode || "").toString().toUpperCase() === "COD";
 
   return (
     <Box sx={{ minHeight: "60vh", py: 6, px: 2, mb: 4 }}>
@@ -115,11 +125,14 @@ const PaymentSuccess = () => {
         {status === "success" && (
           <Box sx={{ textAlign: "center" }}>
             <CheckCircleIcon sx={{ fontSize: 72, color: "#2e7d32", mb: 2 }} />
-            <CustomText variant="h5" sx={{ fontWeight: 700, color: "#2c2c2c", mb: 2 }}>
-              Payment Completed
+            <CustomText variant="h5" sx={{ fontWeight: 700, color: "#2c2c2c", mb: 1 }}>
+              {isCOD ? "Order Placed" : "Payment Completed"}
             </CustomText>
             <CustomText sx={{ fontSize: 15, color: "#666", mb: 3 }}>
-              You have successfully paid {currency} {amount != null ? Number(amount).toFixed(2) : "—"}
+              {details.message ||
+                (isCOD
+                  ? `Order confirmed. Pay ₹${amount != null ? Number(amount).toFixed(2) : "—"} on delivery.`
+                  : `You have successfully paid ${currency} ${amount != null ? Number(amount).toFixed(2) : "—"}`)}
             </CustomText>
 
             <Paper
@@ -150,14 +163,14 @@ const PaymentSuccess = () => {
                 </>
               )}
               {details.paymentMode && (
-                <CustomText sx={{ fontSize: 12, color: "#888", textTransform: "uppercase", letterSpacing: 0.5, mb: 0.5 }}>
-                  Payment Mode
-                </CustomText>
-              )}
-              {details.paymentMode && (
-                <CustomText sx={{ fontSize: 14, fontWeight: 500, color: "#444" }}>
-                  {details.paymentMode}
-                </CustomText>
+                <>
+                  <CustomText sx={{ fontSize: 12, color: "#888", textTransform: "uppercase", letterSpacing: 0.5, mb: 0.5 }}>
+                    Payment Mode
+                  </CustomText>
+                  <CustomText sx={{ fontSize: 14, fontWeight: 500, color: "#444" }}>
+                    {details.paymentMode}
+                  </CustomText>
+                </>
               )}
             </Paper>
             {orderItems.length > 0 && (
@@ -177,18 +190,44 @@ const PaymentSuccess = () => {
                 </CustomText>
                 {orderItems.map((item, idx) => (
                   <Box key={idx} sx={{ display: "flex", justifyContent: "space-between", py: 0.5, fontSize: 13 }}>
-                    <CustomText sx={{ fontSize: 13 }}>{item.name} × {item.quantity}</CustomText>
-                    <CustomText sx={{ fontSize: 13, fontWeight: 600 }}>₹{Number(item.total).toFixed(2)}</CustomText>
-                  </Box>
-                ))}
-                {pricing.grandTotal != null && (
-                  <Box sx={{ borderTop: "1px solid #eee", mt: 1, pt: 1, display: "flex", justifyContent: "space-between" }}>
-                    <CustomText sx={{ fontSize: 14, fontWeight: 600 }}>Total</CustomText>
-                    <CustomText sx={{ fontSize: 14, fontWeight: 600, color: "var(--themeColor)" }}>
-                      ₹{Number(pricing.grandTotal).toFixed(2)}
+                    <CustomText sx={{ fontSize: 13 }}>
+                      {item.name || item.product?.name} × {item.quantity}
+                    </CustomText>
+                    <CustomText sx={{ fontSize: 13, fontWeight: 600 }}>
+                      ₹{Number(item.total ?? (item.rate != null && item.quantity != null ? item.rate * item.quantity : 0)).toFixed(2)}
                     </CustomText>
                   </Box>
+                ))}
+                {(details.order_subtotal != null || details.item_taxes != null || details.discount != null) && (
+                  <Box sx={{ borderTop: "1px solid #eee", mt: 1, pt: 1, display: "flex", flexDirection: "column", gap: 0.5 }}>
+                    {details.order_subtotal != null && (
+                      <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+                        <CustomText sx={{ fontSize: 13, color: "#666" }}>Subtotal</CustomText>
+                        <CustomText sx={{ fontSize: 13 }}>₹{Number(details.order_subtotal).toFixed(2)}</CustomText>
+                      </Box>
+                    )}
+                    {(details.order_level_total_taxes ?? details.item_taxes) != null && (
+                      <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+                        <CustomText sx={{ fontSize: 13, color: "#666" }}>Tax</CustomText>
+                        <CustomText sx={{ fontSize: 13 }}>
+                          ₹{Number(details.order_level_total_taxes ?? details.item_taxes).toFixed(2)}
+                        </CustomText>
+                      </Box>
+                    )}
+                    {details.discount != null && Number(details.discount) > 0 && (
+                      <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+                        <CustomText sx={{ fontSize: 13, color: "#666" }}>Discount</CustomText>
+                        <CustomText sx={{ fontSize: 13, color: "#2e7d32" }}>- ₹{Number(details.discount).toFixed(2)}</CustomText>
+                      </Box>
+                    )}
+                  </Box>
                 )}
+                <Box sx={{ borderTop: "1px solid #eee", mt: 1, pt: 1, display: "flex", justifyContent: "space-between" }}>
+                  <CustomText sx={{ fontSize: 14, fontWeight: 600 }}>Total</CustomText>
+                  <CustomText sx={{ fontSize: 14, fontWeight: 600, color: "var(--themeColor)" }}>
+                    ₹{Number(details.total_charges ?? pricing.grandTotal ?? amount ?? 0).toFixed(2)}
+                  </CustomText>
+                </Box>
               </Paper>
             )}
             {deliveryAddress && (deliveryAddress.name || deliveryAddress.city) && (
