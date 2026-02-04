@@ -128,6 +128,17 @@ export const ProductDetails = () => {
     };
   }, [selectOpen]);
 
+  // Reset product-specific state when navigating to a different product (id change)
+  useEffect(() => {
+    if (!id) return;
+    setQuantity(1);
+    setSelectedImage(0);
+    setTab("cake");
+    setProductWeight("500g");
+    setCartMessage(null);
+    setCakeMessage("");
+  }, [id]);
+
   useEffect(() => {
     const loadProduct = async () => {
       try {

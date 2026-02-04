@@ -531,7 +531,7 @@ export const AddressSection = ({
           </CustomText>
         </DialogTitle>
         <DialogContent sx={{ pt: 2, pb: 1.5 }}>
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mt:1 }}>
             <Autocomplete
               freeSolo
               options={addressSearchOptions}

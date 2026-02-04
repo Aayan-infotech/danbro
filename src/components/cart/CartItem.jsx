@@ -41,47 +41,11 @@ export const CartItem = ({
         },
       }}
     >
-      <CardContent sx={{ p: { xs: 1.5, md: 2.5 } }}>
-        <Box
-          sx={{
-            display: "flex",
-            gap: { xs: 2, md: 3 },
-            flexDirection: { xs: "column", sm: "row" },
-          }}
-        >
-          {/* Clickable: Product Image + Name/Price → Product Details */}
-          <Box
-            component={Link}
-            to={`/products/${productId}`}
-            sx={{
-              display: "flex",
-              flex: 1,
-              minWidth: 0,
-              textDecoration: "none",
-              color: "inherit",
-              cursor: "pointer",
-            }}
-          >
-            <Box
-              component="span"
-              sx={{
-                display: "flex",
-                gap: { xs: 2, md: 3 },
-                flex: 1,
-                minWidth: 0,
-                flexDirection: { xs: "column", sm: "row" },
-                "&:hover": { opacity: 0.9 },
-              }}
-            >
-              <Box
-                sx={{
-                  width: { xs: "100%", sm: 110 },
-                  height: { xs: 180, sm: 110 },
-                  borderRadius: { xs: 2, md: 2 },
-                  overflow: "hidden",
-                  flexShrink: 0,
-                }}
-              >
+      <CardContent>
+        <Box sx={{ display: "flex", gap: { xs: 2, md: 3 }, flexDirection: { xs: "column", sm: "row" }, }}>
+          <Box component={Link} to={`/products/${productId}`} sx={{ display: "flex", flex: 1, minWidth: 0, textDecoration: "none", color: "inherit", cursor: "pointer", }}>
+            <Box component="span" sx={{ display: "flex", gap: { xs: 2, md: 3 }, flex: 1, minWidth: 0, flexDirection: { xs: "column", sm: "row" }, "&:hover": { opacity: 0.9 }, }}>
+              <Box sx={{ width: { xs: "100%", sm: 110 }, height: { xs: 180, sm: 110 }, borderRadius: { xs: 2, md: 2 }, overflow: "hidden", flexShrink: 0, }}>
                 <img
                   src={
                     (item.images && Array.isArray(item.images) && item.images.length > 0 && (item.images[0].url || item.images[0])) ||
@@ -98,32 +62,13 @@ export const CartItem = ({
                 />
               </Box>
               <Box sx={{ flex: 1, minWidth: 0 }}>
-                <CustomText
-                  sx={{
-                    fontSize: { xs: 16, md: 18 },
-                    fontWeight: 600,
-                    color: "#2c2c2c",
-                    mb: 0.5,
-                  }}
-                >
+                <CustomText sx={{ fontSize: { xs: 16, md: 18 }, fontWeight: 600, color: "#2c2c2c", mb: 0.5, }}>
                   {item.name || item.product?.name || "Product"}
                 </CustomText>
-                <CustomText
-                  sx={{
-                    fontSize: { xs: 12, md: 14 },
-                    color: "#666",
-                    mb: { xs: 1, md: 1.5 },
-                  }}
-                >
+                <CustomText sx={{ fontSize: { xs: 12, md: 14 }, color: "#666", mb: { xs: 1, md: 1.5 }, }}>
                   Weight: {item.weight ?? item.product?.weight ?? "N/A"}
                 </CustomText>
-                <CustomText
-                  sx={{
-                    fontSize: { xs: 18, md: 20 },
-                    fontWeight: 700,
-                    color: "var(--themeColor)",
-                  }}
-                >
+                <CustomText sx={{ fontSize: { xs: 18, md: 20 }, fontWeight: 700, color: "var(--themeColor)", }}>
                   ₹{
                     (item.lineTotal != null && item.lineTotal > 0)
                       ? Number(item.lineTotal).toFixed(2)
@@ -140,24 +85,8 @@ export const CartItem = ({
 
           {/* Quantity Controls */}
           <Box sx={{ display: "flex", flexDirection: "column", justifyContent: "space-between", flexShrink: 0 }}>
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                mt: { xs: 2, sm: 0 },
-              }}
-            >
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 1,
-                  border: "1px solid #ddd",
-                  borderRadius: 2,
-                  p: 0.5,
-                }}
-              >
+            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mt: { xs: 2, sm: 0 }, }}>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1, border: "1px solid #ddd", borderRadius: 2, p: 0.5, }}>
                 <IconButton
                   size="small"
                   onClick={() => updateQuantity(productId, -1, item.rawWeight ?? item.weight)}
@@ -174,14 +103,7 @@ export const CartItem = ({
                     <RemoveIcon sx={{ fontSize: { xs: 18, md: 20 } }} />
                   )}
                 </IconButton>
-                <CustomText
-                  sx={{
-                    minWidth: { xs: 30, md: 40 },
-                    textAlign: "center",
-                    fontSize: { xs: 14, md: 16 },
-                    fontWeight: 600,
-                  }}
-                >
+                <CustomText sx={{ minWidth: { xs: 30, md: 40 }, textAlign: "center", fontSize: { xs: 14, md: 16 }, fontWeight: 600, }}>
                   {item.quantity}
                 </CustomText>
                 <IconButton

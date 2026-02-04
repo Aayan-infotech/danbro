@@ -196,8 +196,8 @@ export const Cart = () => {
 
         orderResponse = await initiateOrderGuest({
           cart: cartItems?.map((item) => ({
-            productId: item.productId || item.id,
-            quantity: Number(item.quantity) || 1,
+            productId: item?.productId || item?.id,
+            quantity: Number(item?.quantity) || 1,
           })),
           deliveryAddress: {
             name: someoneElseData?.name,
@@ -353,8 +353,8 @@ export const Cart = () => {
 
     try {
       const cart = cartItems.map((item) => ({
-        productId: item.productId || item.id,
-        quantity: Number(item.quantity) || 1,
+        productId: item?.productId || item?.id,
+        quantity: Number(item?.quantity) || 1,
       }));
       const res = await validateCoupon(couponCode.trim(), cart);
 
@@ -392,18 +392,18 @@ export const Cart = () => {
 
   // Calculate subtotal from cart items (guest items have lineTotal = rate * qty already)
   const subtotal = cartItems?.reduce((sum, item) => {
-    if (item.lineTotal != null && !isNaN(item.lineTotal)) {
-      return sum + Number(item.lineTotal);
+    if (item?.lineTotal != null && !isNaN(item?.lineTotal)) {
+      return sum + Number(item?.lineTotal);
     }
     let itemPrice = 0;
-    if (Array.isArray(item.price) && item.price.length > 0) {
-      itemPrice = item.price[0].rate || item.price[0].mrp || 0;
-    } else if (typeof item.price === "object" && item.price && (item.price.rate != null || item.price.mrp != null)) {
-      itemPrice = Number(item.price.rate) || Number(item.price.mrp) || 0;
-    } else if (typeof item.price === "number") {
-      itemPrice = item.price;
+    if (Array.isArray(item?.price) && item?.price.length > 0) {
+      itemPrice = item?.price[0].rate || item?.price[0].mrp || 0;
+    } else if (typeof item?.price === "object" && item?.price && (item?.price.rate != null || item?.price.mrp != null)) {
+      itemPrice = Number(item?.price.rate) || Number(item?.price.mrp) || 0;
+    } else if (typeof item?.price === "number") {
+      itemPrice = item?.price;
     }
-    const quantity = typeof item.quantity === "number" ? item.quantity : parseInt(item.quantity, 10) || 0;
+    const quantity = typeof item?.quantity === "number" ? item?.quantity : parseInt(item?.quantity, 10) || 0;
     return sum + itemPrice * quantity;
   }, 0);
 
@@ -441,17 +441,8 @@ export const Cart = () => {
       }}
     >
       <Container sx={{ px: { xs: 0, sm: 2, md: 3 }, maxWidth: "100%", width: "100%" }}>
-        {/* Header */}
-        <Box sx={{ mb: { xs: 2, md: 3 } }}>
-          <CustomText
-            variant="h4"
-            sx={{
-              fontSize: { xs: 22, md: 28 },
-              fontWeight: 700,
-              color: "var(--themeColor)",
-              mb: 0.5,
-            }}
-          >
+        <Box sx={{ mb: { xs: 0.5, md: 1 } }}>
+          <CustomText variant="h4" sx={{ fontSize: { xs: 22, md: 28 }, fontWeight: 700, color: "var(--themeColor)", }}>
             Shopping Cart
           </CustomText>
           <CustomText sx={{ fontSize: { xs: 13, md: 15 }, color: "#666" }}>
@@ -480,12 +471,11 @@ export const Cart = () => {
           <EmptyCart navigate={navigate} />
         ) : (
           <Grid container spacing={{ xs: 2, md: 2 }}>
-            {/* Left Column - Cart Items */}
             <Grid size={{ xs: 12, md: 8 }} sx={{ order: { xs: 1, md: 1 }, minWidth: 0 }}>
               <Box sx={{ display: "flex", flexDirection: "column", gap: { xs: 1.5, md: 2 }, minWidth: 0 }}>
                 {cartItems?.map((item) => (
                   <CartItem
-                    key={item.productId || item._id || item.id}
+                    key={item?.productId || item?._id || item?.id}
                     item={item}
                     updatingItems={updatingItems}
                     updatingAction={updatingAction}
@@ -495,8 +485,6 @@ export const Cart = () => {
                   />
                 ))}
               </Box>
-
-              {/* Continue Shopping & Clear Cart Buttons */}
               <Box sx={{ mt: { xs: 2, md: 3 }, display: "flex", gap: 1.5, flexWrap: "wrap" }}>
                 <Button
                   variant="outlined"
