@@ -12,7 +12,6 @@ import {
 } from "@mui/icons-material";
 import { useLocation } from "react-router-dom";
 import api from "../../utils/api";
-import { clearAuthCookies } from "../../utils/cookies";
 import { ProfileSidebar } from "../../components/user/ProfileSidebar";
 import { AccountDetailsTab } from "../../components/user/AccountDetailsTab";
 import { DashboardTab } from "../../components/user/DashboardTab";
@@ -22,6 +21,7 @@ import { SavedAddressesTab } from "../../components/user/SavedAddressesTab";
 import { MyCouponsTab } from "../../components/user/MyCouponsTab";
 import { WishlistTab } from "../../components/user/WishlistTab";
 import blankImage from "../../assets/blankimage.png";
+import { getMyOrders, getRecentlyViewed } from "../../utils/apiService";
 
 export const UserProfile = () => {
   const theme = useTheme();
@@ -32,29 +32,19 @@ export const UserProfile = () => {
     location.state?.activeTab || "dashboard"
   );
 
-  const favoriteItems = [
-    { id: 1, name: "Chocolate Cake", image: blankImage, price: "₹450" },
-    { id: 2, name: "Red Velvet Cake", image: blankImage, price: "₹550" },
-    { id: 3, name: "Black Forest Cake", image: blankImage, price: "₹500" },
-    { id: 4, name: "Vanilla Cake", image: blankImage, price: "₹400" },
-  ];
-
-  const orders = [
-    { id: "#ORD-001", date: "2024-01-15", items: 3, total: "₹1,250", status: "Delivered" },
-    { id: "#ORD-002", date: "2024-01-10", items: 2, total: "₹850", status: "Out for Delivery" },
-    { id: "#ORD-003", date: "2024-01-05", items: 5, total: "₹2,100", status: "Processing" },
-    { id: "#ORD-004", date: "2023-12-28", items: 1, total: "₹450", status: "Delivered" },
-  ];
+  const [recentlyViewedItems, setRecentlyViewedItems] = useState([]);
+  const [recentOrder, setRecentOrder] = useState(null);
+  const [recentOrderLoading, setRecentOrderLoading] = useState(false);
+  const [orderHistoryList, setOrderHistoryList] = useState([]);
+  const [orderHistoryTotal, setOrderHistoryTotal] = useState(0);
+  const [orderHistoryPage, setOrderHistoryPage] = useState(1);
+  const orderHistoryLimit = 5;
+  const [orderHistoryLoading, setOrderHistoryLoading] = useState(false);
 
   const downloads = [
     { id: 1, name: "Invoice #ORD-001", date: "2024-01-15", type: "PDF" },
     { id: 2, name: "Invoice #ORD-002", date: "2024-01-10", type: "PDF" },
     { id: 3, name: "Receipt #ORD-003", date: "2024-01-05", type: "PDF" },
-  ];
-
-  const addresses = [
-    { id: 1, type: "Home", name: "Aditya Kumar", phone: "+91 9876543210", address: "123, Main Street, Lucknow, UP - 226001", isDefault: true },
-    { id: 2, type: "Work", name: "Aditya Kumar", phone: "+91 9876543210", address: "456, Business Park, Kanpur, UP - 208001", isDefault: false },
   ];
 
   const [coupons, setCoupons] = useState([]);
@@ -106,6 +96,138 @@ export const UserProfile = () => {
 
     fetchUserProfile();
   }, []);
+
+  // Fetch recent order for dashboard (single latest order)
+  useEffect(() => {
+    if (activeTab !== "dashboard") return;
+    const fetchRecentOrder = async () => {
+      setRecentOrderLoading(true);
+      try {
+        const res = await getMyOrders(1, 1);
+        const list = res?.data ?? res?.orders ?? res?.result ?? [];
+        const arr = Array.isArray(list) ? list : [];
+        setRecentOrder(arr[0] ?? null);
+      } catch (e) {
+        console.error("Error fetching recent order:", e);
+        setRecentOrder(null);
+      } finally {
+        setRecentOrderLoading(false);
+      }
+    };
+    fetchRecentOrder();
+  }, [activeTab]);
+
+  // Fetch order history (paginated, 5 per page)
+  useEffect(() => {
+    if (activeTab !== "order-history") return;
+    const fetchOrderHistory = async () => {
+      setOrderHistoryLoading(true);
+      try {
+        const res = await getMyOrders(orderHistoryPage, orderHistoryLimit);
+        const list = res?.data ?? res?.orders ?? res?.result ?? [];
+        const count = res?.count ?? res?.total ?? (Array.isArray(list) ? list.length : 0);
+        setOrderHistoryList(Array.isArray(list) ? list : []);
+        setOrderHistoryTotal(Number(count) || 0);
+      } catch (e) {
+        console.error("Error fetching order history:", e);
+        setOrderHistoryList([]);
+        setOrderHistoryTotal(0);
+      } finally {
+        setOrderHistoryLoading(false);
+      }
+    };
+    fetchOrderHistory();
+  }, [activeTab, orderHistoryPage]);
+
+  // Fetch recently viewed products
+  useEffect(() => {
+    const fetchRecentlyViewed = async () => {
+      try {
+        const res = await getRecentlyViewed();
+        const list =
+          res?.data?.products ||
+          res?.products ||
+          res?.data ||
+          res?.result ||
+          [];
+
+        const mapped = (Array.isArray(list) ? list : []).map((p) => {
+          const pid = p?._id || p?.productId || p?.id;
+          const img =
+            (Array.isArray(p?.images) && p.images[0]) ||
+            p?.image ||
+            p?.thumbnail ||
+            blankImage;
+          const priceVal =
+            p?.salePrice ?? p?.discountedPrice ?? p?.price ?? p?.mrp ?? p?.rate;
+          return {
+            id: pid,
+            name: p?.name || p?.productName || "—",
+            image: img || blankImage,
+            price: priceVal != null ? `₹${priceVal}` : "—",
+          };
+        });
+
+        setRecentlyViewedItems(mapped);
+      } catch (e) {
+        console.error("Error fetching recently viewed:", e);
+        setRecentlyViewedItems([]);
+      }
+    };
+
+    fetchRecentlyViewed();
+  }, []);
+
+  const getOrderIdLabel = (o) => o?.orderId || o?._id || o?.id || "";
+  const getOrderStatusLabel = (o) => {
+    const raw = (o?.order_state || o?.status || "").toString();
+    if (!raw) return "—";
+    const map = {
+      placed: "Placed",
+      confirmed: "Confirmed",
+      preparing: "Preparing",
+      ready: "Ready",
+      dispatched: "Dispatched",
+      delivered: "Delivered",
+      cancelled: "Cancelled",
+    };
+    return map[raw.toLowerCase()] || raw;
+  };
+  const getOrderDateLabel = (o) => {
+    const d = o?.createdAt || o?.created_at || o?.date;
+    if (!d) return "—";
+    try {
+      return new Date(d).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+    } catch {
+      return String(d);
+    }
+  };
+  const getOrderItemsCount = (o) => {
+    if (Array.isArray(o?.items)) return o.items.length;
+    if (Array.isArray(o?.cart)) return o.cart.length;
+    return o?.itemsCount || 0;
+  };
+  const getOrderTotalLabel = (o) => {
+    const total =
+      o?.total_charges ??
+      o?.totalAmount ??
+      o?.pricing?.grandTotal ??
+      o?.amountPaid ??
+      o?.amount ??
+      o?.total;
+    return total != null && !Number.isNaN(Number(total)) ? `₹${Number(total).toFixed(2)}` : "—";
+  };
+
+  const recentOrderForDashboard = recentOrder
+    ? {
+        id: getOrderIdLabel(recentOrder) ? `#${getOrderIdLabel(recentOrder)}` : "—",
+        rawId: getOrderIdLabel(recentOrder) || "",
+        date: getOrderDateLabel(recentOrder),
+        items: getOrderItemsCount(recentOrder),
+        total: getOrderTotalLabel(recentOrder),
+        status: getOrderStatusLabel(recentOrder),
+      }
+    : null;
 
   // Fetch coupons from API
   const fetchCoupons = async () => {
@@ -359,20 +481,31 @@ export const UserProfile = () => {
             <Box sx={{ width: "100%" }}>
               {activeTab === "dashboard" && (
                 <DashboardTab
-                  favoriteItems={favoriteItems}
+                  favoriteItems={recentlyViewedItems}
                   setActiveTab={setActiveTab}
                   isMobile={isMobile}
                   userProfile={userProfile}
+                  recentOrder={recentOrderForDashboard}
+                  ordersLoading={recentOrderLoading}
                 />
               )}
 
               {activeTab === "order-history" && (
-                <OrderHistoryTab orders={orders} />
+                <OrderHistoryTab
+                  orders={orderHistoryList}
+                  page={orderHistoryPage}
+                  totalCount={orderHistoryTotal}
+                  limit={orderHistoryLimit}
+                  onPageChange={setOrderHistoryPage}
+                  loading={orderHistoryLoading}
+                />
               )}
 
+              {/* Downloads tab commented out
               {activeTab === "downloads" && (
                 <DownloadsTab downloads={downloads} />
               )}
+              */}
 
               {activeTab === "addresses" && (
                 <SavedAddressesTab />

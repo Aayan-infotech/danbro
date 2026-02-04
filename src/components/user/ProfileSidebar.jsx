@@ -18,7 +18,7 @@ import { CircularProgress } from "@mui/material";
 const menuItems = [
   { id: "dashboard", label: "Dashboard", icon: <DashboardIcon /> },
   { id: "order-history", label: "Order History", icon: <HistoryIcon /> },
-  { id: "downloads", label: "Downloads", icon: <DownloadIcon /> },
+  // { id: "downloads", label: "Downloads", icon: <DownloadIcon /> },
   { id: "addresses", label: "Saved Addresses", icon: <LocationOnIcon /> },
   { id: "account", label: "Account Details", icon: <PersonIcon /> },
   { id: "coupons", label: "My Coupons", icon: <LocalOfferIcon /> },

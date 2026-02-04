@@ -39,7 +39,7 @@ import {
 } from "@mui/icons-material";
 import { useNavigate, useParams } from "react-router-dom";
 import { useMediaQuery, useTheme } from "@mui/material";
-import { fetchProducts, fetchProductById } from "../../utils/apiService";
+import { addToRecentlyViewed, fetchProducts, fetchProductById } from "../../utils/apiService";
 import { useItemCategories } from "../../hooks/useItemCategories";
 import { useHomeLayout } from "../../hooks/useHomeLayout";
 import { addToCart } from "../../utils/cart";
@@ -140,6 +140,13 @@ export const ProductDetails = () => {
           return;
         }
         const productId = id;
+        const markRecentlyViewed = async () => {
+          try {
+            await addToRecentlyViewed(productId);
+          } catch {
+            // ignore (guest user / token missing / API failure)
+          }
+        };
 
         // OPTIMIZATION 1: Use direct API endpoint to get product by ID (fastest)
         try {
@@ -147,12 +154,14 @@ export const ProductDetails = () => {
           if (response?.success && response?.data) {
             setProduct(response.data);
             setProductWeight(response.data.weight || "500g");
+            markRecentlyViewed();
             setLoading(false);
             return;
           } else if (response?.data) {
             // Some APIs return data directly without success flag
             setProduct(response.data);
             setProductWeight(response.data.weight || "500g");
+            markRecentlyViewed();
             setLoading(false);
             return;
           }
@@ -176,6 +185,7 @@ export const ProductDetails = () => {
                   if (response?.success && response?.data) {
                     setProduct(response.data);
                     setProductWeight(response.data.weight || "500g");
+                    markRecentlyViewed();
                     setLoading(false);
                     return;
                   }
@@ -183,6 +193,7 @@ export const ProductDetails = () => {
                   // Use the product from homeLayout as fallback
                   setProduct(foundProduct);
                   setProductWeight(foundProduct.weight || "500g");
+                  markRecentlyViewed();
                   setLoading(false);
                   return;
                 }
@@ -205,6 +216,7 @@ export const ProductDetails = () => {
             if (foundProduct) {
               setProduct(foundProduct);
               setProductWeight(foundProduct.weight || "500g");
+              markRecentlyViewed();
               setLoading(false);
               return;
             }

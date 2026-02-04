@@ -399,6 +399,120 @@ export const trackOrder = async (orderId) => {
 };
 
 /**
+ * Get all orders for current user (no pagination)
+ * GET /api/order/getAllOrders (requires auth)
+ * @returns {Promise<any>} API response
+ */
+export const getAllOrders = async () => {
+  try {
+    const token = getAccessToken();
+    if (!token) throw new Error('Authentication required. Please login.');
+
+    const response = await axios.get(`${API_BASE_URL}/order/getAllOrders`, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      withCredentials: false,
+      timeout: 30000,
+    });
+    return response.data;
+  } catch (error) {
+    const message = error.response?.data?.message || error.response?.data?.error || error.message;
+    throw new Error(message || 'Failed to fetch orders.');
+  }
+};
+
+/**
+ * Get current user's orders with pagination
+ * GET /api/order/getMyOrders?page=1&limit=10 (requires auth)
+ * @param {number} page - 1-based page
+ * @param {number} limit - items per page
+ * @returns {Promise<any>} API response { data, count, ... }
+ */
+export const getMyOrders = async (page = 1, limit = 10) => {
+  try {
+    const token = getAccessToken();
+    if (!token) throw new Error('Authentication required. Please login.');
+
+    const params = new URLSearchParams({ page: String(page), limit: String(limit) });
+    const response = await axios.get(`${API_BASE_URL}/order/getMyOrders?${params.toString()}`, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      withCredentials: false,
+      timeout: 30000,
+    });
+    return response.data;
+  } catch (error) {
+    const message = error.response?.data?.message || error.response?.data?.error || error.message;
+    throw new Error(message || 'Failed to fetch orders.');
+  }
+};
+
+/**
+ * Add a product to recently viewed (requires auth)
+ * POST /api/product/addToRecentlyViewed/:productId
+ * @param {string} productId
+ * @returns {Promise<any>}
+ */
+export const addToRecentlyViewed = async (productId) => {
+  try {
+    const token = getAccessToken();
+    if (!token) throw new Error('Authentication required. Please login.');
+
+    const response = await axios.post(
+      `${API_BASE_URL}/product/addToRecentlyViewed/${productId}`,
+      {},
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        withCredentials: false,
+        timeout: 15000,
+      }
+    );
+
+    return response.data;
+  } catch (error) {
+    const message = error.response?.data?.message || error.response?.data?.error || error.message;
+    throw new Error(message || 'Failed to add recently viewed item.');
+  }
+};
+
+/**
+ * Get recently viewed products (requires auth)
+ * GET /api/product/getRecentlyViewed
+ * @returns {Promise<any>}
+ */
+export const getRecentlyViewed = async () => {
+  try {
+    const token = getAccessToken();
+    if (!token) throw new Error('Authentication required. Please login.');
+
+    const response = await axios.get(`${API_BASE_URL}/product/getRecentlyViewed`, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      withCredentials: false,
+      timeout: 20000,
+    });
+
+    return response.data;
+  } catch (error) {
+    const message = error.response?.data?.message || error.response?.data?.error || error.message;
+    throw new Error(message || 'Failed to fetch recently viewed items.');
+  }
+};
+
+/**
  * Get the API URL for category endpoint
  */
 const getApiUrl = () => {

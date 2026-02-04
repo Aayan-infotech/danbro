@@ -1,6 +1,6 @@
 import { Box, Fab } from "@mui/material";
 import { BrowserRouter, useLocation } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Provider } from "react-redux";
 import { store } from "./store/store";
 import { Footer } from "./components/comman/Footer";
@@ -25,6 +25,7 @@ const ScrollToTop = () => {
 const AppContent = () => {
   const { pathname } = useLocation();
   const [showDeliveryDialog, setShowDeliveryDialog] = useState(false);
+  const hasCheckedDeliveryDialog = useRef(false);
 
   // Hide Navbar on profile page
   const hideNavbar = pathname === "/profile" || pathname === "/user-profile";
@@ -38,15 +39,26 @@ const AppContent = () => {
     pathname === "/contact";
 
   useEffect(() => {
+    // Do not auto-open location dialog on payment result pages
+    const suppressAutoDialog = pathname === "/order-success" || pathname === "/order-failure";
+    if (suppressAutoDialog) {
+      setShowDeliveryDialog(false);
+      return;
+    }
+
+    // Run the auto-open check only once (on first non-suppressed route)
+    if (hasCheckedDeliveryDialog.current) return;
+    hasCheckedDeliveryDialog.current = true;
+
     // Check if location is already set
-    const hasLocation = localStorage.getItem('userLocation');
+    const hasLocation = localStorage.getItem("userLocation");
     const hasSeenDialog = localStorage.getItem("deliveryDialogShown");
-    
+
     // Show dialog if location is not set OR if user hasn't seen the dialog
     if (!hasLocation || !hasSeenDialog) {
       setShowDeliveryDialog(true);
     }
-  }, []);
+  }, [pathname]);
 
   useEffect(() => {
     const openDialog = () => setShowDeliveryDialog(true);

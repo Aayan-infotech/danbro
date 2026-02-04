@@ -217,6 +217,29 @@ const PaymentSuccess = () => {
               </Paper>
             )}
 
+            {details?.receipt?.pdfUrl && (
+              <Button
+                component="a"
+                href={details.receipt.pdfUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                download
+                variant="outlined"
+                sx={{
+                  borderColor: "var(--themeColor)",
+                  color: "var(--themeColor)",
+                  textTransform: "none",
+                  px: 3,
+                  py: 1.5,
+                  mr: 1.5,
+                  mb: 2,
+                  "&:hover": { borderColor: "var(--specialColor)", color: "var(--specialColor)" },
+                }}
+              >
+                Download receipt (PDF)
+              </Button>
+            )}
+
             <Button
               variant="contained"
               onClick={() => navigate("/track-order")}
