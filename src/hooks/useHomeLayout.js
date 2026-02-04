@@ -140,5 +140,8 @@ export const transformProduct = (apiProduct, categoryId) => {
     badge: 'New',
     badgeColor: '#FF9472',
     categoryId: categoryId,
+    courier: apiProduct.courier,
+    mrp: priceObj.mrp,
+    rate: priceObj.rate,
   };
 };

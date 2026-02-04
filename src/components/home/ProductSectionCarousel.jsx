@@ -409,6 +409,32 @@ export const ProductSectionCarousel = memo(({
                     </Box>
                   )}
 
+                  {/* Courier - top right corner */}
+                  {product?.courier != null && product?.courier !== "" && (
+                    <Box
+                      sx={{
+                        position: "absolute",
+                        top: 12,
+                        right: 12,
+                        bgcolor:
+                          product.courier === "Y" || product.courier === "y"
+                            ? "#2e7d32"
+                            : "#d32f2f",
+                        color: "#fff",
+                        px: 1.25,
+                        py: 0.5,
+                        borderRadius: 2,
+                        fontSize: 10,
+                        fontWeight: 600,
+                        textTransform: "none",
+                        boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
+                        zIndex: 2,
+                      }}
+                    >
+                      Courier: {product.courier === "Y" || product.courier === "y" ? "Yes" : "No"}
+                    </Box>
+                  )}
+
                   {/* Favorite Icon */}
                   <IconButton
                     onClick={(e) => handleWishlistToggle(e, product)}
@@ -491,6 +517,20 @@ export const ProductSectionCarousel = memo(({
                         >
                           {product?.originalPrice}
                         </CustomText>
+                      )}
+                      {(product?.mrp != null || product?.rate != null) && (
+                        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5, mt: 0.5 }}>
+                          {product?.mrp != null && (
+                            <CustomText sx={{ fontSize: 11, color: "#666", textTransform: "none" }}>
+                              MRP: ₹{Number(product.mrp).toFixed(2)}
+                            </CustomText>
+                          )}
+                          {product?.rate != null && (
+                            <CustomText sx={{ fontSize: 11, color: "#666", textTransform: "none" }}>
+                              Rate: ₹{Number(product.rate).toFixed(2)}
+                            </CustomText>
+                          )}
+                        </Box>
                       )}
                     </Box>
                     <IconButton

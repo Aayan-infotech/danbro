@@ -41,9 +41,7 @@ export const Footer = () => {
   const handleLinkClick = (e, path) => {
     e.preventDefault();
     e.stopPropagation();
-    // Navigate immediately - scroll will happen naturally
     navigate(path);
-    // Use requestAnimationFrame for non-blocking scroll
     requestAnimationFrame(() => {
       window.scrollTo({ top: 0, behavior: "smooth" });
     });
@@ -346,7 +344,7 @@ export const Footer = () => {
               >
                 OUR STORES
               </CustomText>
-              {ourStories.map((item, index) => (
+              {ourStories?.map((item, index) => (
                 <Link
                   key={index}
                   to={item.link}
@@ -426,10 +424,10 @@ export const Footer = () => {
               >
                 KNOW MORE
               </CustomText>
-              {knowMoreLinks.map((item, index) => (
+              {knowMoreLinks?.map((item, index) => (
                 <Link
                   key={index}
-                  to={item.link}
+                  to={item?.link}
                   className="text-decoration-none"
                   onClick={(e) => handleLinkClick(e, item.link)}
                 >
