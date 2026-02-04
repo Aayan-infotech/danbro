@@ -1,6 +1,5 @@
-import { Box, Container,  Grid, Card, CardContent, Button, Avatar } from "@mui/material";
+import { Box, Container, Grid, Card, CardContent, Button, Avatar } from "@mui/material";
 import { CustomText } from "../../components/comman/CustomText";
-import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import logo from "../../assets/logo.png";
 import { useEffect, useRef, useState } from "react";
 import blogHero from "../../assets/blog.png";
@@ -98,13 +97,13 @@ export const AboutUs = () => {
         </CustomText>
       </Box>
 
-      <Container  sx={{ py: { xs: 5, md: 0 }, px: { xs: 3, sm: 3, md: 4 } }}>
+      <Container sx={{ py: { xs: 2, md: 4 }, px: { xs: 3, sm: 3, md: 4 } }}>
         <CustomText align="center" sx={{ fontWeight: 700, color: "#FF9472", mb: { xs: 4, md: 5 }, fontSize: { xs: 20, sm: 24, md: 32 }, px: { xs: 0, md: 0 } }}>
           SOME WORDS ABOUT US
         </CustomText>
 
         <Grid container spacing={{ xs: 3, md: 3 }}>
-          {cardData.map((item, index) => (
+          {cardData?.map((item, index) => (
             <Grid size={{ xs: 12, sm: 6, md: 4 }} key={index}>
               <Card
                 onClick={() => setActive(index)}
@@ -133,12 +132,11 @@ export const AboutUs = () => {
         </Grid>
       </Container>
 
-      <Container  sx={{ px: { xs: 3, sm: 3, md: 4 }, py: { xs: 2, md: 0 } }}>
+      <Container sx={{ px: { xs: 3, sm: 3, md: 4 }, py: { xs: 2, md: 0 } }}>
         <Box
           sx={{
             p: { xs: 3.5, sm: 3, md: 5 },
             borderRadius: 4,
-            boxShadow: "0 4px 30px rgba(0,0,0,0.10)",
             position: "relative",
             overflow: "hidden",
             "&::before": {
@@ -175,13 +173,12 @@ export const AboutUs = () => {
       </Container>
 
       {/*================ FOUNDER SECTION =================*/}
-      <Box 
+      <Box
         ref={sectionRefs.founder}
-        sx={{ 
-          py: { xs: 8, md: 12 },
+        sx={{
+          py: { xs: 2, md: 6 },
           position: "relative",
           overflow: "hidden",
-          background: "linear-gradient(180deg, rgba(255,255,255,1) 0%, rgba(255,248,245,0.6) 50%, rgba(255,255,255,1) 100%)",
           "&::before": {
             content: '""',
             position: "absolute",
@@ -190,7 +187,6 @@ export const AboutUs = () => {
             width: "600px",
             height: "600px",
             borderRadius: "50%",
-            background: "radial-gradient(circle, rgba(255,148,114,0.12) 0%, transparent 70%)",
             filter: "blur(80px)",
             animation: "float 6s ease-in-out infinite",
             "@keyframes float": {
@@ -221,7 +217,7 @@ export const AboutUs = () => {
           <Box
             sx={{
               textAlign: "center",
-              mb: { xs: 6, md: 8 },
+              mb: { xs: 2, md: 4 },
               opacity: visibleSections.founder ? 1 : 0,
               transform: visibleSections.founder ? "translateY(0)" : "translateY(30px)",
               transition: "all 0.8s cubic-bezier(0.4, 0, 0.2, 1)",
@@ -247,25 +243,23 @@ export const AboutUs = () => {
             >
               <BusinessIcon sx={{ fontSize: { xs: 35, md: 45 }, color: "#FF9472" }} />
             </Box>
-            <CustomText 
-              sx={{ 
-                fontSize: { xs: 11, md: 13 }, 
-                fontWeight: 700, 
-                color: "#FF9472", 
+            <CustomText
+              sx={{
+                fontSize: { xs: 11, md: 13 },
+                fontWeight: 700,
+                color: "#FF9472",
                 textTransform: "uppercase",
                 letterSpacing: 3,
-                mb: 2,
               }}
             >
               Our Founder
             </CustomText>
-            <CustomText 
-              sx={{ 
-                fontSize: { xs: 32, sm: 42, md: 56 }, 
-                fontWeight: 800, 
+            <CustomText
+              sx={{
+                fontSize: { xs: 32, sm: 42, md: 56 },
+                fontWeight: 800,
                 color: "var(--themeColor)",
                 fontFamily: "'Playfair Display', serif",
-                mb: 2,
                 background: "linear-gradient(135deg, var(--themeColor) 0%, #7a2d3a 100%)",
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
@@ -341,11 +335,11 @@ export const AboutUs = () => {
                     }}
                   >
                     {founderImageError ? (
-                      <PersonIcon 
-                        sx={{ 
+                      <PersonIcon
+                        sx={{
                           fontSize: { xs: 110, md: 150 },
                           color: "rgba(255,148,114,0.4)",
-                        }} 
+                        }}
                       />
                     ) : (
                       <Box
@@ -401,10 +395,10 @@ export const AboutUs = () => {
               >
                 {/* Name and Title */}
                 <Box sx={{ mb: 4 }}>
-                  <CustomText 
-                    sx={{ 
-                      fontSize: { xs: 28, md: 38 }, 
-                      fontWeight: 800, 
+                  <CustomText
+                    sx={{
+                      fontSize: { xs: 28, md: 38 },
+                      fontWeight: 800,
                       color: "var(--themeColor)",
                       fontFamily: "'Playfair Display', serif",
                       mb: 1,
@@ -427,10 +421,10 @@ export const AboutUs = () => {
                         },
                       }}
                     />
-                    <CustomText 
-                      sx={{ 
-                        fontSize: { xs: 15, md: 18 }, 
-                        color: "#FF9472", 
+                    <CustomText
+                      sx={{
+                        fontSize: { xs: 15, md: 18 },
+                        color: "#FF9472",
                         fontWeight: 700,
                         textTransform: "uppercase",
                         letterSpacing: 2,
@@ -443,10 +437,10 @@ export const AboutUs = () => {
 
                 {/* Content */}
                 <Box sx={{ pl: { xs: 0, md: 2 } }}>
-                  <CustomText 
-                    sx={{ 
-                      fontSize: { xs: 15, md: 17 }, 
-                      color: "#444", 
+                  <CustomText
+                    sx={{
+                      fontSize: { xs: 15, md: 17 },
+                      color: "#444",
                       lineHeight: 1.85,
                       mb: 3,
                       fontWeight: 400,
@@ -455,10 +449,10 @@ export const AboutUs = () => {
                     Vikash Malik is the visionary founder and CEO of Danbro, a leading bakery brand that has revolutionized the art of baking in India. With an unwavering passion for creating exceptional culinary experiences, Vikash has transformed Danbro from a small family-owned pastry shop into a renowned brand with multiple locations across Lucknow, Kanpur, and Delhi.
                   </CustomText>
 
-                  <CustomText 
-                    sx={{ 
-                      fontSize: { xs: 15, md: 17 }, 
-                      color: "#444", 
+                  <CustomText
+                    sx={{
+                      fontSize: { xs: 15, md: 17 },
+                      color: "#444",
                       lineHeight: 1.85,
                       mb: 3,
                       fontWeight: 400,
@@ -467,10 +461,10 @@ export const AboutUs = () => {
                     Under Vikash's leadership, Danbro has become synonymous with innovation, quality, and excellence. His vision of blending traditional Asian flavors with modern baking techniques has resulted in unique creations like baked mithai innovations, premium mousse cakes, and artisan tarts that have delighted thousands of customers.
                   </CustomText>
 
-                  <CustomText 
-                    sx={{ 
-                      fontSize: { xs: 15, md: 17 }, 
-                      color: "#444", 
+                  <CustomText
+                    sx={{
+                      fontSize: { xs: 15, md: 17 },
+                      color: "#444",
                       lineHeight: 1.85,
                       fontWeight: 400,
                     }}
@@ -487,9 +481,9 @@ export const AboutUs = () => {
       {/*================ COUNT + RIGHT IMAGE =================*/}
 
       <Box sx={{ py: { xs: 5, md: 0 }, mt: { xs: 4, md: 5 } }}>
-        <Container  sx={{ px: { xs: 3, md: 3 } }}>
-          <Grid container spacing={{ xs: 4, md: 4 }} alignItems="center">
-            <Grid size={{ xs: 12, md: 6 }}>
+        <Container sx={{ px: { xs: 3, md: 3 } }}>
+          <Grid container spacing={{ xs: 4, md: 6 }} alignItems="center">
+            <Grid size={{ xs: 12, md: 6 }} sx={{ pr: { xs: 0, md: 2 } }}>
               <CustomText variant="h3" sx={{ fontWeight: 700, mb: { xs: 2, md: 2 }, fontSize: { xs: 20, sm: 24, md: 32 }, px: { xs: 0, md: 0 } }}>
                 We Work Through Every Aspect At The Planning
               </CustomText>
@@ -519,7 +513,7 @@ export const AboutUs = () => {
               </Button>
             </Grid>
 
-            <Grid size={{ xs: 12, md: 6 }} sx={{ position: "relative", mt: { xs: 5, md: 0 }, px: { xs: 0, md: 0 } }}>
+            <Grid size={{ xs: 12, md: 6 }} sx={{ position: "relative", mt: { xs: 5, md: 0 }, pl: { xs: 0, md: 2 }, px: { xs: 0, md: 0 } }}>
               <Box
                 sx={{
                   width: "100%",
@@ -575,20 +569,20 @@ export const AboutUs = () => {
                     }}
                   >
                     <CustomText sx={{ fontSize: { xs: 11, md: 13 }, fontWeight: 600 }}>
-                      {i.label}
+                      {i?.label}
                     </CustomText>
                     <CustomText sx={{ fontWeight: 800, fontSize: { xs: 22, md: 28 } }}>
-                      {i.num}
+                      {i?.num}
                     </CustomText>
                   </Box>
                 ))}
               </Box>
 
-              {/* LEFT 4 VERTICAL CARDS */}
+              {/* LEFT 4 VERTICAL CARDS - kept inside right column with gap from left section */}
               <Box
                 sx={{
                   position: "absolute",
-                  right: { xs: "auto", md: "90%" },
+                  right: { xs: "auto", md: "calc(100% - 180px)" },
                   left: { xs: "auto", md: "auto" },
                   bottom: { xs: "auto", md: "25%" },
                   top: { xs: "auto", md: "auto" },
@@ -596,11 +590,10 @@ export const AboutUs = () => {
                   flexDirection: "column",
                   gap: 2.2,
                   zIndex: 5,
-                  opacity: 0.8,
+                  opacity: 0.9,
                 }}
               >
                 {[
-                  { label: "VENDORS ASSOCIATED", num: "500" },
                   { label: "OFFICES", num: "05" },
                   { label: "TEAM MEMBERS", num: "500" },
                   { label: "PRODUCTS", num: "300" },
@@ -617,10 +610,10 @@ export const AboutUs = () => {
                     }}
                   >
                     <CustomText sx={{ fontSize: 12, fontWeight: 600 }}>
-                      {i.label}
+                      {i?.label}
                     </CustomText>
                     <CustomText sx={{ fontWeight: 800, fontSize: 22 }}>
-                      {i.num}
+                      {i?.num}
                     </CustomText>
                   </Box>
                 ))}
@@ -672,7 +665,7 @@ export const AboutUs = () => {
 
 
       {/*================ YouTube Videos Section =================*/}
-      <Box sx={{ py: { xs: 5, md: 8 } }}>
+      <Box sx={{ py: { xs: 5, md: 8 }, mb: 3 }}>
         <YouTubeVideosSection />
       </Box>
     </Box>
