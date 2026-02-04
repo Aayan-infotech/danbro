@@ -233,7 +233,8 @@ export const TopHeader = () => {
         <Box
             className="container-fluid"
             sx={{
-                display: "flex",
+                display: { xs: "flex", md: "grid" },
+                gridTemplateColumns: { md: "1fr auto 1fr" },
                 justifyContent: "space-between",
                 alignItems: "center",
                 px: { xs: 1, sm: 2, md: 3 },
@@ -285,8 +286,16 @@ export const TopHeader = () => {
                 },
             }}
         >
-            {/* Left Buttons - Hidden on mobile */}
-            <Box className="d-none d-md-flex" sx={{ display: { xs: "none", md: "flex" }, gap: 1, flexWrap: "wrap", }}>
+            {/* Left - Location + Business (no overlap, logo stays center via grid) */}
+            <Box
+                sx={{
+                    display: { xs: "none", md: "flex" },
+                    gap: 1,
+                    alignItems: "center",
+                    minWidth: 0,
+                    justifyContent: "flex-start",
+                }}
+            >
                 <Tooltip
                     title={
                         fullLocationLabel && fullLocationLabel !== "Location...?"
@@ -296,27 +305,48 @@ export const TopHeader = () => {
                     arrow
                     placement="bottom"
                 >
-                    <Box sx={{ position: 'relative' }}>
+                    <Box sx={{ minWidth: 0, maxWidth: 200, flexShrink: 1 }}>
                         <AnimatedButton
                             startIcon={<NearMe />}
                             onClick={() => setOpenDeliveryDialog(true)}
+                            sx={{
+                                textTransform: 'none',
+                                justifyContent: 'flex-start',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                whiteSpace: 'nowrap',
+                                maxWidth: '100%',
+                            }}
                         >
-                            Location
+                            <Box component="span" sx={{ overflow: 'hidden', textOverflow: 'ellipsis', display: 'block' }}>
+                                {locationLabel}
+                            </Box>
                         </AnimatedButton>
                     </Box>
                 </Tooltip>
 
-                <AnimatedButton
-                    onClick={() => setOpenBusinessDialog(true)}
-                >
-                    Business +
-                </AnimatedButton>
+                <Box sx={{ flexShrink: 0 }}>
+                    <AnimatedButton
+                        onClick={() => setOpenBusinessDialog(true)}
+                    >
+                        Business +
+                    </AnimatedButton>
+                </Box>
             </Box>
 
             {/* Mobile Left Buttons - Compact */}
-            <Box className="d-flex d-md-none" sx={{ display: { xs: "flex", md: "none" }, gap: 0.5, order: 1, }}>
+            <Box
+                sx={{
+                    display: { xs: "flex", md: "none" },
+                    gap: 0.5,
+                    order: 1,
+                    minWidth: 0,
+                    maxWidth: 120,
+                    flexShrink: 1,
+                }}
+            >
                 <Tooltip
-                    title={fullLocationLabel}
+                    title={fullLocationLabel && fullLocationLabel !== "Location...?" ? fullLocationLabel : "Allow location to see delivery area"}
                     arrow
                     placement="bottom"
                     PopperProps={{
@@ -350,15 +380,32 @@ export const TopHeader = () => {
                             fontSize: 10,
                             px: 1,
                             minWidth: "auto",
+                            textTransform: 'none',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                            maxWidth: '100%',
                         }}
                     >
-                        {isMobile ? "" : "Location"}
+                        <Box component="span" sx={{ overflow: 'hidden', textOverflow: 'ellipsis', display: 'block' }}>
+                            {locationLabel}
+                        </Box>
                     </AnimatedButton>
                 </Tooltip>
             </Box>
 
-            {/* Logo - Centered */}
-            <Box sx={{ py: { xs: 0.5, md: 1 }, bgcolor: "transparent", display: "flex", justifyContent: "center", order: { xs: 3, md: 2 }, width: { xs: "100%", md: "auto" }, }}>
+            {/* Logo - Always center (grid center column) */}
+            <Box
+                sx={{
+                    py: { xs: 0.5, md: 1 },
+                    bgcolor: "transparent",
+                    display: "flex",
+                    justifyContent: "center",
+                    order: { xs: 3, md: 2 },
+                    width: { xs: "100%", md: "auto" },
+                    minWidth: 0,
+                }}
+            >
                 <Link to="/home">
                     <Box
                         component="img"
@@ -380,6 +427,7 @@ export const TopHeader = () => {
                     gap: { xs: 0.5, md: 1 },
                     order: { xs: 2, md: 3 },
                     alignItems: "center",
+                    justifyContent: { md: "flex-end" },
                 }}
             >
                 <IconButton

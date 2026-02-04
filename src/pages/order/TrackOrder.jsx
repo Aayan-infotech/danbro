@@ -88,8 +88,15 @@ export const TrackOrder = () => {
     });
   };
 
+  const handleReset = () => {
+    setOrderId("");
+    setOrderData(null);
+    setError("");
+    setLoading(false);
+  };
+
   return (
-    <Box sx={{ minHeight: "100vh", backgroundColor: "#f8f9fa", py: 4 }}>
+    <Box sx={{ backgroundColor: "#f8f9fa", py: 4, mb: 3 }}>
       <Container maxWidth="md">
         {/* Header */}
         <Box sx={{ textAlign: "center", mb: 4 }}>
@@ -124,21 +131,29 @@ export const TrackOrder = () => {
             }}
           />
         </Box>
-        <Box sx={{ my: 2, display: "flex", justifyContent: "center" }}>
+        <Box
+          sx={{
+            my: 2,
+            display: "flex",
+            justifyContent: "center",
+            gap: 1.5,
+            flexWrap: "wrap",
+          }}
+        >
           <Button
             variant="contained"
             onClick={handleTrackOrder}
             disabled={loading}
+            size="small"
             sx={{
               backgroundColor: "var(--themeColor)",
               color: "#fff",
               textTransform: "none",
-              px: { xs: 3, md: 4 },
-              py: { xs: 1.5, md: 1.8 },
-              fontSize: { xs: 14, md: 16 },
+              px: 2.5,
+              py: 0.75,
+              fontSize: 13,
               fontWeight: 600,
-              minWidth: "150px",
-              maxWidth: "200px",
+              minHeight: 32,
               "&:hover": {
                 backgroundColor: "var(--specialColor)",
               },
@@ -147,9 +162,35 @@ export const TrackOrder = () => {
               },
             }}
           >
-            {loading ? <CircularProgress size={20} color="inherit" /> : "Track Order"}
+            {loading ? <CircularProgress size={16} color="inherit" /> : "Track Order"}
           </Button>
+
+          {(orderData || error) && (
+            <Button
+              variant="outlined"
+              onClick={handleReset}
+              size="small"
+              sx={{
+                textTransform: "none",
+                px: 2.5,
+                py: 0.75,
+                fontSize: 13,
+                fontWeight: 600,
+                minHeight: 32,
+                borderColor: "var(--themeColor)",
+                color: "var(--themeColor)",
+                "&:hover": {
+                  backgroundColor: "rgba(var(--themeColor-rgb, 230, 120, 80), 0.08)",
+                  borderColor: "var(--themeColor)",
+                },
+              }}
+            >
+              Reset
+            </Button>
+          )}
         </Box>
+
+
         {error && (
           <Alert severity="error" sx={{ mt: 2 }}>
             {error}

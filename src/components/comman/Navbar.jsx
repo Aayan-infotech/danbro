@@ -102,7 +102,6 @@ export const Navbar = () => {
                 onMouseLeave={() => setHoveredItem(null)}
             >
                 <Box
-                    className="d-none d-md-flex"
                     sx={{
                         display: { xs: "none", md: "flex" },
                         justifyContent: "center",
@@ -210,7 +209,6 @@ export const Navbar = () => {
 
             {/* Mobile Navbar */}
             <Box
-                className="d-flex d-md-none"
                 sx={{
                     display: { xs: "flex", md: "none" },
                     justifyContent: "space-between",

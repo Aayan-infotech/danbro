@@ -399,76 +399,6 @@ export const trackOrder = async (orderId) => {
 };
 
 /**
- * Sanitize JSON string by escaping control characters within string values
- * @param {string} jsonString - The JSON string to sanitize
- * @returns {string} Sanitized JSON string
- */
-const sanitizeJsonString = (jsonString) => {
-  let result = '';
-  let inString = false;
-  let escapeNext = false;
-  
-  for (let i = 0; i < jsonString.length; i++) {
-    const char = jsonString[i];
-    const charCode = char.charCodeAt(0);
-    
-    if (escapeNext) {
-      // We're escaping the next character, so just add it as-is
-      result += char;
-      escapeNext = false;
-      continue;
-    }
-    
-    if (char === '\\') {
-      // Next character is escaped
-      escapeNext = true;
-      result += char;
-      continue;
-    }
-    
-    if (char === '"' && !escapeNext) {
-      // Toggle string state
-      inString = !inString;
-      result += char;
-      continue;
-    }
-    
-    if (inString) {
-      // We're inside a string value, escape control characters
-      if (charCode >= 0x00 && charCode <= 0x1F) {
-        // Control character - escape it
-        switch (charCode) {
-          case 0x08: result += '\\b'; break;  // Backspace
-          case 0x09: result += '\\t'; break;  // Tab
-          case 0x0A: result += '\\n'; break;  // Line feed
-          case 0x0C: result += '\\f'; break;  // Form feed
-          case 0x0D: result += '\\r'; break;  // Carriage return
-          default:
-            // For other control characters, use Unicode escape
-            result += '\\u' + ('0000' + charCode.toString(16)).slice(-4);
-        }
-      } else {
-        result += char;
-      }
-    } else {
-      // Outside string, keep as-is (but remove invalid control characters)
-      if (charCode >= 0x00 && charCode <= 0x1F && char !== '\n' && char !== '\r' && char !== '\t') {
-        // Remove control characters outside strings (except whitespace)
-        continue;
-      }
-      result += char;
-    }
-  }
-  
-  return result;
-};
-
-/**
- * Get authentication token from localStorage
- * @returns {string|null} The authentication token or null if not found
- */
-
-/**
  * Get the API URL for category endpoint
  */
 const getApiUrl = () => {
@@ -620,28 +550,10 @@ export const fetchProducts = async (categoryId = null, page = 1, limit = 20, sea
         'long': location.long.toString(),
       },
       withCredentials: false,
-      timeout: 30000, // Increased to 30 seconds to handle slower network conditions
-      responseType: 'text', // Get as text first to handle potential JSON parsing issues
+      timeout: 15000,
     });
 
-    let data;
-    
-    try {
-      // First try parsing without sanitization
-      data = JSON.parse(response.data);
-    } catch (parseError) {
-      // If that fails, try sanitizing and parsing again
-      try {
-        const sanitizedText = sanitizeJsonString(response.data);
-        data = JSON.parse(sanitizedText);
-      } catch (sanitizeError) {
-        console.error('Failed to parse response as JSON:', sanitizeError);
-        console.error('Response text (first 500 chars):', response.data.substring(0, 500));
-        throw new Error(`Invalid response format from API: ${sanitizeError.message}`);
-      }
-    }
-    
-    return data;
+    return response.data;
   } catch (error) {
     console.error('Error fetching products:', error);
     
@@ -714,28 +626,10 @@ export const fetchBranches = async () => {
         'long': location.long.toString(),
       },
       withCredentials: false,
-      timeout: 30000, // Increased to 30 seconds to handle slower network conditions
-      responseType: 'text', // Get as text first to handle potential JSON parsing issues
+      timeout: 15000,
     });
 
-    let data;
-    
-    try {
-      // First try parsing without sanitization
-      data = JSON.parse(response.data);
-    } catch (parseError) {
-      // If that fails, try sanitizing and parsing again
-      try {
-        const sanitizedText = sanitizeJsonString(response.data);
-        data = JSON.parse(sanitizedText);
-      } catch (sanitizeError) {
-        console.error('Failed to parse response as JSON:', sanitizeError);
-        console.error('Response text (first 500 chars):', response.data.substring(0, 500));
-        throw new Error(`Invalid response format from API: ${sanitizeError.message}`);
-      }
-    }
-    
-    return data;
+    return response.data;
   } catch (error) {
     console.error('Error fetching branches:', error);
     
@@ -1158,28 +1052,10 @@ export const fetchProductById = async (productId) => {
         'long': location.long.toString(),
       },
       withCredentials: false,
-      timeout: 30000,
-      responseType: 'text', // Get as text first to handle potential JSON parsing issues
+      timeout: 15000,
     });
 
-    let data;
-    
-    try {
-      // First try parsing without sanitization
-      data = JSON.parse(response.data);
-    } catch (parseError) {
-      // If that fails, try sanitizing and parsing again
-      try {
-        const sanitizedText = sanitizeJsonString(response.data);
-        data = JSON.parse(sanitizedText);
-      } catch (sanitizeError) {
-        console.error('Failed to parse response as JSON:', sanitizeError);
-        console.error('Response text (first 500 chars):', response.data.substring(0, 500));
-        throw new Error(`Invalid response format from API: ${sanitizeError.message}`);
-      }
-    }
-    
-    return data;
+    return response.data;
   } catch (error) {
     console.error('Error fetching product by ID:', error);
     
