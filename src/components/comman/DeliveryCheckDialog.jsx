@@ -241,6 +241,7 @@ export const DeliveryCheckDialog = ({ open, onClose }) => {
         <Autocomplete
           ref={autocompleteRef}
           freeSolo
+          disablePortal
           options={predictions}
           getOptionLabel={(option) =>
             typeof option === 'string' ? option : option.description || ''
@@ -319,7 +320,16 @@ export const DeliveryCheckDialog = ({ open, onClose }) => {
             </Box>
           )}
           PaperComponent={({ children, ...other }) => (
-            <Paper {...other} sx={{ mt: 1, borderRadius: "12px", boxShadow: "0 4px 20px rgba(0,0,0,0.15)" }}>
+            <Paper
+              {...other}
+              sx={{
+                mt: 1,
+                borderRadius: "12px",
+                boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+                zIndex: 10001,
+                position: "relative",
+              }}
+            >
               {children}
             </Paper>
           )}
