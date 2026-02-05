@@ -501,7 +501,7 @@ export const ProductSectionCarousel = memo(({
                       },
                     }}
                   >
-                    {wishlistIds.has(product?.productId || product?.id || product?._id) ? (
+                    {(product?.isWishlisted === true || wishlistIds.has(product?.productId || product?.id || product?._id)) ? (
                       <FavoriteIcon sx={{ fontSize: 18, color: "#f44336" }} />
                     ) : (
                       <FavoriteBorderIcon sx={{ fontSize: 18, color: "var(--themeColor)" }} />

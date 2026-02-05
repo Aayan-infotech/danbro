@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { fetchHomeLayout } from '../utils/apiService';
+import { fetchHomeLayout, invalidateHomeLayoutFetch } from '../utils/apiService';
 import blankImage from '../assets/blankimage.png';
 
 // Cache for home layout data to prevent multiple API calls
@@ -91,13 +91,17 @@ export const useHomeLayout = () => {
     };
   }, []);
 
-  // Refetch when homeLayout is invalidated (e.g. after login so API returns isCart/isWishlisted)
+  // Refetch when homeLayout is invalidated (e.g. after login) or wishlist updated (background only, no full-page load)
   useEffect(() => {
-    const handleInvalidate = () => {
+    const refetchHomeLayout = (options = {}) => {
+      const { background = false } = options;
+      invalidateHomeLayoutFetch();
       homeLayoutCache.data = null;
       homeLayoutCache.timestamp = null;
-      setData({ menus: [], categories: [], products: [] });
-      setLoading(true);
+      if (!background) {
+        setData({ menus: [], categories: [], products: [] });
+        setLoading(true);
+      }
       fetchHomeLayout()
         .then((response) => {
           if (response?.success && response?.data) {
@@ -117,8 +121,14 @@ export const useHomeLayout = () => {
           setLoading(false);
         });
     };
-    window.addEventListener('homeLayoutInvalidate', handleInvalidate);
-    return () => window.removeEventListener('homeLayoutInvalidate', handleInvalidate);
+    const onHomeLayoutInvalidate = () => refetchHomeLayout({ background: false });
+    const onWishlistUpdated = () => refetchHomeLayout({ background: true });
+    window.addEventListener('homeLayoutInvalidate', onHomeLayoutInvalidate);
+    window.addEventListener('wishlistUpdated', onWishlistUpdated);
+    return () => {
+      window.removeEventListener('homeLayoutInvalidate', onHomeLayoutInvalidate);
+      window.removeEventListener('wishlistUpdated', onWishlistUpdated);
+    };
   }, []);
 
   return {
