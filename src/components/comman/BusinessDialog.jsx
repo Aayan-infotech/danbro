@@ -140,7 +140,6 @@ export const BusinessDialog = ({ open, onClose }) => {
                     fontSize: { xs: 24, sm: 28, md: 32 },
                     fontWeight: 700,
                     color: "#fff",
-                    mb: { xs: 2, md: 3 },
                     lineHeight: 1.2,
                   }}
                 >
@@ -168,7 +167,6 @@ export const BusinessDialog = ({ open, onClose }) => {
                   fontSize: { xs: 14, md: 16 },
                   fontWeight: 600,
                   textTransform: "none",
-                  mt: { xs: 3, md: 4 },
                   display: "flex",
                   alignItems: "center",
                   gap: 1,

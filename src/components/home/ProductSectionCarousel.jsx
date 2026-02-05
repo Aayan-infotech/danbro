@@ -4,7 +4,7 @@ import { CustomCarousel, CustomCarouselArrow } from "../comman/CustomCarousel";
 import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import { useRef, useEffect, useState, memo, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import StarIcon from "@mui/icons-material/Star";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import FavoriteIcon from "@mui/icons-material/Favorite";
@@ -24,6 +24,7 @@ export const ProductSectionCarousel = memo(({
   showBadge = true
 }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { cartProductIds } = useCartProductIds();
   const sliderRef = useRef(null);
   const [visible, setVisible] = useState(false);
@@ -83,6 +84,7 @@ export const ProductSectionCarousel = memo(({
 
   const isProductInCart = useCallback((product) => {
     const productId = product?.productId || product?.id || product?._id;
+    // Use isCart from product data first (faster), then check cartProductIds
     return product?.isCart === true || (productId && cartProductIds.has(String(productId)));
   }, [cartProductIds]);
 
@@ -139,6 +141,11 @@ export const ProductSectionCarousel = memo(({
       });
 
       window.dispatchEvent(new CustomEvent('cartUpdated'));
+
+      // If on homepage, trigger homeLayout refetch to update isCart immediately (background, no loading)
+      if (location.pathname === '/' || location.pathname === '/home') {
+        window.dispatchEvent(new CustomEvent('cartUpdatedOnHomepage'));
+      }
 
       setTimeout(() => setToast((prev) => ({ ...prev, open: false })), 3000);
     } catch (error) {
@@ -203,7 +210,7 @@ export const ProductSectionCarousel = memo(({
         borderRadius: { xs: 0, md: 3 },
         opacity: visible ? 1 : 0,
         transform: visible ? "translateY(0)" : "translateY(50px)",
-        transition: "opacity 0.8s ease, transform 0.8s ease",
+        transition: "opacity 0.8s ease 2s, transform 0.8s ease 2s",
         "&::before": {
           content: '""',
           position: "absolute",
@@ -457,8 +464,35 @@ export const ProductSectionCarousel = memo(({
                     </Box>
                   )}
 
-                  {/* Courier - top right corner */}
-                  {product?.courier != null && product?.courier !== "" && (
+                  {/* Added to Cart Badge - top right corner */}
+                  {isProductInCart(product) && (
+                    <Box
+                      sx={{
+                        position: "absolute",
+                        top: 12,
+                        right: 12,
+                        bgcolor: "success.main",
+                        color: "#fff",
+                        px: 1.5,
+                        py: 0.5,
+                        borderRadius: 2,
+                        fontSize: 11,
+                        fontWeight: 700,
+                        textTransform: "uppercase",
+                        letterSpacing: "0.5px",
+                        boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
+                        zIndex: 2,
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 0.5,
+                      }}
+                    >
+                      ✓ Added
+                    </Box>
+                  )}
+
+                  {/* Courier - top right corner (when not in cart) */}
+                  {!isProductInCart(product) && product?.courier != null && product?.courier !== "" && (
                     <Box
                       sx={{
                         position: "absolute",
@@ -618,8 +652,8 @@ export const ProductSectionCarousel = memo(({
                         color: "#fff",
                         width: { xs: 36, md: 40 },
                         height: { xs: 36, md: 40 },
-                        opacity: 0,
-                        transform: "translateY(10px)",
+                        opacity: isProductInCart(product) ? 1 : 0,
+                        transform: isProductInCart(product) ? "translateY(0)" : "translateY(10px)",
                         transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
                         "&:hover": {
                           bgcolor: isProductInCart(product) ? "success.dark" : "#7a2d3a",

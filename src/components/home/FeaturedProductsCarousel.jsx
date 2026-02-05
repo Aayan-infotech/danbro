@@ -4,7 +4,7 @@ import { CustomCarousel, CustomCarouselArrow } from "../comman/CustomCarousel";
 import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import { useRef, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import StarIcon from "@mui/icons-material/Star";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
@@ -81,6 +81,7 @@ const featuredProducts = [
 
 export const FeaturedProductsCarousel = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { cartProductIds } = useCartProductIds();
   const carouselRef = useRef(null);
   const [visible, setVisible] = useState(false);
@@ -116,11 +117,17 @@ export const FeaturedProductsCarousel = () => {
     return () => observer.disconnect();
   }, []);
 
+  const isProductInCart = (product) => {
+    const productId = product?.id || product?.productId || product?._id;
+    // Use isCart from product data first (faster), then check cartProductIds
+    return product?.isCart === true || (productId && cartProductIds.has(String(productId)));
+  };
+
   const handleCartAction = (e, product) => {
     e.preventDefault();
     e.stopPropagation();
     const productId = product?.id || product?.productId || product?._id;
-    if (cartProductIds.has(String(productId))) {
+    if (isProductInCart(product)) {
       navigate("/cart");
       return;
     }
@@ -153,6 +160,11 @@ export const FeaturedProductsCarousel = () => {
         loading: false
       });
       window.dispatchEvent(new CustomEvent('cartUpdated'));
+
+      // If on homepage, trigger homeLayout refetch to update isCart immediately (background, no loading)
+      if (location.pathname === '/' || location.pathname === '/home') {
+        window.dispatchEvent(new CustomEvent('cartUpdatedOnHomepage'));
+      }
     } catch (error) {
       setToast({
         open: true,
@@ -333,23 +345,52 @@ export const FeaturedProductsCarousel = () => {
                     >
                       {product.badge}
                     </Box>
-                    {/* Discount */}
-                    <Box
-                      sx={{
-                        position: "absolute",
-                        top: 15,
-                        right: 15,
-                        bgcolor: "#0A1234",
-                        color: "#fff",
-                        px: 1.5,
-                        py: 0.5,
-                        borderRadius: 2,
-                        fontSize: 12,
-                        fontWeight: 800,
-                      }}
-                    >
-                      {product.discount}
-                    </Box>
+                    {/* Added to Cart Badge */}
+                    {isProductInCart(product) && (
+                      <Box
+                        sx={{
+                          position: "absolute",
+                          top: 15,
+                          right: 15,
+                          bgcolor: "success.main",
+                          color: "#fff",
+                          px: 1.5,
+                          py: 0.5,
+                          borderRadius: 2,
+                          fontSize: 11,
+                          fontWeight: 700,
+                          textTransform: "uppercase",
+                          letterSpacing: "0.5px",
+                          boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 0.5,
+                          zIndex: 2,
+                        }}
+                      >
+                        ✓ Added
+                      </Box>
+                    )}
+
+                    {/* Discount (when not in cart) */}
+                    {!isProductInCart(product) && product.discount && (
+                      <Box
+                        sx={{
+                          position: "absolute",
+                          top: 15,
+                          right: 15,
+                          bgcolor: "#0A1234",
+                          color: "#fff",
+                          px: 1.5,
+                          py: 0.5,
+                          borderRadius: 2,
+                          fontSize: 12,
+                          fontWeight: 800,
+                        }}
+                      >
+                        {product.discount}
+                      </Box>
+                    )}
                     {/* Favorite Icon */}
                     <IconButton
                       sx={{
@@ -470,7 +511,7 @@ export const FeaturedProductsCarousel = () => {
                           },
                         }}
                       >
-                        {cartProductIds.has(String(product?.id || product?.productId || product?._id)) ? "Go to Cart" : "Add to Cart"}
+                        {isProductInCart(product) ? "Go to Cart" : "Add to Cart"}
                       </Button>
                     </Box>
                   </Box>

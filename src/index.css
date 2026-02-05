@@ -129,6 +129,19 @@ span,
     padding: 10px;
   }
 }
+/* Mobile/Android view - padding-top: 111px */
+@media (max-width: 1199px) {
+  .css-awq9fn {
+      padding-top: 111px !important;
+  }
+}
+
+/* Desktop/Laptop view - padding-top: 30px */
+@media (min-width: 1200px) {
+  .css-awq9fn {
+      padding-top: 30px !important;
+  }
+}
 
 @media (min-width: 600px) {
   .css-1u606s6-MuiContainer-root,
@@ -152,5 +165,18 @@ span,
 @media (min-width: 900px) {
   .css-1wc8q2d {
     margin-top: 0 !important;
+  }
+  
+  /* Fix Social Media Icons positioning at 900px breakpoint */
+  .css-nipd8c {
+    left: 20px !important;
+    gap: 12px !important;
+  }
+  
+  /* Fix Social Media Icons positioning at 900px breakpoint */
+  .css-1jtst5e {
+    left: 10px !important;
+    gap: 12px !important;
+    top: 60% !important;
   }
 }

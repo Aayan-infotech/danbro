@@ -123,11 +123,14 @@ export const useHomeLayout = () => {
     };
     const onHomeLayoutInvalidate = () => refetchHomeLayout({ background: false });
     const onWishlistUpdated = () => refetchHomeLayout({ background: true });
+    const onCartUpdatedOnHomepage = () => refetchHomeLayout({ background: true });
     window.addEventListener('homeLayoutInvalidate', onHomeLayoutInvalidate);
     window.addEventListener('wishlistUpdated', onWishlistUpdated);
+    window.addEventListener('cartUpdatedOnHomepage', onCartUpdatedOnHomepage);
     return () => {
       window.removeEventListener('homeLayoutInvalidate', onHomeLayoutInvalidate);
       window.removeEventListener('wishlistUpdated', onWishlistUpdated);
+      window.removeEventListener('cartUpdatedOnHomepage', onCartUpdatedOnHomepage);
     };
   }, []);
 

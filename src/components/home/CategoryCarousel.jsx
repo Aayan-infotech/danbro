@@ -19,36 +19,18 @@ export const CategoryCarousel = ({ categories: propCategories }) => {
   const carouselRef = useRef(null);
   const { categories: hookCategories, loading, error } = useItemCategories();
   const navigate = useNavigate();
-  const [visible, setVisible] = useState(false);
+  const [visible, setVisible] = useState(true); // Start visible immediately
   const sectionRef = useRef(null);
 
   const categories = propCategories || hookCategories;
   const isLoading = propCategories ? false : loading;
 
+  // Set visible immediately if categories are available
   useEffect(() => {
-    if (sectionRef.current) {
-      const rect = sectionRef.current.getBoundingClientRect();
-      const isInViewport = rect.top < window.innerHeight && rect.bottom > 0;
-      if (isInViewport) {
-        setVisible(true);
-      }
+    if (categories && categories.length > 0) {
+      setVisible(true);
     }
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setVisible(true);
-          }
-        });
-      },
-      { threshold: 0.01, rootMargin: "50px" }
-    );
-
-    if (sectionRef.current) observer.observe(sectionRef.current);
-
-    return () => observer.disconnect();
-  }, []);
+  }, [categories]);
 
   const items = categories?.map((category, index) => ({
     id: category?.id ?? category?.categoryId,
@@ -80,9 +62,8 @@ export const CategoryCarousel = ({ categories: propCategories }) => {
         ref={sectionRef}
         sx={{
           mb: { xs: 2, md: 4 },
-          opacity: visible ? 1 : 0.3,
-          transform: visible ? "translateY(0)" : "translateY(20px)",
-          transition: "opacity 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94), transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
+          opacity: 1,
+          transform: "translateY(0)",
           visibility: "visible",
           minHeight: "200px",
         }}
@@ -165,16 +146,11 @@ export const CategoryCarousel = ({ categories: propCategories }) => {
                     key={item?.id || i}
                     sx={{
                       cursor: "pointer",
-                      transition: "all 0.5s cubic-bezier(0.4, 0, 0.2, 1)",
+                      transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
                       position: "relative",
                       px: { xs: 0.5, md: 1 },
-                      opacity: visible ? 1 : 0,
-                      transform: visible ? "translateY(0)" : "translateY(30px)",
-                      animation: visible ? `fadeInUp 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) ${i * 0.1}s both` : "none",
-                      "@keyframes fadeInUp": {
-                        "0%": { opacity: 0, transform: "translateY(30px)" },
-                        "100%": { opacity: 1, transform: "translateY(0)" },
-                      },
+                      opacity: 1,
+                      transform: "translateY(0)",
                     }}
                   >
                     <Box

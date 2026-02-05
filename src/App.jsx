@@ -1,4 +1,5 @@
 import { Box, Fab } from "@mui/material";
+import { KeyboardArrowUp } from "@mui/icons-material";
 import { BrowserRouter, useLocation } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
 import { Provider } from "react-redux";
@@ -27,6 +28,7 @@ const AppContent = () => {
   const { pathname } = useLocation();
   const [showDeliveryDialog, setShowDeliveryDialog] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showScrollTop, setShowScrollTop] = useState(false);
   const hasCheckedDeliveryDialog = useRef(false);
 
   // Hide Navbar on profile page
@@ -68,6 +70,16 @@ const AppContent = () => {
     return () => window.removeEventListener("openLocationDialog", openDialog);
   }, []);
 
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      setShowScrollTop(scrollTop > 300);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   const handleCloseDeliveryDialog = () => {
     setShowDeliveryDialog(false);
     localStorage.setItem("deliveryDialogShown", "true");
@@ -78,6 +90,13 @@ const AppContent = () => {
     const message = encodeURIComponent("Hello! I'd like to know more about your products.");
     const whatsappUrl = `https://wa.me/${phoneNumber}?text=${message}`;
     window.open(whatsappUrl, "_blank", "noopener,noreferrer");
+  };
+
+  const handleScrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
   };
 
   return (
@@ -125,6 +144,36 @@ const AppContent = () => {
         </Box>
         {!hideNavbar && <Footer />}
         
+        {/* Floating Scroll to Top Button */}
+        {showScrollTop && (
+          <Fab
+            onClick={handleScrollToTop}
+            sx={{
+              position: "fixed",
+              bottom: { xs: 86, md: 104 },
+              right: { xs: 20, md: 30 },
+              backgroundColor: "#5F2930",
+              color: "#fff",
+              width: { xs: 56, md: 64 },
+              height: { xs: 56, md: 64 },
+              zIndex: 1000,
+              boxShadow: "0 4px 20px rgba(95, 41, 48, 0.4)",
+              transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+              "&:hover": {
+                backgroundColor: "#4a1f25",
+                transform: "scale(1.1)",
+                boxShadow: "0 6px 30px rgba(95, 41, 48, 0.6)",
+              },
+              "&:active": {
+                transform: "scale(0.95)",
+              },
+            }}
+            aria-label="Scroll to top"
+          >
+            <KeyboardArrowUp sx={{ fontSize: { xs: 32, md: 36 } }} />
+          </Fab>
+        )}
+
         {/* Floating WhatsApp Button */}
         <Fab
           onClick={handleWhatsAppClick}

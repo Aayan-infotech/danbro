@@ -1,6 +1,6 @@
 import { memo, useState, useEffect } from "react";
 import { Box, Card, CardContent, CardMedia, IconButton, CircularProgress, Tooltip } from "@mui/material";
-import { ShoppingCart, ShareOutlined, FavoriteBorder, Favorite, SearchOff } from "@mui/icons-material";
+import { ShoppingCart, ShareOutlined, FavoriteBorder, Favorite, SearchOff, CheckCircle } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import { CustomText } from "../comman/CustomText";
 import { ProductDescription } from "../comman/ProductDescription";
@@ -147,6 +147,12 @@ export const ProductGrid = memo(({ products, isVisible }) => {
     window.open(whatsappUrl, "_blank", "noopener,noreferrer");
   };
 
+  const isProductInCart = (product) => {
+    const productId = product?.productId || product?.id || product?._id;
+    // Use isCart from product data first (faster), then check cartProductIds
+    return product?.isCart === true || (productId && cartProductIds.has(String(productId)));
+  };
+
   const handleCartAction = (e, product) => {
     e.stopPropagation();
     const productId = product?.productId;
@@ -159,7 +165,7 @@ export const ProductGrid = memo(({ products, isVisible }) => {
       });
       return;
     }
-    if (cartProductIds.has(String(productId))) {
+    if (isProductInCart(product)) {
       navigate("/cart");
       return;
     }
@@ -333,26 +339,56 @@ export const ProductGrid = memo(({ products, isVisible }) => {
                   {product?.veg === "Y" || product?.veg === "y" || product?.veg === true ? "Veg" : "Non-Veg"}
                 </Box>
               )}
-              <Box
-                sx={{
-                  position: "absolute",
-                  top: 8,
-                  right: 8,
-                  px: 1,
-                  py: 0.25,
-                  borderRadius: 1,
-                  fontSize: 10,
-                  fontWeight: 600,
-                  color: "#fff",
-                  zIndex: 15,
-                  bgcolor:
-                    product?.courier === "Y" || product?.courier === "y"
-                      ? "#2e7d32"
-                      : "#757575",
-                }}
-              >
-                {product?.courier === "Y" || product?.courier === "y" ? "Courier" : "Store only"}
-              </Box>
+              {/* Added to Cart Badge */}
+              {isProductInCart(product) && (
+                <Box
+                  sx={{
+                    position: "absolute",
+                    top: 8,
+                    right: 8,
+                    px: 1.5,
+                    py: 0.5,
+                    borderRadius: 1.5,
+                    fontSize: 11,
+                    fontWeight: 700,
+                    color: "#fff",
+                    zIndex: 15,
+                    bgcolor: "success.main",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.5px",
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 0.5,
+                  }}
+                >
+                  ✓ Added
+                </Box>
+              )}
+
+              {/* Courier Badge (when not in cart) */}
+              {!isProductInCart(product) && (
+                <Box
+                  sx={{
+                    position: "absolute",
+                    top: 8,
+                    right: 8,
+                    px: 1,
+                    py: 0.25,
+                    borderRadius: 1,
+                    fontSize: 10,
+                    fontWeight: 600,
+                    color: "#fff",
+                    zIndex: 15,
+                    bgcolor:
+                      product?.courier === "Y" || product?.courier === "y"
+                        ? "#2e7d32"
+                        : "#757575",
+                  }}
+                >
+                  {product?.courier === "Y" || product?.courier === "y" ? "Courier" : "Store only"}
+                </Box>
+              )}
               <Box
                 sx={{
                   position: "relative",
@@ -406,20 +442,23 @@ export const ProductGrid = memo(({ products, isVisible }) => {
                     boxShadow: "0 4px 10px rgba(0,0,0,0.15)",
                   }}
                 >
-                  <Tooltip title={cartProductIds.has(String(product?.productId)) ? "Go to Cart" : "Add to Cart"}>
+                  <Tooltip title={isProductInCart(product) ? "Go to Cart" : "Add to Cart"}>
                     <IconButton
                       size="small"
                       onClick={(e) => handleCartAction(e, product)}
                       disabled={loadingCart.has(product?.productId)}
                       sx={{
                         position: "relative",
+                        bgcolor: isProductInCart(product) ? "success.main" : "transparent",
+                        color: isProductInCart(product) ? "#fff" : "inherit",
                         "&:disabled": {
                           opacity: 0.8,
                         },
                         transition: "all 0.3s ease",
                         "&:hover:not(:disabled)": {
                           transform: "scale(1.15)",
-                          color: "var(--themeColor)",
+                          bgcolor: isProductInCart(product) ? "success.dark" : "rgba(255,148,114,0.1)",
+                          color: isProductInCart(product) ? "#fff" : "var(--themeColor)",
                         },
                       }}
                     >
@@ -432,6 +471,8 @@ export const ProductGrid = memo(({ products, isVisible }) => {
                             position: "absolute",
                           }}
                         />
+                      ) : isProductInCart(product) ? (
+                        <CheckCircle sx={{ fontSize: 18, transition: "all 0.3s ease", }} />
                       ) : (
                         <ShoppingCart sx={{ fontSize: 18, transition: "all 0.3s ease", }} />
                       )}
