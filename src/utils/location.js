@@ -73,3 +73,12 @@ export const storeLocation = (lat, long, label) => {
   }
 };
 
+/** Clear stored location (e.g. on logout) so TopHeader/Cart show default. */
+export const clearStoredLocation = () => {
+  try {
+    localStorage.removeItem('userLocation');
+  } catch (error) {
+    console.error('Error clearing stored location:', error);
+  }
+};
+

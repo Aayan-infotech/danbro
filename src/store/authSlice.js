@@ -2,7 +2,7 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 import { API_BASE_URL } from '../utils/apiUrl';
 import { setAccessToken, setRefreshToken, getAccessToken, getRefreshToken, clearAuthCookies } from '../utils/cookies';
-import { getStoredLocation } from '../utils/location';
+import { getStoredLocation, clearStoredLocation } from '../utils/location';
 import { refreshTokenApi } from '../utils/apiService';
 
 /**
@@ -77,6 +77,7 @@ export const logoutUser = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       clearAuthCookies();
+      clearStoredLocation();
       return true;
     } catch (error) {
       return rejectWithValue('Logout failed');
