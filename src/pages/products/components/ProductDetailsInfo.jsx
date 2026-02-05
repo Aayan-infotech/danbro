@@ -8,7 +8,7 @@ import {
   Chip,
   CircularProgress,
 } from "@mui/material";
-import { Add, Remove, Favorite, FavoriteBorder, LocalShipping } from "@mui/icons-material";
+import { Add, Remove, Favorite, FavoriteBorder } from "@mui/icons-material";
 import { Rating } from "@mui/material";
 import { CustomText } from "../../../components/comman/CustomText";
 
@@ -17,6 +17,7 @@ export const ProductDetailsInfo = ({
   weightOptions,
   productWeight,
   onWeightChange,
+  showCakeMessage = false,
   cakeMessage,
   onCakeMessageChange,
   hasSavedLocation,
@@ -106,19 +107,21 @@ export const ProductDetailsInfo = ({
       </Box>
     )}
 
-    <Box sx={{ mb: 0.5 }}>
-      <CustomText sx={{ fontWeight: 600, fontFamily: "'Inter', sans-serif", color: "#2c2c2c", fontSize: 14, mb: 1 }}>Cake Message</CustomText>
-      <TextField
-        fullWidth
-        placeholder="Write a sweet wish!"
-        value={cakeMessage}
-        onChange={(e) => onCakeMessageChange(e.target.value.slice(0, 25))}
-        size="small"
-        inputProps={{ maxLength: 25 }}
-        sx={{ "& .MuiOutlinedInput-root": { borderRadius: 1, fontFamily: "'Inter', sans-serif" } }}
-        helperText={`${cakeMessage.length}/25`}
-      />
-    </Box>
+    {showCakeMessage && (
+      <Box sx={{ mb: 0.5 }}>
+        <CustomText sx={{ fontWeight: 600, fontFamily: "'Inter', sans-serif", color: "#2c2c2c", fontSize: 14, mb: 1 }}>Cake Message</CustomText>
+        <TextField
+          fullWidth
+          placeholder="Write a sweet wish!"
+          value={cakeMessage}
+          onChange={(e) => onCakeMessageChange(e.target.value.slice(0, 25))}
+          size="small"
+          inputProps={{ maxLength: 25 }}
+          sx={{ "& .MuiOutlinedInput-root": { borderRadius: 1, fontFamily: "'Inter', sans-serif" } }}
+          helperText={`${cakeMessage.length}/25`}
+        />
+      </Box>
+    )}
 
     <Box sx={{ mb: 0, p: 1, borderRadius: 1, border: "1px solid #e0e0e0", backgroundColor: "#fafafa" }}>
       <CustomText sx={{ fontWeight: 600, fontFamily: "'Inter', sans-serif", color: "#2c2c2c", fontSize: 14 }}>Delivery Location</CustomText>
@@ -255,12 +258,5 @@ export const ProductDetailsInfo = ({
         {cartMessage.text}
       </Alert>
     )}
-
-    <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 1, backgroundColor: "#f0f9f0", p: 1.5, borderRadius: 1, border: "1px solid #c8e6c9" }}>
-      <LocalShipping sx={{ fontSize: 18, color: "#00A819" }} />
-      <CustomText sx={{ fontSize: 13, fontWeight: 500, fontFamily: "'Inter', sans-serif", color: "#00A819" }}>
-        Order within 2hrs for delivery today.
-      </CustomText>
-    </Box>
   </Box>
 );

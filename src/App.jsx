@@ -8,6 +8,7 @@ import AppRoutes from "./routes/AppRoutes";
 import { Navbar } from "./components/comman/Navbar";
 import { TopHeader } from "./components/comman/TopHeader";
 import { DeliveryCheckDialog } from "./components/comman/DeliveryCheckDialog";
+import { getStoredLocation } from "./utils/location";
 
 const ScrollToTop = () => {
   const { pathname } = useLocation();
@@ -81,7 +82,11 @@ const AppContent = () => {
   return (
     <>
       <ScrollToTop />
-      <DeliveryCheckDialog open={showDeliveryDialog} onClose={handleCloseDeliveryDialog} />
+      <DeliveryCheckDialog
+        open={showDeliveryDialog}
+        onClose={handleCloseDeliveryDialog}
+        initialLocationLabel={getStoredLocation().label || ""}
+      />
       <Box
         sx={{
           width: "100%",

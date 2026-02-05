@@ -242,6 +242,37 @@ export const AddressSection = ({
     >
       <CardHeader
         title="Delivery Address"
+        action={
+          ((deliveryType === "self" && isLoggedIn) || deliveryType === "someone_else") ? (
+            <Button
+              size="small"
+              onClick={() => {
+                if (deliveryType === "self") {
+                  setAddressDialogOpen(true);
+                } else {
+                  openRecipientDialog();
+                }
+              }}
+              sx={{
+                textTransform: "none",
+                fontSize: { xs: 12, md: 13 },
+                fontWeight: 600,
+                color: "var(--themeColor)",
+                border: "1px solid var(--themeColor)",
+                borderRadius: 1.5,
+                px: 1.5,
+                "&:hover": {
+                  backgroundColor: "#fbeeee",
+                  borderColor: "var(--themeColor)",
+                },
+              }}
+            >
+              {deliveryType === "self"
+                ? "+ Add New"
+                : (isSomeoneElseFormValid() ? "Edit Recipient Address" : "Add Recipient Address")}
+            </Button>
+          ) : null
+        }
         sx={{
           px: { xs: 2, md: 2.5 },
           pt: { xs: 2, md: 2.5 },
@@ -253,6 +284,7 @@ export const AddressSection = ({
           },
         }}
       />
+
       <CardContent sx={{ p: { xs: 2, md: 2.5 }, pt: { xs: 1, md: 1.5 } }}>
         <RadioGroup
           row
@@ -336,17 +368,7 @@ export const AddressSection = ({
                                     {address.addressType || "Address"}
                                   </CustomText>
                                   {address.isDefault && (
-                                    <Box
-                                      sx={{
-                                        px: 1,
-                                        py: 0.2,
-                                        borderRadius: 1,
-                                        backgroundColor: "#FFB5A1",
-                                        color: "#000",
-                                        fontSize: 10,
-                                        fontWeight: 600,
-                                      }}
-                                    >
+                                    <Box sx={{ px: 1, py: 0.2, borderRadius: 1, backgroundColor: "#FFB5A1", color: "#000", fontSize: 10, fontWeight: 600, }}>
                                       Default
                                     </Box>
                                   )}
@@ -381,27 +403,6 @@ export const AddressSection = ({
                 })}
               </RadioGroup>
             )}
-
-            {/* Add New Address Button */}
-            <Button
-              variant="outlined"
-              fullWidth
-              onClick={() => setAddressDialogOpen(true)}
-              sx={{
-                borderColor: "var(--themeColor)",
-                color: "var(--themeColor)",
-                textTransform: "none",
-                mt: 1.5,
-                fontSize: { xs: 13, md: 14 },
-                fontWeight: 600,
-                "&:hover": {
-                  borderColor: "var(--themeColor)",
-                  backgroundColor: "#fbeeee",
-                },
-              }}
-            >
-              Add New Address
-            </Button>
           </>
         )}
 
@@ -519,19 +520,14 @@ export const AddressSection = ({
       </Dialog>
 
       {/* Recipient Details Dialog (for orderFor: OTHER) */}
-      <Dialog
-        open={recipientDialogOpen}
-        onClose={() => setRecipientDialogOpen(false)}
-        fullWidth
-        maxWidth="sm"
-      >
+      <Dialog open={recipientDialogOpen} onClose={() => setRecipientDialogOpen(false)} fullWidth maxWidth="sm">
         <DialogTitle>
           <CustomText sx={{ fontSize: { xs: 18, md: 20 }, fontWeight: 700 }}>
             Recipient Details
           </CustomText>
         </DialogTitle>
         <DialogContent sx={{ pt: 2, pb: 1.5 }}>
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mt:1 }}>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1 }}>
             <Autocomplete
               freeSolo
               options={addressSearchOptions}

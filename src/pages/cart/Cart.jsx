@@ -6,6 +6,11 @@ import {
   Button,
   CircularProgress,
   Alert,
+  Card,
+  CardContent,
+  TextField,
+  InputAdornment,
+  Link,
 } from "@mui/material";
 import { CustomText } from "../../components/comman/CustomText";
 import { useNavigate } from "react-router-dom";
@@ -19,6 +24,7 @@ import { CartItem } from "../../components/cart/CartItem";
 import { OrderSummary } from "../../components/cart/OrderSummary";
 import { AddressSection } from "../../components/cart/AddressSection";
 import { EmptyCart } from "../../components/cart/EmptyCart";
+import { LocalShipping as LocalShippingIcon, Schedule as ScheduleIcon, Note as NoteIcon } from "@mui/icons-material";
 
 export const Cart = () => {
   const navigate = useNavigate();
@@ -71,6 +77,22 @@ export const Cart = () => {
   const [paymentStatus, setPaymentStatus] = useState(null); // 'success', 'failure', null
 
   const getItemKey = (productId, weight) => `${productId ?? ""}|${weight ?? ""}`;
+
+  const getDisplayAddress = () => {
+    if (deliveryType === "self" && selectedAddress) {
+      const addr = addresses.find((a) => (a._id || a.id) === selectedAddress);
+      if (addr) {
+        const parts = [addr.houseNumber, addr.streetName, addr.area, addr.landmark && `Near ${addr.landmark}`, addr.city, addr.state, addr.zipCode].filter(Boolean);
+        return parts.join(", ");
+      }
+    }
+    const o = someoneElseData;
+    if (o?.houseNumber || o?.streetName || o?.area || o?.city) {
+      const parts = [o.houseNumber, o.streetName, o.area, o.landmark && `Near ${o.landmark}`, o.city, o.state, o.zipCode].filter(Boolean);
+      return parts.join(", ");
+    }
+    return "";
+  };
 
   useEffect(() => {
     dispatch(loadCartItems());
@@ -405,19 +427,10 @@ export const Cart = () => {
   const total = finalSubtotal - discount + shipping;
 
   return (
-    <Box
-      sx={{
-        minHeight: "100vh",
-        backgroundColor: "#fff",
-        p: { xs: 1, sm: 2, md: 3 },
-        pt: { xs: 2, sm: 3, md: 4 },
-        pb: { xs: 14, sm: 12, md: 6 },
-        boxSizing: "border-box",
-      }}
-    >
+    <Box sx={{ minHeight: "100vh", pb: { xs: 14, sm: 12, md: 6 }, boxSizing: "border-box", }}>
       <Container sx={{ px: { xs: 0, sm: 2, md: 3 }, maxWidth: "100%", width: "100%" }}>
-        <Box sx={{ mb: { xs: 0.5, md: 1 } }}>
-          <CustomText variant="h4" sx={{ fontSize: { xs: 22, md: 28 }, fontWeight: 700, color: "var(--themeColor)", }}>
+        <Box sx={{ mb: { xs: 1, md: 1.5 } }}>
+          <CustomText variant="h4" sx={{ fontSize: { xs: 22, md: 28 }, fontWeight: 700, color: "var(--themeColor)" }}>
             Shopping Cart
           </CustomText>
           <CustomText sx={{ fontSize: { xs: 13, md: 15 }, color: "#666" }}>
@@ -425,7 +438,6 @@ export const Cart = () => {
           </CustomText>
         </Box>
 
-        {/* Error Alerts - show at top */}
         {orderError && (
           <Alert severity="error" sx={{ mb: 2 }} onClose={() => setOrderError("")}>
             {orderError}
@@ -437,7 +449,6 @@ export const Cart = () => {
           </Alert>
         )}
 
-        {/* Main Content - full-page spinner only on initial load (no items yet); quantity/remove refresh keeps list visible */}
         {loading && !cartItems?.length ? (
           <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", py: 8 }}>
             <CircularProgress />
@@ -445,95 +456,119 @@ export const Cart = () => {
         ) : cartItems?.length === 0 ? (
           <EmptyCart navigate={navigate} />
         ) : (
-          <Grid container spacing={{ xs: 2, md: 2 }}>
+          <Grid container spacing={{ xs: 2, md: 2.5 }}>
+            {/* Left column: Delivery, Preparation, Cart items, Add note */}
             <Grid size={{ xs: 12, md: 8 }} sx={{ order: { xs: 1, md: 1 }, minWidth: 0 }}>
-              <Box sx={{ display: "flex", flexDirection: "column", gap: { xs: 1.5, md: 2 }, minWidth: 0 }}>
-                {cartItems?.map((item) => (
-                  <CartItem
-                    key={item?.productId || item?._id || item?.id}
-                    item={item}
-                    updatingItems={updatingItems}
-                    updatingAction={updatingAction}
-                    getItemKey={getItemKey}
-                    updateQuantity={updateQuantity}
-                    removeItem={removeItem}
-                  />
-                ))}
-              </Box>
-              <Box sx={{ mt: { xs: 2, md: 3 }, display: "flex", gap: 1.5, flexWrap: "wrap" }}>
-                <Button
-                  variant="outlined"
-                  onClick={() => navigate("/products")}
-                  disabled={loading}
-                  size="small"
-                  sx={{
-                    borderColor: "var(--themeColor)",
-                    color: "var(--themeColor)",
-                    textTransform: "none",
-                    fontSize: { xs: 13, md: 15 },
-                    fontWeight: 600,
-                    "&:hover": {
-                      borderColor: "var(--specialColor)",
-                      color: "var(--specialColor)",
-                      backgroundColor: "rgba(195, 46, 6, 0.05)",
-                    },
-                  }}
-                >
-                  Continue Shopping
-                </Button>
-                <Button
-                  variant="outlined"
-                  onClick={handleClearCart}
-                  disabled={loading || !cartItems?.length}
-                  size="small"
-                  sx={{
-                    borderColor: "#d32f2f",
-                    color: "#d32f2f",
-                    textTransform: "none",
-                    fontSize: { xs: 13, md: 15 },
-                    fontWeight: 600,
-                    "&:hover": {
-                      borderColor: "#b71c1c",
-                      color: "#b71c1c",
-                      backgroundColor: "rgba(211, 47, 47, 0.08)",
-                    },
-                  }}
-                >
-                  Clear Cart
-                </Button>
+              <Box sx={{ display: "flex", flexDirection: "column", gap: 2, minWidth: 0 }}>
+                {!isGuest && (
+                  <>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "flex-start",
+                        gap: 1.5,
+                        p: 2,
+                        borderRadius: 2,
+                        backgroundColor: "rgba(230, 120, 80, 0.12)",
+                        border: "1px solid rgba(230, 120, 80, 0.25)",
+                      }}
+                    >
+                      <LocalShippingIcon sx={{ color: "var(--themeColor)", fontSize: 24, mt: 0.25 }} />
+                      <Box sx={{ flex: 1, minWidth: 0 }}>
+                        <CustomText sx={{ fontSize: 15, fontWeight: 600, color: "#2c2c2c", mb: 0.5 }}>
+                          Delivery
+                        </CustomText>
+                        <CustomText sx={{ fontSize: 13, color: "#555" }}>
+                          {getDisplayAddress() || "Select delivery address"}
+                        </CustomText>
+                        <Button
+                          size="small"
+                          onClick={() => setAddressDialogOpen(true)}
+                          sx={{ mt: 1, textTransform: "none", color: "var(--themeColor)", fontWeight: 600, p: 0, minWidth: 0 }}
+                        >
+                          Change
+                        </Button>
+                      </Box>
+                    </Box>
+                    <AddressSection
+                      addresses={addresses}
+                      selectedAddress={selectedAddress}
+                      setSelectedAddress={setSelectedAddress}
+                      addressesLoading={addressesLoading}
+                      addressDialogOpen={addressDialogOpen}
+                      setAddressDialogOpen={setAddressDialogOpen}
+                      handleAddressSuccess={handleAddressSuccess}
+                      deliveryType={deliveryType}
+                      setDeliveryType={setDeliveryType}
+                      someoneElseData={someoneElseData}
+                      setSomeoneElseData={setSomeoneElseData}
+                    />
+                  </>
+                )}
+                <Card sx={{ borderRadius: 2, boxShadow: "0 2px 8px rgba(0,0,0,0.08)" }}>
+                  <CardContent sx={{ px: 2, pt: 1, pb: 1, "&:last-child": { pb: 2 } }}>
+                    {cartItems?.map((item, index) => (
+                      <CartItem
+                        key={item?.productId || item?._id || item?.id}
+                        item={item}
+                        updatingItems={updatingItems}
+                        updatingAction={updatingAction}
+                        getItemKey={getItemKey}
+                        updateQuantity={updateQuantity}
+                        removeItem={removeItem}
+                        compact
+                        showDivider={index < (cartItems?.length || 0) - 1}
+                      />
+                    ))}
+                  </CardContent>
+                </Card>
+
+                <Box sx={{ display: "flex", gap: 1.5, flexWrap: "wrap" }}>
+                  <Button
+                    variant="outlined"
+                    onClick={() => navigate("/products")}
+                    disabled={loading}
+                    size="small"
+                    sx={{
+                      borderColor: "var(--themeColor)",
+                      color: "var(--themeColor)",
+                      textTransform: "none",
+                      fontWeight: 600,
+                      "&:hover": { borderColor: "var(--specialColor)", color: "var(--specialColor)", backgroundColor: "rgba(195, 46, 6, 0.05)" },
+                    }}
+                  >
+                    Continue Shopping
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    onClick={handleClearCart}
+                    disabled={loading || !cartItems?.length}
+                    size="small"
+                    sx={{
+                      borderColor: "#d32f2f",
+                      color: "#d32f2f",
+                      textTransform: "none",
+                      fontWeight: 600,
+                      "&:hover": { borderColor: "#b71c1c", backgroundColor: "rgba(211, 47, 47, 0.08)" },
+                    }}
+                  >
+                    Clear Cart
+                  </Button>
+                </Box>
               </Box>
             </Grid>
 
-            {/* Right Column - Address & Order Summary */}
+            {/* Right column: Offers + Bill details + Place order */}
             <Grid size={{ xs: 12, md: 4 }} sx={{ order: { xs: 2, md: 2 }, minWidth: 0 }}>
-              <Box sx={{ display: "flex", flexDirection: "column", gap: { xs: 2, md: 2.5 }, minWidth: 0 }}>
-                {!isGuest && (
-                  <AddressSection
-                    addresses={addresses}
-                    selectedAddress={selectedAddress}
-                    setSelectedAddress={setSelectedAddress}
-                    addressesLoading={addressesLoading}
-                    addressDialogOpen={addressDialogOpen}
-                    setAddressDialogOpen={setAddressDialogOpen}
-                    handleAddressSuccess={handleAddressSuccess}
-                    deliveryType={deliveryType}
-                    setDeliveryType={setDeliveryType}
-                    someoneElseData={someoneElseData}
-                    setSomeoneElseData={setSomeoneElseData}
-                  />
-                )}
-
+              <Box sx={{ position: { md: "sticky" }, top: { md: 100 } }}>
                 <OrderSummary
                   finalSubtotal={finalSubtotal}
                   discount={discount}
                   shipping={shipping}
                   total={total}
                   appliedCoupon={appliedCoupon}
-                  couponCode={couponCode}
                   couponError={couponError}
                   applyingCoupon={applyingCoupon}
-                  setCouponCode={setCouponCode}
-                  handleApplyCoupon={handleApplyCoupon}
                   handleRemoveCoupon={handleRemoveCoupon}
                   coupons={coupons}
                   couponsLoading={couponsLoading}
@@ -545,11 +580,8 @@ export const Cart = () => {
                   someoneElseData={someoneElseData}
                   onInitiateOrder={handleInitiateOrder}
                   orderInitiating={orderInitiating}
-                  orderError={orderError}
                   paymentMode={paymentMode}
                   setPaymentMode={setPaymentMode}
-                  deliveryInstructions={deliveryInstructions}
-                  setDeliveryInstructions={setDeliveryInstructions}
                   paymentStatus={paymentStatus}
                   paymentVerifying={paymentVerifying}
                   isGuest={isGuest}

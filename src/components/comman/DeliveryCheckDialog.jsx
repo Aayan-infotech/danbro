@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from "react";
-import { Box, TextField, Autocomplete, CircularProgress, Paper } from "@mui/material";
+import { Box, TextField, Autocomplete, CircularProgress, Paper, IconButton } from "@mui/material";
 import { CustomText } from "../comman/CustomText";
 import SearchIcon from "@mui/icons-material/Search";
 import MyLocationIcon from "@mui/icons-material/MyLocation";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
+import CloseIcon from "@mui/icons-material/Close";
 import { getCurrentLocation, storeLocation } from "../../utils/location";
 import { initGooglePlaces, getPlacePredictions, getPlaceDetails } from "../../utils/googlePlaces";
 import { checkServiceAvailability } from "../../utils/apiService";
@@ -18,11 +19,13 @@ export const DeliveryCheckDialog = ({ open, onClose, initialLocationLabel = "" }
   const autocompleteRef = useRef(null);
   const debounceTimer = useRef(null);
 
+  const hasStoredLocation = Boolean(initialLocationLabel && initialLocationLabel.trim());
+
   useEffect(() => {
     if (open) {
       setServiceMessage(null);
-      // Pre-fill search with current selected location (same as shown in header)
-      setInputValue(initialLocationLabel || "");
+      // Pre-fill search with current selected location (same as shown in header / TopHeader)
+      setInputValue(initialLocationLabel?.trim() || "");
       // Initialize Google Places when dialog opens
       initGooglePlaces().catch((error) => {
         console.error('Failed to initialize Google Places:', error);
@@ -207,6 +210,7 @@ export const DeliveryCheckDialog = ({ open, onClose, initialLocationLabel = "" }
           maxWidth: "90%",
           boxShadow: "0 10px 40px rgba(0,0,0,0.2)",
           position: "relative",
+          overflow: "hidden",
           animation: "slideUp 0.3s ease-out",
           "@keyframes slideUp": {
             "0%": {
@@ -221,23 +225,54 @@ export const DeliveryCheckDialog = ({ open, onClose, initialLocationLabel = "" }
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header with title and location icons */}
-        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3, position: "relative" }}>
-          <CustomText sx={{ fontSize: { xs: 20, md: 22 }, fontWeight: 700, color: "#333", }}>
+        {/* Header with title, location icons and close (when location is set) */}
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            mb: 3,
+            position: "relative",
+            mx: -3,
+            mt: -3,
+            px: 3,
+            pt: 3,
+            pb: 2,
+            background: "linear-gradient(135deg, #fff5f3 0%, #ffe8e4 100%)",
+            borderBottom: "1px solid rgba(211, 47, 47, 0.12)",
+            borderRadius: "16px 16px 0 0",
+          }}
+        >
+          <CustomText sx={{ fontSize: { xs: 20, md: 22 }, fontWeight: 700, color: "#333" }}>
             Enter Delivery Location
           </CustomText>
-          <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 0.5, position: "relative", width: 40, height: 50 }}>
-            <LocationOnIcon sx={{ color: "#d32f2f", fontSize: 24, position: "absolute", top: 0, zIndex: 2 }} />
-            <Box
-              sx={{
-                width: "2px",
-                height: "24px",
-                position: "absolute",
-                top: 12,
-                background: "repeating-linear-gradient(to bottom, #d32f2f 0px, #d32f2f 4px, transparent 4px, transparent 8px)",
-                zIndex: 1,
-              }}
-            />
+          <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+            {hasStoredLocation && (
+              <IconButton
+                aria-label="Close"
+                onClick={onClose}
+                size="small"
+                sx={{
+                  color: "#666",
+                  "&:hover": { backgroundColor: "rgba(0,0,0,0.06)", color: "#333" },
+                }}
+              >
+                <CloseIcon sx={{ fontSize: 22 }} />
+              </IconButton>
+            )}
+            <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 0.5, position: "relative", width: 40, height: 50 }}>
+              <LocationOnIcon sx={{ color: "#d32f2f", fontSize: 24, position: "absolute", top: 0, zIndex: 2 }} />
+              <Box
+                sx={{
+                  width: "2px",
+                  height: "24px",
+                  position: "absolute",
+                  top: 12,
+                  background: "repeating-linear-gradient(to bottom, #d32f2f 0px, #d32f2f 4px, transparent 4px, transparent 8px)",
+                  zIndex: 1,
+                }}
+              />
+            </Box>
           </Box>
         </Box>
 

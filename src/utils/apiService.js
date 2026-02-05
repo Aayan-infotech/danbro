@@ -1,7 +1,36 @@
 import { EXTERNAL_API_BASE_URL, EXTERNAL_API_ACCESS_KEY, API_BASE_URL } from './apiUrl';
 import axios from 'axios';
 import { getStoredLocation } from './location';
-import { getAccessToken } from './cookies';
+import { getAccessToken, getRefreshToken, setAccessToken, setRefreshToken } from './cookies';
+
+/**
+ * POST /api/user/refreshToken – get new access (and optionally refresh) token using refresh token
+ * @param {string} [refreshToken] - Refresh token (defaults to cookie value)
+ * @returns {Promise<{ accessToken: string, refreshToken?: string }>}
+ */
+export const refreshTokenApi = async (refreshToken = getRefreshToken()) => {
+  if (!refreshToken) {
+    throw new Error('No refresh token available');
+  }
+  const response = await axios.post(
+    `${API_BASE_URL}/user/refreshToken`,
+    { refreshToken },
+    {
+      headers: { 'Content-Type': 'application/json' },
+      withCredentials: false,
+      timeout: 15000,
+    }
+  );
+  const data = response?.data?.data || response?.data;
+  const newAccessToken = data?.accessToken || data?.token;
+  const newRefreshToken = data?.refreshToken;
+  if (!newAccessToken) {
+    throw new Error(response?.data?.message || 'Refresh token failed');
+  }
+  setAccessToken(newAccessToken);
+  if (newRefreshToken) setRefreshToken(newRefreshToken);
+  return { accessToken: newAccessToken, refreshToken: newRefreshToken };
+};
 
 /**
  * Initiate order for SELF delivery

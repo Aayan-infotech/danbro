@@ -1,8 +1,9 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 import { API_BASE_URL } from '../utils/apiUrl';
-import { setAccessToken, setRefreshToken, getAccessToken, clearAuthCookies } from '../utils/cookies';
+import { setAccessToken, setRefreshToken, getAccessToken, getRefreshToken, clearAuthCookies } from '../utils/cookies';
 import { getStoredLocation } from '../utils/location';
+import { refreshTokenApi } from '../utils/apiService';
 
 /**
  * Async thunk for user login
@@ -84,12 +85,34 @@ export const logoutUser = createAsyncThunk(
 );
 
 /**
- * Check if user is authenticated
+ * Refresh access token using refresh token (POST /api/user/refreshToken)
+ */
+export const refreshAuth = createAsyncThunk(
+  'auth/refreshAuth',
+  async (_, { rejectWithValue }) => {
+    const refresh = getRefreshToken();
+    if (!refresh) return rejectWithValue('No refresh token');
+    try {
+      const { accessToken, refreshToken } = await refreshTokenApi(refresh);
+      return { accessToken, refreshToken };
+    } catch (err) {
+      clearAuthCookies();
+      return rejectWithValue(err.message || 'Session expired');
+    }
+  }
+);
+
+/**
+ * Check if user is authenticated (uses access token; if missing but refresh token exists, tries refresh)
  */
 export const checkAuth = createAsyncThunk(
   'auth/checkAuth',
-  async () => {
-    const token = getAccessToken();
+  async (_, { dispatch }) => {
+    let token = getAccessToken();
+    if (!token && getRefreshToken()) {
+      const result = await dispatch(refreshAuth());
+      if (refreshAuth.fulfilled.match(result)) token = result.payload?.accessToken;
+    }
     return !!token;
   }
 );
@@ -163,6 +186,18 @@ const authSlice = createSlice({
           state.accessToken = null;
           state.refreshToken = null;
         }
+      })
+      // Refresh token cases
+      .addCase(refreshAuth.fulfilled, (state, action) => {
+        state.accessToken = action.payload.accessToken;
+        state.refreshToken = action.payload.refreshToken ?? state.refreshToken;
+        state.isAuthenticated = true;
+        state.error = null;
+      })
+      .addCase(refreshAuth.rejected, (state) => {
+        state.isAuthenticated = false;
+        state.accessToken = null;
+        state.refreshToken = null;
       });
   },
 });

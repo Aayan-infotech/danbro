@@ -82,31 +82,38 @@ export const ProductDetails = () => {
     setCakeMessage("");
   }, [id]);
 
+  // Fetch product only when id changes — single API call per product to avoid 6–7x hits
   useEffect(() => {
+    if (!id) return;
+
+    let cancelled = false;
+    const productId = id;
+
+    const markRecentlyViewed = async () => {
+      try {
+        await addToRecentlyViewed(productId);
+      } catch {
+        // ignore (guest user / token missing / API failure)
+      }
+    };
+
     const loadProduct = async () => {
       try {
         setLoading(true);
         setError(null);
 
-        if (!id) {
-          setError("Product ID not found");
-          setLoading(false);
-          return;
-        }
-        const productId = id;
-        const markRecentlyViewed = async () => {
-          try {
-            await addToRecentlyViewed(productId);
-          } catch {
-            // ignore (guest user / token missing / API failure)
-          }
-        };
-
-        // OPTIMIZATION 1: Use direct API endpoint to get product by ID (fastest)
+        // Single call: get product by ID
         try {
           const response = await fetchProductById(productId);
+          if (cancelled) return;
+
           const data = response?.data;
-          const hasValidProduct = data && typeof data === "object" && !Array.isArray(data) && (data.productId || data._id || data.name);
+          const hasValidProduct =
+            data &&
+            typeof data === "object" &&
+            !Array.isArray(data) &&
+            (data.productId || data._id || data.name);
+
           if (response?.success && hasValidProduct) {
             setProduct(data);
             setProductWeight(data.weight || "500g");
@@ -124,14 +131,8 @@ export const ProductDetails = () => {
             setLoading(false);
             return;
           }
-          if (hasValidProduct) {
-            setProduct(data);
-            setProductWeight(data.weight || "500g");
-            markRecentlyViewed();
-            setLoading(false);
-            return;
-          }
         } catch (err) {
+          if (cancelled) return;
           const apiMessage = err.response?.data?.message;
           const isLocationError = err.response?.status === 400 && apiMessage;
           if (isLocationError) {
@@ -139,85 +140,88 @@ export const ProductDetails = () => {
             setLoading(false);
             return;
           }
-          console.log('Direct product fetch failed, trying fallback methods...', err);
         }
 
-        // FALLBACK 1: Check homeLayout products data (already loaded)
-        if (homeLayoutProducts && homeLayoutProducts.length > 0) {
+        // Fallback: use home layout cache (no extra API call)
+        if (homeLayoutProducts?.length > 0) {
           for (const categoryData of homeLayoutProducts) {
             if (categoryData.products && Array.isArray(categoryData.products)) {
-              const foundProduct = categoryData.products.find(p =>
-                p.productId === productId ||
-                p._id === productId ||
-                p.id === productId
+              const found = categoryData.products.find(
+                (p) =>
+                  p.productId === productId ||
+                  p._id === productId ||
+                  p.id === productId
               );
-              if (foundProduct) {
-                try {
-                  const response = await fetchProductById(productId);
-                  if (response?.success && response?.data) {
-                    setProduct(response.data);
-                    setProductWeight(response.data.weight || "500g");
-                    markRecentlyViewed();
-                    setLoading(false);
-                    return;
-                  }
-                } catch (err) {
-                  setProduct(foundProduct);
-                  setProductWeight(foundProduct.weight || "500g");
-                  markRecentlyViewed();
-                  setLoading(false);
-                  return;
-                }
+              if (found) {
+                setProduct(found);
+                setProductWeight(found.weight || "500g");
+                markRecentlyViewed();
+                setLoading(false);
+                return;
               }
             }
           }
         }
 
-        // FALLBACK 2: Search without category filter
-        let lastApiMessage = null;
+        // Fallback: search list (one fetchProducts call, not getById again)
         try {
           const response = await fetchProducts(null, 1, 100, productId);
+          if (cancelled) return;
           if (response?.success && response?.data && Array.isArray(response.data)) {
-            const foundProduct = response.data.find(p =>
-              p._id === productId ||
-              p.productId === productId ||
-              p.id === productId ||
-              p.productId?.toString() === productId ||
-              p._id?.toString() === productId
+            const found = response.data.find(
+              (p) =>
+                p._id === productId ||
+                p.productId === productId ||
+                p.id === productId ||
+                p.productId?.toString() === productId ||
+                p._id?.toString() === productId
             );
-            if (foundProduct) {
-              setProduct(foundProduct);
-              setProductWeight(foundProduct.weight || "500g");
+            if (found) {
+              setProduct(found);
+              setProductWeight(found.weight || "500g");
               markRecentlyViewed();
               setLoading(false);
               return;
             }
-            if (response?.message) lastApiMessage = response.message;
-          } else if (response?.message) {
-            lastApiMessage = response.message;
           }
+          const msg = response?.message || response?.data?.message;
+          setError(msg || "Product not found");
         } catch (err) {
-          if (err.response?.data?.message) lastApiMessage = err.response.data.message;
-          console.log('Search without category failed');
+          if (cancelled) return;
+          setError(
+            err.response?.data?.message ||
+              err.message ||
+              "Failed to load product"
+          );
+        } finally {
+          if (!cancelled) setLoading(false);
         }
-        console.log(lastApiMessage, 'lastApiMessage');
-        setError(lastApiMessage?.message);
       } catch (err) {
-        console.error('Error loading product:', err);
-        const apiMessage = err.response?.data?.message;
-        setError(apiMessage || err.message || "Failed to load product");
-      } finally {
-        setLoading(false);
+        if (!cancelled) {
+          console.error("Error loading product:", err);
+          setError(
+            err.response?.data?.message ||
+              err.message ||
+              "Failed to load product"
+          );
+          setLoading(false);
+        }
       }
     };
 
-    // Load product immediately when id is available
-    if (id) {
-      loadProduct();
-    }
-  }, [id, apiCategories, homeLayoutProducts]);
+    loadProduct();
+    return () => {
+      cancelled = true;
+    };
+  }, [id]);
 
   const productIdForWishlist = product?._id || product?.productId || product?.id || id;
+
+  // Show "Cake Message" only when category is exactly "CAKES WEB AND APP" or "CAKES"
+  const showCakeMessage = useMemo(() => {
+    const cat = product?.category ? String(product.category).trim() : "";
+    return cat === "CAKES WEB AND APP" || cat === "CAKES";
+  }, [product?.category]);
 
   useEffect(() => {
     if (!productIdForWishlist) return;
@@ -365,6 +369,7 @@ export const ProductDetails = () => {
               weightOptions={weightOptions}
               productWeight={productWeight}
               onWeightChange={setProductWeight}
+              showCakeMessage={showCakeMessage}
               cakeMessage={cakeMessage}
               onCakeMessageChange={setCakeMessage}
               hasSavedLocation={hasSavedLocation}
@@ -387,7 +392,7 @@ export const ProductDetails = () => {
       <ProductDetailsIngredientsNutrition
         productData={productData}
         product={product}
-        expanded={expanded}
+              expanded={expanded}
         onExpandedChange={setExpanded}
       />
       <ProductDetailsReviews />

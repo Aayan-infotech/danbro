@@ -15,6 +15,24 @@ import {
 } from "@mui/icons-material";
 import blankImage from "../../assets/blankimage.png";
 
+const getItemPrice = (item) => {
+  if (item?.lineTotal != null && item.lineTotal > 0) return Number(item.lineTotal).toFixed(2);
+  if (Array.isArray(item?.price) && item.price.length > 0)
+    return (Number(item.price[0].rate) || Number(item.price[0].mrp) || 0).toFixed(2);
+  if (item?.price && typeof item.price === "object" && (item.price.rate != null || item.price.mrp != null))
+    return (Number(item.price.rate) || Number(item.price.mrp) || 0).toFixed(2);
+  return (typeof item?.price === "number" ? item.price : 0).toFixed(2);
+};
+
+const getItemImage = (item) =>
+  (item.images && Array.isArray(item.images) && item.images.length > 0 && (item.images[0].url || item.images[0])) ||
+  item.image ||
+  item.product?.image ||
+  blankImage;
+
+const getItemName = (item) => item?.name || item?.product?.name || "Product";
+const getItemUnit = (item) => item?.weight ?? item?.product?.weight ?? "N/A";
+
 export const CartItem = ({
   item,
   updatingItems,
@@ -22,12 +40,74 @@ export const CartItem = ({
   getItemKey,
   updateQuantity,
   removeItem,
+  compact = false,
+  showDivider = true,
 }) => {
   const productId = item.productId || item._id || item.id;
   const itemKey = getItemKey(productId, item.rawWeight ?? item.weight);
   const isUpdatingIncrease = updatingItems.has(itemKey) && updatingAction[itemKey] === "increase";
   const isUpdatingDecrease = updatingItems.has(itemKey) && updatingAction[itemKey] === "decrease";
   const isUpdating = isUpdatingIncrease || isUpdatingDecrease;
+
+  if (compact) {
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: { xs: 1.5, md: 2 },
+          py: 2,
+          borderBottom: showDivider ? "1px dotted #ddd" : "none",
+          "&:last-of-type": { borderBottom: "none" },
+        }}
+      >
+        <Box
+          component={Link}
+          to={`/products/${productId}`}
+          sx={{ display: "flex", alignItems: "center", gap: 1.5, flex: 1, minWidth: 0, textDecoration: "none", color: "inherit" }}
+        >
+          <Box sx={{ width: 64, height: 64, borderRadius: 1.5, overflow: "hidden", flexShrink: 0 }}>
+            <img src={getItemImage(item)} alt={getItemName(item)} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+          </Box>
+          <Box sx={{ width: 24, height: 24, borderRadius: 0.5, bgcolor: "#0d8c2d", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <Box sx={{ width: 10, height: 10, borderRadius: "50%", border: "1.5px solid #fff", bgcolor: "transparent" }} />
+          </Box>
+          <Box sx={{ minWidth: 0 }}>
+            <CustomText sx={{ fontSize: { xs: 14, md: 15 }, fontWeight: 600, color: "#2c2c2c", display: "block" }}>
+              {getItemName(item)}
+            </CustomText>
+            <CustomText sx={{ fontSize: 12, color: "#666" }}>
+              ({getItemUnit(item)})
+            </CustomText>
+          </Box>
+        </Box>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <IconButton
+            size="small"
+            onClick={() => updateQuantity(productId, -1, item.rawWeight ?? item.weight)}
+            disabled={isUpdating}
+            sx={{ color: "#666", bgcolor: "#f0f0f0", "&:hover": { bgcolor: "#e0e0e0" }, "&:disabled": { opacity: 0.5 } }}
+          >
+            {isUpdatingDecrease ? <CircularProgress size={16} /> : <RemoveIcon sx={{ fontSize: 18 }} />}
+          </IconButton>
+          <CustomText sx={{ minWidth: 28, textAlign: "center", fontSize: 14, fontWeight: 600 }}>
+            {item.quantity}
+          </CustomText>
+          <IconButton
+            size="small"
+            onClick={() => updateQuantity(productId, 1, item.rawWeight ?? item.weight)}
+            disabled={isUpdating}
+            sx={{ color: "var(--themeColor)", bgcolor: "rgba(230,120,80,0.12)", "&:hover": { bgcolor: "rgba(230,120,80,0.2)" }, "&:disabled": { opacity: 0.5 } }}
+          >
+            {isUpdatingIncrease ? <CircularProgress size={16} /> : <AddIcon sx={{ fontSize: 18 }} />}
+          </IconButton>
+        </Box>
+        <CustomText sx={{ fontSize: { xs: 14, md: 15 }, fontWeight: 600, color: "#2c2c2c", minWidth: { xs: 70, md: 80 }, textAlign: "right" }}>
+          INR {getItemPrice(item)}
+        </CustomText>
+      </Box>
+    );
+  }
 
   return (
     <Card
@@ -36,103 +116,41 @@ export const CartItem = ({
         borderRadius: { xs: 2, md: 2.5 },
         boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
         transition: "all 0.3s ease",
-        "&:hover": {
-          boxShadow: "0 4px 12px rgba(0,0,0,0.12)",
-        },
+        "&:hover": { boxShadow: "0 4px 12px rgba(0,0,0,0.12)" },
       }}
     >
       <CardContent>
-        <Box sx={{ display: "flex", gap: { xs: 2, md: 3 }, flexDirection: { xs: "column", sm: "row" }, }}>
-          <Box component={Link} to={`/products/${productId}`} sx={{ display: "flex", flex: 1, minWidth: 0, textDecoration: "none", color: "inherit", cursor: "pointer", }}>
-            <Box component="span" sx={{ display: "flex", gap: { xs: 2, md: 3 }, flex: 1, minWidth: 0, flexDirection: { xs: "column", sm: "row" }, "&:hover": { opacity: 0.9 }, }}>
-              <Box sx={{ width: { xs: "100%", sm: 110 }, height: { xs: 180, sm: 110 }, borderRadius: { xs: 2, md: 2 }, overflow: "hidden", flexShrink: 0, }}>
-                <img
-                  src={
-                    (item.images && Array.isArray(item.images) && item.images.length > 0 && (item.images[0].url || item.images[0])) ||
-                    item.image ||
-                    item.product?.image ||
-                    blankImage
-                  }
-                  alt={item.name || item.product?.name || "Product"}
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "cover",
-                  }}
-                />
+        <Box sx={{ display: "flex", gap: { xs: 2, md: 3 }, flexDirection: { xs: "column", sm: "row" } }}>
+          <Box component={Link} to={`/products/${productId}`} sx={{ display: "flex", flex: 1, minWidth: 0, textDecoration: "none", color: "inherit", cursor: "pointer" }}>
+            <Box component="span" sx={{ display: "flex", gap: { xs: 2, md: 3 }, flex: 1, minWidth: 0, flexDirection: { xs: "column", sm: "row" }, "&:hover": { opacity: 0.9 } }}>
+              <Box sx={{ width: { xs: "100%", sm: 110 }, height: { xs: 180, sm: 110 }, borderRadius: 2, overflow: "hidden", flexShrink: 0 }}>
+                <img src={getItemImage(item)} alt={getItemName(item)} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
               </Box>
               <Box sx={{ flex: 1, minWidth: 0 }}>
-                <CustomText sx={{ fontSize: { xs: 16, md: 18 }, fontWeight: 600, color: "#2c2c2c", mb: 0.5, }}>
-                  {item.name || item.product?.name || "Product"}
+                <CustomText sx={{ fontSize: { xs: 16, md: 18 }, fontWeight: 600, color: "#2c2c2c", mb: 0.5 }}>
+                  {getItemName(item)}
                 </CustomText>
-                <CustomText sx={{ fontSize: { xs: 12, md: 14 }, color: "#666", mb: { xs: 1, md: 1.5 }, }}>
-                  Weight: {item.weight ?? item.product?.weight ?? "N/A"}
+                <CustomText sx={{ fontSize: { xs: 12, md: 14 }, color: "#666", mb: { xs: 1, md: 1.5 } }}>
+                  Weight: {getItemUnit(item)}
                 </CustomText>
-                <CustomText sx={{ fontSize: { xs: 18, md: 20 }, fontWeight: 700, color: "var(--themeColor)", }}>
-                  ₹{
-                    (item.lineTotal != null && item.lineTotal > 0)
-                      ? Number(item.lineTotal).toFixed(2)
-                      : (Array.isArray(item.price) && item.price.length > 0)
-                        ? (Number(item.price[0].rate) || Number(item.price[0].mrp) || 0).toFixed(2)
-                        : (item.price && typeof item.price === "object" && (item.price.rate != null || item.price.mrp != null))
-                          ? (Number(item.price.rate) || Number(item.price.mrp) || 0).toFixed(2)
-                          : (typeof item.price === "number" ? item.price : 0).toFixed(2)
-                  }
+                <CustomText sx={{ fontSize: { xs: 18, md: 20 }, fontWeight: 700, color: "var(--themeColor)" }}>
+                  ₹{getItemPrice(item)}
                 </CustomText>
               </Box>
             </Box>
           </Box>
-
-          {/* Quantity Controls */}
           <Box sx={{ display: "flex", flexDirection: "column", justifyContent: "space-between", flexShrink: 0 }}>
-            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mt: { xs: 2, sm: 0 }, }}>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1, border: "1px solid #ddd", borderRadius: 2, p: 0.5, }}>
-                <IconButton
-                  size="small"
-                  onClick={() => updateQuantity(productId, -1, item.rawWeight ?? item.weight)}
-                  disabled={isUpdating}
-                  sx={{
-                    color: "var(--themeColor)",
-                    "&:hover": { backgroundColor: "rgba(95, 41, 48, 0.1)" },
-                    "&:disabled": { opacity: 0.5 },
-                  }}
-                >
-                  {isUpdatingDecrease ? (
-                    <CircularProgress size={16} />
-                  ) : (
-                    <RemoveIcon sx={{ fontSize: { xs: 18, md: 20 } }} />
-                  )}
+            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mt: { xs: 2, sm: 0 } }}>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1, border: "1px solid #ddd", borderRadius: 2, p: 0.5 }}>
+                <IconButton size="small" onClick={() => updateQuantity(productId, -1, item.rawWeight ?? item.weight)} disabled={isUpdating} sx={{ color: "var(--themeColor)", "&:hover": { backgroundColor: "rgba(95, 41, 48, 0.1)" }, "&:disabled": { opacity: 0.5 } }}>
+                  {isUpdatingDecrease ? <CircularProgress size={16} /> : <RemoveIcon sx={{ fontSize: { xs: 18, md: 20 } }} />}
                 </IconButton>
-                <CustomText sx={{ minWidth: { xs: 30, md: 40 }, textAlign: "center", fontSize: { xs: 14, md: 16 }, fontWeight: 600, }}>
-                  {item.quantity}
-                </CustomText>
-                <IconButton
-                  size="small"
-                  onClick={() => updateQuantity(productId, 1, item.rawWeight ?? item.weight)}
-                  disabled={isUpdating}
-                  sx={{
-                    color: "var(--themeColor)",
-                    "&:hover": { backgroundColor: "rgba(95, 41, 48, 0.1)" },
-                    "&:disabled": { opacity: 0.5 },
-                  }}
-                >
-                  {isUpdatingIncrease ? (
-                    <CircularProgress size={16} />
-                  ) : (
-                    <AddIcon sx={{ fontSize: { xs: 18, md: 20 } }} />
-                  )}
+                <CustomText sx={{ minWidth: { xs: 30, md: 40 }, textAlign: "center", fontSize: { xs: 14, md: 16 }, fontWeight: 600 }}>{item.quantity}</CustomText>
+                <IconButton size="small" onClick={() => updateQuantity(productId, 1, item.rawWeight ?? item.weight)} disabled={isUpdating} sx={{ color: "var(--themeColor)", "&:hover": { backgroundColor: "rgba(95, 41, 48, 0.1)" }, "&:disabled": { opacity: 0.5 } }}>
+                  {isUpdatingIncrease ? <CircularProgress size={16} /> : <AddIcon sx={{ fontSize: { xs: 18, md: 20 } }} />}
                 </IconButton>
               </Box>
-
-              <IconButton
-                onClick={() => removeItem(productId, item.rawWeight ?? item.weight)}
-                disabled={isUpdating}
-                sx={{
-                  color: "#d32f2f",
-                  "&:hover": { backgroundColor: "rgba(211, 47, 47, 0.1)" },
-                  "&:disabled": { opacity: 0.5 },
-                }}
-              >
+              <IconButton onClick={() => removeItem(productId, item.rawWeight ?? item.weight)} disabled={isUpdating} sx={{ color: "#d32f2f", "&:hover": { backgroundColor: "rgba(211, 47, 47, 0.1)" }, "&:disabled": { opacity: 0.5 } }}>
                 <DeleteOutlineIcon sx={{ fontSize: { xs: 20, md: 24 } }} />
               </IconButton>
             </Box>

@@ -163,7 +163,7 @@ export const CategoryProductSection = memo(({
 
   // Render ProductSectionCarousel with fetched products
   return (
-    <ProductSectionCarousel
+    <ProductSectionCarousel onCarousel
       title={title || category?.groupname}
       subtitle={subtitle || "Shop Now"}
       products={products}
