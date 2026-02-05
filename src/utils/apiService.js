@@ -1291,14 +1291,20 @@ export const fetchProductById = async (productId) => {
   try {
     const url = `${API_BASE_URL}/product/getById/${productId}`;
     const location = getStoredLocation();
-    
+    const token = getAccessToken();
+
+    const headers = {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'lat': location.lat.toString(),
+      'long': location.long.toString(),
+    };
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
+
     const response = await axios.get(url, {
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'lat': location.lat.toString(),
-        'long': location.long.toString(),
-      },
+      headers,
       withCredentials: false,
       timeout: 15000,
     });
