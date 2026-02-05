@@ -11,10 +11,10 @@ import { CustomText } from "../../components/comman/CustomText";
 import { useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import { loadCartItems, updateCartItemQuantity, removeCartItem, clearCartItems } from "../../store/cartSlice";
+import { getGuestWishlist } from "../../store/guestSlice";
 import { getAccessToken } from "../../utils/cookies";
-import api from "../../utils/api";
-import { getMyAddresses } from "../../utils/apiService";
-import { initiateOrderSelf, initiateOrderOther, initiateOrderGuest, validateCoupon } from "../../utils/apiService";
+import { getMyAddresses, getAllCoupons, validateCoupon } from "../../utils/apiService";
+import { initiateOrderSelf, initiateOrderOther } from "../../utils/apiService";
 import { CartItem } from "../../components/cart/CartItem";
 import { OrderSummary } from "../../components/cart/OrderSummary";
 import { AddressSection } from "../../components/cart/AddressSection";
@@ -32,8 +32,9 @@ export const Cart = () => {
     error,
     updatingItems,
     updatingAction,
-    isGuest
+    isGuest,
   } = useAppSelector((state) => state.cart);
+  const guestWishlist = useAppSelector(getGuestWishlist);
 
   // Local state for addresses and coupons
   const [addresses, setAddresses] = useState([]);
@@ -111,14 +112,9 @@ export const Cart = () => {
   const loadCoupons = async () => {
     try {
       setCouponsLoading(true);
-      const token = getAccessToken();
-      if (!token) {
-        setCoupons([]);
-        return;
-      }
-      const response = await api.get('/coupon/getAll');
-      if (response.data && response.data.data) {
-        const formattedCoupons = response.data.data.map((coupon) => {
+      const response = await getAllCoupons();
+      if (response && response.data) {
+        const formattedCoupons = response.data.map((coupon) => {
           const isPercentage = coupon.discountType === "ITEM_DISCOUNT_PERCENTAGE";
           const discount = isPercentage
             ? `${coupon.discountPercentage}%`
@@ -173,47 +169,26 @@ export const Cart = () => {
   };
 
   const handleInitiateOrder = async () => {
+    if (isGuest) {
+      navigate("/login", {
+        state: {
+          fromCart: true,
+          cartItems: cartItems?.map((item) => ({
+            productId: item?.productId || item?.id,
+            quantity: Number(item?.quantity) || 1,
+          })) || [],
+          wishlist: guestWishlist || [],
+          appliedCoupon: appliedCoupon?.code ? { couponCode: appliedCoupon.code } : undefined,
+        },
+      });
+      return;
+    }
     try {
       setOrderInitiating(true);
       setOrderError("");
       setPaymentStatus(null);
       let orderResponse;
-      if (isGuest) {
-        if (
-          !someoneElseData?.name ||
-          !someoneElseData?.phone ||
-          !someoneElseData?.houseNumber ||
-          !someoneElseData?.streetName ||
-          !someoneElseData?.area ||
-          !someoneElseData?.city ||
-          !someoneElseData?.state ||
-          !someoneElseData?.zipCode
-        ) {
-          setOrderError("Please fill in all required delivery address fields");
-          setOrderInitiating(false);
-          return;
-        }
-
-        orderResponse = await initiateOrderGuest({
-          cart: cartItems?.map((item) => ({
-            productId: item?.productId || item?.id,
-            quantity: Number(item?.quantity) || 1,
-          })),
-          deliveryAddress: {
-            name: someoneElseData?.name,
-            phone: someoneElseData?.phone,
-            houseNumber: someoneElseData?.houseNumber,
-            streetName: someoneElseData?.streetName,
-            area: someoneElseData?.area,
-            landmark: someoneElseData?.landmark,
-            city: someoneElseData?.city,
-            state: someoneElseData?.state,
-            zipCode: someoneElseData?.zipCode,
-          },
-          paymentMode: paymentMode,
-          couponCode: appliedCoupon?.code || couponCode || undefined,
-        });
-      } else if (deliveryType === 'self') {
+      if (deliveryType === 'self') {
         if (!selectedAddress) {
           setOrderError("Please select a delivery address");
           setOrderInitiating(false);
@@ -532,19 +507,21 @@ export const Cart = () => {
             {/* Right Column - Address & Order Summary */}
             <Grid size={{ xs: 12, md: 4 }} sx={{ order: { xs: 2, md: 2 }, minWidth: 0 }}>
               <Box sx={{ display: "flex", flexDirection: "column", gap: { xs: 2, md: 2.5 }, minWidth: 0 }}>
-                <AddressSection
-                  addresses={addresses}
-                  selectedAddress={selectedAddress}
-                  setSelectedAddress={setSelectedAddress}
-                  addressesLoading={addressesLoading}
-                  addressDialogOpen={addressDialogOpen}
-                  setAddressDialogOpen={setAddressDialogOpen}
-                  handleAddressSuccess={handleAddressSuccess}
-                  deliveryType={deliveryType}
-                  setDeliveryType={setDeliveryType}
-                  someoneElseData={someoneElseData}
-                  setSomeoneElseData={setSomeoneElseData}
-                />
+                {!isGuest && (
+                  <AddressSection
+                    addresses={addresses}
+                    selectedAddress={selectedAddress}
+                    setSelectedAddress={setSelectedAddress}
+                    addressesLoading={addressesLoading}
+                    addressDialogOpen={addressDialogOpen}
+                    setAddressDialogOpen={setAddressDialogOpen}
+                    handleAddressSuccess={handleAddressSuccess}
+                    deliveryType={deliveryType}
+                    setDeliveryType={setDeliveryType}
+                    someoneElseData={someoneElseData}
+                    setSomeoneElseData={setSomeoneElseData}
+                  />
+                )}
 
                 <OrderSummary
                   finalSubtotal={finalSubtotal}
@@ -575,6 +552,7 @@ export const Cart = () => {
                   setDeliveryInstructions={setDeliveryInstructions}
                   paymentStatus={paymentStatus}
                   paymentVerifying={paymentVerifying}
+                  isGuest={isGuest}
                 />
               </Box>
             </Grid>

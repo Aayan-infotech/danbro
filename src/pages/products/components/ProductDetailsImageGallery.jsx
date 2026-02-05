@@ -1,0 +1,175 @@
+import { useRef, useState } from "react";
+import { Box, useMediaQuery, useTheme } from "@mui/material";
+import { CustomText } from "../../../components/comman/CustomText";
+
+export const ProductDetailsImageGallery = ({
+  productData,
+  product,
+  selectedImage,
+  onSelectImage,
+}) => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const imageContainerRef = useRef(null);
+  const [isZooming, setIsZooming] = useState(false);
+  const [zoomPosition, setZoomPosition] = useState({ x: 0, y: 0 });
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+
+  const handleMouseMove = (e) => {
+    if (!imageContainerRef.current || isMobile) return;
+    const rect = imageContainerRef.current.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    const relX = e.clientX - rect.left;
+    const relY = e.clientY - rect.top;
+    const lensSize = 120;
+    const half = lensSize / 2;
+    const left = Math.max(0, Math.min(rect.width - lensSize, relX - half));
+    const top = Math.max(0, Math.min(rect.height - lensSize, relY - half));
+    setMousePosition({ x: left, y: top });
+    setZoomPosition({ x: Math.max(0, Math.min(100, x)), y: Math.max(0, Math.min(100, y)) });
+  };
+
+  return (
+    <Box sx={{ display: "flex", gap: { xs: 1.5, md: 2 }, flexDirection: { xs: "column", md: "row" }, height: { xs: "auto", md: "100%" }, width: "100%", minWidth: 0 }}>
+      {/* Thumbnails - desktop only */}
+      <Box
+        sx={{
+          display: { xs: "none", md: "flex" },
+          flexDirection: "column",
+          gap: 1.5,
+          maxHeight: 398,
+          overflowY: "auto",
+          overflowX: "hidden",
+          pr: 0.5,
+          "&::-webkit-scrollbar": { width: 6 },
+          "&::-webkit-scrollbar-thumb": { borderRadius: 3, bgcolor: "rgba(0,0,0,0.2)" },
+          "&::-webkit-scrollbar-track": { bgcolor: "transparent" },
+        }}
+      >
+        {productData?.images?.map((image, index) => (
+          <Box
+            key={index}
+            onClick={() => onSelectImage(index)}
+            sx={{
+              width: 70,
+              height: 70,
+              flexShrink: 0,
+              borderRadius: 1,
+              overflow: "hidden",
+              cursor: "pointer",
+              border: selectedImage === index ? "2px solid #FF9472" : "1px solid #e0e0e0",
+            }}
+          >
+            <Box
+              component="img"
+              src={image}
+              alt={`${productData?.name} ${index + 1}`}
+              loading={index === 0 ? "eager" : "lazy"}
+              sx={{ width: "100%", height: "100%", objectFit: "cover" }}
+            />
+          </Box>
+        ))}
+      </Box>
+
+      {/* Main image with zoom */}
+      <Box sx={{ flex: 1, position: "relative", minHeight: 0, minWidth: 0 }}>
+        <Box
+          ref={imageContainerRef}
+          sx={{
+            width: "100%",
+            height: { xs: 260, sm: 320, md: 420 },
+            minHeight: { xs: 260, sm: 320, md: 420 },
+            borderRadius: 1,
+            overflow: "hidden",
+            backgroundColor: "#f5f5f5",
+            position: "relative",
+            cursor: { xs: "default", md: isZooming ? "crosshair" : "zoom-in" },
+          }}
+          onMouseEnter={() => !isMobile && setIsZooming(true)}
+          onMouseLeave={() => setIsZooming(false)}
+          onMouseMove={handleMouseMove}
+        >
+          <Box
+            component="img"
+            src={productData?.images?.[selectedImage]}
+            alt={productData?.name}
+            loading="eager"
+            sx={{ width: "100%", height: "100%", objectFit: "cover" }}
+          />
+          {(product?.veg === "Y" || product?.veg === true) && (
+            <Box
+              sx={{
+                position: "absolute",
+                top: 12,
+                right: 12,
+                px: 1.5,
+                py: 0.5,
+                borderRadius: 1,
+                backgroundColor: "rgba(27, 156, 63, 0.95)",
+                border: "1px solid #fff",
+                boxShadow: "0 1px 4px rgba(0,0,0,0.2)",
+                zIndex: 5,
+              }}
+            >
+              <CustomText sx={{ fontSize: 12, fontWeight: 700, fontFamily: "'Inter', sans-serif", color: "#fff", letterSpacing: "0.02em" }}>
+                Veg
+              </CustomText>
+            </Box>
+          )}
+          {isZooming && !isMobile && (
+            <Box
+              sx={{
+                position: "absolute",
+                top: mousePosition.y,
+                left: mousePosition.x,
+                width: 120,
+                height: 120,
+                borderRadius: "50%",
+                border: "2px solid rgba(255, 148, 114, 0.9)",
+                backgroundColor: "rgba(255, 255, 255, 0.25)",
+                pointerEvents: "none",
+                display: { xs: "none", md: "block" },
+                zIndex: 10,
+                boxShadow: "0 0 0 9999px rgba(0, 0, 0, 0.35)",
+              }}
+            />
+          )}
+        </Box>
+        {isZooming && !isMobile && (
+          <Box
+            sx={{
+              position: "absolute",
+              top: 0,
+              left: "100%",
+              ml: 1,
+              width: 400,
+              height: 420,
+              borderRadius: 1,
+              overflow: "hidden",
+              backgroundColor: "transparent",
+              zIndex: 20,
+              display: { xs: "none", md: "block" },
+              boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+            }}
+          >
+            <Box
+              component="img"
+              src={productData?.images?.[selectedImage]}
+              alt={`${productData?.name} - Zoomed`}
+              sx={{
+                width: "200%",
+                height: "200%",
+                objectFit: "cover",
+                position: "absolute",
+                left: `${50 - zoomPosition.x}%`,
+                top: `${50 - zoomPosition.y}%`,
+                pointerEvents: "none",
+              }}
+            />
+          </Box>
+        )}
+      </Box>
+    </Box>
+  );
+};

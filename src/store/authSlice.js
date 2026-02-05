@@ -12,10 +12,13 @@ export const loginUser = createAsyncThunk(
   async (credentials, { rejectWithValue }) => {
     try {
       const location = getStoredLocation();
-      const response = await axios.post(`${API_BASE_URL}/user/login`, {
+      const body = {
         email: credentials.email || credentials.username,
         password: credentials.password,
-      }, {
+      };
+      if (credentials.cart != null) body.cart = credentials.cart;
+      if (credentials.wishlist != null) body.wishlist = credentials.wishlist;
+      const response = await axios.post(`${API_BASE_URL}/user/login`, body, {
         headers: {
           'Content-Type': 'application/json',
           'lat': location.lat.toString(),

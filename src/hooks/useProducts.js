@@ -25,7 +25,9 @@ export const useProducts = (categoryId = null, page = 1, limit = 20, search = ''
     hasMore: false
   });
 
-  const isSearchMode = typeof search === 'string' && search.trim() !== '';
+  const hasSearchText = typeof search === 'string' && search.trim() !== '';
+  const hasPriceFilter = minPrice != null || maxPrice != null;
+  const useSearchApi = hasSearchText || hasPriceFilter;
 
   useEffect(() => {
     const loadProducts = async () => {
@@ -33,9 +35,9 @@ export const useProducts = (categoryId = null, page = 1, limit = 20, search = ''
         setLoading(true);
         setError(null);
 
-        if (isSearchMode) {
+        if (useSearchApi) {
           const response = await fetchProductSearch(
-            search.trim(),
+            typeof search === 'string' ? search.trim() : '',
             page,
             limit,
             minPrice,
@@ -46,13 +48,17 @@ export const useProducts = (categoryId = null, page = 1, limit = 20, search = ''
           if (response?.data && Array.isArray(response.data)) {
             productsData = response.data;
           }
-          if (response?.pagination) {
+          const paginationData = response?.pagination || response?.meta;
+          if (paginationData) {
+            const total = paginationData.total ?? 0;
+            const totalPages = paginationData.totalPages ?? (limit > 0 ? Math.ceil(total / limit) : 0);
+            const currentPageNum = paginationData.page ?? page;
             setPagination({
-              page: response.pagination.page || page,
-              limit: response.pagination.limit || limit,
-              total: response.pagination.total || 0,
-              totalPages: response.pagination.totalPages || 0,
-              hasMore: (response.pagination.page || page) < (response.pagination.totalPages || 0)
+              page: currentPageNum,
+              limit: paginationData.limit ?? limit,
+              total,
+              totalPages,
+              hasMore: currentPageNum < totalPages
             });
           } else {
             setPagination({

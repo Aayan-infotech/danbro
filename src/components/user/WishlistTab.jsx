@@ -201,7 +201,7 @@ export const WishlistTab = ({ onRemoveFromWishlist }) => {
                       fontSize: { xs: 14, md: 15 },
                       lineHeight: 1.4,
                       color: "#2c2c2c",
-                      minHeight: { xs: "2.6em", md: "3em" },
+                      minHeight: { xs: "1.6em", md: "3em" },
                       display: "-webkit-box",
                       WebkitLineClamp: 2,
                       WebkitBoxOrient: "vertical",

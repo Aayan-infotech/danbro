@@ -326,6 +326,34 @@ export const verifyOrderPaymentGuest = async (intentId) => {
 };
 
 /**
+ * Get all coupons
+ * GET /api/coupon/getAll (optional auth)
+ * @returns {Promise<{ data: Array }>} API response with data array of coupons
+ */
+export const getAllCoupons = async () => {
+  try {
+    const location = getStoredLocation();
+    const token = getAccessToken();
+    const headers = {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'lat': String(location.lat),
+      'long': String(location.long),
+    };
+    if (token) headers.Authorization = `Bearer ${token}`;
+    const response = await axios.get(`${API_BASE_URL}/coupon/getAll`, {
+      headers,
+      withCredentials: false,
+      timeout: 15000,
+    });
+    return response.data;
+  } catch (error) {
+    const message = error.response?.data?.message || error.response?.data?.error || error.message;
+    throw new Error(message || 'Failed to fetch coupons.');
+  }
+};
+
+/**
  * Validate coupon (guest: no token; logged-in: with token)
  * POST /api/coupon/validate with body { couponCode, cart: [{ productId, quantity }] }
  * @param {string} couponCode - Coupon code to validate
@@ -635,20 +663,21 @@ const getExternalApiUrl = (level, params = {}) => {
 
 /**
  * Search products via GET /product/search
- * @param {string} search - Search query
+ * Matches: ?search=cake and ?minPrice=400&maxPrice=600 with lat/long headers
+ * @param {string} search - Search query (optional); when empty, only price/category applied
  * @param {number} page - Page number (default: 1)
  * @param {number} limit - Number of items per page (default: 20)
  * @param {number|null} minPrice - Min price filter (optional)
  * @param {number|null} maxPrice - Max price filter (optional)
  * @param {string|null} categoryId - Category filter (optional)
- * @returns {Promise<Object>} Response object with success, data array, pagination
+ * @returns {Promise<Object>} Response with data (array), and optional pagination or meta
  */
 export const fetchProductSearch = async (search, page = 1, limit = 20, minPrice = null, maxPrice = null, categoryId = null) => {
   const location = getStoredLocation();
   const params = new URLSearchParams();
-  if (search) params.append('search', search);
-  if (page) params.append('page', page.toString());
-  if (limit) params.append('limit', limit.toString());
+  if (search && String(search).trim()) params.append('search', String(search).trim());
+  if (page != null) params.append('page', String(page));
+  if (limit != null) params.append('limit', String(limit));
   if (minPrice != null && minPrice !== '') params.append('minPrice', String(minPrice));
   if (maxPrice != null && maxPrice !== '') params.append('maxPrice', String(maxPrice));
   if (categoryId) params.append('categoryId', String(categoryId));

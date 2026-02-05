@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Box,  Button, Checkbox, FormControlLabel, Link, Container, Alert, CircularProgress, InputLabel } from "@mui/material";
+import { Box, Button, Checkbox, FormControlLabel, Link, Container, Alert, CircularProgress, InputLabel } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import banner from "../../assets/login.png";
@@ -38,11 +38,57 @@ export const Register = () => {
     agreeTerms: true,
     newsletter: true,
   });
+  const [fieldErrors, setFieldErrors] = useState({
+    fullName: "",
+    email: "",
+    mobile: "",
+    password: "",
+    confirmPassword: "",
+    agreeTerms: "",
+  });
   const formRef = useRef(null);
   const navigate = useNavigate();
 
   const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test((email || "").trim());
   const isValidMobile = (mobile) => /^[6-9]\d{9}$/.test((mobile || "").replace(/\s/g, ""));
+  /** Name should not contain numbers */
+  const isValidName = (name) => (name || "").trim().length >= 2 && !/\d/.test((name || "").trim());
+
+  const validateRegisterField = (name, value, formData) => {
+    const v = typeof value === "string" ? value : "";
+    const trimV = v.trim();
+    if (name === "fullName") {
+      if (!trimV) return "Full name is required.";
+      if (trimV.length < 2) return "Full name must be at least 2 characters.";
+      if (/\d/.test(trimV)) return "Name should not contain numbers.";
+      return "";
+    }
+    if (name === "email") {
+      if (!trimV) return "Email is required.";
+      if (!isValidEmail(trimV)) return "Please enter a valid email address.";
+      return "";
+    }
+    if (name === "mobile") {
+      const m = v.replace(/\s/g, "");
+      if (!m) return "Mobile number is required.";
+      if (!isValidMobile(m)) return "Please enter a valid 10-digit Indian mobile number (e.g. 9876543210).";
+      return "";
+    }
+    if (name === "password") {
+      if (!v) return "Password is required.";
+      if (v.length < 8) return "Password must be at least 8 characters long.";
+      return "";
+    }
+    if (name === "confirmPassword") {
+      if (!v) return "Please confirm your password.";
+      if (v !== formData.password) return "Password and confirm password do not match.";
+      return "";
+    }
+    if (name === "agreeTerms") {
+      return !value ? "You must agree to the Terms of use and Privacy Policy." : "";
+    }
+    return "";
+  };
 
   // Redirect if already logged in
   useEffect(() => {
@@ -92,10 +138,18 @@ export const Register = () => {
 
   const handleChange = (e) => {
     const { name, value, checked, type } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value,
-    }));
+    const newValue = type === "checkbox" ? checked : value;
+    const nextFormData = { ...formData, [name]: newValue };
+    setFormData(nextFormData);
+    setFieldErrors((prev) => {
+      const next = { ...prev, [name]: validateRegisterField(name, newValue, nextFormData) };
+      if (name === "password" && nextFormData.confirmPassword) {
+        next.confirmPassword = nextFormData.confirmPassword !== newValue
+          ? "Password and confirm password do not match."
+          : "";
+      }
+      return next;
+    });
   };
 
   const handleSubmit = async (e) => {
@@ -109,46 +163,54 @@ export const Register = () => {
     const password = formData.password || "";
     const confirmPassword = formData.confirmPassword || "";
 
+    const errors = {
+      fullName: "",
+      email: "",
+      mobile: "",
+      password: "",
+      confirmPassword: "",
+      agreeTerms: "",
+    };
+
     if (!fullName) {
-      setApiError("Full name is required.");
-      return;
+      errors.fullName = "Full name is required.";
+    } else if (!isValidName(fullName)) {
+      errors.fullName = fullName.length < 2
+        ? "Full name must be at least 2 characters."
+        : "Name should not contain numbers.";
     }
-    if (fullName.length < 2) {
-      setApiError("Full name must be at least 2 characters.");
-      return;
-    }
+
     if (!email) {
-      setApiError("Email is required.");
-      return;
+      errors.email = "Email is required.";
+    } else if (!isValidEmail(email)) {
+      errors.email = "Please enter a valid email address.";
     }
-    if (!isValidEmail(email)) {
-      setApiError("Please enter a valid email address.");
-      return;
-    }
+
     if (!mobile) {
-      setApiError("Mobile number is required.");
-      return;
+      errors.mobile = "Mobile number is required.";
+    } else if (!isValidMobile(mobile)) {
+      errors.mobile = "Please enter a valid 10-digit Indian mobile number (e.g. 9876543210).";
     }
-    if (!isValidMobile(mobile)) {
-      setApiError("Please enter a valid 10-digit Indian mobile number.");
-      return;
-    }
+
     if (!password) {
-      setApiError("Password is required.");
-      return;
+      errors.password = "Password is required.";
+    } else if (password.length < 8) {
+      errors.password = "Password must be at least 8 characters long.";
     }
-    if (password.length < 8) {
-      setApiError("Password must be at least 8 characters long.");
-      return;
+
+    if (!confirmPassword) {
+      errors.confirmPassword = "Please confirm your password.";
+    } else if (password !== confirmPassword) {
+      errors.confirmPassword = "Password and confirm password do not match.";
     }
-    if (password !== confirmPassword) {
-      setApiError("Password and confirm password do not match.");
-      return;
-    }
+
     if (!formData.agreeTerms) {
-      setApiError("You must agree to the Terms of use and Privacy Policy.");
-      return;
+      errors.agreeTerms = "You must agree to the Terms of use and Privacy Policy.";
     }
+
+    const hasErrors = Object.values(errors).some((msg) => msg !== "");
+    setFieldErrors(errors);
+    if (hasErrors) return;
 
     setIsSubmitting(true);
     setRecaptchaError("");
@@ -172,7 +234,7 @@ export const Register = () => {
         if (response.data) {
           setApiSuccess("Registration successful! Please verify your email with OTP.");
           setApiError("");
-          
+
           // Subscribe to newsletter if checked
           if (formData.newsletter) {
             try {
@@ -191,10 +253,10 @@ export const Register = () => {
               console.error("Newsletter subscription error:", error);
             }
           }
-          
+
           // Store registered email for OTP verification
           setRegisteredEmail(email);
-          
+
           // Show OTP verification step
           setShowOtpVerification(true);
         }
@@ -219,7 +281,7 @@ export const Register = () => {
   // Handle OTP Verification
   const handleVerifyOtp = async (e) => {
     e.preventDefault();
-    
+
     if (!otp || otp.length !== 6) {
       setApiError("Please enter a valid 6-digit OTP.");
       return;
@@ -245,7 +307,7 @@ export const Register = () => {
       if (response.data) {
         setApiSuccess("Email verified successfully! Redirecting to login...");
         setApiError("");
-        
+
         // After OTP verification, redirect to login
         // Login will handle token storage
 
@@ -271,7 +333,7 @@ export const Register = () => {
   const handleResendOtp = async () => {
     setApiError("");
     setApiSuccess("Resending OTP...");
-    
+
     try {
       // You might need to call a resend OTP API here
       // For now, we'll just show a message
@@ -380,7 +442,7 @@ export const Register = () => {
                   {apiSuccess}
                 </Alert>
               )}
-              
+
               <CustomText
                 sx={{
                   fontSize: { xs: 14, md: 16 },
@@ -493,314 +555,338 @@ export const Register = () => {
           ) : (
             // Registration Form
             <Box component="form" onSubmit={handleSubmit}>
-            {apiError && (
-              <Alert severity="error" sx={{ mb: 2, borderRadius: 2 }}>
-                {apiError}
-              </Alert>
-            )}
-            {apiSuccess && (
-              <Alert severity="success" sx={{ mb: 2, borderRadius: 2 }}>
-                {apiSuccess}
-              </Alert>
-            )}
-            {recaptchaError && (
-              <Alert severity="error" sx={{ mb: 2, borderRadius: 2 }}>
-                {recaptchaError}
-              </Alert>
-            )}
-            <InputLabel sx={{ fontSize: 13, color: "#fff", mb: 0.5 }}>Full Name</InputLabel>
-            <CustomTextField
-              fullWidth
-              name="fullName"
-              placeholder="Full Name"
-              required
-              value={formData.fullName}
-              onChange={handleChange}
-              sx={{ mb: 1.5 }}
-            />
-
-            {/* Email Field */}
-            <InputLabel sx={{ fontSize: 13, color: "#fff", mb: 0.5 }}>Email Address</InputLabel>
-            <CustomTextField
-              fullWidth
-              name="email"
-              placeholder="Email Address"
-              type="email"
-              required
-              value={formData.email}
-              onChange={handleChange}
-              sx={{ mb: 1.5 }}
-            />
-
-            {/* Mobile Field */}
-            <InputLabel sx={{ fontSize: 13, color: "#fff", mb: 0.5 }}>Mobile Number</InputLabel>
-            <CustomTextField
-              fullWidth
-              name="mobile"
-              placeholder="Mobile Number"
-              type="tel"
-              required
-              value={formData.mobile}
-              onChange={handleChange}
-              sx={{ mb: 1.5 }}
-            />
-
-            {/* Password Field */}
-            <InputLabel sx={{ fontSize: 13, color: "#fff", mb: 0.5 }}>Password</InputLabel>
-            <Box sx={{ position: "relative", mb: 2 }}>
+              {apiError && (
+                <Alert severity="error" sx={{ mb: 2, borderRadius: 2 }}>
+                  {apiError}
+                </Alert>
+              )}
+              {apiSuccess && (
+                <Alert severity="success" sx={{ mb: 2, borderRadius: 2 }}>
+                  {apiSuccess}
+                </Alert>
+              )}
+              {recaptchaError && (
+                <Alert severity="error" sx={{ mb: 2, borderRadius: 2 }}>
+                  {recaptchaError}
+                </Alert>
+              )}
+              <InputLabel sx={{ fontSize: 13, color: "#fff", mb: 0.5 }}>Full Name</InputLabel>
               <CustomTextField
                 fullWidth
-                name="password"
-                placeholder="Password"
-                type={showPassword ? "text" : "password"}
+                name="fullName"
+                placeholder="Full Name (letters only, no numbers)"
                 required
-                value={formData.password}
-                onChange={handleChange}
-                sx={{ mb: 0 }}
-              />
-              <Button
-                onClick={() => setShowPassword(!showPassword)}
-                sx={{
-                  position: "absolute",
-                  right: 8,
-                  top: "50%",
-                  transform: "translateY(-50%)",
-                  minWidth: "auto",
-                  color: "#666",
-                  textTransform: "none",
-                  fontSize: 12,
-                  "&:hover": {
-                    backgroundColor: "transparent",
-                    color: "var(--themeColor)",
-                  },
+                value={formData.fullName}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (/^[a-zA-Z\s]*$/.test(value)) {
+                    const nextFormData = { ...formData, fullName: value };
+                    setFormData(nextFormData);
+                    setFieldErrors((prev) => ({ ...prev, fullName: validateRegisterField("fullName", value, nextFormData) }));
+                  }
                 }}
-              >
-                {showPassword ? (
-                  <>
-                    <VisibilityOff sx={{ fontSize: 18, mr: 0.5 }} />
-                  </>
-                ) : (
-                  <>
-                    <Visibility sx={{ fontSize: 18, mr: 0.5 }} />
-                  </>
-                )}
-              </Button>
-            </Box>
+                inputProps={{ inputMode: "text", pattern: "[A-Za-z ]*" }}
+                error={!!fieldErrors.fullName}
+                helperText={fieldErrors.fullName}
+                sx={{ mb: 1.5 }}
+              />
 
-            {/* Confirm Password Field */}
-            <InputLabel sx={{ fontSize: 13, color: "#fff", mb: 0.5 }}>Confirm Password</InputLabel>
-            <Box sx={{ position: "relative", mb: 2 }}>
+              {/* Email Field */}
+              <InputLabel sx={{ fontSize: 13, color: "#fff", mb: 0.5 }}>Email Address</InputLabel>
               <CustomTextField
                 fullWidth
-                name="confirmPassword"
-                placeholder="Confirm Password"
-                type={showConfirmPassword ? "text" : "password"}
+                name="email"
+                placeholder="Email Address"
+                type="email"
                 required
-                value={formData.confirmPassword}
+                value={formData.email}
                 onChange={handleChange}
-                sx={{ mb: 0 }}
+                error={!!fieldErrors.email}
+                helperText={fieldErrors.email}
+                sx={{ mb: 1.5 }}
               />
-              <Button
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                sx={{
-                  position: "absolute",
-                  right: 8,
-                  top: "50%",
-                  transform: "translateY(-50%)",
-                  minWidth: "auto",
-                  color: "#666",
-                  textTransform: "none",
-                  fontSize: 12,
-                  "&:hover": {
-                    backgroundColor: "transparent",
-                    color: "var(--themeColor)",
-                  },
-                }}
-              >
-                {showConfirmPassword ? (
-                  <>
-                    <VisibilityOff sx={{ fontSize: 18, mr: 0.5 }} />
-                  </>
-                ) : (
-                  <>
-                    <Visibility sx={{ fontSize: 18, mr: 0.5 }} />
-                  </>
-                )}
-              </Button>
-            </Box>
 
-            {/* Password Requirements */}
-            <CustomText sx={{ fontSize: 12, color: "#fff", mb: 2, ml: 1.5, }}>
-              Use 8 or more characters with a mix of letters, numbers & symbols
-            </CustomText>
-            <CustomText sx={{ fontSize: 12, color: "#fff", mb: 2, ml: 1.5, }}>
-              Your personal data will be used to support your experience throughout this website, to manage access to your account, and for other purposes described
-              in our <Link 
-                onClick={(e) => {
-                  e.preventDefault();
-                  window.open("/privacy-policy", "_blank");
-                }}
-                sx={{ 
-                  color: "#4A90E2", 
-                  textDecoration: "underline",
-                  cursor: "pointer",
-                  "&:hover": {
-                    color: "#6BA3E8",
-                  },
-                }}
-              >
-                Privacy Policy
-              </Link>.
-            </CustomText>
-
-            {/* Checkboxes */}
-            <Box>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    name="agreeTerms"
-                    checked={formData.agreeTerms}
-                    onChange={handleChange}
-                    sx={{
-                      color: "#333",
-                      "&.Mui-checked": {
-                        color: "white",
-                      },
-                      "&:hover": {
-                        backgroundColor: "rgba(95,41,48,0.1)",
-                      },
-                    }}
-                  />
-                }
-                label={
-                  <CustomText sx={{ color: "#fff", fontSize: { xs: 13, md: 14 } }}>
-                    Agree to our{" "}
-                    <Link 
-                      onClick={(e) => {
-                        e.preventDefault();
-                        window.open("/terms-conditions", "_blank");
-                      }}
-                      sx={{ 
-                        color: "#4A90E2", 
-                        textDecoration: "underline",
-                        cursor: "pointer",
-                        "&:hover": {
-                          color: "#6BA3E8",
-                        },
-                      }}
-                    >
-                      Terms of use
-                    </Link>{" "}
-                    and{" "}
-                    <Link 
-                      onClick={(e) => {
-                        e.preventDefault();
-                        window.open("/privacy-policy", "_blank");
-                      }}
-                      sx={{ 
-                        color: "#4A90E2", 
-                        textDecoration: "underline",
-                        cursor: "pointer",
-                        "&:hover": {
-                          color: "#6BA3E8",
-                        },
-                      }}
-                    >
-                      Privacy Policy
-                    </Link>
-                  </CustomText>
-                }
+              {/* Mobile Field */}
+              <InputLabel sx={{ fontSize: 13, color: "#fff", mb: 0.5 }}>Mobile Number</InputLabel>
+              <CustomTextField
+                fullWidth
+                name="mobile"
+                placeholder="10-digit mobile (e.g. 9876543210)"
+                type="tel"
+                required
+                value={formData.mobile}
+                onChange={handleChange}
+                error={!!fieldErrors.mobile}
+                helperText={fieldErrors.mobile}
+                inputProps={{ maxLength: 10 }}
+                sx={{ mb: 1.5 }}
               />
-            </Box>
 
-            {/* reCAPTCHA Error Display */}
-            {recaptchaError && (
-              <Box>
-                <Alert
-                  severity="error"
+              {/* Password Field */}
+              <InputLabel sx={{ fontSize: 13, color: "#fff", mb: 0.5 }}>Password (min 8 characters)</InputLabel>
+              <Box sx={{ position: "relative", mb: 2 }}>
+                <CustomTextField
+                  fullWidth
+                  name="password"
+                  placeholder="Password"
+                  type={showPassword ? "text" : "password"}
+                  required
+                  value={formData.password}
+                  onChange={handleChange}
+                  error={!!fieldErrors.password}
+                  helperText={fieldErrors.password}
+                  sx={{ mb: 0 }}
+                />
+                <Button
+                  onClick={() => setShowPassword(!showPassword)}
                   sx={{
+                    position: "absolute",
+                    right: 8,
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                    minWidth: "auto",
+                    color: "#666",
+                    textTransform: "none",
                     fontSize: 12,
-                    backgroundColor: "rgba(211, 47, 47, 0.1)",
-                    color: "#ffcdd2",
-                    border: "1px solid rgba(211, 47, 47, 0.3)",
-                    "& .MuiAlert-message": {
-                      fontSize: 12,
+                    "&:hover": {
+                      backgroundColor: "transparent",
+                      color: "var(--themeColor)",
                     },
                   }}
                 >
-                  {recaptchaError}
-                </Alert>
+                  {showPassword ? (
+                    <>
+                      <VisibilityOff sx={{ fontSize: 18, mr: 0.5 }} />
+                    </>
+                  ) : (
+                    <>
+                      <Visibility sx={{ fontSize: 18, mr: 0.5 }} />
+                    </>
+                  )}
+                </Button>
               </Box>
-            )}
 
-            {/* Register Button */}
-            <CustomButton
-              type="submit"
-              fullWidth
-              disabled={isSubmitting}
-              sx={{ mb: 1 }}
-            >
-              {isSubmitting ? (
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                  <CircularProgress size={20} sx={{ color: "#fff" }} />
-                  <CustomText>Verifying...</CustomText>
+              {/* Confirm Password Field */}
+              <InputLabel sx={{ fontSize: 13, color: "#fff", mb: 0.5 }}>Confirm Password</InputLabel>
+              <Box sx={{ position: "relative", mb: 2 }}>
+                <CustomTextField
+                  fullWidth
+                  name="confirmPassword"
+                  placeholder="Confirm Password"
+                  type={showConfirmPassword ? "text" : "password"}
+                  required
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  error={!!fieldErrors.confirmPassword}
+                  helperText={fieldErrors.confirmPassword}
+                  sx={{ mb: 0 }}
+                />
+                <Button
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  sx={{
+                    position: "absolute",
+                    right: 8,
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                    minWidth: "auto",
+                    color: "#666",
+                    textTransform: "none",
+                    fontSize: 12,
+                    "&:hover": {
+                      backgroundColor: "transparent",
+                      color: "var(--themeColor)",
+                    },
+                  }}
+                >
+                  {showConfirmPassword ? (
+                    <>
+                      <VisibilityOff sx={{ fontSize: 18, mr: 0.5 }} />
+                    </>
+                  ) : (
+                    <>
+                      <Visibility sx={{ fontSize: 18, mr: 0.5 }} />
+                    </>
+                  )}
+                </Button>
+              </Box>
+
+              {/* Password Requirements */}
+              <CustomText sx={{ fontSize: 12, color: "#fff", mb: 2, ml: 1.5, }}>
+                Use 8 or more characters with a mix of letters, numbers & symbols
+              </CustomText>
+              <CustomText sx={{ fontSize: 12, color: "#fff", mb: 2, ml: 1.5, }}>
+                Your personal data will be used to support your experience throughout this website, to manage access to your account, and for other purposes described
+                in our <Link
+                  onClick={(e) => {
+                    e.preventDefault();
+                    window.open("/privacy-policy", "_blank");
+                  }}
+                  sx={{
+                    color: "#4A90E2",
+                    textDecoration: "underline",
+                    cursor: "pointer",
+                    "&:hover": {
+                      color: "#6BA3E8",
+                    },
+                  }}
+                >
+                  Privacy Policy
+                </Link>.
+              </CustomText>
+
+              {/* Checkboxes */}
+              <Box>
+                {fieldErrors.agreeTerms && (
+                  <CustomText sx={{ color: "#f44336", fontSize: 12, mb: 0.5, ml: 1.5 }}>
+                    {fieldErrors.agreeTerms}
+                  </CustomText>
+                )}
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      name="agreeTerms"
+                      checked={formData.agreeTerms}
+                      onChange={handleChange}
+                      sx={{
+                        color: "#333",
+                        "&.Mui-checked": {
+                          color: "white",
+                        },
+                        "&:hover": {
+                          backgroundColor: "rgba(95,41,48,0.1)",
+                        },
+                      }}
+                    />
+                  }
+                  label={
+                    <CustomText sx={{ color: "#fff", fontSize: { xs: 13, md: 14 } }}>
+                      Agree to our{" "}
+                      <Link
+                        onClick={(e) => {
+                          e.preventDefault();
+                          window.open("/terms-conditions", "_blank");
+                        }}
+                        sx={{
+                          color: "#4A90E2",
+                          textDecoration: "underline",
+                          cursor: "pointer",
+                          "&:hover": {
+                            color: "#6BA3E8",
+                          },
+                        }}
+                      >
+                        Terms of use
+                      </Link>{" "}
+                      and{" "}
+                      <Link
+                        onClick={(e) => {
+                          e.preventDefault();
+                          window.open("/privacy-policy", "_blank");
+                        }}
+                        sx={{
+                          color: "#4A90E2",
+                          textDecoration: "underline",
+                          cursor: "pointer",
+                          "&:hover": {
+                            color: "#6BA3E8",
+                          },
+                        }}
+                      >
+                        Privacy Policy
+                      </Link>
+                    </CustomText>
+                  }
+                />
+              </Box>
+
+              {/* reCAPTCHA Error Display */}
+              {recaptchaError && (
+                <Box>
+                  <Alert
+                    severity="error"
+                    sx={{
+                      fontSize: 12,
+                      backgroundColor: "rgba(211, 47, 47, 0.1)",
+                      color: "#ffcdd2",
+                      border: "1px solid rgba(211, 47, 47, 0.3)",
+                      "& .MuiAlert-message": {
+                        fontSize: 12,
+                      },
+                    }}
+                  >
+                    {recaptchaError}
+                  </Alert>
                 </Box>
-              ) : (
-                "Register"
               )}
-            </CustomButton>
+
+              {/* Register Button */}
+              <CustomButton
+                type="submit"
+                fullWidth
+                disabled={isSubmitting}
+                sx={{ mb: 1 }}
+              >
+                {isSubmitting ? (
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                    <CircularProgress size={20} sx={{ color: "#fff" }} />
+                    <CustomText>Verifying...</CustomText>
+                  </Box>
+                ) : (
+                  "Register"
+                )}
+              </CustomButton>
 
               {/* Login Link */}
               <CustomText sx={{ textAlign: "center", color: "#fff", fontSize: { xs: 14, md: 16 }, mb: 2 }}>
                 Already have an account?{" "}
                 <Link
-                onClick={() => navigate("/login")}
+                  onClick={() => navigate("/login")}
+                  sx={{
+                    color: "#4A90E2",
+                    textDecoration: "underline",
+                    cursor: "pointer",
+                    fontWeight: 600,
+                    transition: "all 0.3s ease",
+                    "&:hover": {
+                      color: "#6BA3E8",
+                      transform: "scale(1.05)",
+                    },
+                  }}
+                >
+                  Login Now
+                </Link>
+              </CustomText>
+
+              <Button
+                fullWidth
+                startIcon={
+                  <img
+                    src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
+                    alt="Google"
+                    width="20"
+                    height="20"
+                  />
+                }
                 sx={{
-                  color: "#4A90E2",
-                  textDecoration: "underline",
-                  cursor: "pointer",
+                  backgroundColor: "#fff",
+                  color: "#000",
+                  py: 1.3,
+                  borderRadius: "50px",
+                  fontSize: { xs: 15, md: 16 },
                   fontWeight: 600,
-                  transition: "all 0.3s ease",
+                  textTransform: "none",
+                  mb: 2,
+                  transition: "0.3s",
                   "&:hover": {
-                    color: "#6BA3E8",
-                    transform: "scale(1.05)",
+                    backgroundColor: "#f1f1f1",
+                    transform: "translateY(-2px)",
+                    boxShadow: "0px 6px 20px rgba(0,0,0,0.2)",
                   },
                 }}
+                onClick={() => console.log("Google Auth Clicked")} // later replace with auth logic
               >
-                Login Now
-              </Link>
-            </CustomText>
-
-            <Button
-              fullWidth
-              startIcon={
-                <img
-                  src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
-                  alt="Google"
-                  width="20"
-                  height="20"
-                />
-              }
-              sx={{
-                backgroundColor: "#fff",
-                color: "#000",
-                py: 1.3,
-                borderRadius: "50px",
-                fontSize: { xs: 15, md: 16 },
-                fontWeight: 600,
-                textTransform: "none",
-                mb: 2,
-                transition: "0.3s",
-                "&:hover": {
-                  backgroundColor: "#f1f1f1",
-                  transform: "translateY(-2px)",
-                  boxShadow: "0px 6px 20px rgba(0,0,0,0.2)",
-                },
-              }}
-              onClick={() => console.log("Google Auth Clicked")} // later replace with auth logic
-            >
-              Continue with Google
-            </Button>
+                Continue with Google
+              </Button>
             </Box>
           )}
         </Box>

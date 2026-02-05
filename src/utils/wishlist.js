@@ -7,6 +7,17 @@ import { addToGuestWishlist, removeFromGuestWishlist } from '../store/guestSlice
 
 const WISHLIST_ICON_LOADING_EVENT = 'headerWishlistLoading';
 
+// In-memory cache + dedupe: reduce repeated /wishlist/get calls across TopHeader, ProductGrid, Carousel, etc.
+const WISHLIST_CACHE_TTL_MS = 2 * 60 * 1000; // 2 minutes
+let wishlistCache = { data: null, timestamp: 0 };
+let wishlistInFlight = null;
+
+/** Invalidate wishlist cache (call after add/remove so next getWishlist refetches) */
+export const invalidateWishlistCache = () => {
+  wishlistCache = { data: null, timestamp: 0 };
+  wishlistInFlight = null;
+};
+
 /**
  * Add a product to wishlist (guest: LocalStorage + Redux; logged-in: API)
  * @param {string} productId - The product ID to add
@@ -50,6 +61,7 @@ export const removeFromWishlist = async (productId) => {
     }
     const payload = { productId };
     const response = await api.post('/wishlist/remove', payload);
+    invalidateWishlistCache();
     return response.data;
   } catch (error) {
     console.error('Error removing from wishlist:', error);
@@ -61,6 +73,7 @@ export const removeFromWishlist = async (productId) => {
 
 /**
  * Get wishlist items (guest: from Redux/LocalStorage; logged-in: API)
+ * Uses in-memory cache + request deduplication to avoid repeated /wishlist/get calls.
  * @returns {Promise} API response or guest wishlist data { data: productIds[] }
  */
 export const getWishlist = async () => {
@@ -70,13 +83,24 @@ export const getWishlist = async () => {
     const ids = state.guest?.guestWishlist ?? [];
     return { data: ids.map((id) => ({ productId: id })), success: true };
   }
-  try {
-    const response = await api.get('/wishlist/get');
-    return response.data;
-  } catch (error) {
+  const now = Date.now();
+  if (wishlistCache.data != null && now - wishlistCache.timestamp < WISHLIST_CACHE_TTL_MS) {
+    return wishlistCache.data;
+  }
+  if (wishlistInFlight) {
+    return wishlistInFlight;
+  }
+  wishlistInFlight = api.get('/wishlist/get').then((res) => {
+    const data = res?.data ?? res;
+    wishlistCache = { data, timestamp: Date.now() };
+    wishlistInFlight = null;
+    return data;
+  }).catch((error) => {
+    wishlistInFlight = null;
     console.error('Error fetching wishlist:', error);
     throw error;
-  }
+  });
+  return wishlistInFlight;
 };
 
 /**

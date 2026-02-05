@@ -6,12 +6,12 @@ import {
   Button,
   TextField,
   FormControl,
-  Select,
-  MenuItem,
+  FormControlLabel,
+  Radio,
+  RadioGroup,
   CircularProgress,
   Alert,
   Checkbox,
-  FormControlLabel,
 } from "@mui/material";
 import { CustomText } from "../comman/CustomText";
 import {
@@ -50,20 +50,22 @@ export const OrderSummary = ({
   setDeliveryInstructions,
   paymentStatus,
   paymentVerifying,
+  isGuest = false,
 }) => {
   const isCheckoutDisabled = () => {
     if (cartItems?.length === 0) return true;
+    if (isGuest) return false;
     if (deliveryType === 'self') {
       return !selectedAddress;
     } else if (deliveryType === 'someone_else') {
       return !someoneElseData?.name ||
-             !someoneElseData?.phone ||
-             !someoneElseData?.houseNumber ||
-             !someoneElseData?.streetName ||
-             !someoneElseData?.area ||
-             !someoneElseData?.city ||
-             !someoneElseData?.state ||
-             !someoneElseData?.zipCode;
+        !someoneElseData?.phone ||
+        !someoneElseData?.houseNumber ||
+        !someoneElseData?.streetName ||
+        !someoneElseData?.area ||
+        !someoneElseData?.city ||
+        !someoneElseData?.state ||
+        !someoneElseData?.zipCode;
     }
     return true;
   };
@@ -79,27 +81,13 @@ export const OrderSummary = ({
         }}
       >
         <CardContent sx={{ p: { xs: 2, md: 2.5 } }}>
-          <CustomText
-            sx={{
-              fontSize: { xs: 18, md: 22 },
-              fontWeight: 700,
-              color: "#2c2c2c",
-              mb: { xs: 1.5, md: 2 },
-            }}
-          >
+          <CustomText sx={{ fontSize: { xs: 18, md: 22 }, fontWeight: 700, color: "#2c2c2c", mb: { xs: 0.5, md: 1 }, }}>
             Order Summary
           </CustomText>
 
           {/* Coupon Section - checkboxes only */}
           <Box sx={{ mb: 2 }}>
-            <CustomText
-              sx={{
-                fontSize: { xs: 14, md: 16 },
-                fontWeight: 600,
-                color: "#2c2c2c",
-                mb: 1,
-              }}
-            >
+            <CustomText sx={{ fontSize: { xs: 14, md: 16 }, fontWeight: 600, color: "#7c3838", mb: 1, }}>
               Coupon Code
             </CustomText>
             {coupons.length > 0 ? (
@@ -214,65 +202,53 @@ export const OrderSummary = ({
                 borderTop: "1px solid #eee",
               }}
             >
-              <CustomText
-                sx={{
-                  fontSize: { xs: 16, md: 18 },
-                  fontWeight: 700,
-                  color: "#2c2c2c",
-                }}
-              >
+              <CustomText sx={{ fontSize: { xs: 16, md: 18 }, fontWeight: 700, color: "#2c2c2c", }}>
                 Total
               </CustomText>
-              <CustomText
-                sx={{
-                  fontSize: { xs: 16, md: 18 },
-                  fontWeight: 700,
-                  color: "var(--themeColor)",
-                }}
-              >
+              <CustomText sx={{ fontSize: { xs: 16, md: 18 }, fontWeight: 700, color: "var(--themeColor)", }}>
                 ₹{total.toFixed(2)}
               </CustomText>
             </Box>
           </Box>
 
-          {/* Payment Mode Selection */}
-          <Box sx={{ mt: 3 }}>
-            <CustomText
-              sx={{
-                fontSize: { xs: 14, md: 16 },
-                fontWeight: 600,
-                color: "#2c2c2c",
-                mb: 1,
-              }}
-            >
-              Payment Mode
-            </CustomText>
-            <FormControl fullWidth>
-              <Select
-                value={paymentMode}
-                onChange={(e) => setPaymentMode(e.target.value)}
-                sx={{
-                  "& .MuiOutlinedInput-root": {
-                    borderRadius: "8px",
-                  },
-                }}
-              >
-                <MenuItem value="UPI">UPI</MenuItem>
-                <MenuItem value="COD">Cash on Delivery</MenuItem>
-              </Select>
-            </FormControl>
-          </Box>
+          {/* Payment Mode Selection - hidden for guest */}
+          {!isGuest && (
+            <Box sx={{ mt: 1 }}>
+              <CustomText sx={{ fontSize: { xs: 14, md: 16 }, fontWeight: 600, color: "#2c2c2c", mb: 1, }}>
+                Payment Mode
+              </CustomText>
+              <FormControl>
+                <RadioGroup row value={paymentMode} onChange={(e) => setPaymentMode(e.target.value)} sx={{ gap: 2 }}>
+                  <FormControlLabel
+                    value="UPI"
+                    control={
+                      <Radio size="small" sx={{ color: "#666", "&.Mui-checked": { color: "var(--themeColor)", }, }} />
+                    }
+                    label={
+                      <CustomText sx={{ fontSize: { xs: 13, md: 14 }, color: "#333" }}>
+                        UPI
+                      </CustomText>
+                    }
+                  />
+                  <FormControlLabel
+                    value="COD"
+                    control={
+                      <Radio size="small" sx={{ color: "#666", "&.Mui-checked": { color: "var(--themeColor)", }, }} />
+                    }
+                    label={
+                      <CustomText sx={{ fontSize: { xs: 13, md: 14 }, color: "#333" }}>
+                        Cash on Delivery
+                      </CustomText>
+                    }
+                  />
+                </RadioGroup>
+              </FormControl>
+            </Box>
+          )}
 
           {/* Delivery Instructions */}
-          <Box sx={{ mt: 3 }}>
-            <CustomText
-              sx={{
-                fontSize: { xs: 14, md: 16 },
-                fontWeight: 600,
-                color: "#2c2c2c",
-                mb: 1,
-              }}
-            >
+          <Box sx={{ mt: 2 }}>
+            <CustomText sx={{ fontSize: { xs: 14, md: 16 }, fontWeight: 600, color: "#2c2c2c" }}>
               Delivery Instructions (Optional)
             </CustomText>
             <TextField
@@ -292,8 +268,8 @@ export const OrderSummary = ({
 
           {/* Payment Success */}
           {paymentStatus === 'success' && (
-            <Alert 
-              severity="success" 
+            <Alert
+              severity="success"
               icon={<CheckCircleIcon />}
               sx={{ mt: 2 }}
             >
@@ -314,7 +290,7 @@ export const OrderSummary = ({
               py: 1.5,
               fontSize: { xs: 14, md: 16 },
               fontWeight: 600,
-              mt: 3,
+              mt: 1,
               "&:hover": {
                 backgroundColor: "var(--specialColor)",
               },
@@ -331,6 +307,8 @@ export const OrderSummary = ({
               </Box>
             ) : paymentStatus === 'success' ? (
               "Order Placed Successfully!"
+            ) : isGuest ? (
+              `Login to Place Order • ₹${total.toFixed(2)}`
             ) : (
               `Place Order • ₹${total.toFixed(2)}`
             )}

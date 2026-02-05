@@ -10,11 +10,10 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
+  Button,
 } from "@mui/material";
 import { CustomText } from "../../components/comman/CustomText";
-import {
-  Search as SearchIcon,
-} from "@mui/icons-material";
+import { Search as SearchIcon, Clear as ClearIcon } from "@mui/icons-material";
 import { useSearchParams } from "react-router-dom";
 import Rectangle45 from "../../assets/Rectangle45.png";
 import { useItemCategories } from "../../hooks/useItemCategories";
@@ -25,11 +24,15 @@ import { RecommendedProducts } from "../../components/products/RecommendedProduc
 import { CustomButton } from "../../components/comman/CustomButton";
 import blankImage from "../../assets/blankimage.png";
 
+// Price range options sent as minPrice/maxPrice to GET /product/search (lat/long in headers)
 const PRICE_RANGE_OPTIONS = [
   { value: "", label: "Price range" },
   { value: "0-100", label: "₹0 - ₹100", min: 0, max: 100 },
-  { value: "100-2000", label: "₹100 - ₹2000", min: 100, max: 2000 },
-  { value: "2000-above", label: "₹2000 - Above", min: 2000, max: null },
+  { value: "100-400", label: "₹100 - ₹400", min: 100, max: 400 },
+  { value: "400-600", label: "₹400 - ₹600", min: 400, max: 600 },
+  { value: "600-1000", label: "₹600 - ₹1000", min: 600, max: 1000 },
+  { value: "1000-2000", label: "₹1000 - ₹2000", min: 1000, max: 2000 },
+  { value: "2000-above", label: "₹2000 & above", min: 2000, max: null },
 ];
 
 export const ProductList = () => {
@@ -47,10 +50,11 @@ export const ProductList = () => {
   const ITEMS_PER_PAGE = 20; // Show 20 items per page
 
   const { categories: apiCategories, loading: categoriesLoading, error: categoriesError } = useItemCategories();
-  console.log(apiCategories, 'apiCategories')
 
   const categoryIdFromUrl = searchParams.get('categoryId');
- 
+  const searchFromUrl = searchParams.get('search') ?? '';
+  const minPriceFromUrl = searchParams.get('minPrice');
+  const maxPriceFromUrl = searchParams.get('maxPrice');
 
   useEffect(() => {
     if (categoryIdFromUrl && apiCategories && apiCategories.length > 0) {
@@ -65,14 +69,50 @@ export const ProductList = () => {
     }
   }, [categoryIdFromUrl, apiCategories]);
 
+  // Initialize search and price from URL on mount (so ?search=cake&minPrice=400&maxPrice=600 works)
+  const urlInitDone = useRef(false);
+  useEffect(() => {
+    if (urlInitDone.current) return;
+    urlInitDone.current = true;
+    if (searchFromUrl) {
+      setSearchQuery(searchFromUrl);
+      setDebouncedSearchQuery(searchFromUrl);
+    }
+    if (minPriceFromUrl !== null && minPriceFromUrl !== undefined && minPriceFromUrl !== '') {
+      const match = PRICE_RANGE_OPTIONS.find(
+        (r) => r.value && String(r.min) === String(minPriceFromUrl) && (maxPriceFromUrl == null || maxPriceFromUrl === '' ? r.max == null : String(r.max) === String(maxPriceFromUrl))
+      );
+      if (match) setPriceRange(match.value);
+    }
+  }, [searchFromUrl, minPriceFromUrl, maxPriceFromUrl]);
+
   // Debounce search query to avoid excessive API calls - increased delay for better typing experience
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearchQuery(searchQuery);
-    }, 800); 
+    }, 800);
 
     return () => clearTimeout(timer);
   }, [searchQuery]);
+
+  // Sync search and price range to URL so API request is shareable (e.g. ?search=cake&minPrice=400&maxPrice=600)
+  useEffect(() => {
+    if (!urlInitDone.current) return; // avoid clearing URL before init-from-URL runs
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      if (debouncedSearchQuery.trim()) {
+        next.set('search', debouncedSearchQuery.trim());
+      } else {
+        next.delete('search');
+      }
+      const range = PRICE_RANGE_OPTIONS.find((r) => r.value === priceRange);
+      if (range?.min != null) next.set('minPrice', String(range.min));
+      else next.delete('minPrice');
+      if (range?.max != null) next.set('maxPrice', String(range.max));
+      else next.delete('maxPrice');
+      return next;
+    }, { replace: true });
+  }, [debouncedSearchQuery, priceRange]);
 
   // API expects categoryId (string e.g. "696602a929c5a42df91ef599"), not numeric id
   const selectedCategoryId = useMemo(() => {
@@ -107,6 +147,7 @@ export const ProductList = () => {
   const minPriceNum = selectedRange?.min ?? null;
   const maxPriceNum = selectedRange?.max ?? null;
 
+  // GET /product/search?search=...&minPrice=...&maxPrice=... (lat/long in headers) for search and/or price range
   const { products: apiProducts, loading: productsLoading, error: productsError, pagination } = useProducts(
     selectedCategoryId,
     currentPage,
@@ -143,6 +184,9 @@ export const ProductList = () => {
         mrp: priceObj.mrp,
         rate: priceObj.rate,
         courier: product.courier ?? "N",
+        weight: product.weight || null,
+        veg: product.veg ?? "N",
+        subcategory: product.subcategory || null,
         image: productImage,
       };
     });
@@ -318,13 +362,35 @@ export const ProductList = () => {
                   "&.Mui-focused": { backgroundColor: "#fff", boxShadow: "0 4px 12px rgba(255,100,58,0.2)" },
                 }}
               >
-                {PRICE_RANGE_OPTIONS.map((opt) => (
+                {PRICE_RANGE_OPTIONS?.map((opt) => (
                   <MenuItem key={opt.value || "all"} value={opt.value}>
-                    {opt.label}
+                    {opt?.label}
                   </MenuItem>
                 ))}
               </Select>
             </FormControl>
+            {(searchQuery.trim() || priceRange) && (
+              <Button
+                variant="outlined"
+                size="small"
+                startIcon={<ClearIcon />}
+                onClick={() => {
+                  setSearchQuery("");
+                  setDebouncedSearchQuery("");
+                  setPriceRange("");
+                }}
+                sx={{
+                  borderRadius: 2,
+                  textTransform: "none",
+                  fontWeight: 600,
+                  borderColor: "#999",
+                  color: "#666",
+                  "&:hover": { borderColor: "#666", backgroundColor: "rgba(0,0,0,0.04)" },
+                }}
+              >
+                Reset search
+              </Button>
+            )}
           </Box>
         </Box>
         <CategoryTabs categories={categories} selectedCategory={selectedCategory} onChange={handleCategoryChange} />

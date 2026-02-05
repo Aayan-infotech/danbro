@@ -4,7 +4,6 @@ import { ShoppingCart, ShareOutlined, FavoriteBorder, Favorite, SearchOff } from
 import { useNavigate } from "react-router-dom";
 import { CustomText } from "../comman/CustomText";
 import { ProductDescription } from "../comman/ProductDescription";
-import { ProductPrice } from "../comman/ProductPrice";
 import { CustomToast } from "../comman/CustomToast";
 import { addToWishlist, removeFromWishlist, getWishlist } from "../../utils/wishlist";
 import { addToCart } from "../../utils/cart";
@@ -16,11 +15,11 @@ export const ProductGrid = memo(({ products, isVisible }) => {
   const [wishlistItems, setWishlistItems] = useState(new Set());
   const [loadingWishlist, setLoadingWishlist] = useState(new Set());
   const [loadingCart, setLoadingCart] = useState(new Set());
-  const [toast, setToast] = useState({ 
-    open: false, 
-    message: "", 
-    severity: "success", 
-    loading: false 
+  const [toast, setToast] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+    loading: false
   });
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
@@ -173,14 +172,14 @@ export const ProductGrid = memo(({ products, isVisible }) => {
       // Default quantity is 1, can be customized later
       const quantity = 1;
       await addToCart(productId, quantity);
-      
+
       setToast({
         open: true,
         message: "Product added to cart successfully!",
         severity: "success",
         loading: false,
       });
-      
+
       // Dispatch event to update cart count in header
       window.dispatchEvent(new CustomEvent('cartUpdated'));
     } catch (error) {
@@ -255,15 +254,10 @@ export const ProductGrid = memo(({ products, isVisible }) => {
                 minHeight: 0,
                 display: "flex",
                 flexDirection: "column",
-                "& .green-dot": {
+                "& .veg-badge": {
                   position: "absolute",
                   top: 8,
                   left: 8,
-                  width: 12,
-                  height: 12,
-                  backgroundColor: "#26d94c",
-                  borderRadius: "50%",
-                  border: "2px solid white",
                   zIndex: 15,
                 },
                 "& .hover-icons": {
@@ -300,7 +294,27 @@ export const ProductGrid = memo(({ products, isVisible }) => {
                 },
               }}
             >
-              <Box className="green-dot" />
+              {(product?.veg === "Y" || product?.veg === "y" || product?.veg === true || product?.veg === "N" || product?.veg === "n" || product?.veg === false) && (
+                <Box
+                  className="veg-badge"
+                  sx={{
+                    px: 1,
+                    py: 0.25,
+                    borderRadius: 1,
+                    fontSize: 10,
+                    fontWeight: 700,
+                    color: "#fff",
+                    border: "1px solid rgba(255,255,255,0.9)",
+                    boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
+                    bgcolor:
+                      product?.veg === "Y" || product?.veg === "y" || product?.veg === true
+                        ? "#26d94c"
+                        : "#d32f2f",
+                  }}
+                >
+                  {product?.veg === "Y" || product?.veg === "y" || product?.veg === true ? "Veg" : "Non-Veg"}
+                </Box>
+              )}
               <Box
                 sx={{
                   position: "absolute",
@@ -316,10 +330,10 @@ export const ProductGrid = memo(({ products, isVisible }) => {
                   bgcolor:
                     product?.courier === "Y" || product?.courier === "y"
                       ? "#2e7d32"
-                      : "#d32f2f",
+                      : "#757575",
                 }}
               >
-                Courier
+                {product?.courier === "Y" || product?.courier === "y" ? "Courier" : "Store only"}
               </Box>
               <Box
                 sx={{
@@ -400,12 +414,7 @@ export const ProductGrid = memo(({ products, isVisible }) => {
                         }}
                       />
                     ) : (
-                      <ShoppingCart
-                        sx={{
-                          fontSize: 18,
-                          transition: "all 0.3s ease",
-                        }}
-                      />
+                      <ShoppingCart sx={{ fontSize: 18, transition: "all 0.3s ease", }} />
                     )}
                   </IconButton>
                   <IconButton size="small" onClick={(e) => handleShare(e, product)}>
@@ -469,16 +478,14 @@ export const ProductGrid = memo(({ products, isVisible }) => {
                   sx={{
                     fontWeight: 600,
                     color: "#2c2c2c",
-                    mb: 0.5,
                     fontSize: { xs: 11, sm: 12, md: 13 },
-                    lineHeight: 1.3,
                     transition: "color 0.3s ease",
                     overflow: "hidden",
                     textOverflow: "ellipsis",
                     display: "-webkit-box",
                     WebkitLineClamp: 2,
                     WebkitBoxOrient: "vertical",
-                    minHeight: { xs: "2.6em", sm: "2.6em", md: "2.6em" },
+                    minHeight: { xs: "1.6em", sm: "1.6em", md: "1.6em" },
                     "&:hover": {
                       color: "#FF643A",
                     },
@@ -486,6 +493,19 @@ export const ProductGrid = memo(({ products, isVisible }) => {
                 >
                   {product?.name}
                 </CustomText>
+
+                <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mb: 0.5 }}>
+                  {product?.weight && String(product.weight).trim() && (
+                    <CustomText sx={{ fontSize: 11, color: "#666", fontFamily: "'Inter', sans-serif" }}>
+                      Weight: {product.weight}
+                    </CustomText>
+                  )}
+                  {product?.subcategory && String(product.subcategory).trim() && (
+                    <CustomText sx={{ fontSize: 11, color: "#666", fontFamily: "'Inter', sans-serif" }}>
+                      Subcategory: {product.subcategory}
+                    </CustomText>
+                  )}
+                </Box>
 
                 <ProductDescription
                   sx={{
@@ -498,33 +518,33 @@ export const ProductGrid = memo(({ products, isVisible }) => {
                     minHeight: 0,
                   }}
                 >
-                  {product?.description}
+                  {product?.subcategory}
                 </ProductDescription>
 
-                <ProductPrice>{product?.price}</ProductPrice>
-                {(product?.mrp != null || product?.rate != null) && (
-                  <CustomText
-                    sx={{
-                      fontSize: 10,
-                      color: "#666",
-                      mt: 0.5,
-                      textAlign: "right",
-                    }}
-                  >
-                    {product?.mrp != null && `MRP ₹${product.mrp}`}
-                    {product?.mrp != null && product?.rate != null && " · "}
-                    {product?.rate != null && `Rate ₹${product.rate}`}
-                  </CustomText>
-                )}
+                <Box sx={{ mt: 0.5, display: "flex", flexDirection: "column", gap: 0.25 }}>
+                  {product?.mrp != null && (
+                    <CustomText sx={{ fontSize: 11, color: "#666", fontFamily: "'Inter', sans-serif" }}>
+                      MRP: <Box component="span" sx={{ textDecoration: product?.rate != null && product.mrp > product.rate ? "line-through" : "none", color: product?.rate != null && product.mrp > product.rate ? "#999" : "#444" }}>₹{Math.round(product.mrp)}</Box>
+                    </CustomText>
+                  )}
+                  {product?.rate != null && (
+                    <CustomText sx={{ fontSize: 12, fontWeight: 700, color: "var(--themeColor)", fontFamily: "'Inter', sans-serif" }}>
+                      Rate: ₹{Math.round(product.rate)}
+                    </CustomText>
+                  )}
+                  {product?.mrp == null && product?.rate == null && (
+                    <CustomText sx={{ fontSize: 11, color: "#999", fontFamily: "'Inter', sans-serif" }}>Price on request</CustomText>
+                  )}
+                </Box>
               </CardContent>
             </Card>
           </Box>
         ))
       ) : (
-        <Box 
-          sx={{ 
-            width: "100%", 
-            textAlign: "center", 
+        <Box
+          sx={{
+            width: "100%",
+            textAlign: "center",
             py: { xs: 6, md: 10 },
             px: 2,
             display: "flex",
@@ -590,20 +610,20 @@ export const ProductGrid = memo(({ products, isVisible }) => {
                 boxShadow: "0 8px 30px rgba(255,148,114,0.3)",
               }}
             >
-              <SearchOff 
-                sx={{ 
+              <SearchOff
+                sx={{
                   fontSize: { xs: 40, md: 50 },
                   color: "#fff",
-                }} 
+                }}
               />
             </Box>
           </Box>
-          
+
           <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-            <CustomText 
-              variant="h5" 
-              sx={{ 
-                color: "#2c2c2c", 
+            <CustomText
+              variant="h5"
+              sx={{
+                color: "#2c2c2c",
                 fontSize: { xs: 20, sm: 24, md: 28 },
                 fontWeight: 700,
                 mb: 0.5,
@@ -611,9 +631,9 @@ export const ProductGrid = memo(({ products, isVisible }) => {
             >
               No Products Found
             </CustomText>
-            <CustomText 
-              sx={{ 
-                color: "#666", 
+            <CustomText
+              sx={{
+                color: "#666",
                 fontSize: { xs: 14, md: 16 },
                 maxWidth: { xs: "100%", md: "500px" },
                 mx: "auto",
