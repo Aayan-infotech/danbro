@@ -235,6 +235,13 @@ export const TopHeader = ({ onOpenMobileMenu }) => {
         };
     }, []);
 
+    // Listen for "Business" opened from mobile menu (Android view)
+    useEffect(() => {
+        const handleOpenBusiness = () => setOpenBusinessDialog(true);
+        window.addEventListener("openBusinessDialog", handleOpenBusiness);
+        return () => window.removeEventListener("openBusinessDialog", handleOpenBusiness);
+    }, []);
+
     const handleWishlistClick = () => {
         if (isLoggedIn) {
             navigate("/profile", { state: { activeTab: "wishlist" } });

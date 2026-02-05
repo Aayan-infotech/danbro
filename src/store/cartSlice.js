@@ -95,7 +95,22 @@ export const loadCartItems = createAsyncThunk(
         items = response;
       }
 
-      return { items, cartTotal, isGuest: false };
+      const apiSubtotal = response?.subtotal != null ? Number(response.subtotal) : null;
+      const apiTaxTotal = response?.taxTotal != null ? Number(response.taxTotal) : null;
+      const apiDiscount = response?.discount != null ? Number(response.discount) : null;
+      const apiFinalAmount = response?.finalAmount != null ? Number(response.finalAmount) : null;
+      if (apiFinalAmount != null && cartTotal === 0) cartTotal = apiFinalAmount;
+      if (apiSubtotal != null && cartTotal === 0) cartTotal = apiSubtotal;
+
+      return {
+        items,
+        cartTotal,
+        isGuest: false,
+        cartSubtotal: apiSubtotal,
+        cartTaxTotal: apiTaxTotal,
+        cartDiscount: apiDiscount,
+        cartFinalAmount: apiFinalAmount,
+      };
     } catch (error) {
       const errorMessage = error.response?.data?.message || error.message || 'Failed to load cart';
       return rejectWithValue(errorMessage);
@@ -163,6 +178,10 @@ const initialState = {
   updatingItems: new Set(),
   updatingAction: {},
   isGuest: false,
+  cartSubtotal: null,
+  cartTaxTotal: null,
+  cartDiscount: null,
+  cartFinalAmount: null,
 };
 
 const cartSlice = createSlice({
@@ -197,6 +216,10 @@ const cartSlice = createSlice({
         state.items = action.payload.items;
         state.cartTotal = action.payload.cartTotal;
         state.isGuest = action.payload.isGuest;
+        state.cartSubtotal = action.payload.cartSubtotal ?? null;
+        state.cartTaxTotal = action.payload.cartTaxTotal ?? null;
+        state.cartDiscount = action.payload.cartDiscount ?? null;
+        state.cartFinalAmount = action.payload.cartFinalAmount ?? null;
         state.error = null;
       })
       .addCase(loadCartItems.rejected, (state, action) => {
@@ -204,6 +227,10 @@ const cartSlice = createSlice({
         state.error = action.payload;
         state.items = [];
         state.cartTotal = 0;
+        state.cartSubtotal = null;
+        state.cartTaxTotal = null;
+        state.cartDiscount = null;
+        state.cartFinalAmount = null;
       })
       // Update item quantity
       .addCase(updateCartItemQuantity.pending, (state, action) => {
@@ -256,6 +283,10 @@ const cartSlice = createSlice({
         state.loading = false;
         state.items = [];
         state.cartTotal = 0;
+        state.cartSubtotal = null;
+        state.cartTaxTotal = null;
+        state.cartDiscount = null;
+        state.cartFinalAmount = null;
         state.error = null;
       });
   },

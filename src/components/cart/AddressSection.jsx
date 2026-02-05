@@ -129,7 +129,13 @@ export const AddressSection = ({
   };
 
   const handleRecipientDraftChange = (field) => (event) => {
-    const value = event.target.value;
+    let value = event.target.value;
+    if (field === "name") {
+      value = value.replace(/[^a-zA-Z\s.'-]/g, "");
+    }
+    if (field === "phone") {
+      value = value.replace(/\D/g, "").slice(0, 15);
+    }
     setRecipientDraft((prev) => ({
       ...prev,
       [field]: value,
@@ -219,9 +225,12 @@ export const AddressSection = ({
   };
 
   const isRecipientDraftValid = () => {
+    const name = (recipientDraft?.name || "").trim();
+    const phone = (recipientDraft?.phone || "").replace(/\D/g, "");
     return (
-      recipientDraft?.name &&
-      recipientDraft?.phone &&
+      name.length >= 2 &&
+      /^[a-zA-Z\s.'-]+$/.test(name) &&
+      phone.length === 10 &&
       recipientDraft?.houseNumber &&
       recipientDraft?.streetName &&
       recipientDraft?.area &&
@@ -445,33 +454,6 @@ export const AddressSection = ({
                 No recipient address added yet. Please add recipient details to place order for someone else.
               </CustomText>
             )}
-
-            <Button
-              variant="outlined"
-              fullWidth
-              onClick={openRecipientDialog}
-              sx={{
-                borderColor: "var(--themeColor)",
-                color: "var(--themeColor)",
-                textTransform: "none",
-                mt: 0.5,
-                py: 1,
-                fontSize: { xs: 13, md: 14 },
-                fontWeight: 600,
-                "&:hover": {
-                  borderColor: "var(--themeColor)",
-                  backgroundColor: "#fbeeee",
-                },
-              }}
-            >
-              {isSomeoneElseFormValid() ? "Edit Recipient Address" : "Add Recipient Address"}
-            </Button>
-
-            {!isSomeoneElseFormValid() && (
-              <CustomText sx={{ fontSize: 12, color: "#d32f2f", mt: 1 }}>
-                Please fill all required fields before placing the order.
-              </CustomText>
-            )}
           </Box>
         )}
       </CardContent>
@@ -576,8 +558,10 @@ export const AddressSection = ({
               fullWidth
               size="small"
               label="Recipient Name"
+              placeholder="Letters and spaces only"
               value={recipientDraft?.name || ""}
               onChange={handleRecipientDraftChange("name")}
+              inputProps={{ maxLength: 80 }}
               sx={{
                 "& .MuiOutlinedInput-root": {
                   borderRadius: 2,
@@ -589,8 +573,16 @@ export const AddressSection = ({
               fullWidth
               size="small"
               label="Phone Number"
+              placeholder="10 digit mobile number"
               value={recipientDraft?.phone || ""}
               onChange={handleRecipientDraftChange("phone")}
+              inputProps={{ maxLength: 15, inputMode: "numeric" }}
+              error={!!(recipientDraft?.phone && recipientDraft.phone.length < 10)}
+              helperText={
+                recipientDraft?.phone && recipientDraft.phone.length > 0 && recipientDraft.phone.length < 10
+                  ? "Enter a valid 10 digit number"
+                  : null
+              }
               sx={{
                 "& .MuiOutlinedInput-root": {
                   borderRadius: 2,

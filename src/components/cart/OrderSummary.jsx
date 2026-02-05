@@ -25,6 +25,7 @@ import {
 
 export const OrderSummary = ({
   finalSubtotal,
+  taxTotal = 0,
   discount,
   shipping,
   total,
@@ -70,7 +71,6 @@ export const OrderSummary = ({
   };
 
   const packingCharges = 0;
-  const taxesCharges = 0;
 
   return (
     <>
@@ -155,28 +155,28 @@ export const OrderSummary = ({
           </CustomText>
           <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
             <CustomText sx={{ fontSize: 13, color: "#666" }}>Item(s) Subtotal:</CustomText>
-            <CustomText sx={{ fontSize: 13, color: "#333" }}>INR {finalSubtotal.toFixed(2)}</CustomText>
+            <CustomText sx={{ fontSize: 13, color: "#333" }}>₹{Number(finalSubtotal).toFixed(2)}</CustomText>
           </Box>
           <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
             <CustomText sx={{ fontSize: 13, color: "#666" }}>Packing Charges:</CustomText>
-            <CustomText sx={{ fontSize: 13, color: "#333" }}>+INR {packingCharges.toFixed(2)}</CustomText>
+            <CustomText sx={{ fontSize: 13, color: "#333" }}>+₹{Number(packingCharges).toFixed(2)}</CustomText>
           </Box>
           <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
             <CustomText sx={{ fontSize: 13, color: "#666" }}>Delivery Charges:</CustomText>
-            <CustomText sx={{ fontSize: 13, color: "#333" }}>+INR {shipping.toFixed(2)}</CustomText>
+            <CustomText sx={{ fontSize: 13, color: "#333" }}>+₹{Number(shipping).toFixed(2)}</CustomText>
           </Box>
           <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
             <CustomText sx={{ fontSize: 13, color: "#666" }}>Taxes and Charges:</CustomText>
-            <CustomText sx={{ fontSize: 13, color: "#333" }}>+INR {taxesCharges.toFixed(2)}</CustomText>
+            <CustomText sx={{ fontSize: 13, color: "#333" }}>+₹{Number(taxTotal).toFixed(2)}</CustomText>
           </Box>
           <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
             <CustomText sx={{ fontSize: 13, color: "#666" }}>Discount:</CustomText>
-            <CustomText sx={{ fontSize: 13, color: "#16a34a" }}>-INR {discount.toFixed(2)}</CustomText>
+            <CustomText sx={{ fontSize: 13, color: "#16a34a" }}>-₹{Number(discount).toFixed(2)}</CustomText>
           </Box>
           <Box sx={{ borderTop: "1px solid #eee", pt: 1.5, mt: 1 }}>
             <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <CustomText sx={{ fontSize: 16, fontWeight: 700, color: "#2c2c2c" }}>Grand Total:</CustomText>
-              <CustomText sx={{ fontSize: 16, fontWeight: 700, color: "var(--themeColor)" }}>INR {total.toFixed(2)}</CustomText>
+              <CustomText sx={{ fontSize: 16, fontWeight: 700, color: "var(--themeColor)" }}>₹{Number(total).toFixed(2)}</CustomText>
             </Box>
           </Box>
           <CustomText sx={{ fontSize: 12, color: "#0d8c2d", fontWeight: 500, mt: 1.5, display: "block" }}>

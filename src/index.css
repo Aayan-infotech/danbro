@@ -67,6 +67,17 @@ span,
 .MuiContainer-root.MuiContainer-maxWidthFalse.css-935ve3-MuiContainer-root {
   padding-top: 30px;
 }
+.MuiBox-root.css-1x6uh2p {
+  padding: 12px;
+  padding-top: 30px;
+}
+/* .MuiBox-root.css-1q0h42n: only on mobile / Android view (not desktop) */
+@media (max-width: 599px) {
+  .MuiBox-root.css-1q0h42n {
+    padding: 10px;
+    margin-top: 40px;
+  }
+}
 
 /* Section title utility */
 .title-style {

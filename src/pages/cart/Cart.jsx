@@ -39,6 +39,10 @@ export const Cart = () => {
     updatingItems,
     updatingAction,
     isGuest,
+    cartSubtotal,
+    cartTaxTotal,
+    cartDiscount,
+    cartFinalAmount,
   } = useAppSelector((state) => state.cart);
   const guestWishlist = useAppSelector(getGuestWishlist);
 
@@ -237,6 +241,20 @@ export const Cart = () => {
           setOrderInitiating(false);
           return;
         }
+        const nameTrim = (someoneElseData?.name || "").trim();
+        const phoneTrim = (someoneElseData?.phone || "").trim();
+        const nameValid = /^[a-zA-Z\s.'-]+$/.test(nameTrim);
+        const phoneValid = /^\d{10}$/.test(phoneTrim.replace(/\D/g, ""));
+        if (!nameValid || nameTrim.length < 2) {
+          setOrderError("Recipient name should contain only letters and spaces (at least 2 characters).");
+          setOrderInitiating(false);
+          return;
+        }
+        if (!phoneValid) {
+          setOrderError("Please enter a valid 10 digit phone number.");
+          setOrderInitiating(false);
+          return;
+        }
         orderResponse = await initiateOrderOther({
           deliveryAddress: {
             name: someoneElseData?.name,
@@ -404,12 +422,16 @@ export const Cart = () => {
     return sum + itemPrice * quantity;
   }, 0);
 
-  // Use cartTotal from API if available, otherwise calculate
-  const finalSubtotal = cartTotal > 0 ? cartTotal : subtotal;
+  // Use API summary when available (logged-in cart/get), otherwise calculate
+  const hasApiSummary = cartSubtotal != null || cartFinalAmount != null;
+  const finalSubtotal = hasApiSummary && cartSubtotal != null ? cartSubtotal : (cartTotal > 0 ? cartTotal : subtotal);
+  const taxTotal = hasApiSummary && cartTaxTotal != null ? cartTaxTotal : 0;
 
-  // Calculate discount based on coupon type (ITEM_DISCOUNT_AMOUNT | ITEM_DISCOUNT_PERCENTAGE)
+  // Discount: from API when available, else from applied coupon
   let discount = 0;
-  if (appliedCoupon) {
+  if (hasApiSummary && cartDiscount != null) {
+    discount = cartDiscount;
+  } else if (appliedCoupon) {
     if (appliedCoupon.discountType === "ITEM_DISCOUNT_PERCENTAGE") {
       discount = (finalSubtotal * (appliedCoupon.discountPercent || 0)) / 100;
     } else if (appliedCoupon.discountType === "ITEM_DISCOUNT_AMOUNT") {
@@ -424,7 +446,7 @@ export const Cart = () => {
   }
 
   const shipping = finalSubtotal > 50 ? 0 : 5.0;
-  const total = finalSubtotal - discount + shipping;
+  const total = hasApiSummary && cartFinalAmount != null ? cartFinalAmount : finalSubtotal - discount + shipping;
 
   return (
     <Box sx={{ minHeight: "100vh", pb: { xs: 14, sm: 12, md: 6 }, boxSizing: "border-box", }}>
@@ -563,6 +585,7 @@ export const Cart = () => {
               <Box sx={{ position: { md: "sticky" }, top: { md: 100 } }}>
                 <OrderSummary
                   finalSubtotal={finalSubtotal}
+                  taxTotal={taxTotal}
                   discount={discount}
                   shipping={shipping}
                   total={total}

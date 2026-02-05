@@ -272,6 +272,32 @@ export const Navbar = ({ mobileMenuOpen, onMobileMenuClose }) => {
                         px: 3,
                     }}
                 >
+                    {/* Business - only in mobile drawer (Android view) */}
+                    <Box
+                        sx={{
+                            display: { xs: "flex", md: "none" },
+                            alignItems: "center",
+                            cursor: "pointer",
+                            pb: 1,
+                            borderBottom: "1px solid rgba(255,148,114,0.3)",
+                            mb: 0.5,
+                        }}
+                        onClick={() => {
+                            closeDrawer();
+                            window.dispatchEvent(new CustomEvent("openBusinessDialog"));
+                        }}
+                    >
+                        <CustomText
+                            sx={{
+                                fontWeight: 600,
+                                fontSize: 14,
+                                color: "var(--themeColor)",
+                                "&:hover": { opacity: 0.8 },
+                            }}
+                        >
+                            Business +
+                        </CustomText>
+                    </Box>
                     {navbarItems.map(({ label, categoryId, hasProducts, path: itemPath }, index) => {
                         const path = itemPath || `/products?categoryId=${categoryId}`;
                         const products = getProductsForCategory(categoryId);
