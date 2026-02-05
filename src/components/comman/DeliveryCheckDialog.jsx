@@ -276,11 +276,10 @@ export const DeliveryCheckDialog = ({ open, onClose, initialLocationLabel = "" }
           </Box>
         </Box>
 
-        {/* Search Input with Autocomplete */}
+        {/* Search Input with Autocomplete - portal so dropdown is not clipped by modal */}
         <Autocomplete
           ref={autocompleteRef}
           freeSolo
-          disablePortal
           options={predictions}
           getOptionLabel={(option) =>
             typeof option === 'string' ? option : option.description || ''
@@ -296,6 +295,19 @@ export const DeliveryCheckDialog = ({ open, onClose, initialLocationLabel = "" }
             }
           }}
           loading={loading}
+          ListboxProps={{
+            sx: {
+              maxHeight: 280,
+              overflow: "auto",
+              "& .MuiAutocomplete-option": {
+                whiteSpace: "normal",
+                wordBreak: "break-word",
+                alignItems: "flex-start",
+                paddingTop: 1.25,
+                paddingBottom: 1.25,
+              },
+            },
+          }}
           renderInput={(params) => (
             <TextField
               {...params}
@@ -365,8 +377,8 @@ export const DeliveryCheckDialog = ({ open, onClose, initialLocationLabel = "" }
                 mt: 1,
                 borderRadius: "12px",
                 boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
-                zIndex: 10001,
-                position: "relative",
+                zIndex: 10002,
+                overflow: "hidden",
               }}
             >
               {children}

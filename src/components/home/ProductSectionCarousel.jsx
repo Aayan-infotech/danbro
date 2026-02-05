@@ -318,32 +318,38 @@ export const ProductSectionCarousel = memo(({
                   }
                 }}
                 sx={{
-                  bgcolor: "#fff",
+                  bgcolor: "transparent",  
                   borderRadius: { xs: 2.5, md: 3 },
                   overflow: "hidden",
-                  boxShadow: "0 8px 30px rgba(0,0,0,0.08), 0 0 0 1px rgba(255,181,161,0.1) inset",
                   cursor: "pointer",
                   position: "relative",
+                  boxShadow: "none",  
+                  border: "none",    
                   transition: "all 0.6s cubic-bezier(0.4, 0, 0.2, 1)",
-                  border: "1px solid rgba(255,181,161,0.1)",
                   "&::before": {
                     content: '""',
                     position: "absolute",
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    background: hoveredIndex === index
-                      ? `linear-gradient(135deg, ${product?.color || "#FF9472"}12 0%, ${product?.color || "#FF9472"}08 50%, #fff 100%)`
-                      : "linear-gradient(135deg, rgba(255,181,161,0.05) 0%, rgba(95,41,48,0.02) 100%)",
+                    inset: 0,
+                    background:
+                      hoveredIndex === index
+                        ? `linear-gradient(
+                      135deg,
+                      ${product?.color || "#FF9472"}12 0%,
+                      ${product?.color || "#FF9472"}08 50%,
+                      transparent 100%
+                    )`
+                        : "transparent",
                     opacity: hoveredIndex === index ? 1 : 0,
                     transition: "opacity 0.5s ease",
                     zIndex: 1,
                     pointerEvents: "none",
                   },
                   "&:hover": {
+                    backgroundColor: "#fff",       // ✅ hover pe card feel
                     transform: "translateY(-15px) scale(1.03) rotateY(2deg)",
-                    boxShadow: `0 25px 60px ${product?.color || "#FF9472"}30, 0 0 0 2px ${product?.color || "#FF9472"}20 inset`,
+                    boxShadow: `0 25px 60px ${product?.color || "#FF9472"}30`,
+                    borderRadius: { xs: 2.5, md: 3 },
+
                     "& .product-image": {
                       transform: "scale(1.1)",
                     },
@@ -442,12 +448,11 @@ export const ProductSectionCarousel = memo(({
                         borderRadius: 2,
                         fontSize: 10,
                         fontWeight: 600,
-                        textTransform: "none",
                         boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
                         zIndex: 2,
                       }}
                     >
-                      Courier: {product.courier === "Y" || product.courier === "y" ? "Yes" : "No"}
+                      Courier
                     </Box>
                   )}
 

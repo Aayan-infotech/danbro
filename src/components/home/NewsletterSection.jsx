@@ -28,8 +28,6 @@ export const NewsletterSection = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Newsletter subscription logic here
-    console.log("Newsletter subscription:", email);
     setEmail("");
   };
 
@@ -63,14 +61,7 @@ export const NewsletterSection = () => {
       }}
     >
       <Container maxWidth="lg" sx={{ px: { xs: 2, md: 3 }, position: "relative", zIndex: 1 }}>
-        <Box
-          sx={{
-            textAlign: "center",
-            maxWidth: 700,
-            mx: "auto",
-            mb: 4,
-          }}
-        >
+        <Box sx={{ textAlign: "center", maxWidth: 700, mx: "auto", mb: 7, }}>
           {/* Icon with Animation */}
           <Box
             sx={{
@@ -97,13 +88,7 @@ export const NewsletterSection = () => {
           </Box>
 
           {/* Title */}
-          <CustomText
-            sx={{
-              fontSize: { xs: 28, sm: 34, md: 42 },
-              fontWeight: 800,
-              color: "#fff",
-            }}
-          >
+          <CustomText sx={{ fontSize: { xs: 28, sm: 34, md: 42 }, fontWeight: 800, color: "#fff" }}>
             Subscribe to Our Newsletter
           </CustomText>
 
