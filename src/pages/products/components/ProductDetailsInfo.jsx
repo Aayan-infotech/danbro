@@ -48,13 +48,41 @@ export const ProductDetailsInfo = ({
     >
       {productData?.name}
     </CustomText>
-    <Box>
-      <CustomText sx={{ fontSize: { xs: 20, sm: 26, md: 32 }, fontWeight: 600, fontFamily: "'Inter', sans-serif", color: "#F31400", wordBreak: "break-word" }}>
-        {productData?.price}
-        <Box component="span" sx={{ fontSize: { xs: 12, sm: 14 }, fontWeight: 400, color: "#666", ml: 0.5 }}>
-          / {productData?.weight}
-        </Box>
-      </CustomText>
+    <Box sx={{ mb: 0.5 }}>
+      <Box >
+        {productData?.mrp != null && productData?.rate != null && (
+          <>
+            <Box sx={{ display: "flex", alignItems: "baseline", gap: 0.5 }}>
+              <CustomText sx={{ fontSize: { xs: 20, sm: 26, md: 32 }, fontWeight: 600, fontFamily: "'Inter', sans-serif", color: "#F31400" }}>
+                ₹{productData?.rate}
+              </CustomText>
+              <Box component="span" sx={{ fontSize: { xs: 12, sm: 14 }, fontWeight: 400, color: "#666" }}>
+                / {productData?.weight || "—"}
+              </Box>
+            </Box>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+              <CustomText sx={{ fontSize: { xs: 12, sm: 13 }, fontWeight: 500, color: "#666", fontFamily: "'Inter', sans-serif" }}>MRP</CustomText>
+              <CustomText
+                component="span"
+                sx={{
+                  fontSize: { xs: 16, sm: 18 },
+                  fontWeight: 500,
+                  color: "#666",
+                  fontFamily: "'Inter', sans-serif",
+                  textDecoration: productData?.mrp > productData?.rate ? "line-through" : "none",
+                }}
+              >
+                ₹{productData?.mrp}
+              </CustomText>
+            </Box>
+          </>
+        )}
+        {((productData?.mrp == null && productData?.rate == null) || productData?.mrp == null || productData?.rate == null) && (
+          <CustomText sx={{ fontSize: { xs: 20, sm: 26, md: 32 }, fontWeight: 600, fontFamily: "'Inter', sans-serif", color: "#F31400" }}>
+            {productData?.price}
+          </CustomText>
+        )}
+      </Box>
     </Box>
     <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1, flexWrap: "wrap" }}>
       <Rating value={4.5} precision={0.5} readOnly size="small" sx={{ color: "#FF643A" }} />
@@ -177,6 +205,15 @@ export const ProductDetailsInfo = ({
           >
             Set Location
           </Button>
+        </Box>
+      )}
+      {/* Availability based on courier (N = store pickup only, Y = courier delivery available) */}
+      {product?.courier != null && (
+        <Box sx={{ mt: 1.5, pt: 1.5, borderTop: "1px solid #eee" }}>
+          <CustomText sx={{ fontSize: 12, fontWeight: 600, fontFamily: "'Inter', sans-serif", color: "#2c2c2c", mb: 0.5 }}>Availability</CustomText>
+          <CustomText sx={{ fontSize: 13, fontFamily: "'Inter', sans-serif", color: product?.courier === "Y" ? "#1B9C3F" : "#666" }}>
+            {product?.courier === "Y" ? "Available for courier delivery" : "Store pickup only (not available for courier delivery)"}
+          </CustomText>
         </Box>
       )}
     </Box>

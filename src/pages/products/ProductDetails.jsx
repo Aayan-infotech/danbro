@@ -297,7 +297,9 @@ export const ProductDetails = () => {
     if (!product) return null;
 
     const priceObj = product.price && product.price.length > 0 ? product.price[0] : { rate: 0, mrp: 0 };
-    const displayPrice = priceObj.rate || priceObj.mrp || 0;
+    const rate = Number(priceObj.rate) || Number(priceObj.mrp) || 0;
+    const mrp = Number(priceObj.mrp) || rate;
+    const displayPrice = rate;
 
     // Transform nutrition array to object
     const nutritionObj = {};
@@ -321,6 +323,8 @@ export const ProductDetails = () => {
       name: product.name || "Product",
       description: product.ingredient || product.name || "",
       price: `₹${displayPrice}`,
+      mrp,
+      rate,
       weight: product.weight || "500g",
       images: images,
       nutrition: nutritionObj,
