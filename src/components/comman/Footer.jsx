@@ -200,7 +200,7 @@ export const Footer = () => {
                 ))}
               </Box>
             </Box>
-            <Link to="/contact">
+            <Link to="/contact" style={{ textDecoration: "none" }}>
               <Box
                 sx={{
                   background: "#fff",
@@ -328,7 +328,7 @@ export const Footer = () => {
                   lineHeight: 1.6,
                 }}
               >
-                Blending Asian traditions with modern flavors, Danbro crafts 
+                Blending Asian traditions with modern flavors, Danbro crafts
                 exquisite, world-class bakery delights, from wedding cakes to
                 innovative baked mithai, ensuring every celebration is
                 unforgettable.
@@ -349,6 +349,7 @@ export const Footer = () => {
                   key={index}
                   to={item.link}
                   className="text-decoration-none"
+                  style={{ textDecoration: "none" }}
                   onClick={(e) => handleLinkClick(e, item.link)}
                 >
                   <CustomText
@@ -375,13 +376,7 @@ export const Footer = () => {
               ))}
             </Grid>
             <Grid item xs={6} sm={3} md={2} lg={2}>
-              <CustomText
-                sx={{
-                  fontWeight: 700,
-                  mb: 2,
-                  fontSize: { xs: 14, sm: 14, md: 13, lg: 16 },
-                }}
-              >
+              <CustomText sx={{ fontWeight: 700, mb: 2, fontSize: { xs: 14, sm: 14, md: 13, lg: 16 }, }}>
                 USEFUL LINKS
               </CustomText>
               {knowMore?.map((item, index) => (
@@ -540,7 +535,7 @@ export const Footer = () => {
             }}
           >
             <CustomText sx={{ color: "#000", fontSize: { xs: 12, sm: 12, md: 12, lg: 14 }, textAlign: { xs: "left", sm: "left", md: "left" }, flex: { md: "0 0 auto" }, whiteSpace: { md: "nowrap" } }}>
-              Mr. Brown Bakery and Food Products Pvt Ltd | 2025 |
+              Mr. Brown Bakery and Food Products Pvt Ltd | {new Date().getFullYear()} |
             </CustomText>
             <Box sx={{ display: "flex", gap: { xs: 1.5, sm: 2, md: 1.5, lg: 2 }, alignItems: "center", flexWrap: { xs: "wrap", sm: "wrap", md: "nowrap" }, flex: { md: "0 0 auto" } }}>
               <CustomText sx={{ color: "#000", fontSize: { xs: 12, sm: 12, md: 12, lg: 14 }, textAlign: { xs: "left", sm: "left", md: "left" }, whiteSpace: "nowrap" }}>

@@ -4,7 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { addToRecentlyViewed, fetchProducts, fetchProductById } from "../../utils/apiService";
 import { useItemCategories } from "../../hooks/useItemCategories";
 import { useHomeLayout } from "../../hooks/useHomeLayout";
-import { addToCart } from "../../utils/cart";
+import { addToCart, getCart } from "../../utils/cart";
 import { addToWishlist, removeFromWishlist, isInWishlist } from "../../utils/wishlist";
 import { getStoredLocation } from "../../utils/location";
 import blankImage from "../../assets/blankimage.png";
@@ -36,6 +36,7 @@ export const ProductDetails = () => {
   const [wishlistLoading, setWishlistLoading] = useState(false);
   const [deliveryLocationLabel, setDeliveryLocationLabel] = useState("");
   const [hasSavedLocation, setHasSavedLocation] = useState(false);
+  const [cartItems, setCartItems] = useState([]);
 
   const { categories: apiCategories } = useItemCategories();
   const { products: homeLayoutProducts } = useHomeLayout();
@@ -190,8 +191,8 @@ export const ProductDetails = () => {
           if (cancelled) return;
           setError(
             err.response?.data?.message ||
-              err.message ||
-              "Failed to load product"
+            err.message ||
+            "Failed to load product"
           );
         } finally {
           if (!cancelled) setLoading(false);
@@ -201,8 +202,8 @@ export const ProductDetails = () => {
           console.error("Error loading product:", err);
           setError(
             err.response?.data?.message ||
-              err.message ||
-              "Failed to load product"
+            err.message ||
+            "Failed to load product"
           );
           setLoading(false);
         }
@@ -241,6 +242,44 @@ export const ProductDetails = () => {
     window.addEventListener("wishlistUpdated", handleWishlistUpdated);
     return () => window.removeEventListener("wishlistUpdated", handleWishlistUpdated);
   }, [productIdForWishlist]);
+
+  // Load cart to check if current product is in cart (for "Go to Cart" vs "Add to Cart")
+  useEffect(() => {
+    let cancelled = false;
+    getCart()
+      .then((res) => {
+        if (cancelled) return;
+        // API returns { items: [...] }; guest returns { data: [...] }
+        const items = Array.isArray(res?.items) ? res.items : (Array.isArray(res?.data) ? res.data : []);
+        setCartItems(items);
+      })
+      .catch(() => {
+        if (!cancelled) setCartItems([]);
+      });
+    return () => { cancelled = true; };
+  }, [id]);
+
+  useEffect(() => {
+    const handleCartUpdated = () => {
+      getCart()
+        .then((res) => {
+          const items = Array.isArray(res?.items) ? res.items : (Array.isArray(res?.data) ? res.data : []);
+          setCartItems(items);
+        })
+        .catch(() => setCartItems([]));
+    };
+    window.addEventListener("cartUpdated", handleCartUpdated);
+    return () => window.removeEventListener("cartUpdated", handleCartUpdated);
+  }, []);
+
+  const productIdForCart = product?._id || product?.productId || product?.id || id;
+  const isProductInCart = useMemo(() => {
+    if (!productIdForCart || !Array.isArray(cartItems)) return false;
+
+    return cartItems.some(
+      (item) => String(item.productId || item._id || "") === String(productIdForCart)
+    );
+  }, [cartItems, productIdForCart]);
 
   const handleWishlistToggle = async () => {
     if (!productIdForWishlist || wishlistLoading) return;
@@ -388,6 +427,8 @@ export const ProductDetails = () => {
               inWishlist={inWishlist}
               wishlistLoading={wishlistLoading}
               onWishlistToggle={handleWishlistToggle}
+              isProductInCart={isProductInCart}
+              onGoToCart={() => navigate("/cart")}
             />
           </Grid>
         </Grid>
@@ -396,7 +437,7 @@ export const ProductDetails = () => {
       <ProductDetailsIngredientsNutrition
         productData={productData}
         product={product}
-              expanded={expanded}
+        expanded={expanded}
         onExpandedChange={setExpanded}
       />
       <ProductDetailsReviews />

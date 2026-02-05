@@ -42,7 +42,7 @@ export const useHomeLayout = () => {
       }
 
       try {
-        setLoading(true);
+        if (!cancelled) setLoading(true);
         setError(null);
 
         const response = await fetchHomeLayout();
@@ -89,6 +89,36 @@ export const useHomeLayout = () => {
       cancelled = true;
       isMountedRef.current = false;
     };
+  }, []);
+
+  // Refetch when homeLayout is invalidated (e.g. after login so API returns isCart/isWishlisted)
+  useEffect(() => {
+    const handleInvalidate = () => {
+      homeLayoutCache.data = null;
+      homeLayoutCache.timestamp = null;
+      setData({ menus: [], categories: [], products: [] });
+      setLoading(true);
+      fetchHomeLayout()
+        .then((response) => {
+          if (response?.success && response?.data) {
+            const newData = {
+              menus: response.data.menus || [],
+              categories: response.data.categories || [],
+              products: response.data.products || [],
+            };
+            homeLayoutCache.data = newData;
+            homeLayoutCache.timestamp = Date.now();
+            setData(newData);
+          }
+          setLoading(false);
+        })
+        .catch((err) => {
+          console.error('Error refetching home layout:', err);
+          setLoading(false);
+        });
+    };
+    window.addEventListener('homeLayoutInvalidate', handleInvalidate);
+    return () => window.removeEventListener('homeLayoutInvalidate', handleInvalidate);
   }, []);
 
   return {
@@ -145,5 +175,7 @@ export const transformProduct = (apiProduct, categoryId) => {
     rate: priceObj.rate,
     veg: apiProduct.veg,
     weight: apiProduct.weight,
+    isCart: apiProduct.isCart === true,
+    isWishlisted: apiProduct.isWishlisted === true,
   };
 };

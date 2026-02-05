@@ -45,6 +45,7 @@ export const Cart = () => {
     cartFinalAmount,
   } = useAppSelector((state) => state.cart);
   const guestWishlist = useAppSelector(getGuestWishlist);
+  console.log(cartItems, 'cartItems')
 
   // Local state for addresses and coupons
   const [addresses, setAddresses] = useState([]);

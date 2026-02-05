@@ -32,6 +32,8 @@ export const ProductDetailsInfo = ({
   inWishlist,
   wishlistLoading,
   onWishlistToggle,
+  isProductInCart = false,
+  onGoToCart,
 }) => (
   <Box sx={{ minWidth: 0 }}>
     <CustomText
@@ -242,11 +244,11 @@ export const ProductDetailsInfo = ({
       </Grid>
       <Grid size={{ xs: 6, sm: 7 }}>
         <Button
-          onClick={onAddToCart}
-          disabled={addingToCart || !product}
+          onClick={isProductInCart ? onGoToCart : onAddToCart}
+          disabled={!isProductInCart && (addingToCart || !product)}
           fullWidth
           sx={{
-            backgroundColor: "#FF9472",
+            backgroundColor: isProductInCart ? "#1B9C3F" : "#FF9472",
             color: "#fff",
             py: { xs: 1, sm: 1.2 },
             borderRadius: 1,
@@ -254,15 +256,25 @@ export const ProductDetailsInfo = ({
             fontWeight: 500,
             fontFamily: "'Inter', sans-serif",
             textTransform: "none",
-            "&:hover": { backgroundColor: "#F2709C" },
-            "&:disabled": { backgroundColor: "#ccc", color: "#999" },
+            transition: "all 0.25s ease",
+            "&:hover": {
+              backgroundColor: isProductInCart ? "#148A37" : "#F2709C",
+            },
+            "&:disabled": {
+              backgroundColor: "#ccc",
+              color: "#999",
+            },
           }}
         >
-          {addingToCart ? (
+          {addingToCart && !isProductInCart ? (
             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
               <CircularProgress size={20} sx={{ color: "#fff" }} />
-              <CustomText sx={{ fontFamily: "'Inter', sans-serif" }}>Adding...</CustomText>
+              <CustomText sx={{ fontFamily: "'Inter', sans-serif" }}>
+                Adding...
+              </CustomText>
             </Box>
+          ) : isProductInCart ? (
+            "Go to Cart"
           ) : (
             "Add to Cart"
           )}

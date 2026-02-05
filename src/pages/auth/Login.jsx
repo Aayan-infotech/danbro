@@ -10,6 +10,7 @@ import { CustomButton } from "../../components/comman/CustomButton";
 import { CustomText } from "../../components/comman/CustomText";
 import { getAccessToken } from "../../utils/cookies";
 import api from "../../utils/api";
+import { invalidateHomeLayoutFetch } from "../../utils/apiService";
 
 const RECAPTCHA_SITE_KEY = "6LfBFCwsAAAAAIiTPg_1ZGCaKId4TwkCDcvBNBq0";
 
@@ -69,6 +70,8 @@ export const Login = () => {
   // Redirect after successful login (to cart if came from cart, else home)
   useEffect(() => {
     if (isRedirecting && isAuthenticated) {
+      invalidateHomeLayoutFetch();
+      window.dispatchEvent(new CustomEvent("homeLayoutInvalidate"));
       navigate(fromCartState ? "/cart" : "/home", { replace: true });
     }
   }, [isRedirecting, isAuthenticated, navigate, fromCartState]);

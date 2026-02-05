@@ -9,6 +9,7 @@ import axios from "axios";
 import { API_BASE_URL } from "../../utils/apiUrl";
 import { setAccessToken, setRefreshToken } from "../../utils/cookies";
 import { getStoredLocation } from "../../utils/location";
+import { invalidateHomeLayoutFetch } from "../../utils/apiService";
 
 export const VerifyOtp = () => {
   const [otp, setOtp] = useState("");
@@ -134,6 +135,9 @@ export const VerifyOtp = () => {
             // Clear pending login data
             localStorage.removeItem('pendingLoginEmail');
             localStorage.removeItem('pendingLoginPassword');
+
+            invalidateHomeLayoutFetch();
+            window.dispatchEvent(new CustomEvent("homeLayoutInvalidate"));
 
             // Redirect to home or profile page
             setTimeout(() => {

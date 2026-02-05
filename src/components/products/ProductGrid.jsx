@@ -1,5 +1,5 @@
 import { memo, useState, useEffect } from "react";
-import { Box, Card, CardContent, CardMedia, IconButton, CircularProgress } from "@mui/material";
+import { Box, Card, CardContent, CardMedia, IconButton, CircularProgress, Tooltip } from "@mui/material";
 import { ShoppingCart, ShareOutlined, FavoriteBorder, Favorite, SearchOff } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import { CustomText } from "../comman/CustomText";
@@ -9,9 +9,11 @@ import { addToWishlist, removeFromWishlist, getWishlist } from "../../utils/wish
 import { addToCart } from "../../utils/cart";
 import { getStoredLocation } from "../../utils/location";
 import { getAccessToken } from "../../utils/cookies";
+import { useCartProductIds } from "../../hooks/useCartProductIds";
 
 export const ProductGrid = memo(({ products, isVisible }) => {
   const navigate = useNavigate();
+  const { cartProductIds } = useCartProductIds();
   const [wishlistItems, setWishlistItems] = useState(new Set());
   const [loadingWishlist, setLoadingWishlist] = useState(new Set());
   const [loadingCart, setLoadingCart] = useState(new Set());
@@ -145,6 +147,25 @@ export const ProductGrid = memo(({ products, isVisible }) => {
     window.open(whatsappUrl, "_blank", "noopener,noreferrer");
   };
 
+  const handleCartAction = (e, product) => {
+    e.stopPropagation();
+    const productId = product?.productId;
+    if (!productId) {
+      setToast({
+        open: true,
+        message: "Product ID is missing. Please try again.",
+        severity: "error",
+        loading: false,
+      });
+      return;
+    }
+    if (cartProductIds.has(String(productId))) {
+      navigate("/cart");
+      return;
+    }
+    handleAddToCart(e, product);
+  };
+
   const handleAddToCart = async (e, product) => {
     e.stopPropagation();
 
@@ -158,7 +179,6 @@ export const ProductGrid = memo(({ products, isVisible }) => {
       return;
     }
 
-
     const productId = product.productId;
     setLoadingCart((prev) => new Set(prev).add(productId));
     setToast({
@@ -169,7 +189,6 @@ export const ProductGrid = memo(({ products, isVisible }) => {
     });
 
     try {
-      // Default quantity is 1, can be customized later
       const quantity = 1;
       await addToCart(productId, quantity);
 
@@ -180,7 +199,6 @@ export const ProductGrid = memo(({ products, isVisible }) => {
         loading: false,
       });
 
-      // Dispatch event to update cart count in header
       window.dispatchEvent(new CustomEvent('cartUpdated'));
     } catch (error) {
       console.error("Error adding to cart:", error);
@@ -388,35 +406,37 @@ export const ProductGrid = memo(({ products, isVisible }) => {
                     boxShadow: "0 4px 10px rgba(0,0,0,0.15)",
                   }}
                 >
-                  <IconButton
-                    size="small"
-                    onClick={(e) => handleAddToCart(e, product)}
-                    disabled={loadingCart.has(product?.productId)}
-                    sx={{
-                      position: "relative",
-                      "&:disabled": {
-                        opacity: 0.8,
-                      },
-                      transition: "all 0.3s ease",
-                      "&:hover:not(:disabled)": {
-                        transform: "scale(1.15)",
-                        color: "var(--themeColor)",
-                      },
-                    }}
-                  >
-                    {loadingCart.has(product?.productId) ? (
-                      <CircularProgress
-                        size={18}
-                        thickness={4}
-                        sx={{
+                  <Tooltip title={cartProductIds.has(String(product?.productId)) ? "Go to Cart" : "Add to Cart"}>
+                    <IconButton
+                      size="small"
+                      onClick={(e) => handleCartAction(e, product)}
+                      disabled={loadingCart.has(product?.productId)}
+                      sx={{
+                        position: "relative",
+                        "&:disabled": {
+                          opacity: 0.8,
+                        },
+                        transition: "all 0.3s ease",
+                        "&:hover:not(:disabled)": {
+                          transform: "scale(1.15)",
                           color: "var(--themeColor)",
-                          position: "absolute",
-                        }}
-                      />
-                    ) : (
-                      <ShoppingCart sx={{ fontSize: 18, transition: "all 0.3s ease", }} />
-                    )}
-                  </IconButton>
+                        },
+                      }}
+                    >
+                      {loadingCart.has(product?.productId) ? (
+                        <CircularProgress
+                          size={18}
+                          thickness={4}
+                          sx={{
+                            color: "var(--themeColor)",
+                            position: "absolute",
+                          }}
+                        />
+                      ) : (
+                        <ShoppingCart sx={{ fontSize: 18, transition: "all 0.3s ease", }} />
+                      )}
+                    </IconButton>
+                  </Tooltip>
                   <IconButton size="small" onClick={(e) => handleShare(e, product)}>
                     <ShareOutlined sx={{ fontSize: 18 }} />
                   </IconButton>

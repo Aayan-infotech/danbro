@@ -9,9 +9,11 @@ import StarIcon from "@mui/icons-material/Star";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { addToCart } from "../../utils/cart";
 import { addToWishlist, removeFromWishlist, getWishlist } from "../../utils/wishlist";
 import { CustomToast } from "../comman/CustomToast";
+import { useCartProductIds } from "../../hooks/useCartProductIds";
 
 export const ProductSectionCarousel = memo(({
   title,
@@ -22,6 +24,7 @@ export const ProductSectionCarousel = memo(({
   showBadge = true
 }) => {
   const navigate = useNavigate();
+  const { cartProductIds } = useCartProductIds();
   const sliderRef = useRef(null);
   const [visible, setVisible] = useState(false);
   const [hoveredIndex, setHoveredIndex] = useState(null);
@@ -78,6 +81,30 @@ export const ProductSectionCarousel = memo(({
     return () => observer.disconnect();
   }, []);
 
+  const isProductInCart = useCallback((product) => {
+    const productId = product?.productId || product?.id || product?._id;
+    return product?.isCart === true || (productId && cartProductIds.has(String(productId)));
+  }, [cartProductIds]);
+
+  const handleCartAction = useCallback((e, product) => {
+    e.stopPropagation();
+    const productId = product?.productId || product?.id || product?._id;
+    if (!productId) {
+      setToast({
+        open: true,
+        message: "Product ID is missing. Please try again.",
+        severity: "error",
+        loading: false,
+      });
+      return;
+    }
+    if (isProductInCart(product)) {
+      navigate("/cart");
+      return;
+    }
+    handleAddToCart(e, product);
+  }, [isProductInCart, navigate]);
+
   const handleAddToCart = useCallback(async (e, product) => {
     e.stopPropagation();
 
@@ -111,7 +138,6 @@ export const ProductSectionCarousel = memo(({
         loading: false,
       });
 
-      // Dispatch event to update cart count in header
       window.dispatchEvent(new CustomEvent('cartUpdated'));
 
       setTimeout(() => setToast((prev) => ({ ...prev, open: false })), 3000);
@@ -140,7 +166,7 @@ export const ProductSectionCarousel = memo(({
     if (!productId) return;
     setLoadingWishlist((prev) => new Set(prev).add(productId));
     try {
-      const isInWishlist = wishlistIds.has(productId);
+      const isInWishlist = product?.isWishlisted === true || wishlistIds.has(productId);
       if (isInWishlist) {
         await removeFromWishlist(productId);
         setWishlistIds((prev) => {
@@ -585,10 +611,10 @@ export const ProductSectionCarousel = memo(({
                     </Box>
                     <IconButton
                       className="add-cart-btn"
-                      onClick={(e) => handleAddToCart(e, product)}
+                      onClick={(e) => handleCartAction(e, product)}
                       disabled={loadingCart.has(product?.productId || product?.id || product?._id)}
                       sx={{
-                        bgcolor: "var(--themeColor)",
+                        bgcolor: isProductInCart(product) ? "success.main" : "var(--themeColor)",
                         color: "#fff",
                         width: { xs: 36, md: 40 },
                         height: { xs: 36, md: 40 },
@@ -596,7 +622,7 @@ export const ProductSectionCarousel = memo(({
                         transform: "translateY(10px)",
                         transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
                         "&:hover": {
-                          bgcolor: "#7a2d3a",
+                          bgcolor: isProductInCart(product) ? "success.dark" : "#7a2d3a",
                           transform: "scale(1.1)",
                         },
                         "&:disabled": {
@@ -611,6 +637,8 @@ export const ProductSectionCarousel = memo(({
                             color: "#fff",
                           }}
                         />
+                      ) : isProductInCart(product) ? (
+                        <CheckCircleIcon sx={{ fontSize: { xs: 16, md: 18 } }} />
                       ) : (
                         <ShoppingCartIcon sx={{ fontSize: { xs: 16, md: 18 } }} />
                       )}

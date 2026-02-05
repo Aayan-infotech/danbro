@@ -11,6 +11,7 @@ import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import { addToCart } from "../../utils/cart";
 import { getAccessToken } from "../../utils/cookies";
 import { CustomToast } from "../comman/CustomToast";
+import { useCartProductIds } from "../../hooks/useCartProductIds";
 import offer1 from "../../assets/Group 8.png";
 import offer2 from "../../assets/Group 8 (2).png";
 import offer3 from "../../assets/Group 8 (1).png";
@@ -80,6 +81,7 @@ const featuredProducts = [
 
 export const FeaturedProductsCarousel = () => {
   const navigate = useNavigate();
+  const { cartProductIds } = useCartProductIds();
   const carouselRef = useRef(null);
   const [visible, setVisible] = useState(false);
   const sectionRef = useRef(null);
@@ -114,10 +116,21 @@ export const FeaturedProductsCarousel = () => {
     return () => observer.disconnect();
   }, []);
 
+  const handleCartAction = (e, product) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const productId = product?.id || product?.productId || product?._id;
+    if (cartProductIds.has(String(productId))) {
+      navigate("/cart");
+      return;
+    }
+    handleAddToCart(e, product);
+  };
+
   const handleAddToCart = async (e, product) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     if (!isLoggedIn) {
       setToast({
         open: true,
@@ -132,13 +145,14 @@ export const FeaturedProductsCarousel = () => {
     setLoadingCart(prev => new Set(prev).add(productId));
 
     try {
-      await addToCart({ productId: productId, quantity: 1 });
+      await addToCart(productId, 1);
       setToast({
         open: true,
         message: "Product added to cart successfully!",
         severity: "success",
         loading: false
       });
+      window.dispatchEvent(new CustomEvent('cartUpdated'));
     } catch (error) {
       setToast({
         open: true,
@@ -406,7 +420,7 @@ export const FeaturedProductsCarousel = () => {
                       </Box>
                       <Button
                         className="add-cart-btn"
-                        onClick={(e) => handleAddToCart(e, product)}
+                        onClick={(e) => handleCartAction(e, product)}
                         disabled={loadingCart.has(product?.id || product?.productId || product?._id)}
                         startIcon={
                           loadingCart.has(product?.id || product?.productId || product?._id) ? (
@@ -456,7 +470,7 @@ export const FeaturedProductsCarousel = () => {
                           },
                         }}
                       >
-                        Add
+                        {cartProductIds.has(String(product?.id || product?.productId || product?._id)) ? "Go to Cart" : "Add to Cart"}
                       </Button>
                     </Box>
                   </Box>

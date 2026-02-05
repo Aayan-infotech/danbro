@@ -1224,14 +1224,20 @@ export const fetchHomeLayout = async () => {
     try {
       const url = `${API_BASE_URL}/product/homeLayout`;
       const location = getStoredLocation();
+      const token = getAccessToken();
+
+      const headers = {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'lat': location.lat.toString(),
+        'long': location.long.toString(),
+      };
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
 
       const response = await axios.get(url, {
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'lat': location.lat.toString(),
-          'long': location.long.toString(),
-        },
+        headers,
         withCredentials: false,
         timeout: 15000,
       });
@@ -1266,6 +1272,14 @@ export const fetchHomeLayout = async () => {
     }
   })();
   return homeLayoutFetchPromise;
+};
+
+/**
+ * Invalidate home layout in-flight request so next fetch uses current token (e.g. after login).
+ * Call this after login so homeLayout is refetched with Authorization header.
+ */
+export const invalidateHomeLayoutFetch = () => {
+  homeLayoutFetchPromise = null;
 };
 
 /**
