@@ -141,8 +141,6 @@ export const ProductSectionCarousel = memo(({
       });
 
       window.dispatchEvent(new CustomEvent('cartUpdated'));
-
-      // If on homepage, trigger homeLayout refetch to update isCart immediately (background, no loading)
       if (location.pathname === '/' || location.pathname === '/home') {
         window.dispatchEvent(new CustomEvent('cartUpdatedOnHomepage'));
       }
@@ -440,28 +438,23 @@ export const ProductSectionCarousel = memo(({
                     </Box>
                   )}
 
-                  {/* Veg / Non-Veg - top left corner (when badge not present) */}
+                  {/* Veg / Non-Veg dot - top left corner (when badge not present) */}
                   {!product?.badge && product?.veg != null && product?.veg !== "" && (
                     <Box
                       sx={{
                         position: "absolute",
                         top: 12,
                         left: 12,
+                        width: 12,
+                        height: 12,
+                        borderRadius: "50%",
                         bgcolor: product?.veg === "Y" || product?.veg === "y" ? "#2e7d32" : "#d32f2f",
-                        color: "#fff",
-                        px: 1.25,
-                        py: 0.5,
-                        borderRadius: 2,
-                        fontSize: 10,
-                        fontWeight: 700,
-                        textTransform: "uppercase",
-                        letterSpacing: "0.5px",
                         boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
                         zIndex: 2,
+                        border: "2px solid #fff",
                       }}
-                    >
-                      {product?.veg === "Y" || product?.veg === "y" ? "Veg" : "Non-Veg"}
-                    </Box>
+                      aria-label={product?.veg === "Y" || product?.veg === "y" ? "Veg" : "Non-Veg"}
+                    />
                   )}
 
                   {/* Added to Cart Badge - top right corner */}

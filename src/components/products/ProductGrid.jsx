@@ -322,22 +322,18 @@ export const ProductGrid = memo(({ products, isVisible }) => {
                 <Box
                   className="veg-badge"
                   sx={{
-                    px: 1,
-                    py: 0.25,
-                    borderRadius: 1,
-                    fontSize: 10,
-                    fontWeight: 700,
-                    color: "#fff",
-                    border: "1px solid rgba(255,255,255,0.9)",
+                    width: 12,
+                    height: 12,
+                    borderRadius: "50%",
+                    border: "2px solid rgba(255,255,255,0.9)",
                     boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
                     bgcolor:
                       product?.veg === "Y" || product?.veg === "y" || product?.veg === true
-                        ? "#26d94c"
+                        ? "#2e7d32"
                         : "#d32f2f",
                   }}
-                >
-                  {product?.veg === "Y" || product?.veg === "y" || product?.veg === true ? "Veg" : "Non-Veg"}
-                </Box>
+                  aria-label={product?.veg === "Y" || product?.veg === "y" || product?.veg === true ? "Veg" : "Non-Veg"}
+                />
               )}
               {/* Added to Cart Badge */}
               {isProductInCart(product) && (

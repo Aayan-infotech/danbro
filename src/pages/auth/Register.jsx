@@ -10,6 +10,12 @@ import axios from "axios";
 import { API_BASE_URL } from "../../utils/apiUrl";
 import { setAccessToken, setRefreshToken, getAccessToken } from "../../utils/cookies";
 import { getStoredLocation } from "../../utils/location";
+import {
+  validateRegisterField,
+  isValidEmail,
+  isValidMobile,
+  isValidName,
+} from "../../utils/validateRegisterField";
 
 const RECAPTCHA_SITE_KEY = "6Lfr-iAsAAAAAIQsR8mfUxZO1qK3r_AXrTSLSb4g";
 
@@ -49,46 +55,7 @@ export const Register = () => {
   const formRef = useRef(null);
   const navigate = useNavigate();
 
-  const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test((email || "").trim());
-  const isValidMobile = (mobile) => /^[6-9]\d{9}$/.test((mobile || "").replace(/\s/g, ""));
-  /** Name should not contain numbers */
-  const isValidName = (name) => (name || "").trim().length >= 2 && !/\d/.test((name || "").trim());
-
-  const validateRegisterField = (name, value, formData) => {
-    const v = typeof value === "string" ? value : "";
-    const trimV = v.trim();
-    if (name === "fullName") {
-      if (!trimV) return "Full name is required.";
-      if (trimV.length < 2) return "Full name must be at least 2 characters.";
-      if (/\d/.test(trimV)) return "Name should not contain numbers.";
-      return "";
-    }
-    if (name === "email") {
-      if (!trimV) return "Email is required.";
-      if (!isValidEmail(trimV)) return "Please enter a valid email address.";
-      return "";
-    }
-    if (name === "mobile") {
-      const m = v.replace(/\s/g, "");
-      if (!m) return "Mobile number is required.";
-      if (!isValidMobile(m)) return "Please enter a valid 10-digit Indian mobile number (e.g. 9876543210).";
-      return "";
-    }
-    if (name === "password") {
-      if (!v) return "Password is required.";
-      if (v.length < 8) return "Password must be at least 8 characters long.";
-      return "";
-    }
-    if (name === "confirmPassword") {
-      if (!v) return "Please confirm your password.";
-      if (v !== formData.password) return "Password and confirm password do not match.";
-      return "";
-    }
-    if (name === "agreeTerms") {
-      return !value ? "You must agree to the Terms of use and Privacy Policy." : "";
-    }
-    return "";
-  };
+  // Note: We do not call newsletter/subscribe API on signup. Subscribe is only via NewsletterSection or explicit user action.
 
   // Redirect if already logged in
   useEffect(() => {
@@ -232,32 +199,9 @@ export const Register = () => {
         });
 
         if (response.data) {
-          setApiSuccess("Registration successful! Please verify your email with OTP.");
+          setApiSuccess(response?.data?.message || "Registration successful! Please verify your email with OTP.");
           setApiError("");
-
-          // Subscribe to newsletter if checked
-          if (formData.newsletter) {
-            try {
-              const loc = getStoredLocation();
-              await axios.post(`${API_BASE_URL}/newsletter/subscribe`, {
-                email,
-              }, {
-                headers: {
-                  'Content-Type': 'application/json',
-                  'lat': loc.lat.toString(),
-                  'long': loc.long.toString(),
-                },
-              });
-            } catch (error) {
-              // Newsletter subscription is optional, don't block registration if it fails
-              console.error("Newsletter subscription error:", error);
-            }
-          }
-
-          // Store registered email for OTP verification
           setRegisteredEmail(email);
-
-          // Show OTP verification step
           setShowOtpVerification(true);
         }
       } catch (error) {

@@ -1,6 +1,5 @@
 import { useRef, useState } from "react";
 import { Box, useMediaQuery, useTheme } from "@mui/material";
-import { CustomText } from "../../../components/comman/CustomText";
 
 export const ProductDetailsImageGallery = ({
   productData,
@@ -97,25 +96,22 @@ export const ProductDetailsImageGallery = ({
             loading="eager"
             sx={{ width: "100%", height: "100%", objectFit: "cover" }}
           />
-          {(product?.veg === "Y" || product?.veg === true) && (
+          {product?.veg != null && product?.veg !== "" && (product?.veg === "Y" || product?.veg === "y" || product?.veg === true || product?.veg === "N" || product?.veg === "n" || product?.veg === false) && (
             <Box
               sx={{
                 position: "absolute",
                 top: 12,
                 right: 12,
-                px: 1.5,
-                py: 0.5,
-                borderRadius: 1,
-                backgroundColor: "rgba(27, 156, 63, 0.95)",
-                border: "1px solid #fff",
+                width: 12,
+                height: 12,
+                borderRadius: "50%",
+                bgcolor: product?.veg === "Y" || product?.veg === "y" || product?.veg === true ? "#2e7d32" : "#d32f2f",
+                border: "2px solid #fff",
                 boxShadow: "0 1px 4px rgba(0,0,0,0.2)",
                 zIndex: 5,
               }}
-            >
-              <CustomText sx={{ fontSize: 12, fontWeight: 700, fontFamily: "'Inter', sans-serif", color: "#fff", letterSpacing: "0.02em" }}>
-                Veg
-              </CustomText>
-            </Box>
+              aria-label={product?.veg === "Y" || product?.veg === "y" || product?.veg === true ? "Veg" : "Non-Veg"}
+            />
           )}
           {isZooming && !isMobile && (
             <Box
