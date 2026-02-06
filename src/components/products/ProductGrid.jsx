@@ -577,20 +577,19 @@ export const ProductGrid = memo(({ products, isVisible }) => {
                 >
                   {product?.subcategory}
                 </ProductDescription>
-
-                <Box sx={{ mt: 0.5, display: "flex", flexDirection: "column", gap: 0.25 }}>
+                <Box sx={{ display: "flex", flexDirection: "column", gap: 0.25 }}>
                   {product?.mrp != null && (
-                    <CustomText sx={{ fontSize: 11, color: "#666", fontFamily: "'Inter', sans-serif" }}>
-                      MRP: <Box component="span" sx={{ textDecoration: product?.rate != null && product.mrp > product.rate ? "line-through" : "none", color: product?.rate != null && product.mrp > product.rate ? "#999" : "#444" }}>₹{Math.round(product.mrp)}</Box>
-                    </CustomText>
-                  )}
-                  {product?.rate != null && (
-                    <CustomText sx={{ fontSize: 12, fontWeight: 700, color: "var(--themeColor)", fontFamily: "'Inter', sans-serif" }}>
-                      Rate: ₹{Math.round(product.rate)}
+                    <CustomText sx={{ fontSize: 12, color: "#444", fontWeight: 600, textTransform: "none" }}>
+                      MRP: <Box component="span" sx={{ textDecoration: product?.rate != null && product.mrp > product.rate ? "line-through" : "none", color: product?.rate != null && product.mrp > product.rate ? "#2c2c2c" : "#444" }}>₹{Math.round(product.mrp)}</Box>
                     </CustomText>
                   )}
                   {product?.mrp == null && product?.rate == null && (
                     <CustomText sx={{ fontSize: 11, color: "#999", fontFamily: "'Inter', sans-serif" }}>Price on request</CustomText>
+                  )}
+                  {product?.rate != null && (
+                    <CustomText autoTitleCase={false} sx={{ fontWeight: 800, color: "#d32f2f", textTransform: "none" }}>
+                      Rate: ₹{Math.round(product.rate)}
+                    </CustomText>
                   )}
                 </Box>
               </CardContent>
