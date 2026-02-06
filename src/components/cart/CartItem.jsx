@@ -56,64 +56,66 @@ export const CartItem = ({
         sx={{
           display: "flex",
           alignItems: "center",
-          gap: { xs: 1.5, md: 2 },
-          py: 2,
+          gap: { xs: 1, sm: 1.5, md: 2 },
+          py: { xs: 1.5, sm: 2 },
           borderBottom: showDivider ? "1px dotted #ddd" : "none",
           "&:last-of-type": { borderBottom: "none" },
+          minWidth: 0,
+          maxWidth: "100%",
         }}
       >
         <Box
           component={Link}
           to={`/products/${productId}`}
-          sx={{ display: "flex", alignItems: "center", gap: 1.5, flex: 1, minWidth: 0, textDecoration: "none", color: "inherit" }}
+          sx={{ display: "flex", alignItems: "center", gap: { xs: 1, sm: 1.5 }, flex: 1, minWidth: 0, textDecoration: "none", color: "inherit", overflow: "hidden" }}
         >
-          <Box sx={{ width: 64, height: 64, borderRadius: 1.5, overflow: "hidden", flexShrink: 0 }}>
+          <Box sx={{ width: { xs: 52, sm: 64 }, height: { xs: 52, sm: 64 }, borderRadius: 1.5, overflow: "hidden", flexShrink: 0 }}>
             <img src={getItemImage(item)} alt={getItemName(item)} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
           </Box>
-          <Box sx={{ width: 24, height: 24, borderRadius: 0.5, bgcolor: "#0d8c2d", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-            <Box sx={{ width: 10, height: 10, borderRadius: "50%", border: "1.5px solid #fff", bgcolor: "transparent" }} />
+          <Box sx={{ width: { xs: 20, sm: 24 }, height: { xs: 20, sm: 24 }, borderRadius: 0.5, bgcolor: "#0d8c2d", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <Box sx={{ width: { xs: 8, sm: 10 }, height: { xs: 8, sm: 10 }, borderRadius: "50%", border: "1.5px solid #fff", bgcolor: "transparent" }} />
           </Box>
-          <Box sx={{ minWidth: 0 }}>
-            <CustomText sx={{ fontSize: { xs: 14, md: 15 }, fontWeight: 600, color: "#2c2c2c", display: "block" }}>
+          <Box sx={{ minWidth: 0, overflow: "hidden" }}>
+            <CustomText sx={{ fontSize: { xs: 13, sm: 14, md: 15 }, fontWeight: 600, color: "#2c2c2c", display: "block", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
               {getItemName(item)}
             </CustomText>
-            <CustomText sx={{ fontSize: 12, color: "#666" }}>
+            <CustomText sx={{ fontSize: { xs: 11, sm: 12 }, color: "#666", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
               ({getItemUnit(item)})
             </CustomText>
           </Box>
         </Box>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: { xs: 0.5, sm: 1 }, flexShrink: 0 }}>
           <IconButton
             size="small"
             onClick={() => updateQuantity(productId, -1, item.rawWeight ?? item.weight)}
             disabled={isUpdating}
-            sx={{ color: "#666", bgcolor: "#f0f0f0", "&:hover": { bgcolor: "#e0e0e0" }, "&:disabled": { opacity: 0.5 } }}
+            sx={{ color: "#666", bgcolor: "#f0f0f0", p: { xs: 0.4, sm: 0.5 }, "&:hover": { bgcolor: "#e0e0e0" }, "&:disabled": { opacity: 0.5 } }}
           >
-            {isUpdatingDecrease ? <CircularProgress size={16} /> : <RemoveIcon sx={{ fontSize: 18 }} />}
+            {isUpdatingDecrease ? <CircularProgress size={14} /> : <RemoveIcon sx={{ fontSize: { xs: 16, sm: 18 } }} />}
           </IconButton>
-          <CustomText sx={{ minWidth: 28, textAlign: "center", fontSize: 14, fontWeight: 600 }}>
+          <CustomText sx={{ minWidth: 24, textAlign: "center", fontSize: { xs: 13, sm: 14 }, fontWeight: 600 }}>
             {item.quantity}
           </CustomText>
           <IconButton
             size="small"
             onClick={() => updateQuantity(productId, 1, item.rawWeight ?? item.weight)}
             disabled={isUpdating}
-            sx={{ color: "var(--themeColor)", bgcolor: "rgba(230,120,80,0.12)", "&:hover": { bgcolor: "rgba(230,120,80,0.2)" }, "&:disabled": { opacity: 0.5 } }}
+            sx={{ color: "var(--themeColor)", bgcolor: "rgba(230,120,80,0.12)", p: { xs: 0.4, sm: 0.5 }, "&:hover": { bgcolor: "rgba(230,120,80,0.2)" }, "&:disabled": { opacity: 0.5 } }}
           >
-            {isUpdatingIncrease ? <CircularProgress size={16} /> : <AddIcon sx={{ fontSize: 18 }} />}
+            {isUpdatingIncrease ? <CircularProgress size={14} /> : <AddIcon sx={{ fontSize: { xs: 16, sm: 18 } }} />}
           </IconButton>
         </Box>
-        <CustomText sx={{ fontSize: { xs: 14, md: 15 }, fontWeight: 600, color: "#2c2c2c", minWidth: { xs: 70, md: 80 }, textAlign: "right" }}>
+        <CustomText sx={{ fontSize: { xs: 12, sm: 14, md: 15 }, fontWeight: 600, color: "#2c2c2c", minWidth: { xs: 56, sm: 70, md: 80 }, textAlign: "right", flexShrink: 0 }}>
           INR {getItemPrice(item)}
         </CustomText>
         <IconButton
           size="small"
           onClick={() => removeItem(productId, item.rawWeight ?? item.weight)}
           disabled={isUpdating}
-          sx={{ color: "#d32f2f", "&:hover": { backgroundColor: "rgba(211, 47, 47, 0.1)" }, "&:disabled": { opacity: 0.5 } }}
+          sx={{ color: "#d32f2f", p: { xs: 0.4, sm: 0.5 }, "&:hover": { backgroundColor: "rgba(211, 47, 47, 0.1)" }, "&:disabled": { opacity: 0.5 } }}
           aria-label="Remove item"
         >
-          <DeleteOutlineIcon sx={{ fontSize: 20 }} />
+          <DeleteOutlineIcon sx={{ fontSize: { xs: 18, sm: 20 } }} />
         </IconButton>
       </Box>
     );

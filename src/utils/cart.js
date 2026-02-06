@@ -20,6 +20,12 @@ export const addToCart = async (productId, quantity = 1, options = {}) => {
     if (!productId) {
       throw new Error('ProductId is required');
     }
+    const rate = options?.rate != null ? Number(options.rate) : null;
+    const price = options?.price != null ? Number(options.price) : null;
+    if ((rate !== null && rate === 0) || (price !== null && price === 0)) {
+      window.dispatchEvent(new CustomEvent(CART_ICON_LOADING_EVENT, { detail: { loading: false } }));
+      throw new Error('This product cannot be added to cart as price is not available.');
+    }
 
     const token = getAccessToken();
     if (!token) {

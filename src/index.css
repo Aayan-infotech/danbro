@@ -130,9 +130,10 @@ span,
     padding: 10px;
   }
 }
-/* Mobile/Android view - padding-top: 111px */
+/* Mobile/Android view - padding 12px + padding-top for navbar */
 @media (max-width: 1199px) {
   .css-awq9fn {
+      padding: 12px !important;
       padding-top: 111px !important;
   }
 }

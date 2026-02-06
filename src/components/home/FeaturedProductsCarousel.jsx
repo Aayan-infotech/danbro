@@ -148,11 +148,22 @@ export const FeaturedProductsCarousel = () => {
       return;
     }
 
+    const effectiveRate = Number(product?.rate) ?? Number(product?.price?.[0]?.rate) ?? Number(product?.price?.[0]?.mrp) ?? (typeof product?.price === "number" ? product.price : null);
+    if (effectiveRate === 0) {
+      setToast({
+        open: true,
+        message: "This product cannot be added to cart as price is not available.",
+        severity: "warning",
+        loading: false
+      });
+      return;
+    }
+
     const productId = product?.id || product?.productId || product?._id;
     setLoadingCart(prev => new Set(prev).add(productId));
 
     try {
-      await addToCart(productId, 1);
+      await addToCart(productId, 1, effectiveRate != null ? { rate: effectiveRate } : {});
       setToast({
         open: true,
         message: "Product added to cart successfully!",

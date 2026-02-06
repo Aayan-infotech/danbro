@@ -20,13 +20,13 @@ export const SocialMediaIcons = () => {
     <Box
       sx={{
         position: "fixed",
-        left: { xs: 10, sm: 15, md: 20 },
-        top: { xs: "50%", md: "60%" },
+        left: { md: 20 },
+        top: { md: "60%" },
         transform: "translateY(-50%)",
         zIndex: 999,
-        display: "flex",
+        display: { xs: "none", md: "flex" },
         flexDirection: "column",
-        gap: { xs: 1, sm: 1.25, md: 1.5 },
+        gap: 1.5,
         alignItems: "center",
       }}
     >

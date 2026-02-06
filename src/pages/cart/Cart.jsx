@@ -7,10 +7,7 @@ import {
   CircularProgress,
   Alert,
   Card,
-  CardContent,
-  TextField,
-  InputAdornment,
-  Link,
+  CardContent
 } from "@mui/material";
 import { CustomText } from "../../components/comman/CustomText";
 import { useNavigate } from "react-router-dom";
@@ -45,7 +42,6 @@ export const Cart = () => {
     cartFinalAmount,
   } = useAppSelector((state) => state.cart);
   const guestWishlist = useAppSelector(getGuestWishlist);
-  console.log(cartItems, 'cartItems')
 
   // Local state for addresses and coupons
   const [addresses, setAddresses] = useState([]);
@@ -103,6 +99,15 @@ export const Cart = () => {
     dispatch(loadCartItems());
     loadAddresses();
     loadCoupons();
+  }, [dispatch]);
+
+  // Refetch cart when page is restored from back-forward cache (e.g. user clicked Back from payment success)
+  useEffect(() => {
+    const onPageShow = (e) => {
+      if (e.persisted) dispatch(loadCartItems());
+    };
+    window.addEventListener("pageshow", onPageShow);
+    return () => window.removeEventListener("pageshow", onPageShow);
   }, [dispatch]);
 
   // Scroll to top when order error appears so user sees it without scrolling
@@ -450,13 +455,13 @@ export const Cart = () => {
   const total = hasApiSummary && cartFinalAmount != null ? cartFinalAmount : finalSubtotal - discount + shipping;
 
   return (
-    <Box sx={{ minHeight: "100vh", pb: { xs: 14, sm: 12, md: 6 }, boxSizing: "border-box", }}>
-      <Container sx={{ px: { xs: 0, sm: 2, md: 3 }, maxWidth: "100%", width: "100%" }}>
-        <Box sx={{ mb: { xs: 1, md: 1.5 } }}>
-          <CustomText variant="h4" sx={{ fontSize: { xs: 22, md: 28 }, fontWeight: 700, color: "var(--themeColor)" }}>
+    <Box sx={{ minHeight: "100vh", pb: { xs: 14, sm: 12, md: 6 }, boxSizing: "border-box", overflowX: "hidden", width: "100%", maxWidth: "100%" }}>
+      <Container sx={{ px: { xs: 1.5, sm: 2, md: 3 }, maxWidth: "100%", width: "100%", boxSizing: "border-box" }}>
+        <Box sx={{ mb: { xs: 1, md: 1.5 }, minWidth: 0 }}>
+          <CustomText variant="h4" sx={{ fontSize: { xs: 20, sm: 22, md: 28 }, fontWeight: 700, color: "var(--themeColor)" }}>
             Shopping Cart
           </CustomText>
-          <CustomText sx={{ fontSize: { xs: 13, md: 15 }, color: "#666" }}>
+          <CustomText sx={{ fontSize: { xs: 12, sm: 13, md: 15 }, color: "#666" }}>
             {cartItems?.length || 0} {cartItems?.length === 1 ? "item" : "items"} in your cart
           </CustomText>
         </Box>
@@ -479,10 +484,10 @@ export const Cart = () => {
         ) : cartItems?.length === 0 ? (
           <EmptyCart navigate={navigate} />
         ) : (
-          <Grid container spacing={{ xs: 2, md: 2.5 }}>
+          <Grid container spacing={{ xs: 1.5, sm: 2, md: 2.5 }} sx={{ maxWidth: "100%", margin: 0 }}>
             {/* Left column: Delivery, Preparation, Cart items, Add note */}
-            <Grid size={{ xs: 12, md: 8 }} sx={{ order: { xs: 1, md: 1 }, minWidth: 0 }}>
-              <Box sx={{ display: "flex", flexDirection: "column", gap: 2, minWidth: 0 }}>
+            <Grid size={{ xs: 12, md: 8 }} sx={{ order: { xs: 1, md: 1 }, minWidth: 0, maxWidth: "100%" }}>
+              <Box sx={{ display: "flex", flexDirection: "column", gap: { xs: 1.5, sm: 2 }, minWidth: 0, maxWidth: "100%", overflow: "hidden" }}>
                 {!isGuest && (
                   <>
                     <Box
@@ -528,8 +533,8 @@ export const Cart = () => {
                     />
                   </>
                 )}
-                <Card sx={{ borderRadius: 2, boxShadow: "0 2px 8px rgba(0,0,0,0.08)" }}>
-                  <CardContent sx={{ px: 2, pt: 1, pb: 1, "&:last-child": { pb: 2 } }}>
+                <Card sx={{ borderRadius: 2, boxShadow: "0 2px 8px rgba(0,0,0,0.08)", overflow: "hidden", maxWidth: "100%" }}>
+                  <CardContent sx={{ px: { xs: 1.5, sm: 2 }, pt: 1, pb: 1, "&:last-child": { pb: 2 }, maxWidth: "100%", boxSizing: "border-box" }}>
                     {cartItems?.map((item, index) => (
                       <CartItem
                         key={item?.productId || item?._id || item?.id}
@@ -546,7 +551,7 @@ export const Cart = () => {
                   </CardContent>
                 </Card>
 
-                <Box sx={{ display: "flex", gap: 1.5, flexWrap: "wrap" }}>
+                <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
                   <Button
                     variant="outlined"
                     onClick={() => navigate("/products")}
@@ -557,6 +562,8 @@ export const Cart = () => {
                       color: "var(--themeColor)",
                       textTransform: "none",
                       fontWeight: 600,
+                      fontSize: { xs: 12, sm: 14 },
+                      py: { xs: 0.6, sm: 0.75 },
                       "&:hover": { borderColor: "var(--specialColor)", color: "var(--specialColor)", backgroundColor: "rgba(195, 46, 6, 0.05)" },
                     }}
                   >
@@ -572,6 +579,8 @@ export const Cart = () => {
                       color: "#d32f2f",
                       textTransform: "none",
                       fontWeight: 600,
+                      fontSize: { xs: 12, sm: 14 },
+                      py: { xs: 0.6, sm: 0.75 },
                       "&:hover": { borderColor: "#b71c1c", backgroundColor: "rgba(211, 47, 47, 0.08)" },
                     }}
                   >
@@ -582,8 +591,8 @@ export const Cart = () => {
             </Grid>
 
             {/* Right column: Offers + Bill details + Place order */}
-            <Grid size={{ xs: 12, md: 4 }} sx={{ order: { xs: 2, md: 2 }, minWidth: 0 }}>
-              <Box sx={{ position: { md: "sticky" }, top: { md: 100 } }}>
+            <Grid size={{ xs: 12, md: 4 }} sx={{ order: { xs: 2, md: 2 }, minWidth: 0, maxWidth: "100%" }}>
+              <Box sx={{ position: { md: "sticky" }, top: { md: 100 }, minWidth: 0, maxWidth: "100%" }}>
                 <OrderSummary
                   finalSubtotal={finalSubtotal}
                   taxTotal={taxTotal}

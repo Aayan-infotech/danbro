@@ -119,6 +119,17 @@ export const ProductSectionCarousel = memo(({
       return;
     }
 
+    const effectiveRate = Number(product?.rate) ?? Number(product?.price?.[0]?.rate) ?? Number(product?.price?.[0]?.mrp) ?? 0;
+    if (effectiveRate === 0) {
+      setToast({
+        open: true,
+        message: "This product cannot be added to cart as price is not available.",
+        severity: "warning",
+        loading: false,
+      });
+      return;
+    }
+
     const productId = product.productId || product.id || product._id;
     setLoadingCart((prev) => new Set(prev).add(productId));
     setToast({
@@ -130,7 +141,7 @@ export const ProductSectionCarousel = memo(({
 
     try {
       const quantity = 1;
-      await addToCart(productId, quantity);
+      await addToCart(productId, quantity, { rate: effectiveRate });
 
       setToast({
         open: true,

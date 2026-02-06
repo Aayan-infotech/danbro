@@ -206,7 +206,15 @@ export const Login = () => {
     if (!password) {
       errors.password = "Password is required.";
     } else if (password.length < 8) {
-      errors.password = "Password must be at least 8 characters.";
+      errors.password = "Password must be at least 8 characters and include uppercase, lowercase, number, and special character.";
+    } else {
+      const hasUpper = /[A-Z]/.test(password);
+      const hasLower = /[a-z]/.test(password);
+      const hasNumber = /\d/.test(password);
+      const hasSpecial = /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password);
+      if (!hasUpper || !hasLower || !hasNumber || !hasSpecial) {
+        errors.password = "Password must be at least 8 characters and include uppercase, lowercase, number, and special character.";
+      }
     }
     if (!formData.agreeTerms) {
       errors.agreeTerms = "You must agree to the Terms of use and Privacy Policy.";
@@ -235,11 +243,23 @@ export const Login = () => {
     }
     const result = await dispatch(loginUser(loginPayload));
 
-    // Redirect to verify-otp only when backend requires OTP (isVerified === false). Do not redirect for "Domain not allowed" or other 403.
+    // Handle login rejection: show API message and optionally redirect to verify-otp
     if (loginUser.rejected.match(result)) {
       const errorPayload = result.payload;
+      const apiMessage = errorPayload?.message || (typeof errorPayload === "string" ? errorPayload : "") || "Login failed.";
+
+      // Show API validation message under the relevant field (password / email)
+      if (apiMessage && /password|character|uppercase|lowercase|special/i.test(apiMessage)) {
+        setLoginErrors((prev) => ({ ...prev, password: apiMessage }));
+      } else if (apiMessage && /email|invalid credentials|user not found/i.test(apiMessage)) {
+        setLoginErrors((prev) => ({ ...prev, email: apiMessage }));
+      } else {
+        setLoginErrors((prev) => ({ ...prev, password: "", email: "" }));
+      }
+
+      // Redirect to verify-otp only when backend requires OTP (isVerified === false). Do not redirect for "Domain not allowed" or other 403.
       const isOtpRequired = errorPayload?.isVerified === false;
-      const isDomainOrForbidden = /domain not allowed|forbidden/i.test(errorPayload?.message || "");
+      const isDomainOrForbidden = /domain not allowed|forbidden/i.test(apiMessage);
       if (isOtpRequired && !isDomainOrForbidden) {
         localStorage.setItem('pendingLoginEmail', formData?.username);
         localStorage.setItem('pendingLoginPassword', formData?.password);
@@ -247,7 +267,7 @@ export const Login = () => {
           state: {
             email: formData?.username,
             password: formData?.password,
-            message: errorPayload?.message || "OTP has been sent to your email. Please check your inbox."
+            message: apiMessage
           }
         });
       }
@@ -715,12 +735,12 @@ export const Login = () => {
 
             <Box component="form" onSubmit={handleSubmit}>
               {error && typeof error === 'object' && error.message && (
-                <Alert severity="error" sx={{ mb: 2, borderRadius: 2 }}>
+                <Alert severity="error" sx={{ mb: 2, borderRadius: 2, whiteSpace: "normal", wordBreak: "break-word", "& .MuiAlert-message": { overflow: "hidden" } }}>
                   {error.message}
                 </Alert>
               )}
               {error && typeof error === 'string' && (
-                <Alert severity="error" sx={{ mb: 2, borderRadius: 2 }}>
+                <Alert severity="error" sx={{ mb: 2, borderRadius: 2, whiteSpace: "normal", wordBreak: "break-word", "& .MuiAlert-message": { overflow: "hidden" } }}>
                   {error}
                 </Alert>
               )}
@@ -786,8 +806,8 @@ export const Login = () => {
               </Box>
 
               {/* Password Requirements */}
-              <CustomText sx={{ fontSize: 12, color: "white", mb: 1, ml: 1.5, }}>
-                Use 8 or more characters with a mix of letters, numbers & symbols
+              <CustomText sx={{ fontSize: 12, color: "white", mb: 1, ml: 1.5, whiteSpace: "normal" }}>
+                Use 8+ characters with uppercase, lowercase, number and special character
               </CustomText>
 
               {/* Forgot Password Link */}

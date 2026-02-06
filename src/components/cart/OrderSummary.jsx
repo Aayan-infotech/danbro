@@ -84,13 +84,13 @@ export const OrderSummary = ({
           bgcolor: "rgba(93, 64, 55, 0.03)",
         }}
       >
-        <CardContent sx={{ py: 2, px: 2.5, "&:last-child": { pb: 2 } }}>
-          <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 1.5 }}>
+        <CardContent sx={{ py: { xs: 1.5, sm: 2 }, px: { xs: 1.5, sm: 2.5 }, "&:last-child": { pb: 2 } }}>
+          <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: { xs: 1, sm: 1.5 } }}>
             <Box sx={{ display: "flex", alignItems: "center", gap: 1.25 }}>
-              <Box sx={{ p: 0.75, borderRadius: 1.5, bgcolor: "rgba(93, 64, 55, 0.08)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <LocalOfferIcon sx={{ fontSize: 22, color: "#5D4037" }} />
+              <Box sx={{ p: { xs: 0.5, sm: 0.75 }, borderRadius: 1.5, bgcolor: "rgba(93, 64, 55, 0.08)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <LocalOfferIcon sx={{ fontSize: { xs: 20, sm: 22 }, color: "#5D4037" }} />
               </Box>
-              <CustomText sx={{ fontSize: 16, fontWeight: 600, color: "#2c2c2c" }}>Offers</CustomText>
+              <CustomText sx={{ fontSize: { xs: 14, sm: 16 }, fontWeight: 600, color: "#2c2c2c" }}>Offers</CustomText>
             </Box>
             <Box sx={{ display: "flex", alignItems: "center", gap: 1.25, flex: 1, justifyContent: "flex-end", minWidth: 0 }}>
               {couponsLoading ? (
@@ -190,35 +190,35 @@ export const OrderSummary = ({
       </Dialog>
 
       {/* Bill Details Card */}
-      <Card sx={{ borderRadius: 2, boxShadow: "0 2px 8px rgba(0,0,0,0.08)", mb: 2 }}>
-        <CardContent sx={{ p: 2 }}>
-          <CustomText sx={{ fontSize: 16, fontWeight: 700, color: "#2c2c2c", mb: 1.5 }}>
+      <Card sx={{ borderRadius: 2, boxShadow: "0 2px 8px rgba(0,0,0,0.08)", mb: 2, overflow: "hidden" }}>
+        <CardContent sx={{ p: { xs: 1.5, sm: 2 } }}>
+          <CustomText sx={{ fontSize: { xs: 15, sm: 16 }, fontWeight: 700, color: "#2c2c2c", mb: 1.5 }}>
             Bill details:
           </CustomText>
-          <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
-            <CustomText sx={{ fontSize: 13, color: "#666" }}>Item(s) Subtotal:</CustomText>
-            <CustomText sx={{ fontSize: 13, color: "#333" }}>₹{Number(finalSubtotal).toFixed(2)}</CustomText>
+          <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1, gap: 1 }}>
+            <CustomText sx={{ fontSize: { xs: 12, sm: 13 }, color: "#666", flexShrink: 0 }}>Item(s) Subtotal:</CustomText>
+            <CustomText sx={{ fontSize: { xs: 12, sm: 13 }, color: "#333", flexShrink: 0 }}>₹{Number(finalSubtotal).toFixed(2)}</CustomText>
           </Box>
-          <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
-            <CustomText sx={{ fontSize: 13, color: "#666" }}>Packing Charges:</CustomText>
-            <CustomText sx={{ fontSize: 13, color: "#333" }}>+₹{Number(packingCharges).toFixed(2)}</CustomText>
+          <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1, gap: 1 }}>
+            <CustomText sx={{ fontSize: { xs: 12, sm: 13 }, color: "#666" }}>Packing Charges:</CustomText>
+            <CustomText sx={{ fontSize: { xs: 12, sm: 13 }, color: "#333" }}>+₹{Number(packingCharges).toFixed(2)}</CustomText>
           </Box>
-          <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
-            <CustomText sx={{ fontSize: 13, color: "#666" }}>Delivery Charges:</CustomText>
-            <CustomText sx={{ fontSize: 13, color: "#333" }}>+₹{Number(shipping).toFixed(2)}</CustomText>
+          <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1, gap: 1 }}>
+            <CustomText sx={{ fontSize: { xs: 12, sm: 13 }, color: "#666" }}>Delivery Charges:</CustomText>
+            <CustomText sx={{ fontSize: { xs: 12, sm: 13 }, color: "#333" }}>+₹{Number(shipping).toFixed(2)}</CustomText>
           </Box>
-          <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
-            <CustomText sx={{ fontSize: 13, color: "#666" }}>Taxes and Charges:</CustomText>
-            <CustomText sx={{ fontSize: 13, color: "#333" }}>+₹{Number(taxTotal).toFixed(2)}</CustomText>
+          <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1, gap: 1 }}>
+            <CustomText sx={{ fontSize: { xs: 12, sm: 13 }, color: "#666" }}>Taxes and Charges:</CustomText>
+            <CustomText sx={{ fontSize: { xs: 12, sm: 13 }, color: "#333" }}>+₹{Number(taxTotal).toFixed(2)}</CustomText>
           </Box>
-          <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
-            <CustomText sx={{ fontSize: 13, color: "#666" }}>Discount:</CustomText>
-            <CustomText sx={{ fontSize: 13, color: "#16a34a" }}>-₹{Number(discount).toFixed(2)}</CustomText>
+          <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1, gap: 1 }}>
+            <CustomText sx={{ fontSize: { xs: 12, sm: 13 }, color: "#666" }}>Discount:</CustomText>
+            <CustomText sx={{ fontSize: { xs: 12, sm: 13 }, color: "#16a34a" }}>-₹{Number(discount).toFixed(2)}</CustomText>
           </Box>
           <Box sx={{ borderTop: "1px solid #eee", pt: 1.5, mt: 1 }}>
-            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <CustomText sx={{ fontSize: 16, fontWeight: 700, color: "#2c2c2c" }}>Grand Total:</CustomText>
-              <CustomText sx={{ fontSize: 16, fontWeight: 700, color: "var(--themeColor)" }}>₹{Number(total).toFixed(2)}</CustomText>
+            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 1 }}>
+              <CustomText sx={{ fontSize: { xs: 15, sm: 16 }, fontWeight: 700, color: "#2c2c2c" }}>Grand Total:</CustomText>
+              <CustomText sx={{ fontSize: { xs: 15, sm: 16 }, fontWeight: 700, color: "var(--themeColor)" }}>₹{Number(total).toFixed(2)}</CustomText>
             </Box>
           </Box>
           <CustomText sx={{ fontSize: 12, color: "#0d8c2d", fontWeight: 500, mt: 1.5, display: "block" }}>
@@ -265,8 +265,8 @@ export const OrderSummary = ({
           backgroundColor: "var(--themeColor)",
           color: "#fff",
           textTransform: "none",
-          py: 1.5,
-          fontSize: 15,
+          py: { xs: 1.25, sm: 1.5 },
+          fontSize: { xs: 14, sm: 15 },
           fontWeight: 600,
           "&:hover": { backgroundColor: "var(--specialColor)" },
           "&:disabled": { backgroundColor: "#ccc", color: "#666" },

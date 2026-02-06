@@ -141,31 +141,17 @@ export const ProductDetailsReviews = ({ productId }) => {
   };
 
   return (
-    <Container
-      maxWidth="lg"
-      sx={{
-        py: { xs: 3, md: 5 },
-        px: { xs: 2, sm: 3, md: 4 },
-        maxWidth: "100%",
-      }}
-    >
+    <Container maxWidth="lg" sx={{ py: { xs: 3, md: 5 }, px: { xs: 2, sm: 3, md: 4 }, maxWidth: "100%", }}>
       <Typography sx={{ ...sectionTitleSx, mb: 3 }}>Ratings & Reviews</Typography>
 
       {loading ? (
-        <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
+        <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>./Cursor-2.0.63-x86_64.AppImage --no-sandbox
           <CircularProgress sx={{ color: "#8b6914" }} />
         </Box>
       ) : (
         <>
           {/* Summary: average + distribution */}
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: { xs: "column", sm: "row" },
-              gap: 3,
-              mb: 4,
-            }}
-          >
+          <Box sx={{ display: "flex", flexDirection: { xs: "column", sm: "row" }, gap: 3, mb: 4, }}>
             <Box
               sx={{
                 ...cardSx,
@@ -177,15 +163,7 @@ export const ProductDetailsReviews = ({ productId }) => {
                 justifyContent: "center",
               }}
             >
-              <Typography
-                sx={{
-                  fontSize: "2.5rem",
-                  fontWeight: 700,
-                  color: "#3d2914",
-                  fontFamily: "'Inter', sans-serif",
-                  lineHeight: 1.2,
-                }}
-              >
+              <Typography  sx={{    fontSize: "2.5rem",    fontWeight: 700,    color: "#3d2914",    fontFamily: "'Inter', sans-serif",    lineHeight: 1.2,  }}>
                 {summary.averageRating > 0 ? summary.averageRating.toFixed(1) : "0.0"}
               </Typography>
               <Rating
@@ -196,13 +174,7 @@ export const ProductDetailsReviews = ({ productId }) => {
                 emptyIcon={<StarIcon fontSize="inherit" />}
                 sx={{ color: "#c9a227", my: 0.5 }}
               />
-              <Typography
-                sx={{
-                  fontSize: "0.875rem",
-                  color: "#5c4a32",
-                  fontFamily: "'Inter', sans-serif",
-                }}
-              >
+              <Typography  sx={{    fontSize: "0.875rem",    color: "#5c4a32",    fontFamily: "'Inter', sans-serif",  }}>
                 Based on {summary.totalReviews} review{summary.totalReviews !== 1 ? "s" : ""}
               </Typography>
             </Box>
@@ -211,54 +183,16 @@ export const ProductDetailsReviews = ({ productId }) => {
               {[5, 4, 3, 2, 1].map((star) => {
                 const pct = summary.distributionPct[star - 1] ?? 0;
                 return (
-                  <Box
-                    key={star}
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 1.5,
-                      mb: 1.5,
-                    }}
-                  >
+                  <Box  key={star}  sx={{    display: "flex",    alignItems: "center",    gap: 1.5,    mb: 1.5,  }}>
                     <Box sx={{ display: "flex", width: 100, flexShrink: 0 }}>
                       {[1, 2, 3, 4, 5].map((s) => (
-                        <StarIcon
-                          key={s}
-                          sx={{
-                            fontSize: 18,
-                            color: s <= star ? "#c9a227" : "#e0d5c7",
-                          }}
-                        />
+                        <StarIcon  key={s}  sx={{    fontSize: 18,    color: s <= star ? "#c9a227" : "#e0d5c7",  }}/>
                       ))}
                     </Box>
-                    <Box
-                      sx={{
-                        flex: 1,
-                        height: 10,
-                        backgroundColor: "#ebe6df",
-                        borderRadius: 1,
-                        overflow: "hidden",
-                      }}
-                    >
-                      <Box
-                        sx={{
-                          height: "100%",
-                          width: `${pct}%`,
-                          backgroundColor: "#8b6914",
-                          borderRadius: 1,
-                          minWidth: pct > 0 ? 4 : 0,
-                        }}
-                      />
+                    <Box  sx={{    flex: 1,    height: 10,    backgroundColor: "#ebe6df",    borderRadius: 1,    overflow: "hidden",  }}>
+                      <Box  sx={{    height: "100%",    width: `${pct}%`,    backgroundColor: "#8b6914",    borderRadius: 1,    minWidth: pct > 0 ? 4 : 0,  }}/>
                     </Box>
-                    <Typography
-                      sx={{
-                        width: 36,
-                        textAlign: "right",
-                        fontSize: "0.875rem",
-                        color: "#3d2914",
-                        fontFamily: "'Inter', sans-serif",
-                      }}
-                    >
+                    <Typography  sx={{    width: 36,    textAlign: "right",    fontSize: "0.875rem",    color: "#3d2914",    fontFamily: "'Inter', sans-serif",  }}>
                       {pct}%
                     </Typography>
                   </Box>
@@ -352,8 +286,8 @@ export const ProductDetailsReviews = ({ productId }) => {
             </Box>
           )}
 
-          {reviews.length > 0 &&
-            reviews.map((rev, i) => {
+          {reviews?.length > 0 &&
+            reviews?.map((rev, i) => {
               const name =
                 rev.user?.name ||
                 rev.userName ||

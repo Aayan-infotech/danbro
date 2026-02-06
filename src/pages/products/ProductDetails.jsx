@@ -301,6 +301,19 @@ export const ProductDetails = () => {
 
   const handleAddToCart = async () => {
     if (!product) return;
+    const priceArr = product?.price && Array.isArray(product.price) ? product.price : [];
+    const matchWeight = (pw) => (pw || "").toString().trim().toLowerCase();
+    const selectedPrice = productWeight && priceArr.length > 0
+      ? priceArr.find((p) => matchWeight(p.weight) === matchWeight(productWeight))
+      : priceArr[0];
+    const effectiveRate = selectedPrice
+      ? (Number(selectedPrice.rate) || Number(selectedPrice.mrp) || 0)
+      : (productData?.rate != null ? Number(productData.rate) : 0);
+    if (effectiveRate === 0) {
+      setCartMessage({ type: "error", text: "This product cannot be added to cart as price is not available." });
+      setTimeout(() => setCartMessage(null), 3000);
+      return;
+    }
     try {
       setAddingToCart(true);
       setCartMessage(null);
@@ -308,7 +321,7 @@ export const ProductDetails = () => {
       if (!productId) {
         throw new Error("Product ID not found");
       }
-      const options = productData ? { weight: productWeight, productSnapshot: { name: productData?.name, price: product?.price, images: product?.images, weight: productWeight } } : {};
+      const options = productData ? { weight: productWeight, rate: effectiveRate, productSnapshot: { name: productData?.name, price: product?.price, images: product?.images, weight: productWeight } } : { rate: effectiveRate };
       const response = await addToCart(productId, quantity, options);
 
       setCartMessage({
