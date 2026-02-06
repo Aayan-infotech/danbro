@@ -40,7 +40,7 @@ const AppContent = () => {
   const isNoPaddingPage =
     pathname === "/about-us" ||
     pathname === "/blog" ||
-    pathname === "/blog-details" ||
+    pathname.startsWith("/blog-details") ||
     pathname === "/contact";
 
   useEffect(() => {
@@ -100,10 +100,12 @@ const AppContent = () => {
     });
   };
 
+  const isHomePage = pathname === "/" || pathname === "/home";
+
   return (
     <>
       <ScrollToTop />
-      <SocialMediaIcons />
+      {isHomePage && <SocialMediaIcons />}
       <DeliveryCheckDialog
         open={showDeliveryDialog}
         onClose={handleCloseDeliveryDialog}

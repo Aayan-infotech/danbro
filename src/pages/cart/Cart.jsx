@@ -15,7 +15,7 @@ import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import { loadCartItems, updateCartItemQuantity, removeCartItem, clearCartItems } from "../../store/cartSlice";
 import { getGuestWishlist } from "../../store/guestSlice";
 import { getAccessToken } from "../../utils/cookies";
-import { getMyAddresses, getAllCoupons, validateCoupon } from "../../utils/apiService";
+import { getMyAddresses, getAllCoupons, applyCoupon, removeCoupon } from "../../utils/apiService";
 import { initiateOrderSelf, initiateOrderOther } from "../../utils/apiService";
 import { CartItem } from "../../components/cart/CartItem";
 import { OrderSummary } from "../../components/cart/OrderSummary";
@@ -40,6 +40,7 @@ export const Cart = () => {
     cartTaxTotal,
     cartDiscount,
     cartFinalAmount,
+    appliedCoupon: appliedCouponFromApi,
   } = useAppSelector((state) => state.cart);
   const guestWishlist = useAppSelector(getGuestWishlist);
 
@@ -65,7 +66,7 @@ export const Cart = () => {
   const [couponsLoading, setCouponsLoading] = useState(false);
   const [selectedCoupon, setSelectedCoupon] = useState(null);
   const [couponCode, setCouponCode] = useState("");
-  const [appliedCoupon, setAppliedCoupon] = useState(null);
+  // Applied coupon is now driven by API (/cart/get) via Redux cartSlice
   const [couponError, setCouponError] = useState("");
   const [applyingCoupon, setApplyingCoupon] = useState(false);
 
@@ -189,12 +190,6 @@ export const Cart = () => {
     const coupon = coupons.find(c => c.id === couponId);
     if (coupon) {
       setSelectedCoupon(couponId);
-      setAppliedCoupon({
-        code: coupon.code,
-        discountPercent: coupon.discountPercentage || 0,
-        discountAmount: coupon.discountAmount || 0,
-        discountType: coupon.discountType,
-      });
       setCouponCode(coupon.code);
       setCouponError("");
     }
@@ -210,7 +205,7 @@ export const Cart = () => {
             quantity: Number(item?.quantity) || 1,
           })) || [],
           wishlist: guestWishlist || [],
-          appliedCoupon: appliedCoupon?.code ? { couponCode: appliedCoupon.code } : undefined,
+          appliedCoupon: appliedCouponFromApi?.couponCode ? { couponCode: appliedCouponFromApi.couponCode } : undefined,
         },
       });
       return;
@@ -230,7 +225,7 @@ export const Cart = () => {
           addressId: selectedAddress,
           paymentMode: paymentMode,
           instructions: deliveryInstructions,
-          couponCode: appliedCoupon?.code || couponCode || undefined,
+          couponCode: appliedCouponFromApi?.couponCode || couponCode || undefined,
         });
       } else {
         if (
@@ -275,7 +270,7 @@ export const Cart = () => {
           },
           paymentMode: paymentMode,
           instructions: deliveryInstructions,
-          couponCode: appliedCoupon?.code || couponCode || undefined,
+          couponCode: appliedCouponFromApi?.couponCode || couponCode || undefined,
         });
       }
       const orderId = orderResponse?.orderId;
@@ -358,9 +353,10 @@ export const Cart = () => {
     }
   };
 
-  // Apply coupon (validate API – works for guest and logged-in)
-  const handleApplyCoupon = async () => {
-    if (!couponCode.trim()) {
+  // Apply coupon by code (used by manual input and by dialog selection)
+  const handleApplyCouponWithCode = async (code) => {
+    const trimmed = typeof code === "string" ? code.trim() : "";
+    if (!trimmed) {
       setCouponError("Please enter a coupon code");
       return;
     }
@@ -373,42 +369,39 @@ export const Cart = () => {
     setCouponError("");
 
     try {
-      const cart = cartItems.map((item) => ({
-        productId: item?.productId || item?.id,
-        quantity: Number(item?.quantity) || 1,
-      }));
-      const res = await validateCoupon(couponCode.trim(), cart);
-
-      const valid = res?.valid === true;
-      const discountType = res?.discountType || "";
-      const discountValue = Number(res?.discount) || 0;
-
-      if (valid && discountType) {
-        const isPercentage = discountType === "ITEM_DISCOUNT_PERCENTAGE";
-        setAppliedCoupon({
-          code: couponCode.trim(),
-          discountPercent: isPercentage ? discountValue : 0,
-          discountAmount: isPercentage ? 0 : discountValue,
-          discountType,
-        });
-        setCouponCode("");
-      } else {
-        setCouponError(res?.message || "Invalid or expired coupon");
-      }
+      await applyCoupon(trimmed);
+      await dispatch(loadCartItems());
+      setCouponCode("");
+      setSelectedCoupon(null);
+      setCouponError("");
     } catch (err) {
-      console.error("Error validating coupon:", err);
+      console.error("Error applying coupon:", err);
       setCouponError(err?.message || "Failed to apply coupon");
+      throw err;
     } finally {
       setApplyingCoupon(false);
     }
   };
 
-  // Remove coupon
-  const handleRemoveCoupon = () => {
-    setAppliedCoupon(null);
-    setSelectedCoupon(null);
-    setCouponCode("");
-    setCouponError("");
+  const handleApplyCoupon = async () => {
+    await handleApplyCouponWithCode(couponCode);
+  };
+
+  // Remove coupon via API and reload cart
+  const handleRemoveCoupon = async () => {
+    try {
+      setApplyingCoupon(true);
+      setCouponError("");
+      await removeCoupon();
+      await dispatch(loadCartItems());
+      setSelectedCoupon(null);
+      setCouponCode("");
+    } catch (err) {
+      console.error("Error removing coupon:", err);
+      setCouponError(err?.message || "Failed to remove coupon");
+    } finally {
+      setApplyingCoupon(false);
+    }
   };
 
   // Calculate subtotal from cart items (guest items have lineTotal = rate * qty already)
@@ -437,18 +430,6 @@ export const Cart = () => {
   let discount = 0;
   if (hasApiSummary && cartDiscount != null) {
     discount = cartDiscount;
-  } else if (appliedCoupon) {
-    if (appliedCoupon.discountType === "ITEM_DISCOUNT_PERCENTAGE") {
-      discount = (finalSubtotal * (appliedCoupon.discountPercent || 0)) / 100;
-    } else if (appliedCoupon.discountType === "ITEM_DISCOUNT_AMOUNT") {
-      discount = Math.min(appliedCoupon.discountAmount || 0, finalSubtotal);
-    } else {
-      if (appliedCoupon.discountPercent) {
-        discount = (finalSubtotal * appliedCoupon.discountPercent) / 100;
-      } else if (appliedCoupon.discountAmount) {
-        discount = Math.min(appliedCoupon.discountAmount, finalSubtotal);
-      }
-    }
   }
 
   const shipping = finalSubtotal > 50 ? 0 : 5.0;
@@ -495,27 +476,29 @@ export const Cart = () => {
                         display: "flex",
                         alignItems: "flex-start",
                         gap: 1.5,
-                        p: 2,
+                        p: 1,
                         borderRadius: 2,
                         backgroundColor: "rgba(230, 120, 80, 0.12)",
                         border: "1px solid rgba(230, 120, 80, 0.25)",
                       }}
                     >
-                      <LocalShippingIcon sx={{ color: "var(--themeColor)", fontSize: 24, mt: 0.25 }} />
+                      <LocalShippingIcon sx={{ color: "var(--themeColor)", fontSize: 24 }} />
                       <Box sx={{ flex: 1, minWidth: 0 }}>
-                        <CustomText sx={{ fontSize: 15, fontWeight: 600, color: "#2c2c2c", mb: 0.5 }}>
-                          Delivery
-                        </CustomText>
+                        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                          <CustomText sx={{ fontSize: 15, fontWeight: 600, color: "#2c2c2c", mb: 0.5 }}>
+                            Delivery
+                          </CustomText>
+                          <Button
+                            size="small"
+                            onClick={() => setAddressDialogOpen(true)}
+                            sx={{ mt: 1, textTransform: "none", color: "var(--themeColor)", fontWeight: 600, p: 0, minWidth: 0 }}
+                          >
+                            Change
+                          </Button>
+                        </Box>
                         <CustomText sx={{ fontSize: 13, color: "#555" }}>
                           {getDisplayAddress() || "Select delivery address"}
                         </CustomText>
-                        <Button
-                          size="small"
-                          onClick={() => setAddressDialogOpen(true)}
-                          sx={{ mt: 1, textTransform: "none", color: "var(--themeColor)", fontWeight: 600, p: 0, minWidth: 0 }}
-                        >
-                          Change
-                        </Button>
                       </Box>
                     </Box>
                     <AddressSection
@@ -599,10 +582,11 @@ export const Cart = () => {
                   discount={discount}
                   shipping={shipping}
                   total={total}
-                  appliedCoupon={appliedCoupon}
+                  appliedCoupon={appliedCouponFromApi}
                   couponError={couponError}
                   applyingCoupon={applyingCoupon}
                   handleRemoveCoupon={handleRemoveCoupon}
+                  onApplyCouponWithCode={handleApplyCouponWithCode}
                   coupons={coupons}
                   couponsLoading={couponsLoading}
                   selectedCoupon={selectedCoupon}

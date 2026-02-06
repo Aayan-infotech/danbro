@@ -21,7 +21,7 @@ const menuItems = [
   // { id: "downloads", label: "Downloads", icon: <DownloadIcon /> },
   { id: "addresses", label: "Saved Addresses", icon: <LocationOnIcon /> },
   { id: "account", label: "Account Details", icon: <PersonIcon /> },
-  { id: "coupons", label: "My Coupons", icon: <LocalOfferIcon /> },
+  { id: "coupons", label: "Help & Support", icon: <LocalOfferIcon /> },
   { id: "wishlist", label: "Wishlist", icon: <FavoriteIcon /> },
   { id: "logout", label: "Logout", icon: <LogoutIcon /> },
 ];

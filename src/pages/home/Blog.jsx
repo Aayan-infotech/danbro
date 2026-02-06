@@ -1,16 +1,35 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Box, Container,  Grid, Button, Divider } from "@mui/material";
+import { Box, Container, Grid, Button, Divider, CircularProgress, Typography } from "@mui/material";
 import { CustomText } from "../../components/comman/CustomText";
-
-// images – filhaal available images use kar liye,
-// tum apne hisaab se change kar sakta hai
-import blogHero from "../../assets/blog.png";
-import createevents1 from "../../assets/createevents1.png";
-import cateringEvents from "../../assets/createevents.png";
 import { useNavigate } from "react-router-dom";
+import { getAllBlogs } from "../../utils/apiService";
+import blogHero from "../../assets/blog.png";
+
+// Normalize blog from API (supports _id, createdAt, category/categoryName, author/authorName, image string URL)
+const normalizeBlog = (raw) => {
+  const id = raw?._id ?? raw?.id;
+  const title = raw?.title ?? "";
+  const description = raw?.description ?? raw?.content ?? raw?.body ?? "";
+  const image = raw?.image ?? raw?.thumbnail ?? raw?.featuredImage ?? raw?.bannerImage;
+  const category = raw?.category ?? raw?.categoryName ?? raw?.categoryId ?? "Blog";
+  const author = raw?.author ?? raw?.authorName ?? raw?.postedBy ?? "Danbro by Mr Brown Bakery";
+  let date = raw?.date ?? raw?.createdAt ?? raw?.updatedAt ?? "";
+  if (date && typeof date === "string" && date.length >= 10) {
+    try {
+      const d = new Date(date);
+      if (!isNaN(d.getTime())) date = d.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
+    } catch (_) {}
+  }
+  return { id, title, description, image, category, date, author };
+};
 
 export const Blog = () => {
+  const navigate = useNavigate();
   const [visibleSections, setVisibleSections] = useState({});
+  const [blogs, setBlogs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
   const sectionRefs = {
     hero: useRef(null),
     categories: useRef(null),
@@ -18,6 +37,29 @@ export const Blog = () => {
     sidebar: useRef(null),
     pagination: useRef(null),
   };
+
+  useEffect(() => {
+    let cancelled = false;
+    const fetchBlogs = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const data = await getAllBlogs();
+        if (!cancelled) {
+          setBlogs(Array.isArray(data) ? data.map(normalizeBlog) : []);
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setError(err?.message || "Failed to load blogs");
+          setBlogs([]);
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+    fetchBlogs();
+    return () => { cancelled = true; };
+  }, []);
 
   useEffect(() => {
     const observers = Object.keys(sectionRefs).map((key) => {
@@ -41,45 +83,10 @@ export const Blog = () => {
       observers.forEach((observer) => observer.disconnect());
     };
   }, []);
-  const categories = ["Category 1", "Category 2", "Category 3", "Category 4"];
 
-  const navigate = useNavigate();
-
-  const blogs = [
-    {
-      id: 1,
-      category: "Cakes",
-      title:
-        "Handmade with Love – Discover Danbro Cookies by Mr Brown Bakery",
-      author: "Danbro by Mr Brown Bakery",
-      date: "May 03, 2025",
-      image: createevents1,
-      description:
-        "There’s something timeless and comforting about a cookie—the kind that crumbles just right, fills the room with warmth, and tastes like it was made in grandma’s kitchen. That’s exactly what you get with Danbro’s Handmade Cookies, a delightful creation by Mr Brown Bakery.",
-    },
-    {
-      id: 2,
-      category: "Cakes",
-      title:
-        "Experience the Magic of Danbro Cakes – A Delicious Creation by Mr Brown Bakery",
-      author: "Danbro by Mr Brown Bakery",
-      date: "May 03, 2025",
-      image: cateringEvents,
-      description:
-        "When it comes to desserts that spark joy and make moments memorable, few things compare to a beautifully baked cake. At Mr Brown Bakery, we’ve taken cake-making to the next level with our premium line: Danbro Cakes – a name now synonymous with indulgence, elegance, and irresistible flavour.",
-    },
-    {
-      id: 3,
-      category: "Cake",
-      title:
-        "Discover the Best Baklawa by Danbro – A Sweet Masterpiece by Mr Brown Bakery",
-      author: "Danbro by Mr Brown Bakery",
-      date: "May 03, 2025",
-      image: createevents1,
-      description:
-        "When it comes to indulgent desserts that blend tradition with perfection, baklawa tops the list. And if you’re on the hunt for the best baklawa around, look no further than Danbro’s Baklawa by Mr Brown Bakery — a bite of golden bliss that melts in your mouth and lingers in your memory.",
-    },
-  ];
+  const categories = blogs.length
+    ? [...new Set(blogs.map((b) => b.category).filter(Boolean))]
+    : ["All"];
 
   return (
     <Box
@@ -187,6 +194,18 @@ export const Blog = () => {
           </Box>
         </Box>
 
+        {error && (
+          <Box sx={{ py: 4, textAlign: "center" }}>
+            <Typography color="error">{error}</Typography>
+          </Box>
+        )}
+
+        {loading ? (
+          <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
+            <CircularProgress />
+          </Box>
+        ) : (
+        <Box>
         <Grid container spacing={{ xs: 2, sm: 3, md: 3, lg: 3 }}>
           <Grid size={{ xs: 12, md: 8 }}>
             {blogs?.map((blog) => (
@@ -212,13 +231,17 @@ export const Blog = () => {
                   }}
                 >
                   <img
-                    src={blog?.image}
+                    src={typeof blog?.image === "string" ? blog.image : blog?.image}
                     alt={blog?.title}
                     loading="lazy"
                     style={{
                       width: "100%",
                       height: "100%",
                       objectFit: "cover",
+                    }}
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = "https://via.placeholder.com/400x240?text=Blog";
                     }}
                   />
                 </Box>
@@ -266,14 +289,14 @@ export const Blog = () => {
                       mb: 2.5,
                     }}
                   >
-                    {blog?.description.length > 200
-                      ? blog?.description.slice(0, 200) + "..."
-                      : blog?.description}
+                    {String(blog?.description || "").length > 200
+                      ? String(blog.description).slice(0, 200) + "..."
+                      : String(blog?.description || "")}
                   </CustomText>
 
                   <Button
                     variant="outlined"
-                    onClick={() => navigate("/blog-details", { state: blog })}
+                    onClick={() => navigate(`/blog-details/${blog?.id}`, { state: blog })}
                     sx={{
                       borderRadius: 2,
                       fontSize: { xs: 13, sm: 13, md: 12.5, lg: 13 },
@@ -359,6 +382,7 @@ export const Blog = () => {
                 {blogs.slice(0, 3).map((b, index) => (
                   <Box
                     key={b.id}
+                    onClick={() => navigate(`/blog-details/${b.id}`, { state: b })}
                     sx={{
                       display: "flex",
                       gap: { xs: 1.5, sm: 2 },
@@ -378,7 +402,7 @@ export const Blog = () => {
                     }}
                   >
                     <img
-                      src={b.image}
+                      src={typeof b.image === "string" ? b.image : b.image}
                       alt={b.title}
                       loading="lazy"
                       style={{
@@ -387,9 +411,14 @@ export const Blog = () => {
                         borderRadius: 6,
                         objectFit: "cover",
                         flexShrink: 0,
+                        cursor: "pointer",
+                      }}
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = "https://via.placeholder.com/70?text=Blog";
                       }}
                     />
-                    <Box>
+                    <Box sx={{ cursor: "pointer" }}>
                       <CustomText
                         sx={{
                           fontSize: { xs: 12, sm: 13 },
@@ -398,8 +427,8 @@ export const Blog = () => {
                           lineHeight: 1.4,
                         }}
                       >
-                        {b.title.length > 45
-                          ? b.title.slice(0, 45) + "..."
+                        {String(b.title || "").length > 45
+                          ? String(b.title).slice(0, 45) + "..."
                           : b.title}
                       </CustomText>
                       <CustomText
@@ -472,6 +501,8 @@ export const Blog = () => {
             Last »
           </Button>
         </Box>
+        </Box>
+        )}
       </Container>
     </Box>
   );

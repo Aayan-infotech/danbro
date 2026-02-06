@@ -424,6 +424,72 @@ export const validateCoupon = async (couponCode, cart) => {
 };
 
 /**
+ * Apply coupon to cart (logged-in only)
+ * POST /api/coupon/apply with body { couponCode }
+ * @param {string} couponCode - Coupon code to apply
+ * @returns {Promise} Apply response; then /cart/get will return updated appliedCoupon & discount
+ */
+export const applyCoupon = async (couponCode) => {
+  try {
+    const token = getAccessToken();
+    if (!token) {
+      throw new Error('Authentication required. Please login.');
+    }
+
+    const response = await axios.post(
+      `${API_BASE_URL}/coupon/apply`,
+      { couponCode: (couponCode || '').trim() },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        withCredentials: false,
+        timeout: 15000,
+      }
+    );
+
+    return response.data;
+  } catch (error) {
+    const message = error.response?.data?.message || error.response?.data?.error || error.message;
+    throw new Error(message || 'Failed to apply coupon.');
+  }
+};
+
+/**
+ * Remove applied coupon from cart (logged-in only)
+ * POST /api/coupon/remove
+ */
+export const removeCoupon = async () => {
+  try {
+    const token = getAccessToken();
+    if (!token) {
+      throw new Error('Authentication required. Please login.');
+    }
+
+    const response = await axios.post(
+      `${API_BASE_URL}/coupon/remove`,
+      {},
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        withCredentials: false,
+        timeout: 15000,
+      }
+    );
+
+    return response.data;
+  } catch (error) {
+    const message = error.response?.data?.message || error.response?.data?.error || error.message;
+    throw new Error(message || 'Failed to remove coupon.');
+  }
+};
+
+/**
  * Track order by order ID
  * GET /api/order/track/:orderId (works for guest and logged-in; send Authorization if token present)
  * @param {string} orderId - Order ID to track
@@ -1622,6 +1688,42 @@ export const getStaticContent = async (slug) => {
     return data;
   } catch (error) {
     console.error('Error fetching static content:', error);
+    throw error;
+  }
+};
+
+/**
+ * GET /api/blogs/getAll – fetch all blogs
+ * @returns {Promise<Array>} List of blogs (uses response.data?.data ?? response.data)
+ */
+export const getAllBlogs = async () => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/blogs/getAll`, {
+      timeout: 15000,
+    });
+    const data = response?.data?.data ?? response?.data ?? response;
+    return Array.isArray(data) ? data : [];
+  } catch (error) {
+    console.error('Error fetching blogs:', error);
+    throw error;
+  }
+};
+
+/**
+ * GET /api/blogs/getById/:id – fetch a single blog by id
+ * @param {string} id - Blog id
+ * @returns {Promise<Object>} Blog object
+ */
+export const getBlogById = async (id) => {
+  try {
+    if (!id) throw new Error('Blog id is required');
+    const response = await axios.get(`${API_BASE_URL}/blogs/getById/${id}`, {
+      timeout: 15000,
+    });
+    const data = response?.data?.data ?? response?.data ?? response;
+    return data;
+  } catch (error) {
+    console.error('Error fetching blog:', error);
     throw error;
   }
 };

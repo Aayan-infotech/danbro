@@ -18,7 +18,7 @@ import { DashboardTab } from "../../components/user/DashboardTab";
 import { OrderHistoryTab } from "../../components/user/OrderHistoryTab";
 import { DownloadsTab } from "../../components/user/DownloadsTab";
 import { SavedAddressesTab } from "../../components/user/SavedAddressesTab";
-import { MyCouponsTab } from "../../components/user/MyCouponsTab";
+import { HelpSupportTab } from "../../components/user/HelpSupportTab";
 import { WishlistTab } from "../../components/user/WishlistTab";
 import blankImage from "../../assets/blankimage.png";
 import { getMyOrders, getRecentlyViewed } from "../../utils/apiService";
@@ -221,13 +221,13 @@ export const UserProfile = () => {
 
   const recentOrderForDashboard = recentOrder
     ? {
-        id: getOrderIdLabel(recentOrder) ? `#${getOrderIdLabel(recentOrder)}` : "—",
-        rawId: getOrderIdLabel(recentOrder) || "",
-        date: getOrderDateLabel(recentOrder),
-        items: getOrderItemsCount(recentOrder),
-        total: getOrderTotalLabel(recentOrder),
-        status: getOrderStatusLabel(recentOrder),
-      }
+      id: getOrderIdLabel(recentOrder) ? `#${getOrderIdLabel(recentOrder)}` : "—",
+      rawId: getOrderIdLabel(recentOrder) || "",
+      date: getOrderDateLabel(recentOrder),
+      items: getOrderItemsCount(recentOrder),
+      total: getOrderTotalLabel(recentOrder),
+      status: getOrderStatusLabel(recentOrder),
+    }
     : null;
 
   // Fetch coupons from API
@@ -240,10 +240,10 @@ export const UserProfile = () => {
         // Format coupon data
         const formattedCoupons = response.data.data.map((coupon) => {
           const isPercentage = coupon.discountType === "ITEM_DISCOUNT_PERCENTAGE";
-          const discount = isPercentage 
-            ? `${coupon.discountPercentage}%` 
+          const discount = isPercentage
+            ? `${coupon.discountPercentage}%`
             : `₹${coupon.discountAmount}`;
-          
+
           // Format dates
           const validFrom = new Date(coupon.validFrom).toLocaleDateString('en-GB', {
             day: '2-digit',
@@ -268,8 +268,8 @@ export const UserProfile = () => {
             discountType: coupon.discountType,
             discountPercentage: coupon.discountPercentage,
             discountAmount: coupon.discountAmount,
-            description: isPercentage 
-              ? `Get ${coupon.discountPercentage}% off on your order` 
+            description: isPercentage
+              ? `Get ${coupon.discountPercentage}% off on your order`
               : `Flat ₹${coupon.discountAmount} off on your order`,
             validFrom: validFrom,
             validTo: validTo,
@@ -392,7 +392,7 @@ export const UserProfile = () => {
 
   return (
     <Box sx={{ minHeight: "100vh", backgroundColor: "#fff", py: { xs: 3, md: 0 }, pb: { xs: 8, md: 0 }, p: { xs: 1.25, md: 0 } }}>
-      <Container  sx={{ px: { xs: 2, md: 3, lg: 2 }, py: 4 }}>
+      <Container sx={{ px: { xs: 2, md: 3, lg: 2 }, py: 4 }}>
         <Box
           sx={{
             display: "flex",
@@ -535,11 +535,7 @@ export const UserProfile = () => {
               )}
 
               {activeTab === "coupons" && (
-                <MyCouponsTab
-                  coupons={coupons}
-                  couponsLoading={couponsLoading}
-                  couponsError={couponsError}
-                />
+                <HelpSupportTab />
               )}
 
               {activeTab === "wishlist" && (

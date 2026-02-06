@@ -13,14 +13,17 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
+  DialogActions,
   Link,
 } from "@mui/material";
 import { CustomText } from "../comman/CustomText";
+import IconButton from "@mui/material/IconButton";
 import {
   LocalOffer as LocalOfferIcon,
   Schedule as ScheduleIcon,
   Payment as PaymentIcon,
   CheckCircle as CheckCircleIcon,
+  Close as CloseIcon,
 } from "@mui/icons-material";
 
 export const OrderSummary = ({
@@ -95,8 +98,10 @@ export const OrderSummary = ({
             <Box sx={{ display: "flex", alignItems: "center", gap: 1.25, flex: 1, justifyContent: "flex-end", minWidth: 0 }}>
               {couponsLoading ? (
                 <CircularProgress size={18} sx={{ color: "#5D4037" }} />
-              ) : appliedCoupon?.code ? (
-                <CustomText sx={{ fontSize: 14, color: "#5D4037", fontWeight: 600, mr: 0.5 }}>{appliedCoupon.code}</CustomText>
+              ) : appliedCoupon?.couponCode || appliedCoupon?.code ? (
+                <CustomText sx={{ fontSize: 14, color: "#5D4037", fontWeight: 600, mr: 0.5 }}>
+                  {appliedCoupon.couponCode || appliedCoupon.code}
+                </CustomText>
               ) : (
                 <CustomText sx={{ fontSize: 13, color: "#999" }}>No coupon selected</CustomText>
               )}
@@ -116,7 +121,7 @@ export const OrderSummary = ({
                   "&:hover": { textDecoration: "none", bgcolor: "rgba(93, 64, 55, 0.08)" },
                 }}
               >
-                {appliedCoupon?.code ? "Change" : "Select"}
+                {appliedCoupon?.couponCode || appliedCoupon?.code ? "Change" : "Select"}
               </Link>
             </Box>
           </Box>
@@ -126,7 +131,7 @@ export const OrderSummary = ({
         </CardContent>
       </Card>
 
-      {/* Coupon selection dialog */}
+      {/* Coupon selection dialog: select coupon → Apply button enabled → on Apply call API then cart/get for update */}
       <Dialog
         open={couponDialogOpen}
         onClose={() => setCouponDialogOpen(false)}
@@ -141,16 +146,51 @@ export const OrderSummary = ({
           },
         }}
       >
-        <DialogTitle sx={{ backgroundColor: "#3E2723", color: "#fff", fontSize: 18, fontWeight: 600, py: 2, px: 2.5, borderBottom: "none", }}>
+        <DialogTitle sx={{ backgroundColor: "#3E2723", color: "#fff", fontSize: 18, fontWeight: 600, py: 2, px: 2.5, position: "relative", }}>
           Select a coupon
+
+          <IconButton
+            onClick={() => setCouponDialogOpen(false)}
+            sx={{
+              position: "absolute",
+              right: 8,
+              top: "50%",
+              transform: "translateY(-50%)",
+              color: "#fff",
+              "&:hover": {
+                backgroundColor: "rgba(255,255,255,0.15)",
+              },
+            }}
+          >
+            <CloseIcon />
+          </IconButton>
         </DialogTitle>
-        <DialogContent sx={{ my: 2, px: 2.5, pb: 2.5, bgcolor: "#fafafa" }}>
+        <DialogContent sx={{ my: 2, px: 2.5, pb: 2.5, bgcolor: "#fafafa", position: "relative" }}>
+          {applyingCoupon && (
+            <Box
+              sx={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                bgcolor: "rgba(255,255,255,0.7)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                zIndex: 1,
+                borderRadius: 1,
+              }}
+            >
+              <CircularProgress size={32} />
+            </Box>
+          )}
           {coupons.map((coupon) => (
             <Box
               key={coupon.id}
               onClick={() => {
+                if (applyingCoupon) return;
                 handleCouponSelect(coupon.id);
-                setCouponDialogOpen(false);
               }}
               sx={{
                 p: 2,
@@ -159,19 +199,22 @@ export const OrderSummary = ({
                 border: "1px solid",
                 borderColor: selectedCoupon === coupon.id ? "#5D4037" : "#e0e0e0",
                 bgcolor: selectedCoupon === coupon.id ? "rgba(93, 64, 55, 0.08)" : "#fff",
-                cursor: "pointer",
+                cursor: applyingCoupon ? "default" : "pointer",
                 transition: "all 0.2s ease",
                 "&:hover": {
-                  bgcolor: selectedCoupon === coupon.id ? "rgba(93, 64, 55, 0.12)" : "rgba(93, 64, 55, 0.04)",
-                  borderColor: "#5D4037",
+                  bgcolor: applyingCoupon ? undefined : selectedCoupon === coupon.id ? "rgba(93, 64, 55, 0.12)" : "rgba(93, 64, 55, 0.04)",
+                  borderColor: applyingCoupon ? undefined : "#5D4037",
                 },
               }}
             >
-              <CustomText sx={{ fontWeight: 600, fontSize: 15, color: "#3E2723" }}>{coupon.code}</CustomText>
+              <CustomText sx={{ fontWeight: 600, fontSize: 15, color: "#3E2723" }}>{coupon.couponCode ?? coupon.code}</CustomText>
               <CustomText sx={{ fontSize: 13, color: "#666", display: "block", mt: 0.25 }}>{coupon.description}</CustomText>
             </Box>
           ))}
-          {appliedCoupon?.code && (
+          {couponError && (
+            <CustomText sx={{ fontSize: 12, color: "#d32f2f", mt: 1, display: "block" }}>{couponError}</CustomText>
+          )}
+          {(appliedCoupon?.couponCode || appliedCoupon?.code) && (
             <Button
               size="small"
               onClick={() => { handleRemoveCoupon(); setCouponDialogOpen(false); }}
@@ -187,6 +230,37 @@ export const OrderSummary = ({
             </Button>
           )}
         </DialogContent>
+        <DialogActions sx={{ px: 2.5, py: 2, bgcolor: "#fafafa", borderTop: "1px solid #eee" }}>
+          <Button
+            onClick={() => setCouponDialogOpen(false)}
+            sx={{ textTransform: "none", color: "#666" }}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="contained"
+            disabled={!selectedCoupon || applyingCoupon || !onApplyCouponWithCode}
+            onClick={async () => {
+              const selected = coupons.find((c) => c.id === selectedCoupon);
+              const code = selected ? (selected.couponCode ?? selected.code) : null;
+              if (!code) return;
+              try {
+                await onApplyCouponWithCode(code);
+                setCouponDialogOpen(false);
+              } catch (_) {
+                // couponError set in parent; dialog stays open
+              }
+            }}
+            sx={{
+              textTransform: "none",
+              bgcolor: "#5D4037",
+              fontWeight: 600,
+              "&:hover": { bgcolor: "#3E2723" },
+            }}
+          >
+            Apply
+          </Button>
+        </DialogActions>
       </Dialog>
 
       {/* Bill Details Card */}

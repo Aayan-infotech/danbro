@@ -83,6 +83,7 @@ export const loadCartItems = createAsyncThunk(
       const apiTaxTotal = response?.taxTotal != null ? Number(response.taxTotal) : null;
       const apiDiscount = response?.discount != null ? Number(response.discount) : null;
       const apiFinalAmount = response?.finalAmount != null ? Number(response.finalAmount) : null;
+      const appliedCoupon = response?.appliedCoupon ?? response?.data?.appliedCoupon ?? null;
       if (apiFinalAmount != null && cartTotal === 0) cartTotal = apiFinalAmount;
       if (apiSubtotal != null && cartTotal === 0) cartTotal = apiSubtotal;
 
@@ -94,6 +95,7 @@ export const loadCartItems = createAsyncThunk(
         cartTaxTotal: apiTaxTotal,
         cartDiscount: apiDiscount,
         cartFinalAmount: apiFinalAmount,
+        appliedCoupon,
       };
     } catch (error) {
       const errorMessage = error.response?.data?.message || error.message || 'Failed to load cart';
@@ -166,6 +168,7 @@ const initialState = {
   cartTaxTotal: null,
   cartDiscount: null,
   cartFinalAmount: null,
+  appliedCoupon: null,
 };
 
 const cartSlice = createSlice({
@@ -204,6 +207,7 @@ const cartSlice = createSlice({
         state.cartTaxTotal = action.payload.cartTaxTotal ?? null;
         state.cartDiscount = action.payload.cartDiscount ?? null;
         state.cartFinalAmount = action.payload.cartFinalAmount ?? null;
+         state.appliedCoupon = action.payload.appliedCoupon ?? null;
         state.error = null;
       })
       .addCase(loadCartItems.rejected, (state, action) => {
@@ -215,6 +219,7 @@ const cartSlice = createSlice({
         state.cartTaxTotal = null;
         state.cartDiscount = null;
         state.cartFinalAmount = null;
+        state.appliedCoupon = null;
       })
       // Update item quantity
       .addCase(updateCartItemQuantity.pending, (state, action) => {
@@ -271,6 +276,7 @@ const cartSlice = createSlice({
         state.cartTaxTotal = null;
         state.cartDiscount = null;
         state.cartFinalAmount = null;
+        state.appliedCoupon = null;
         state.error = null;
       });
   },

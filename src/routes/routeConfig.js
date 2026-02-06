@@ -57,6 +57,10 @@ export const publicRoutes = [
     component: Blog,
   },
   {
+    path: "/blog-details/:id",
+    component: BlogDetails,
+  },
+  {
     path: "/blog-details",
     component: BlogDetails,
   },

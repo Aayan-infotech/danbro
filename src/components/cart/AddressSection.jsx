@@ -320,7 +320,7 @@ export const AddressSection = ({
         {isLoggedIn && deliveryType === 'self' && (
           <>
             {addressesLoading ? (
-              <Box sx={{ display: "flex", justifyContent: "center", py: 1.5 }}>
+              <Box sx={{ display: "flex", justifyContent: "center" }}>
                 <CircularProgress size={20} />
               </Box>
             ) : addresses.length === 0 ? (

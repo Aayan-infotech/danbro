@@ -1,13 +1,36 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Box, Container,  Grid, Button, Divider } from "@mui/material";
+import { Box, Container, Grid, Button, Divider, CircularProgress, Typography } from "@mui/material";
 import { CustomText } from "../../components/comman/CustomText";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
-import { useNavigate, useLocation } from "react-router-dom";
-import createevents1 from "../../assets/createevents1.png";
+import { useNavigate, useLocation, useParams } from "react-router-dom";
+import { getBlogById, getAllBlogs } from "../../utils/apiService";
+
+const normalizeBlog = (raw) => {
+  if (!raw) return null;
+  const id = raw._id ?? raw.id;
+  const title = raw?.title ?? "";
+  const description = raw?.description ?? raw?.content ?? raw?.body ?? "";
+  const image = raw?.image ?? raw?.thumbnail ?? raw?.featuredImage ?? raw?.bannerImage;
+  const category = raw?.category ?? raw?.categoryName ?? "Blog";
+  const author = raw?.author ?? raw?.authorName ?? raw?.postedBy ?? "Danbro by Mr Brown Bakery";
+  let date = raw?.date ?? raw?.createdAt ?? raw?.updatedAt ?? "";
+  if (date && typeof date === "string" && date.length >= 10) {
+    try {
+      const d = new Date(date);
+      if (!isNaN(d.getTime())) date = d.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
+    } catch (_) {}
+  }
+  return { id, title, description, image, category, date, author };
+};
 
 export default function BlogDetails() {
   const navigate = useNavigate();
-  const { state } = useLocation(); // blog data passed from View More
+  const { state } = useLocation();
+  const { id: paramId } = useParams();
+  const [blog, setBlog] = useState(state ? normalizeBlog(state) : null);
+  const [relatedBlogs, setRelatedBlogs] = useState([]);
+  const [loading, setLoading] = useState(!state && !!paramId);
+  const [error, setError] = useState(null);
   const [visibleSections, setVisibleSections] = useState({});
 
   const sectionRefs = {
@@ -19,6 +42,53 @@ export default function BlogDetails() {
     comment: useRef(null),
     specialties: useRef(null),
   };
+
+  useEffect(() => {
+    if (state) {
+      setBlog(normalizeBlog(state));
+      setLoading(false);
+      return;
+    }
+    if (!paramId) {
+      setLoading(false);
+      return;
+    }
+    let cancelled = false;
+    const fetchBlog = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const data = await getBlogById(paramId);
+        if (!cancelled) {
+          setBlog(normalizeBlog(data));
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setError(err?.message || "Failed to load blog");
+          setBlog(null);
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+    fetchBlog();
+    return () => { cancelled = true; };
+  }, [paramId, state]);
+
+  useEffect(() => {
+    const loadRelated = async () => {
+      try {
+        const data = await getAllBlogs();
+        const list = Array.isArray(data) ? data.map(normalizeBlog) : [];
+        const currentId = blog?.id ?? paramId;
+        const related = list.filter((b) => b?.id && String(b.id) !== String(currentId)).slice(0, 4);
+        setRelatedBlogs(related);
+      } catch (_) {
+        setRelatedBlogs([]);
+      }
+    };
+    if (blog || paramId) loadRelated();
+  }, [blog?.id, paramId]);
 
   useEffect(() => {
     const observers = Object.keys(sectionRefs).map((key) => {
@@ -42,34 +112,31 @@ export default function BlogDetails() {
       observers.forEach((observer) => observer.disconnect());
     };
   }, []);
-  const specialties = [
-    {
-      title: "MAY 03, 2025",
-      description: "Handmade with Love – Discover Danbro Cookies by Mr Brown Bakery",
-      image: createevents1,
-    },
-    {
-      title: "MAY 03, 2025",
-      description: "Handmade with Love – Discover Danbro Cookies by Mr Brown Bakery",
-      image: createevents1,
-    },
-    {
-      title: "MAY 03, 2025",
-      description: "Handmade with Love – Discover Danbro Cookies by Mr Brown Bakery",
-      image: createevents1,
-    },
-    {
-      title: "MAY 03, 2025",
-      description: "Handmade with Love – Discover Danbro Cookies by Mr Brown Bakery",
-      image: createevents1,
-    },
-  ];
 
-  const categories = ["Category 1", "Category 2", "Category 3", "Category 4"];
+  const categories = relatedBlogs.length
+    ? [...new Set(relatedBlogs.map((b) => b.category).filter(Boolean))]
+    : blog?.category
+    ? [blog.category]
+    : ["Blog"];
 
-  const blog = state;
-  // fallback if no data (optional)
-  if (!blog) return <CustomText>No Blog Data Found</CustomText>;
+  if (loading) {
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: 300 }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (error || !blog) {
+    return (
+      <Box sx={{ p: 4, textAlign: "center" }}>
+        <Typography color="error">{error || "Blog not found."}</Typography>
+        <Button onClick={() => navigate("/blog")} sx={{ mt: 2 }}>
+          Back to Blogs
+        </Button>
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ backgroundColor: "#fff", pb: { xs: 8, md: 10 }, p: { xs: 1.25, md: 0 } }}>
@@ -185,15 +252,19 @@ export default function BlogDetails() {
           }}
         >
           <img
-            src={blog.image}
-            alt="Blog"
+            src={typeof blog.image === "string" ? blog.image : blog.image}
+            alt={blog.title}
             style={{ width: "100%", height: "100%", objectFit: "cover" }}
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src = "https://via.placeholder.com/800x420?text=Blog";
+            }}
           />
         </Box>
       </Container>
 
       {/* Blog Content */}
-      <Container  sx={{ lineHeight: 1.8, color: "#444", px: { xs: 2, md: 3 } }} ref={sectionRefs.content}>
+      <Container sx={{ lineHeight: 1.8, color: "#444", px: { xs: 2, md: 3 } }} ref={sectionRefs.content}>
         <Box
           sx={{
             opacity: visibleSections.content ? 1 : 0,
@@ -201,89 +272,10 @@ export default function BlogDetails() {
             transition: "opacity 0.8s ease-out, transform 0.8s ease-out",
           }}
         >
-          <CustomText sx={{ fontSize: { xs: 14, sm: 15, md: 15 }, mb: 3 }}>
+          <CustomText
+            sx={{ fontSize: { xs: 14, sm: 15, md: 15 }, mb: 3, whiteSpace: "pre-wrap" }}
+          >
             {blog.description}
-          </CustomText>
-
-          <CustomText
-            sx={{
-              fontWeight: 700,
-              mb: 1,
-              fontSize: { xs: 16, sm: 17, md: 18 },
-            }}
-          >
-            The Charm of Handmade Goodness
-          </CustomText>
-
-          <CustomText sx={{ fontSize: { xs: 14, sm: 15, md: 15 }, mb: 2 }}>
-            In a world full of factory-made snacks...
-          </CustomText>
-
-          <Box
-            component="ul"
-            sx={{
-              marginLeft: { xs: 2.5, sm: 2.5 },
-              marginBottom: 2.5,
-              lineHeight: "1.7",
-              fontSize: { xs: 14, sm: 15 },
-            }}
-          >
-            <li>Made from Scratch – No shortcuts, no preservatives...</li>
-            <li>Perfectly Baked – Crunchy on the outside, soft inside...</li>
-            <li>Variety to Crave – From classic choco-chip to...</li>
-          </Box>
-
-          <CustomText
-            sx={{
-              fontWeight: 700,
-              mb: 1,
-              fontSize: { xs: 16, sm: 17, md: 18 },
-            }}
-          >
-            Great for Gifting or Snacking
-          </CustomText>
-          <CustomText sx={{ fontSize: { xs: 14, sm: 15, md: 15 }, mb: 2 }}>
-            Whether you're filling a jar at home, packing a lunchbox, or choosing a thoughtful gift, Danbro handmade cookies are a perfect pick. They're ideal for:
-          </CustomText>
-
-          <Box
-            component="ul"
-            sx={{
-              marginLeft: { xs: 2.5, sm: 2.5 },
-              marginBottom: 2.5,
-              fontSize: { xs: 14, sm: 15 },
-            }}
-          >
-            <li>Festive Hampers</li>
-            <li>Office snack boxes</li>
-            <li>Tea-time treats</li>
-            <li>Little everyday indulgences</li>
-          </Box>
-
-          <CustomText
-            sx={{
-              fontWeight: 700,
-              mb: 1,
-              fontSize: { xs: 16, sm: 17, md: 18 },
-            }}
-          >
-            Available Fresh In-Store & Online
-          </CustomText>
-          <CustomText sx={{ fontSize: { xs: 14, sm: 15, md: 15 }, mb: 2 }}>
-            Danbro cookies are available at all Mr Brown Bakery outlets and through our online store. Packaged with care, they stay fresh, crisp, and ready to enjoy anytime.
-          </CustomText>
-
-          <CustomText
-            sx={{
-              fontWeight: 700,
-              mb: 1,
-              fontSize: { xs: 16, sm: 17, md: 18 },
-            }}
-          >
-            Every Bite Tells a Story
-          </CustomText>
-          <CustomText sx={{ fontSize: { xs: 14, sm: 15, md: 15 }, mb: 2 }}>
-            With Danbro handmade cookies, you're not just eating a snack — you're tasting tradition, craftsmanship, and a whole lot of love.
           </CustomText>
 
           {/* Divider */}
@@ -388,7 +380,7 @@ export default function BlogDetails() {
       </Container>
 
       {/* Related Posts Section */}
-      <Container  sx={{ py: { xs: 4, md: 0 }, px: { xs: 2, md: 3 } }}>
+      <Container sx={{ py: { xs: 4, md: 0 }, px: { xs: 2, md: 3 } }}>
         <Box ref={sectionRefs.specialties}>
           <Box
             sx={{
@@ -406,75 +398,81 @@ export default function BlogDetails() {
                 mb: { xs: 3, md: 4 },
               }}
             >
-              Our Catering Specialties
+              Related Posts
             </CustomText>
 
-          <Grid container spacing={{ xs: 2, sm: 2, md: 2 }}>
-            {specialties.map((item, index) => (
-              <Grid size={{ xs: 6, sm: 6, md: 3 }} key={index}>
-                <Box
-                  sx={{
-                    cursor: "pointer",
-                    animation: visibleSections.specialties
-                      ? `fadeInUp 0.6s ease-out ${index * 0.1}s both`
-                      : "none",
-                    "@keyframes fadeInUp": {
-                      "0%": { opacity: 0, transform: "translateY(20px)" },
-                      "100%": { opacity: 1, transform: "translateY(0)" },
-                    },
-                    transition: "all 0.3s ease",
-                    "&:hover": {
-                      transform: "translateY(-5px)",
-                    },
-                  }}
-                >
+            <Grid container spacing={{ xs: 2, sm: 2, md: 2 }}>
+              {relatedBlogs.map((item, index) => (
+                <Grid size={{ xs: 6, sm: 6, md: 3 }} key={item.id ?? index}>
                   <Box
+                    onClick={() => navigate(`/blog-details/${item.id}`, { state: item })}
                     sx={{
-                      borderRadius: { xs: 2, md: 3 },
-                      overflow: "hidden",
-                      height: { xs: 200, sm: 180, md: 170 },
-                      mb: 2,
-                      transition: "transform 0.3s ease",
+                      cursor: "pointer",
+                      animation: visibleSections.specialties
+                        ? `fadeInUp 0.6s ease-out ${index * 0.1}s both`
+                        : "none",
+                      "@keyframes fadeInUp": {
+                        "0%": { opacity: 0, transform: "translateY(20px)" },
+                        "100%": { opacity: 1, transform: "translateY(0)" },
+                      },
+                      transition: "all 0.3s ease",
                       "&:hover": {
-                        transform: "scale(1.05)",
+                        transform: "translateY(-5px)",
                       },
                     }}
                   >
-                    <img
-                      src={item.image}
-                      alt={item.title}
-                      style={{
-                        width: "100%",
-                        height: "100%",
-                        objectFit: "cover",
+                    <Box
+                      sx={{
+                        borderRadius: { xs: 2, md: 3 },
+                        overflow: "hidden",
+                        height: { xs: 200, sm: 180, md: 170 },
+                        mb: 2,
+                        transition: "transform 0.3s ease",
+                        "&:hover": {
+                          transform: "scale(1.05)",
+                        },
                       }}
-                    />
-                  </Box>
+                    >
+                      <img
+                        src={typeof item.image === "string" ? item.image : item.image}
+                        alt={item.title}
+                        style={{
+                          width: "100%",
+                          height: "100%",
+                          objectFit: "cover",
+                        }}
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src = "https://via.placeholder.com/400x200?text=Blog";
+                        }}
+                      />
+                    </Box>
 
-                  <CustomText
-                    sx={{
-                      fontSize: { xs: 12, sm: 13, md: 13 },
-                      color: "#666",
-                      mt: 0.5,
-                      lineHeight: 1.5,
-                    }}
-                  >
-                    {item.description}
-                  </CustomText>
-                  <CustomText
-                    sx={{
-                      fontSize: { xs: 12, sm: 13, md: 13 },
-                      color: "#666",
-                      mt: 0.5,
-                      lineHeight: 1.5,
-                    }}
-                  >
-                    {item.title}
-                  </CustomText>
-                </Box>
-              </Grid>
-            ))}
-          </Grid>
+                    <CustomText
+                      sx={{
+                        fontSize: { xs: 12, sm: 13, md: 13 },
+                        fontWeight: 600,
+                        lineHeight: 1.4,
+                        mb: 0.5,
+                      }}
+                    >
+                      {String(item.title || "").length > 50
+                        ? String(item.title).slice(0, 50) + "..."
+                        : item.title}
+                    </CustomText>
+                    <CustomText
+                      sx={{
+                        fontSize: { xs: 11, sm: 12, md: 12 },
+                        color: "#666",
+                        lineHeight: 1.5,
+                      }}
+                    >
+                      {item.date}
+                    </CustomText>
+                  </Box>
+                </Grid>
+              ))}
+            </Grid>
           </Box>
         </Box>
       </Container>
