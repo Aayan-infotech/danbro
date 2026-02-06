@@ -3,6 +3,8 @@ import { enableMapSet } from 'immer';
 import authReducer from './authSlice';
 import guestReducer from './guestSlice';
 import cartReducer from './cartSlice';
+import { loginUser } from './authSlice';
+import { clearGuestData } from './guestSlice';
 
 // Enable MapSet plugin for Immer to handle Set objects in state
 enableMapSet();
@@ -23,6 +25,13 @@ export const store = configureStore({
         // Ignore these paths in the state
         ignoredPaths: ['auth.user', 'cart.updatingItems'],
       },
+    }).concat((storeApi) => (next) => (action) => {
+      const result = next(action);
+      // After successful login, clear guest cart/wishlist so merged data lives only on server
+      if (action.type === loginUser.fulfilled.type) {
+        storeApi.dispatch(clearGuestData());
+      }
+      return result;
     }),
 });
 

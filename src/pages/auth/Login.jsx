@@ -4,6 +4,8 @@ import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import { loginUser, checkAuth } from "../../store/authSlice";
+import { store } from "../../store/store";
+import { getGuestCart, getGuestWishlist } from "../../store/guestSlice";
 import banner from "../../assets/login.png";
 import { CustomTextField } from "../../components/comman/CustomTextField";
 import { CustomButton } from "../../components/comman/CustomButton";
@@ -229,17 +231,20 @@ export const Login = () => {
       email: formData.username,
       password: formData.password,
     };
-    if (fromCartState?.cartItems?.length) {
+    // Always merge guest cart/wishlist from Redux when present (fixes: guest added to cart -> register -> login losing cart)
+    const guestCart = getGuestCart(store.getState());
+    const guestWishlist = getGuestWishlist(store.getState()) ?? [];
+    if (guestCart?.length) {
       loginPayload.cart = {
-        items: fromCartState.cartItems.map((item) => ({
-          product: item.productId || item.product,
+        items: guestCart.map((item) => ({
+          product: item.productId,
           quantity: Number(item.quantity) || 1,
         })),
-        appliedCoupon: fromCartState.appliedCoupon || undefined,
+        appliedCoupon: fromCartState?.appliedCoupon || undefined,
       };
     }
-    if (fromCartState?.wishlist?.length) {
-      loginPayload.wishlist = fromCartState.wishlist;
+    if (guestWishlist?.length) {
+      loginPayload.wishlist = guestWishlist;
     }
     const result = await dispatch(loginUser(loginPayload));
 
