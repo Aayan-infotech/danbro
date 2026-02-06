@@ -7,9 +7,6 @@ import {
   Drawer,
   IconButton,
 } from "@mui/material";
-import {
-  Menu as MenuIcon,
-} from "@mui/icons-material";
 import { useLocation } from "react-router-dom";
 import api from "../../utils/api";
 import { ProfileSidebar } from "../../components/user/ProfileSidebar";
@@ -384,6 +381,13 @@ export const UserProfile = () => {
     }
   }, [location.state]);
 
+  // TopHeader menu icon (mobile) opens this drawer via custom event
+  useEffect(() => {
+    const openDrawer = () => setMobileDrawerOpen(true);
+    window.addEventListener("openProfileMenu", openDrawer);
+    return () => window.removeEventListener("openProfileMenu", openDrawer);
+  }, []);
+
   useEffect(() => {
     if (activeTab === "coupons") {
       fetchCoupons();
@@ -461,24 +465,6 @@ export const UserProfile = () => {
               position: "relative",
             }}
           >
-            {isMobile && (
-              <IconButton
-                onClick={() => setMobileDrawerOpen(true)}
-                sx={{
-                  position: "absolute",
-                  top: 8,
-                  left: 8,
-                  backgroundColor: "#FF9472",
-                  color: "#fff",
-                  "&:hover": {
-                    backgroundColor: "#F2709C",
-                  },
-                  zIndex: 10,
-                }}
-              >
-                <MenuIcon />
-              </IconButton>
-            )}
             <Box sx={{ width: "100%" }}>
               {activeTab === "dashboard" && (
                 <DashboardTab

@@ -44,6 +44,7 @@ export const TopHeader = ({ onOpenMobileMenu }) => {
 
     // Check if on profile page to add bottom border
     const isProfilePage = location.pathname === "/profile" || location.pathname === "/user-profile";
+    const isProfileMobile = useMediaQuery(theme.breakpoints.down("md"));
 
     // Sync header search input with URL on search page; clear when on any other page
     const searchQFromUrl = searchParams.get("q") ?? "";
@@ -503,6 +504,23 @@ export const TopHeader = ({ onOpenMobileMenu }) => {
                     justifyContent: { md: "flex-end" },
                 }}
             >
+                {/* Profile page mobile: menu icon to open profile sidebar */}
+                {isProfilePage && isProfileMobile && (
+                    <IconButton
+                        size="small"
+                        onClick={() => window.dispatchEvent(new CustomEvent("openProfileMenu"))}
+                        sx={{
+                            color: "var(--themeColor)",
+                            padding: { xs: 0.5, md: 0.75 },
+                            width: { xs: 36, md: 40 },
+                            height: { xs: 36, md: 40 },
+                            "&:hover": { backgroundColor: "rgba(95,41,48,0.08)" },
+                        }}
+                        aria-label="Open profile menu"
+                    >
+                        <MenuIcon sx={{ fontSize: { xs: 22, md: 24 } }} />
+                    </IconButton>
+                )}
                 {/* Desktop: search form; Mobile: search icon opens dialog */}
                 {!isMobile && (
                     <Box
