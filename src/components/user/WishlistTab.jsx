@@ -275,7 +275,7 @@ export const WishlistTab = ({ onRemoveFromWishlist }) => {
   );
 
   return (
-    <Box sx={{ mb: 1, mt: responsivePadding, p: responsivePadding, pt: responsivePadding }}>
+    <Box sx={{ mb: 1}}>
       <CustomText variant="h4" sx={{ fontSize: { xs: 20, md: 32 }, fontWeight: 700, color: "var(--themeColor)", mb: { xs: 2, md: 2 }, }}>
         My Wishlist
       </CustomText>

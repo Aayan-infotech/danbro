@@ -13,8 +13,11 @@ import { CustomText } from "../comman/CustomText";
 import SupportAgentIcon from "@mui/icons-material/SupportAgent";
 import { createHelpTicket, getAllHelpRequests } from "../../utils/apiService";
 
-export const HelpSupportTab = () => {
-  const [orderId, setOrderId] = useState("");
+export const HelpSupportTab = ({ recentOrderRaw }) => {
+  // Get order ID from recent order if available
+  const recentOrderId = recentOrderRaw?.orderId || recentOrderRaw?._id || recentOrderRaw?.id || null;
+  
+  const [orderId, setOrderId] = useState(recentOrderId || "");
   const [subject, setSubject] = useState("");
   const [query, setQuery] = useState("");
   const [imageFiles, setImageFiles] = useState([]);
@@ -23,6 +26,13 @@ export const HelpSupportTab = () => {
   const [submitSuccess, setSubmitSuccess] = useState("");
   const [helpList, setHelpList] = useState([]);
   const [helpListLoading, setHelpListLoading] = useState(false);
+
+  // Update orderId when recentOrderRaw changes
+  useEffect(() => {
+    if (recentOrderId) {
+      setOrderId(recentOrderId);
+    }
+  }, [recentOrderId]);
 
   const fetchHelpList = async () => {
     setHelpListLoading(true);
@@ -76,7 +86,7 @@ export const HelpSupportTab = () => {
 
   return (
     <Box>
-      <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 4 }}>
+      <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 1 }}>
         <SupportAgentIcon sx={{ fontSize: { xs: 32, md: 40 }, color: "var(--themeColor)" }} />
         <CustomText
           variant="h4"
@@ -90,7 +100,7 @@ export const HelpSupportTab = () => {
         </CustomText>
       </Box>
 
-      <CustomText sx={{ fontSize: { xs: 14, md: 15 }, color: "#555", mb: 2 }}>
+      <CustomText sx={{ fontSize: { xs: 14, md: 15 }, color: "#555" }}>
         For any help related to your orders, payments, refunds, or account, please reach out to us:
       </CustomText>
 
@@ -113,9 +123,10 @@ export const HelpSupportTab = () => {
         <TextField
           fullWidth
           size="small"
-          label="Order ID (optional)"
+          label="Order ID"
           value={orderId}
           onChange={(e) => setOrderId(e.target.value)}
+          helperText={recentOrderId ? "Recent Order ID pre-filled" : "Enter Order ID (optional)"}
           sx={{ mb: 2 }}
         />
         <TextField

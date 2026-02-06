@@ -526,7 +526,7 @@ export const UserProfile = () => {
               )}
 
               {activeTab === "coupons" && (
-                <HelpSupportTab />
+                <HelpSupportTab recentOrderRaw={recentOrder} />
               )}
 
               {activeTab === "wishlist" && (

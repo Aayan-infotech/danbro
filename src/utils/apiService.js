@@ -1746,9 +1746,9 @@ export const getBlogById = async (id) => {
 };
 
 /**
- * POST /api/helpAndSupport/help – create help ticket (requires auth)
+ * POST /api/helpAndSupport/help or /api/helpAndSupport/help/order/{orderId} – create help ticket (requires auth)
  * @param {Object} params
- * @param {string} params.orderId - Order ID
+ * @param {string} params.orderId - Order ID (if provided, uses /help/order/{orderId} endpoint)
  * @param {string} params.subject - Subject
  * @param {string} params.query - Query message
  * @param {File[]} [params.images] - Optional array of image files
@@ -1759,7 +1759,6 @@ export const createHelpTicket = async ({ orderId, subject, query, images = [] })
   if (!token) throw new Error('Authentication required. Please login.');
 
   const formData = new FormData();
-  formData.append('orderId', orderId || '');
   formData.append('subject', subject || '');
   formData.append('query', query || '');
   if (Array.isArray(images) && images.length) {
@@ -1767,7 +1766,12 @@ export const createHelpTicket = async ({ orderId, subject, query, images = [] })
   }
 
   const location = getStoredLocation();
-  const response = await axios.post(`${API_BASE_URL}/helpAndSupport/help`, formData, {
+  // Use order-specific endpoint if orderId is provided
+  const endpoint = orderId && orderId.trim() 
+    ? `${API_BASE_URL}/helpAndSupport/help/order/${orderId.trim()}`
+    : `${API_BASE_URL}/helpAndSupport/help`;
+  
+  const response = await axios.post(endpoint, formData, {
     headers: {
       Authorization: `Bearer ${token}`,
       lat: location.lat.toString(),
@@ -1779,14 +1783,14 @@ export const createHelpTicket = async ({ orderId, subject, query, images = [] })
 };
 
 /**
- * GET /api/helpAndSupport/admin/help – get all help requests (requires auth)
+ * GET /api/helpAndSupport/help – get all help requests (requires auth)
  * @returns {Promise<any>}
  */
 export const getAllHelpRequests = async () => {
   const token = getAccessToken();
   if (!token) throw new Error('Authentication required. Please login.');
 
-  const response = await axios.get(`${API_BASE_URL}/helpAndSupport/admin/help`, {
+  const response = await axios.get(`${API_BASE_URL}/helpAndSupport/help`, {
     headers: {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,
