@@ -2,6 +2,7 @@ import { Box, Button, IconButton, useMediaQuery, useTheme, Avatar, Badge, Circul
 import { NearMe, ShoppingCart, Favorite, Search as SearchIcon, Menu as MenuIcon } from "@mui/icons-material";
 import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
 import { Link, useNavigate, useLocation, useSearchParams } from "react-router-dom";
+import { PrefetchLink } from "./PrefetchLink";
 import { useState, useEffect, useRef } from "react";
 import logo from "../../assets/logo.png";
 import { DeliveryCheckDialog } from "./DeliveryCheckDialog";
@@ -487,9 +488,9 @@ export const TopHeader = ({ onOpenMobileMenu }) => {
                     gap: { xs: 0.5, md: 1 },
                 }}
             >
-                <Link to="/home">
+                <PrefetchLink to="/home">
                     <Box component="img" src={logo} alt="logo" sx={{ height: isMobile ? 30 : isTablet ? 35 : 40, maxWidth: "100%", cursor: "pointer", }} />
-                </Link>
+                </PrefetchLink>
             </Box>
 
             {/* Right Icons */}
@@ -605,7 +606,7 @@ export const TopHeader = ({ onOpenMobileMenu }) => {
                 </IconButton>
 
                 {isLoggedIn && userProfile ? (
-                    <Link to="/profile" className="link-no-decoration">
+                    <PrefetchLink to="/profile" className="link-no-decoration">
                         <IconButton
                             size="small"
                             sx={{
@@ -639,7 +640,7 @@ export const TopHeader = ({ onOpenMobileMenu }) => {
                                         : "U"}
                             </Avatar>
                         </IconButton>
-                    </Link>
+                    </PrefetchLink>
                 ) : (
                     <IconButton
                         size="small"
@@ -661,7 +662,7 @@ export const TopHeader = ({ onOpenMobileMenu }) => {
                         <PersonOutlineIcon sx={{ fontSize: { xs: 22, md: 24 } }} />
                     </IconButton>
                 )}
-                <Link to="/cart">
+                <PrefetchLink to="/cart">
                     <IconButton
                         size="small"
                         disabled={cartIconLoading}
@@ -689,7 +690,7 @@ export const TopHeader = ({ onOpenMobileMenu }) => {
                             )}
                         </Badge>
                     </IconButton>
-                </Link>
+                </PrefetchLink>
             </Box>
             {/* Mobile search dialog / popup */}
             <Dialog

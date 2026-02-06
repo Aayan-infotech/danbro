@@ -17,6 +17,8 @@ import paypalLogo from "../../assets/paypal-logo.svg";
 import amexLogo from "../../assets/amex-logo.svg";
 import razorpayLogo from "../../assets/razorpay-logo.svg";
 import { Link, useNavigate } from "react-router-dom";
+import { PrefetchLink } from "./PrefetchLink";
+import { prefetchRoute } from "../../utils/routePrefetch";
 
 const FooterContainer = styled(Box)(({ theme }) => ({
   backgroundColor: "#FBEFE8",
@@ -226,7 +228,7 @@ export const Footer = () => {
                 ))}
               </Box>
             </Box>
-            <Link to="/contact" style={{ textDecoration: "none" }}>
+            <PrefetchLink to="/contact" style={{ textDecoration: "none" }}>
               <Box
                 sx={{
                   background: "#fff",
@@ -248,7 +250,7 @@ export const Footer = () => {
               >
                 Contact
               </Box>
-            </Link>
+            </PrefetchLink>
           </Box>
           <Box sx={{ mt: { xs: 6, sm: 8, md: 10, lg: 10 }, display: 'flex', flexDirection: { xs: "column", sm: "row" }, justifyContent: { xs: "flex-start", sm: "space-between", md: "space-between" }, alignItems: { xs: "flex-start", sm: "center" }, gap: { xs: 2, sm: 2, md: 2, lg: 0 }, mb: 4, px: { xs: 1, sm: 1, md: 1, lg: 0 } }}>
             <Box
@@ -371,7 +373,7 @@ export const Footer = () => {
                 OUR STORES
               </CustomText>
               {ourStories?.map((item, index) => (
-                <Link
+                <PrefetchLink
                   key={index}
                   to={item.link}
                   className="text-decoration-none"
@@ -398,7 +400,7 @@ export const Footer = () => {
                   >
                     {item.label}
                   </CustomText>
-                </Link>
+                </PrefetchLink>
               ))}
             </Grid>
             <Grid item xs={6} sm={3} md={2} lg={2}>
@@ -406,7 +408,7 @@ export const Footer = () => {
                 USEFUL LINKS
               </CustomText>
               {knowMore?.map((item, index) => (
-                <Link
+                <PrefetchLink
                   key={index}
                   to={item.link}
                   className="text-decoration-none"
@@ -433,7 +435,7 @@ export const Footer = () => {
                   >
                     {item?.label}
                   </CustomText>
-                </Link>
+                </PrefetchLink>
               ))}
             </Grid>
             <Grid item xs={6} sm={3} md={2} lg={2}>
@@ -447,7 +449,7 @@ export const Footer = () => {
                 KNOW MORE
               </CustomText>
               {knowMoreLinks?.map((item, index) => (
-                <Link
+                <PrefetchLink
                   key={index}
                   to={item?.link}
                   className="text-decoration-none"
@@ -474,7 +476,7 @@ export const Footer = () => {
                   >
                     {item?.label}
                   </CustomText>
-                </Link>
+                </PrefetchLink>
               ))}
             </Grid>
             <Grid item xs={12} sm={6} md={3} lg={3.4}>
@@ -496,6 +498,7 @@ export const Footer = () => {
                 return (
                   <Box
                     key={id ?? index}
+                    onMouseEnter={() => id && prefetchRoute(`/blog-details/${id}`)}
                     onClick={() => id && navigate(`/blog-details/${id}`)}
                     sx={{
                       display: "flex",

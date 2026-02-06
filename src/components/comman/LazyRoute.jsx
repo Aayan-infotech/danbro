@@ -2,7 +2,7 @@ import { lazy, Suspense, ComponentType } from "react";
 import { Box, CircularProgress } from "@mui/material";
 
 /**
- * Loading fallback component for lazy loaded routes
+ * Loading fallback - full height, soft so transition feels smooth
  */
 const LoadingFallback = () => (
   <Box
@@ -10,10 +10,12 @@ const LoadingFallback = () => (
       display: "flex",
       justifyContent: "center",
       alignItems: "center",
-      minHeight: "60vh",
+      minHeight: "100vh",
+      opacity: 0.96,
+      transition: "opacity 0.2s ease",
     }}
   >
-    <CircularProgress sx={{ color: "var(--themeColor)" }} />
+    <CircularProgress size={44} sx={{ color: "var(--themeColor)" }} />
   </Box>
 );
 

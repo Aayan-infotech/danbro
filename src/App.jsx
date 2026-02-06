@@ -11,6 +11,7 @@ import { TopHeader } from "./components/comman/TopHeader";
 import { DeliveryCheckDialog } from "./components/comman/DeliveryCheckDialog";
 import { SocialMediaIcons } from "./components/comman/SocialMediaIcons";
 import { getStoredLocation } from "./utils/location";
+import { prefetchRoute } from "./utils/routePrefetch";
 
 const ScrollToTop = () => {
   const { pathname } = useLocation();
@@ -28,6 +29,19 @@ const ScrollToTop = () => {
 const AppContent = () => {
   const { pathname } = useLocation();
   const [showDeliveryDialog, setShowDeliveryDialog] = useState(false);
+
+  // Preload key routes in background so navigation feels instant
+  useEffect(() => {
+    const t = setTimeout(() => {
+      prefetchRoute("/cart");
+      prefetchRoute("/products");
+      prefetchRoute("/blog");
+      prefetchRoute("/contact");
+      prefetchRoute("/about-us");
+      prefetchRoute("/offers");
+    }, 600);
+    return () => clearTimeout(t);
+  }, []);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showScrollTop, setShowScrollTop] = useState(false);
   const hasCheckedDeliveryDialog = useRef(false);
