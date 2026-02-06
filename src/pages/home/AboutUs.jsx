@@ -8,11 +8,35 @@ import { YouTubeVideosSection } from "../../components/home/YouTubeVideosSection
 import BusinessIcon from "@mui/icons-material/Business";
 import PersonIcon from "@mui/icons-material/Person";
 import founderImage from "../../assets/founderImage.jpeg";
+import { StaticContentLayout } from "../../components/comman/StaticContentLayout";
+import { useStaticContent } from "../../hooks/useStaticContent";
 
 export const AboutUs = () => {
+  const { data, loading } = useStaticContent("aboutUs");
   const [visibleSections, setVisibleSections] = useState({});
   const [active, setActive] = useState(0);
   const [founderImageError, setFounderImageError] = useState(false);
+
+  const hasDynamicContent = data?.content?.trim() || (data?.sections && data.sections.length > 0);
+  if (loading && !data) {
+    return (
+      <StaticContentLayout
+        pageTitle="About Us"
+        loading={true}
+      />
+    );
+  }
+  if (hasDynamicContent) {
+    return (
+      <StaticContentLayout
+        pageTitle={data?.title ?? "About Us"}
+        updatedAt={data?.updatedAt}
+        sections={data?.sections}
+        content={data?.content}
+        loading={false}
+      />
+    );
+  }
 
   const sectionRefs = {
     header: useRef(null),

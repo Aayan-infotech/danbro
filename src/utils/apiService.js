@@ -1607,3 +1607,21 @@ export const addReview = async (payload) => {
     );
   }
 };
+
+/**
+ * GET /api/staticContent/get/:slug – fetch static page content by slug
+ * @param {string} slug - one of: aboutUs, termsAndConditions, privacyPolicy, refundAndReturnPolicy, shippingPolicy
+ * @returns {Promise<{ title?: string, content?: string, sections?: Array<{ title: string, content: string }>, updatedAt?: string }>}
+ */
+export const getStaticContent = async (slug) => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/staticContent/get/${slug}`, {
+      timeout: 15000,
+    });
+    const data = response?.data?.data ?? response?.data ?? response;
+    return data;
+  } catch (error) {
+    console.error('Error fetching static content:', error);
+    throw error;
+  }
+};

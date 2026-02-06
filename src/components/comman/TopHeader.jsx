@@ -28,7 +28,7 @@ export const TopHeader = ({ onOpenMobileMenu }) => {
     const [searchParams] = useSearchParams();
     const [openDeliveryDialog, setOpenDeliveryDialog] = useState(false);
     const [openBusinessDialog, setOpenBusinessDialog] = useState(false);
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [isLoggedIn, setIsLoggedIn] = useState(() => !!getAccessToken());
     const [userProfile, setUserProfile] = useState(null);
     const [wishlistCount, setWishlistCount] = useState(0);
     const [cartCount, setCartCount] = useState(0);
@@ -76,18 +76,24 @@ export const TopHeader = ({ onOpenMobileMenu }) => {
         }
     }, []); // Only run once on mount
 
+    // Sync location label from localStorage (used on mount and after payment redirect / pageshow)
+    const syncLocationFromStorage = () => {
+        const storedLocation = getStoredLocation();
+        const label = storedLocation?.label?.trim() || (storedLocation?.lat != null ? "Delivery location set" : null);
+        if (label) {
+            const displayLabel = label.length > 28 ? `${label.slice(0, 28)}...` : label;
+            setLocationLabel(displayLabel);
+            setFullLocationLabel(label);
+        }
+    };
+
     // Initialize and listen for delivery location changes
     useEffect(() => {
-        // Load stored location on mount
-        const storedLocation = getStoredLocation();
-        if (storedLocation && storedLocation.label) {
-            const displayLabel =
-                storedLocation.label.length > 28
-                    ? `${storedLocation.label.slice(0, 28)}...`
-                    : storedLocation.label;
-            setLocationLabel(displayLabel);
-            setFullLocationLabel(storedLocation.label);
-        }
+        syncLocationFromStorage();
+
+        // Re-sync when page is shown (e.g. after Razorpay redirect to payment success – full page load)
+        const onPageShow = () => syncLocationFromStorage();
+        window.addEventListener("pageshow", onPageShow);
 
         // Listen for updates from DeliveryCheckDialog
         const handleLocationUpdated = (event) => {
@@ -103,6 +109,7 @@ export const TopHeader = ({ onOpenMobileMenu }) => {
         window.addEventListener("locationUpdated", handleLocationUpdated);
 
         return () => {
+            window.removeEventListener("pageshow", onPageShow);
             window.removeEventListener("locationUpdated", handleLocationUpdated);
         };
     }, []);
@@ -129,27 +136,42 @@ export const TopHeader = ({ onOpenMobileMenu }) => {
         return () => clearTimeout(timeoutId);
     }, [isLoggedIn, guestWishlist?.length]);
 
-    // Fetch cart count = number of products/line items (guest: from Redux; logged-in: API)
+    // Helper to get cart items array from API response (logged-in cart can be data, data.data, data.items, items)
+    const getCartItemsFromResponse = (cartData) => {
+        if (!cartData) return [];
+        if (Array.isArray(cartData)) return cartData;
+        if (Array.isArray(cartData.data)) return cartData.data;
+        if (Array.isArray(cartData.items)) return cartData.items;
+        if (cartData?.data && Array.isArray(cartData.data.data)) return cartData.data.data;
+        if (cartData?.data && Array.isArray(cartData.data.items)) return cartData.data.items;
+        return [];
+    };
+
+    // Fetch cart count = number of line items (guest: from Redux; logged-in: API)
     useEffect(() => {
         if (!isLoggedIn) {
             setCartCount((guestCart ?? []).length);
             return;
         }
+        let cancelled = false;
         const timeoutId = setTimeout(async () => {
             try {
                 const cartData = await getCart();
-                let items = [];
-                if (cartData && Array.isArray(cartData.data)) items = cartData.data;
-                else if (cartData?.data && Array.isArray(cartData.data)) items = cartData.data;
-                else if (cartData?.data?.data && Array.isArray(cartData.data.data)) items = cartData.data.data;
-                else if (Array.isArray(cartData)) items = cartData;
-                setCartCount(items.length);
+                if (cancelled) return;
+                const items = getCartItemsFromResponse(cartData);
+                const count = items.reduce((sum, it) => sum + (Number(it?.quantity) || 1), 0);
+                setCartCount(count);
             } catch (error) {
-                console.error("Error fetching cart count:", error);
-                setCartCount(0);
+                if (!cancelled) {
+                    console.error("Error fetching cart count:", error);
+                    setCartCount(0);
+                }
             }
         }, 300);
-        return () => clearTimeout(timeoutId);
+        return () => {
+            cancelled = true;
+            clearTimeout(timeoutId);
+        };
     }, [isLoggedIn, guestCart]);
 
     // Listen for header cart icon loading (when add to cart is in progress)
@@ -166,7 +188,7 @@ export const TopHeader = ({ onOpenMobileMenu }) => {
         return () => window.removeEventListener("headerWishlistLoading", handleWishlistLoading);
     }, []);
 
-    // Listen for cart updates (badge = number of products/line items)
+    // Listen for cart updates (badge = total item count / quantity sum)
     useEffect(() => {
         const handleCartUpdate = async (e) => {
             const explicitCount = e?.detail?.cartCount;
@@ -176,17 +198,15 @@ export const TopHeader = ({ onOpenMobileMenu }) => {
             }
             if (!getAccessToken()) {
                 const guestCartItems = store.getState().guest?.guestCart ?? [];
-                setCartCount(guestCartItems.length);
+                const guestCount = guestCartItems.reduce((s, it) => s + (Number(it?.quantity) || 1), 0);
+                setCartCount(guestCount);
                 return;
             }
             try {
                 const cartData = await getCart();
-                let items = [];
-                if (cartData && Array.isArray(cartData.data)) items = cartData.data;
-                else if (cartData?.data && Array.isArray(cartData.data)) items = cartData.data;
-                else if (cartData?.data?.data && Array.isArray(cartData.data.data)) items = cartData.data.data;
-                else if (Array.isArray(cartData)) items = cartData;
-                setCartCount(items.length);
+                const items = getCartItemsFromResponse(cartData);
+                const count = items.reduce((sum, it) => sum + (Number(it?.quantity) || 1), 0);
+                setCartCount(count);
             } catch (error) {
                 console.error("Error fetching cart count:", error);
             }

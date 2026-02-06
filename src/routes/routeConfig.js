@@ -34,6 +34,7 @@ const PaymentSuccess = createLazyComponent(() => import("../pages/home/paymentSu
 const PaymentFailure = createLazyComponent(() => import("../pages/home/paymentFailure"), "paymentFailure");
 const DanbroFreshB2B = createLazyComponent(() => import("../pages/home/DanbroFreshB2B"), "DanbroFreshB2B");
 const SearchPage = createLazyComponent(() => import("../pages/products/SearchPage"), "SearchPage");
+const ShippingPolicy = createLazyComponent(() => import("../pages/home/ShippingPolicy"), "ShippingPolicy");
 
 /**
  * Public Routes - Accessible without authentication
@@ -106,6 +107,14 @@ export const publicRoutes = [
   {
     path: "/refund-returns-policy",
     component: RefundReturnsPolicy,
+  },
+  {
+    path: "/shipping-policy",
+    component: ShippingPolicy,
+  },
+  {
+    path: "/shipping-policies",
+    component: ShippingPolicy,
   },
   {
     path: "/corporate-queries",
