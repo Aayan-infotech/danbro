@@ -395,8 +395,8 @@ export const UserProfile = () => {
   }, [activeTab]);
 
   return (
-    <Box sx={{ minHeight: "100vh", backgroundColor: "#fff", py: { xs: 3, md: 0 }, pb: { xs: 8, md: 0 }, p: { xs: 1.25, md: 0 } }}>
-      <Container sx={{ px: { xs: 2, md: 3, lg: 2 }, py: 4 }}>
+    <Box sx={{ minHeight: "100vh", backgroundColor: "#fff", py: { xs: 3, md: 0 }, pt: { xs: "55px", md: 0 }, pb: { xs: 8, md: 0 }, p: { xs: 1.25, md: 0 } }}>
+      <Container sx={{ px: { xs: 2, md: 3, lg: 2 }, py: 4, pt: { xs: "38px", md: 4 } }}>
         <Box
           sx={{
             display: "flex",
