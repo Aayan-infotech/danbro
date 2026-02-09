@@ -119,3 +119,12 @@
   margin-top: 26px;
 }
 
+/* Flipkart-style zoom preview: right-side panel, magnified area follows cursor */
+.product-details-zoom-preview {
+  isolation: isolate;
+}
+
+.product-details-zoom-preview img {
+  will-change: left, top;
+}
+

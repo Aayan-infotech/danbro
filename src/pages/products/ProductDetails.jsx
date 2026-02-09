@@ -8,6 +8,7 @@ import { addToCart, getCart } from "../../utils/cart";
 import { addToWishlist, removeFromWishlist, isInWishlist } from "../../utils/wishlist";
 import { getStoredLocation } from "../../utils/location";
 import blankImage from "../../assets/blankimage.png";
+import "./ProductDetails.css";
 import {
   ProductDetailsLoading,
   ProductDetailsError,
@@ -37,6 +38,7 @@ export const ProductDetails = () => {
   const [deliveryLocationLabel, setDeliveryLocationLabel] = useState("");
   const [hasSavedLocation, setHasSavedLocation] = useState(false);
   const [cartItems, setCartItems] = useState([]);
+  const [imageZoomActive, setImageZoomActive] = useState(false);
 
   const { categories: apiCategories } = useItemCategories();
   const { products: homeLayoutProducts } = useHomeLayout();
@@ -411,12 +413,21 @@ export const ProductDetails = () => {
           onNavigate={navigate}
         />
         <Grid container spacing={{ xs: 2, sm: 3, md: 5 }} sx={{ alignItems: "stretch", maxWidth: "100%" }}>
-          <Grid size={{ xs: 12, md: 6 }} sx={{ display: { md: "flex" }, minWidth: 0 }}>
+          <Grid
+            size={{ xs: 12, md: 6 }}
+            sx={{
+              display: { md: "flex" },
+              minWidth: 0,
+              position: "relative",
+              zIndex: imageZoomActive ? 10 : 0,
+            }}
+          >
             <ProductDetailsImageGallery
               productData={productData}
               product={product}
               selectedImage={selectedImage}
               onSelectImage={setSelectedImage}
+              onZoomActiveChange={setImageZoomActive}
             />
           </Grid>
           <Grid size={{ xs: 12, md: 6 }} sx={{ minWidth: 0 }}>

@@ -134,18 +134,14 @@ export const ProductDetailsReviews = ({ productId }) => {
 
   const cardSx = {
     p: { xs: 2, sm: 2.5 },
-    borderRadius: 2,
-    backgroundColor: "#faf8f5",
-    boxShadow: "0 1px 8px rgba(0,0,0,0.06)",
-    border: "1px solid #ebe6df",
   };
 
   return (
-    <Container maxWidth="lg" sx={{ py: { xs: 3, md: 5 }, px: { xs: 2, sm: 3, md: 4 }, maxWidth: "100%", }}>
+    <Container maxWidth="lg" sx={{ py: { xs: 1, md: 3 }, px: { xs: 2, sm: 3, md: 4 }, maxWidth: "100%", }}>
       <Typography sx={{ ...sectionTitleSx, mb: 3 }}>Ratings & Reviews</Typography>
 
       {loading ? (
-        <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>./Cursor-2.0.63-x86_64.AppImage --no-sandbox
+        <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
           <CircularProgress sx={{ color: "#8b6914" }} />
         </Box>
       ) : (
@@ -154,7 +150,6 @@ export const ProductDetailsReviews = ({ productId }) => {
           <Box sx={{ display: "flex", flexDirection: { xs: "column", sm: "row" }, gap: 3, mb: 4, }}>
             <Box
               sx={{
-                ...cardSx,
                 minWidth: { sm: 220 },
                 textAlign: "center",
                 display: "flex",

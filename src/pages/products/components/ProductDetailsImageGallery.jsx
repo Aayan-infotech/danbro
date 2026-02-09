@@ -6,6 +6,7 @@ export const ProductDetailsImageGallery = ({
   product,
   selectedImage,
   onSelectImage,
+  onZoomActiveChange,
 }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
@@ -14,7 +15,7 @@ export const ProductDetailsImageGallery = ({
   const [zoomPosition, setZoomPosition] = useState({ x: 0, y: 0 });
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
 
-  const handleMouseMove = (e) => {
+  const updatePosition = (e) => {
     if (!imageContainerRef.current || isMobile) return;
     const rect = imageContainerRef.current.getBoundingClientRect();
     const x = ((e.clientX - rect.left) / rect.width) * 100;
@@ -27,6 +28,20 @@ export const ProductDetailsImageGallery = ({
     const top = Math.max(0, Math.min(rect.height - lensSize, relY - half));
     setMousePosition({ x: left, y: top });
     setZoomPosition({ x: Math.max(0, Math.min(100, x)), y: Math.max(0, Math.min(100, y)) });
+  };
+
+  const handleMouseMove = updatePosition;
+  const handleMouseEnter = (e) => {
+    if (!isMobile) {
+      setIsZooming(true);
+      onZoomActiveChange?.(true);
+      updatePosition(e);
+    }
+  };
+
+  const handleMouseLeave = () => {
+    setIsZooming(false);
+    onZoomActiveChange?.(false);
   };
 
   return (
@@ -85,8 +100,8 @@ export const ProductDetailsImageGallery = ({
             position: "relative",
             cursor: { xs: "default", md: isZooming ? "crosshair" : "zoom-in" },
           }}
-          onMouseEnter={() => !isMobile && setIsZooming(true)}
-          onMouseLeave={() => setIsZooming(false)}
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
           onMouseMove={handleMouseMove}
         >
           <Box
@@ -134,19 +149,23 @@ export const ProductDetailsImageGallery = ({
         </Box>
         {isZooming && !isMobile && (
           <Box
+            className="product-details-zoom-preview"
             sx={{
               position: "absolute",
               top: 0,
               left: "100%",
-              ml: 1,
+              ml: 1.5,
               width: 400,
               height: 420,
+              minWidth: 400,
+              minHeight: 420,
               borderRadius: 1,
               overflow: "hidden",
-              backgroundColor: "transparent",
-              zIndex: 20,
+              backgroundColor: "#fff",
+              zIndex: 1,
               display: { xs: "none", md: "block" },
-              boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+              boxShadow: "0 4px 24px rgba(0,0,0,0.18)",
+              border: "1px solid #eee",
             }}
           >
             <Box
@@ -158,8 +177,9 @@ export const ProductDetailsImageGallery = ({
                 height: "200%",
                 objectFit: "cover",
                 position: "absolute",
-                left: `${50 - zoomPosition.x}%`,
-                top: `${50 - zoomPosition.y}%`,
+                /* Flipkart-style: point under cursor stays at center of zoom box (2x zoom) */
+                left: `${50 - 2 * zoomPosition.x}%`,
+                top: `${50 - 2 * zoomPosition.y}%`,
                 pointerEvents: "none",
               }}
             />
