@@ -9,25 +9,25 @@ const youtubeVideos = [
     id: 1,
     videoId: "33d42UTJRzo",
     title: "Danbro Bakery Story",
-    thumbnail: `https://img.youtube.com/vi/33d42UTJRzo/maxresdefault.jpg`,
+    thumbnail: `https://img.youtube.com/vi/33d42UTJRzo/hqdefault.jpg`,
   },
   {
     id: 2,
     videoId: "rYRDiLcCj4Q",
     title: "Our Bakery Products",
-    thumbnail: `https://img.youtube.com/vi/rYRDiLcCj4Q/maxresdefault.jpg`,
+    thumbnail: `https://img.youtube.com/vi/rYRDiLcCj4Q/hqdefault.jpg`,
   },
   {
     id: 3,
     videoId: "s1TvejLsfXU",
     title: "Customer Experience",
-    thumbnail: `https://img.youtube.com/vi/s1TvejLsfXU/maxresdefault.jpg`,
+    thumbnail: `https://img.youtube.com/vi/s1TvejLsfXU/hqdefault.jpg`,
   },
   {
     id: 4,
     videoId: "gjOQ8Fo4xWs",
     title: "Behind the Scenes",
-    thumbnail: `https://img.youtube.com/vi/gjOQ8Fo4xWs/maxresdefault.jpg`,
+    thumbnail: `https://img.youtube.com/vi/gjOQ8Fo4xWs/hqdefault.jpg`,
   },
 ];
 
@@ -195,6 +195,8 @@ export const YouTubeVideosSection = () => {
                           component="img"
                           src={video.thumbnail}
                           alt={video.title}
+                          loading="lazy"
+                          decoding="async"
                           onError={(e) => {
                             e.target.src = `https://img.youtube.com/vi/${video.videoId}/hqdefault.jpg`;
                           }}

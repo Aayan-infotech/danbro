@@ -1,24 +1,21 @@
-import { lazy, Suspense, ComponentType, useEffect, useRef } from "react";
-import { Box, CircularProgress } from "@mui/material";
+import { lazy, Suspense, useEffect, useRef, useMemo } from "react";
 import { useLocation } from "react-router-dom";
+import {
+  PageSkeleton,
+  HomePageSkeleton,
+  ProductListPageSkeleton,
+  ProductDetailsSkeleton,
+} from "./Skeletons";
 
 /**
- * Loading fallback - full height, soft so transition feels smooth
+ * Pick route-specific skeleton so lazy chunk loading matches page layout (feels smoother)
  */
-const LoadingFallback = () => (
-  <Box
-    sx={{
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
-      minHeight: "100vh",
-      opacity: 0.96,
-      transition: "opacity 0.2s ease",
-    }}
-  >
-    <CircularProgress size={44} sx={{ color: "var(--themeColor)" }} />
-  </Box>
-);
+const getRouteFallback = (pathname) => {
+  if (pathname === "/" || pathname === "/home") return HomePageSkeleton;
+  if (pathname === "/products") return ProductListPageSkeleton;
+  if (/^\/products\/[^/]+$/.test(pathname)) return ProductDetailsSkeleton;
+  return PageSkeleton;
+};
 
 /**
  * LazyRoute Component
@@ -29,24 +26,24 @@ const LoadingFallback = () => (
  * @param {React.ReactNode} props.fallback - Optional custom loading fallback
  * @returns {JSX.Element}
  */
-export const LazyRoute = ({ 
-  component: Component, 
-  fallback = <LoadingFallback /> 
-}) => {
+export const LazyRoute = ({ component: Component, fallback: customFallback }) => {
   const { pathname } = useLocation();
   const hasDispatchedRef = useRef(false);
+
+  const FallbackComponent = useMemo(() => getRouteFallback(pathname), [pathname]);
+  const fallback = customFallback ?? <FallbackComponent />;
 
   useEffect(() => {
     // Only dispatch appReady once, and only if not home page (home page handles it itself)
     if (!hasDispatchedRef.current && !window.__appReadyDispatched) {
       const isHomePage = pathname === "/" || pathname === "/home";
-      
+
       // For non-home pages, dispatch immediately on mount
       // Home page will dispatch when data loads
       if (!isHomePage) {
         window.__appReadyDispatched = true;
         hasDispatchedRef.current = true;
-        window.dispatchEvent(new CustomEvent('appReady'));
+        window.dispatchEvent(new CustomEvent("appReady"));
       }
     }
   }, [pathname]);

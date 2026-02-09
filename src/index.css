@@ -1,5 +1,5 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap');
- 
+/* Font loaded via <link> in index.html with font-display: swap for non-blocking load */
+
 :root {
   --themeColor: #5F2930;
   --specialColor: #c32e06;
@@ -147,7 +147,7 @@ span,
 /* Desktop/Laptop/Small laptop - keep 111px so content does not go under fixed navbar */
 @media (min-width: 1200px) {
   .css-awq9fn {
-      padding-top: 45px !important;
+      padding-top: 100px !important;
   }
 }
 
@@ -213,6 +213,12 @@ button, a, [role="button"] {
   transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
               opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1),
               background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Below-the-fold sections: browser can skip rendering until near viewport (smoother scroll) */
+.content-visibility-auto {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 400px;
 }
 
 /* Reduce motion for users who prefer it */

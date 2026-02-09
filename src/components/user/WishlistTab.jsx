@@ -6,13 +6,14 @@ import {
   CardContent, 
   Button, 
   IconButton, 
-  CircularProgress, 
   Alert, 
   Typography, 
   useTheme, 
   useMediaQuery,
   Avatar,
+  CircularProgress,
 } from "@mui/material";
+import { WishlistSkeleton } from "../comman/Skeletons";
 import { Favorite as FavoriteIcon, Visibility as VisibilityIcon } from "@mui/icons-material";
 import { CustomCarousel } from "../comman/CustomCarousel";
 import { CustomText } from "../comman/CustomText";
@@ -122,11 +123,7 @@ export const WishlistTab = ({ onRemoveFromWishlist }) => {
   }, []);
 
   if (loading) {
-    return (
-      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", py: 8, p: responsivePadding, pt: responsivePadding, mt: responsivePadding }}>
-        <CircularProgress sx={{ color: "var(--themeColor)" }} />
-      </Box>
-    );
+    return <WishlistSkeleton />;
   }
 
   if (error && wishlistItems.length === 0) {

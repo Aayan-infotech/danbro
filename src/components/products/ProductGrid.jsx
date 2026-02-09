@@ -434,6 +434,7 @@ export const ProductGrid = memo(({ products, isVisible }) => {
                   image={product?.image}
                   alt={product?.name}
                   loading="lazy"
+                  decoding="async"
                   sx={{
                     height: { xs: 160, sm: 180, md: 200 },
                     objectFit: "cover",

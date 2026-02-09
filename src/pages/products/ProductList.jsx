@@ -19,6 +19,7 @@ import Rectangle45 from "../../assets/Rectangle45.png";
 import { useItemCategories } from "../../hooks/useItemCategories";
 import { useProducts } from "../../hooks/useProducts";
 import { CategoryTabs } from "../../components/comman/CategoryTabs";
+import { ProductListPageSkeleton, ProductListSkeleton } from "../../components/comman/Skeletons";
 import { ProductGrid } from "../../components/products/ProductGrid";
 import { RecommendedProducts } from "../../components/products/RecommendedProducts";
 import { CustomButton } from "../../components/comman/CustomButton";
@@ -221,13 +222,9 @@ export const ProductList = () => {
     return () => clearTimeout(timer);
   }, [selectedCategory, debouncedSearchQuery]);
 
-  // Show full-page loader only until categories are ready – then show layout so categories appear fast
+  // Show skeleton until categories are ready so layout is stable and feels faster
   if (categoriesLoading) {
-    return (
-      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "60vh" }}>
-        <CircularProgress sx={{ color: "var(--themeColor)" }} />
-      </Box>
-    );
+    return <ProductListPageSkeleton />;
   }
 
   if (categoriesError) {
@@ -367,9 +364,7 @@ export const ProductList = () => {
         )}
         <Box ref={productRef} sx={{ px: { xs: 2, md: 3, lg: 2 } }}>
           {productsLoading && currentPage === 1 ? (
-            <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: 200, py: 4 }}>
-              <CircularProgress sx={{ color: "var(--themeColor)" }} />
-            </Box>
+            <ProductListSkeleton count={8} />
           ) : (
             <ProductGrid products={products} isVisible={isVisible} />
           )}

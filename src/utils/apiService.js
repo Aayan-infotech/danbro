@@ -840,10 +840,13 @@ export const fetchProductsByCategory = async (categoryId, page = 1, limit = 20, 
   const response = await axios.get(url, {
     headers,
     withCredentials: false,
-    timeout: 15000,
+    timeout: 30000, // 30s for slow backend; products API can be heavy
   });
   return response.data;
 };
+
+/** Product API timeout (ms) – used for fetchProducts / fetchProductsByCategory */
+const PRODUCTS_API_TIMEOUT = 30000;
 
 /**
  * Fetch products from the API (uses getProductsByCategory when categoryId is set)
@@ -881,31 +884,21 @@ export const fetchProducts = async (categoryId = null, page = 1, limit = 20, sea
     const response = await axios.get(url, {
       headers,
       withCredentials: false,
-      timeout: 15000,
+      timeout: PRODUCTS_API_TIMEOUT,
     });
 
     return response.data;
   } catch (error) {
     console.error('Error fetching products:', error);
-    
-    // Handle timeout errors specifically
-    if (error.code === 'ECONNABORTED' || error.message.includes('timeout')) {
-      throw new Error(
-        'Request timeout: The server is taking too long to respond. Please try again or check your network connection.'
-      );
-    }
-    
-    // Handle network errors
-    if (!error.response) {
-      if (error.code === 'ERR_NETWORK' || error.message.includes('Network Error')) {
-        throw new Error(
-          'Network error: Unable to connect to the API. Please check your internet connection or try again later.'
-        );
-      }
-      throw new Error(
-        'Network error: Unable to connect to the API. Please check your internet connection or try again later.'
-      );
-    }
+
+    const isTimeout = error.code === 'ECONNABORTED' || error.message?.includes('timeout');
+    const isNetwork = !error.response && (error.code === 'ERR_NETWORK' || error.message?.includes('Network Error'));
+    const timeoutMessage = 'Request timeout: The server is taking too long to respond. Please try again or check your network connection.';
+    const networkMessage = 'Network error: Unable to connect to the API. Please check your internet connection or try again later.';
+
+    if (isTimeout) throw new Error(timeoutMessage);
+    if (isNetwork) throw new Error(networkMessage);
+    if (!error.response) throw new Error(networkMessage);
 
     throw new Error(
       error.response?.data?.message ||

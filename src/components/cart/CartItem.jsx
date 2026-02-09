@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo } from "react";
 import { Link } from "react-router-dom";
 import {
   Card,
@@ -36,7 +36,7 @@ const getItemUnit = (item) => {
   return weight != null && weight !== "" ? weight : null;
 };
 
-export const CartItem = ({
+const CartItemComponent = ({
   item,
   updatingItems,
   updatingAction,
@@ -73,7 +73,7 @@ export const CartItem = ({
           sx={{ display: "flex", alignItems: "center", gap: { xs: 1, sm: 1.5 }, flex: 1, minWidth: 0, textDecoration: "none", color: "inherit", overflow: "hidden" }}
         >
           <Box sx={{ width: { xs: 52, sm: 64 }, height: { xs: 52, sm: 64 }, borderRadius: 1.5, overflow: "hidden", flexShrink: 0 }}>
-            <img src={getItemImage(item)} alt={getItemName(item)} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+            <img src={getItemImage(item)} alt={getItemName(item)} loading="lazy" decoding="async" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
           </Box>
           <Box sx={{ width: { xs: 20, sm: 24 }, height: { xs: 20, sm: 24 }, borderRadius: 0.5, bgcolor: "#0d8c2d", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
             <Box sx={{ width: { xs: 8, sm: 10 }, height: { xs: 8, sm: 10 }, borderRadius: "50%", border: "1.5px solid #fff", bgcolor: "transparent" }} />
@@ -141,7 +141,7 @@ export const CartItem = ({
           <Box component={Link} to={`/products/${productId}`} sx={{ display: "flex", flex: 1, minWidth: 0, textDecoration: "none", color: "inherit", cursor: "pointer" }}>
             <Box component="span" sx={{ display: "flex", gap: { xs: 2, md: 3 }, flex: 1, minWidth: 0, flexDirection: { xs: "column", sm: "row" }, "&:hover": { opacity: 0.9 } }}>
               <Box sx={{ width: { xs: "100%", sm: 110 }, height: { xs: 180, sm: 110 }, borderRadius: 2, overflow: "hidden", flexShrink: 0 }}>
-                <img src={getItemImage(item)} alt={getItemName(item)} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                <img src={getItemImage(item)} alt={getItemName(item)} loading="lazy" decoding="async" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
               </Box>
               <Box sx={{ flex: 1, minWidth: 0 }}>
                 <CustomText sx={{ fontSize: { xs: 16, md: 18 }, fontWeight: 600, color: "#2c2c2c", mb: 0.5 }}>
@@ -179,3 +179,5 @@ export const CartItem = ({
     </Card>
   );
 };
+
+export const CartItem = memo(CartItemComponent);

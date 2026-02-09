@@ -30,17 +30,21 @@ const AppContent = () => {
   const { pathname } = useLocation();
   const [showDeliveryDialog, setShowDeliveryDialog] = useState(false);
 
-  // Preload key routes in background so navigation feels instant
+  // Preload key routes when browser is idle so navigation feels instant
   useEffect(() => {
-    const t = setTimeout(() => {
+    const prefetchKeyRoutes = () => {
       prefetchRoute("/cart");
       prefetchRoute("/products");
       prefetchRoute("/blog");
       prefetchRoute("/contact");
       prefetchRoute("/about-us");
       prefetchRoute("/offers");
-    }, 600);
-    return () => clearTimeout(t);
+    };
+    const useIdle = typeof requestIdleCallback !== "undefined";
+    const id = useIdle
+      ? requestIdleCallback(prefetchKeyRoutes, { timeout: 1200 })
+      : setTimeout(prefetchKeyRoutes, 400);
+    return () => (useIdle ? cancelIdleCallback(id) : clearTimeout(id));
   }, []);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showScrollTop, setShowScrollTop] = useState(false);

@@ -15,6 +15,7 @@ import { Clear as ClearIcon } from "@mui/icons-material";
 import { useSearchParams } from "react-router-dom";
 import { useProducts } from "../../hooks/useProducts";
 import { ProductGrid } from "../../components/products/ProductGrid";
+import { ProductListSkeleton } from "../../components/comman/Skeletons";
 import { CustomButton } from "../../components/comman/CustomButton";
 import blankImage from "../../assets/blankimage.png";
 
@@ -248,9 +249,7 @@ export const SearchPage = () => {
             </CustomText>
           </Box>
         ) : productsLoading && currentPage === 1 ? (
-          <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "40vh" }}>
-            <CircularProgress sx={{ color: "var(--themeColor)" }} />
-          </Box>
+          <ProductListSkeleton count={8} />
         ) : (
           <>
             <Box sx={{ px: { xs: 2, md: 3, lg: 2 } }}>

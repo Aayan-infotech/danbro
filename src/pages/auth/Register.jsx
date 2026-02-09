@@ -16,6 +16,7 @@ import {
   isValidMobile,
   isValidName,
 } from "../../utils/validateRegisterField";
+import { loadRecaptchaScript } from "../../utils/loadRecaptcha";
 
 const RECAPTCHA_SITE_KEY = "6Lfr-iAsAAAAAIQsR8mfUxZO1qK3r_AXrTSLSb4g";
 
@@ -85,22 +86,9 @@ export const Register = () => {
     };
   }, []);
 
-  // Check if reCAPTCHA is loaded
+  // Load reCAPTCHA script only on Register page (keeps home page lighter)
   useEffect(() => {
-    const checkRecaptcha = () => {
-      if (window.grecaptcha && window.grecaptcha.enterprise) {
-        console.log("reCAPTCHA Enterprise is loaded");
-      } else {
-        console.warn("reCAPTCHA Enterprise is not loaded yet");
-      }
-    };
-
-    // Check immediately
-    checkRecaptcha();
-
-    // Also check after a short delay in case script is still loading
-    const timeout = setTimeout(checkRecaptcha, 1000);
-    return () => clearTimeout(timeout);
+    loadRecaptchaScript().catch(() => {});
   }, []);
 
   const handleChange = (e) => {

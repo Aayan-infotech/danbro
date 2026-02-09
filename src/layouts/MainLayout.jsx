@@ -1,4 +1,5 @@
-import { Container, Box, CircularProgress, Typography } from "@mui/material";
+import { Container, Box, Typography } from "@mui/material";
+import { HomePageSkeleton } from "../components/comman/Skeletons";
 import { CategoryCarousel } from "../components/home/CategoryCarousel";
 import { HeroBanner } from "../components/home/HeroBanner";
 import { AboutBakerySection } from "../components/home/AboutBakerySection";
@@ -59,16 +60,9 @@ const Home = () => {
     return [...namkeen, ...namkeenShyam];
   }, [productsData]);
 
-  // Show loading screen while all data is being fetched
+  // Show skeleton so layout is stable and perceived load is faster
   if (loading) {
-    return (
-      <Box sx={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", minHeight: "100vh", gap: 2, }}>
-        <CircularProgress size={60} sx={{ color: "var(--themeColor)", }} />
-        <Typography sx={{ fontSize: { xs: 16, md: 18 }, color: "var(--themeColor)", fontWeight: 600, }}>
-          Loading delicious products...
-        </Typography>
-      </Box>
-    );
+    return <HomePageSkeleton />;
   }
 
   // Show error state if data loading failed
@@ -95,7 +89,7 @@ const Home = () => {
       <Container maxWidth={false} sx={{ px: { xs: 2, md: 3 }, py: { xs: 4, md: 6 }, position: "relative", zIndex: 1 }}>
         {/* Category Carousel */}
         <CategoryCarousel categories={categories} />
-        
+
         {/* Cakes - Merged Section (Birthday Cakes + Beautiful Cakes) */}
         <CategoryProductSection
           categoryGroupname="CAKES"
@@ -107,6 +101,8 @@ const Home = () => {
           preloadedProducts={cakesProducts.slice(0, 20)}
         />
         
+        {/* Below-the-fold sections: browser can defer work for smoother scroll */}
+        <Box component="div" className="content-visibility-auto">
         {/* Hunger Bites - From API */}
         <CategoryProductSection
           categoryGroupname="FAST FOOD"
@@ -235,6 +231,7 @@ const Home = () => {
         
         {/* Testimonials / Reviews */}
         <TestimonialsCarousel />
+        </Box>
       </Container>
       
       {/* Newsletter Signup */}

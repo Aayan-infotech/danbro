@@ -12,6 +12,7 @@ import {
 } from "@mui/material";
 import { Add as AddIcon, Edit as EditIcon, Delete as DeleteIcon } from "@mui/icons-material";
 import { CustomText } from "../comman/CustomText";
+import { AddressesListSkeleton } from "../comman/Skeletons";
 import { ProfileTable } from "./ProfileTable";
 import { getMyAddresses, deleteAddress } from "../../utils/apiService";
 import { AddressFormDialog } from "./AddressFormDialog";
@@ -99,11 +100,7 @@ export const SavedAddressesTab = () => {
   };
 
   if (loading) {
-    return (
-      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", py: 8 }}>
-        <CircularProgress sx={{ color: "var(--themeColor)" }} />
-      </Box>
-    );
+    return <AddressesListSkeleton count={3} />;
   }
 
   return (

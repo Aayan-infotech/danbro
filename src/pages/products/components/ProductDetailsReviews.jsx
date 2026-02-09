@@ -6,8 +6,8 @@ import {
   Button,
   TextField,
   Typography,
-  CircularProgress,
 } from "@mui/material";
+import { ReviewsListSkeleton } from "../../../components/comman/Skeletons";
 import StarIcon from "@mui/icons-material/Star";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ThumbUpOutlinedIcon from "@mui/icons-material/ThumbUpOutlined";
@@ -141,9 +141,7 @@ export const ProductDetailsReviews = ({ productId }) => {
       <Typography sx={{ ...sectionTitleSx, mb: 3 }}>Ratings & Reviews</Typography>
 
       {loading ? (
-        <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
-          <CircularProgress sx={{ color: "#8b6914" }} />
-        </Box>
+        <ReviewsListSkeleton count={4} />
       ) : (
         <>
           {/* Summary: average + distribution */}

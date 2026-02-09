@@ -1,4 +1,4 @@
-import { Box, Avatar, List, ListItem, ListItemButton, ListItemIcon, ListItemText } from "@mui/material";
+import { Box, Avatar, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Skeleton } from "@mui/material";
 import {
   Dashboard as DashboardIcon,
   History as HistoryIcon,
@@ -77,19 +77,28 @@ export const ProfileSidebar = ({
     >
       {/* Profile Section */}
       <Box sx={{ display: "flex", justifyContent: "start", alignItems: "center", gap: 2, px: 2 }}>
-        <Avatar
-          sx={{ width: { xs: 40, md: 50 }, height: { xs: 40, md: 50 }, bgcolor: "var(--themeColor)", fontSize: { xs: 20, md: 24 }, fontWeight: 600, }}
-          src={userProfile?.avatar || userProfile?.profilePicture}
-        >
-          {userProfile?.name
-            ? userProfile.name.charAt(0).toUpperCase()
-            : userProfile?.email
-              ? userProfile.email.charAt(0).toUpperCase()
-              : "U"}
-        </Avatar>
-        <CustomText variant="h6" sx={{ fontWeight: 'bold', color: "#2c2c2c", fontSize: { xs: 16, md: 20 } }}>
-          {profileLoading ? "Loading..." : (userProfile?.name || (accountData.firstName + " " + accountData.lastName).trim() || "User")}
-        </CustomText>
+        {profileLoading ? (
+          <>
+            <Skeleton variant="circular" width={50} height={50} sx={{ bgcolor: "grey.200" }} />
+            <Skeleton width={120} height={24} sx={{ bgcolor: "grey.200" }} />
+          </>
+        ) : (
+          <>
+            <Avatar
+              sx={{ width: { xs: 40, md: 50 }, height: { xs: 40, md: 50 }, bgcolor: "var(--themeColor)", fontSize: { xs: 20, md: 24 }, fontWeight: 600, }}
+              src={userProfile?.avatar || userProfile?.profilePicture}
+            >
+              {userProfile?.name
+                ? userProfile.name.charAt(0).toUpperCase()
+                : userProfile?.email
+                  ? userProfile.email.charAt(0).toUpperCase()
+                  : "U"}
+            </Avatar>
+            <CustomText variant="h6" sx={{ fontWeight: 'bold', color: "#2c2c2c", fontSize: { xs: 16, md: 20 } }}>
+              {userProfile?.name || (accountData.firstName + " " + accountData.lastName).trim() || "User"}
+            </CustomText>
+          </>
+        )}
       </Box>
 
       {/* Menu Items */}

@@ -8,6 +8,7 @@ import { useState, useEffect, useRef, useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useHomeLayout } from "../../hooks/useHomeLayout";
 import { NavbarDropdown } from "./NavbarDropdown";
+import { prefetchRoute } from "../../utils/routePrefetch";
 
 export const Navbar = ({ mobileMenuOpen, onMobileMenuClose }) => {
     const theme = useTheme();
@@ -162,6 +163,7 @@ export const Navbar = ({ mobileMenuOpen, onMobileMenuClose }) => {
                                     position: "relative",
                                 }}
                                 onMouseEnter={(e) => {
+                                    prefetchRoute(path);
                                     if (showDropdown) {
                                         e.preventDefault();
                                         e.stopPropagation();

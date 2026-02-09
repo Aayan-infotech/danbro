@@ -5,13 +5,29 @@ import react from '@vitejs/plugin-react-swc'
 export default defineConfig({
   plugins: [react()],
   build: {
-    // Increase chunk size warning limit
     chunkSizeWarningLimit: 1000,
-    // Enable source maps only in development
     sourcemap: false,
-    // Use default esbuild minifier (no external terser dependency)
     target: 'es2015',
     cssCodeSplit: true,
+    rollupOptions: {
+      output: {
+        manualChunks: (id) => {
+          if (id.includes('node_modules')) {
+            if (id.includes('react-dom') || id.includes('react/')) return 'react-vendor';
+            if (id.includes('@mui/material') || id.includes('@emotion')) return 'mui-vendor';
+            if (id.includes('@mui/icons-material')) return 'mui-icons';
+            if (id.includes('react-router')) return 'router';
+            if (id.includes('@reduxjs/toolkit') || id.includes('redux')) return 'redux-vendor';
+            if (id.includes('axios')) return 'axios';
+            if (id.includes('slick-carousel') || id.includes('react-slick')) return 'slick';
+            return 'vendor';
+          }
+        },
+        chunkFileNames: 'assets/[name]-[hash].js',
+        entryFileNames: 'assets/[name]-[hash].js',
+        assetFileNames: 'assets/[name]-[hash][extname]',
+      },
+    },
   },
   // Optimize dependencies
   optimizeDeps: {

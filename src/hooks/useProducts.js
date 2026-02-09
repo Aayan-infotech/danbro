@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { fetchProducts, fetchProductSearch } from '../utils/apiService';
 
 /**
@@ -11,7 +11,7 @@ import { fetchProducts, fetchProductSearch } from '../utils/apiService';
  * @param {string} search - Search query (default: ''); when set, uses search API
  * @param {number|null} minPrice - Min price for search (optional)
  * @param {number|null} maxPrice - Max price for search (optional)
- * @returns {Object} products, loading, error, pagination
+ * @returns {Object} products, loading, error, pagination, refetch
  */
 export const useProducts = (categoryId = null, page = 1, limit = 20, search = '', minPrice = null, maxPrice = null) => {
   const [products, setProducts] = useState([]);
@@ -29,8 +29,7 @@ export const useProducts = (categoryId = null, page = 1, limit = 20, search = ''
   const hasPriceFilter = minPrice != null || maxPrice != null;
   const useSearchApi = hasSearchText || hasPriceFilter;
 
-  useEffect(() => {
-    const loadProducts = async () => {
+  const loadProducts = useCallback(async () => {
       try {
         setLoading(true);
         setError(null);
@@ -143,11 +142,14 @@ export const useProducts = (categoryId = null, page = 1, limit = 20, search = ''
       } finally {
         setLoading(false);
       }
-    };
+    },
+    [categoryId, page, limit, search, minPrice, maxPrice, useSearchApi]
+  );
 
+  useEffect(() => {
     loadProducts();
-  }, [categoryId, page, limit, search, minPrice, maxPrice]);
+  }, [loadProducts]);
 
-  return { products, loading, error, pagination };
+  return { products, loading, error, pagination, refetch: loadProducts };
 };
 

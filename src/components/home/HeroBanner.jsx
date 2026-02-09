@@ -24,6 +24,18 @@ export const HeroBanner = () => {
     return () => clearInterval(interval);
   }, []);
 
+  // Preload LCP image (first slide) so it appears faster
+  useEffect(() => {
+    const firstImg = bannerSlides?.[0]?.img;
+    if (!firstImg || typeof document === "undefined") return;
+    const link = document.createElement("link");
+    link.rel = "preload";
+    link.as = "image";
+    link.href = firstImg;
+    document.head.appendChild(link);
+    return () => link.remove();
+  }, []);
+
   return (
     <>
       <div className="container">

@@ -1,7 +1,3 @@
-import { Box, CircularProgress } from "@mui/material";
+import { ProductDetailsSkeleton } from "../../../components/comman/Skeletons";
 
-export const ProductDetailsLoading = () => (
-  <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "60vh" }}>
-    <CircularProgress sx={{ color: "var(--themeColor)" }} />
-  </Box>
-);
+export const ProductDetailsLoading = () => <ProductDetailsSkeleton />;

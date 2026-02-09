@@ -1,4 +1,5 @@
-import { Box, Container, Grid, FormControl, Select, MenuItem, CircularProgress, Avatar } from "@mui/material";
+import { Box, Container, Grid, FormControl, Select, MenuItem, Avatar } from "@mui/material";
+import { ReviewsListSkeleton } from "../../components/comman/Skeletons";
 import { CustomText } from "../../components/comman/CustomText";
 import { useState, useEffect, useMemo } from "react";
 import StarIcon from "@mui/icons-material/Star";
@@ -75,10 +76,7 @@ export const AllReviews = () => {
           </CustomText>
 
           {loading ? (
-            <Box sx={{ display: "flex", alignItems: "center", gap: 2, py: 4 }}>
-              <CircularProgress size={28} sx={{ color: "var(--themeColor)" }} />
-              <CustomText sx={{ color: "#666" }}>Loading reviews...</CustomText>
-            </Box>
+            <ReviewsListSkeleton count={6} />
           ) : (
             <>
               {/* Overall rating summary */}

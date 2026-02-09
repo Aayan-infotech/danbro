@@ -13,6 +13,7 @@ import { CustomText } from "../../components/comman/CustomText";
 import { getAccessToken } from "../../utils/cookies";
 import api from "../../utils/api";
 import { invalidateHomeLayoutFetch } from "../../utils/apiService";
+import { loadRecaptchaScript } from "../../utils/loadRecaptcha";
 
 const RECAPTCHA_SITE_KEY = "6LfBFCwsAAAAAIiTPg_1ZGCaKId4TwkCDcvBNBq0";
 
@@ -98,37 +99,15 @@ export const Login = () => {
     };
   }, []);
 
-  // Check if reCAPTCHA Enterprise script is loaded
+  // Load reCAPTCHA script only on Login page (not on home) for faster initial load
   useEffect(() => {
-    const checkRecaptcha = () => {
-      if (window.grecaptcha && window.grecaptcha.enterprise) {
-        setRecaptchaLoaded(true);
-        console.log("reCAPTCHA Enterprise is loaded");
-      } else {
-        console.warn("reCAPTCHA Enterprise script is still loading...");
-      }
-    };
-
-    // Check immediately
-    checkRecaptcha();
-
-    // Also check after a delay in case script is still loading
-    const interval = setInterval(() => {
-      if (window.grecaptcha && window.grecaptcha.enterprise) {
-        setRecaptchaLoaded(true);
-        clearInterval(interval);
-      }
-    }, 100);
-
-    const timeout = setTimeout(() => {
-      clearInterval(interval);
-      checkRecaptcha();
-    }, 5000);
-
-    return () => {
-      clearInterval(interval);
-      clearTimeout(timeout);
-    };
+    if (SKIP_RECAPTCHA) {
+      setRecaptchaLoaded(true);
+      return;
+    }
+    loadRecaptchaScript()
+      .then(() => setRecaptchaLoaded(true))
+      .catch(() => setRecaptchaError("Could not load security check. Please refresh."));
   }, []);
 
   // Render reCAPTCHA Enterprise checkbox widget
