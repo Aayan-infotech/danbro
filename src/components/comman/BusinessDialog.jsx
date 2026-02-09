@@ -4,7 +4,17 @@ import CloseIcon from "@mui/icons-material/Close";
 import CampaignIcon from "@mui/icons-material/Campaign";
 import { Link } from "react-router-dom";
 
-const businessCards = [
+
+export const BusinessDialog = ({ open, onClose }) => {
+  const handleClickHere = () => {
+    onClose();
+  };
+
+  const handleInquireNow = () => {
+    onClose();
+  };
+
+  const businessCards = [
   {
     title: "Something About Us",
     description:
@@ -22,15 +32,6 @@ const businessCards = [
     onClick: handleInquireNow,
   },
 ];
-
-export const BusinessDialog = ({ open, onClose }) => {
-  const handleClickHere = () => {
-    onClose();
-  };
-
-  const handleInquireNow = () => {
-    onClose();
-  };
 
   return (
     <Dialog

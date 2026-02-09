@@ -251,19 +251,19 @@ export const WishlistTab = ({ onRemoveFromWishlist }) => {
               }
             }}
             sx={{
-              backgroundColor: "#FFB5A1",
-              color: "#000",
+              bgcolor: "var(--themeColor)",
+              color: "#fff",
               textTransform: "none",
               borderRadius: 2,
               fontWeight: 600,
               fontSize: { xs: 13, md: 14 },
               py: 1,
-              boxShadow: "0 2px 8px rgba(255,181,161,0.25)",
-              transition: "all 0.3s ease",
+              boxShadow: "0 2px 8px rgba(95, 41, 48, 0.25)",
+              transition: "all 0.2s ease",
               "&:hover": {
-                backgroundColor: "#F2709C",
+                bgcolor: "var(--specialColor)",
                 transform: "translateY(-2px)",
-                boxShadow: "0 4px 12px rgba(242,112,156,0.35)",
+                boxShadow: "0 4px 12px rgba(95, 41, 48, 0.3)",
               },
             }}
           >

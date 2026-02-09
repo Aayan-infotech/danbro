@@ -205,7 +205,7 @@ export const AddressFormDialog = ({ open, onClose, address = null, onSuccess }) 
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth disableScrollLock>
       <DialogTitle>
         <CustomText sx={{ fontSize: { xs: 20, md: 24 }, fontWeight: 700, color: "var(--themeColor)" }}>
           {address ? "Edit Address" : "Add New Address"}

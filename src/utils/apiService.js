@@ -1746,9 +1746,9 @@ export const getBlogById = async (id) => {
 };
 
 /**
- * POST /api/helpAndSupport/help or /api/helpAndSupport/help/order/{orderId} – create help ticket (requires auth)
+ * POST /api/helpAndSupport/help – create help ticket (requires auth)
  * @param {Object} params
- * @param {string} params.orderId - Order ID (if provided, uses /help/order/{orderId} endpoint)
+ * @param {string} [params.orderId] - Order ID (optional, sent as form field)
  * @param {string} params.subject - Subject
  * @param {string} params.query - Query message
  * @param {File[]} [params.images] - Optional array of image files
@@ -1761,16 +1761,16 @@ export const createHelpTicket = async ({ orderId, subject, query, images = [] })
   const formData = new FormData();
   formData.append('subject', subject || '');
   formData.append('query', query || '');
+  if (orderId && String(orderId).trim()) {
+    formData.append('orderId', String(orderId).trim());
+  }
   if (Array.isArray(images) && images.length) {
     images.forEach((file) => formData.append('images', file));
   }
 
   const location = getStoredLocation();
-  // Use order-specific endpoint if orderId is provided
-  const endpoint = orderId && orderId.trim() 
-    ? `${API_BASE_URL}/helpAndSupport/help/order/${orderId.trim()}`
-    : `${API_BASE_URL}/helpAndSupport/help`;
-  
+  const endpoint = `${API_BASE_URL}/helpAndSupport/help`;
+
   const response = await axios.post(endpoint, formData, {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -1784,7 +1784,7 @@ export const createHelpTicket = async ({ orderId, subject, query, images = [] })
 
 /**
  * GET /api/helpAndSupport/help – get all help requests (requires auth)
- * @returns {Promise<any>}
+ * @returns {Promise<any[]>}
  */
 export const getAllHelpRequests = async () => {
   const token = getAccessToken();
@@ -1799,4 +1799,30 @@ export const getAllHelpRequests = async () => {
   });
   const data = response?.data?.data ?? response?.data ?? response;
   return Array.isArray(data) ? data : [];
+};
+
+/**
+ * GET /api/helpAndSupport/help/order/:orderId – get help requests for a specific order (requires auth)
+ * @param {string} orderId - Order ID
+ * @returns {Promise<any[]>}
+ */
+export const getHelpRequestsByOrderId = async (orderId) => {
+  const token = getAccessToken();
+  if (!token) throw new Error('Authentication required. Please login.');
+  if (!orderId || !String(orderId).trim()) return [];
+
+  const response = await axios.get(
+    `${API_BASE_URL}/helpAndSupport/help/order/${String(orderId).trim()}`,
+    {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      timeout: 15000,
+    }
+  );
+  const data = response?.data?.data ?? response?.data ?? response;
+  if (Array.isArray(data)) return data;
+  if (data && typeof data === 'object' && !Array.isArray(data)) return [data];
+  return [];
 };

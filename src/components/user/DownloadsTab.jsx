@@ -47,14 +47,18 @@ export const DownloadsTab = ({ downloads }) => {
                     startIcon={<DownloadIcon />}
                     variant="contained"
                     sx={{
-                      backgroundColor: "#FFB5A1",
-                      color: "black",
+                      bgcolor: "var(--themeColor)",
+                      color: "#fff",
                       textTransform: "none",
                       borderRadius: 2,
                       fontWeight: 600,
-                      px: 3,
+                      px: 2.5,
+                      py: 1,
+                      boxShadow: "0 2px 8px rgba(95, 41, 48, 0.25)",
+                      transition: "all 0.2s ease",
                       "&:hover": {
-                        backgroundColor: "#F2709C",
+                        bgcolor: "var(--specialColor)",
+                        boxShadow: "0 4px 12px rgba(95, 41, 48, 0.3)",
                       },
                     }}
                   >

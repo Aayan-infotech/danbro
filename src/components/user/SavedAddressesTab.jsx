@@ -1,5 +1,22 @@
 import { useState, useEffect } from "react";
-import { Box, Grid, Card, CardContent, Button, Alert, CircularProgress, Dialog, DialogTitle, DialogContent, DialogActions } from "@mui/material";
+import {
+  Box,
+  Button,
+  Alert,
+  CircularProgress,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  IconButton,
+} from "@mui/material";
 import { Add as AddIcon, Edit as EditIcon, Delete as DeleteIcon } from "@mui/icons-material";
 import { CustomText } from "../comman/CustomText";
 import { getMyAddresses, deleteAddress } from "../../utils/apiService";
@@ -113,14 +130,18 @@ export const SavedAddressesTab = () => {
           variant="contained"
           onClick={handleAddNew}
           sx={{
-            backgroundColor: "#FFB5A1",
-            color: "black",
+            bgcolor: "var(--themeColor)",
+            color: "#fff",
             textTransform: "none",
             borderRadius: 2,
             fontWeight: 600,
-            px: 3,
+            px: 2.5,
+            py: 1,
+            boxShadow: "0 2px 8px rgba(95, 41, 48, 0.25)",
+            transition: "all 0.2s ease",
             "&:hover": {
-              backgroundColor: "#F2709C",
+              bgcolor: "var(--specialColor)",
+              boxShadow: "0 4px 12px rgba(95, 41, 48, 0.3)",
             },
           }}
         >
@@ -153,11 +174,18 @@ export const SavedAddressesTab = () => {
             startIcon={<AddIcon />}
             onClick={handleAddNew}
             sx={{
-              backgroundColor: "var(--themeColor)",
+              bgcolor: "var(--themeColor)",
               color: "#fff",
               textTransform: "none",
+              fontWeight: 600,
+              px: 2.5,
+              py: 1,
+              borderRadius: 2,
+              boxShadow: "0 2px 8px rgba(95, 41, 48, 0.25)",
+              transition: "all 0.2s ease",
               "&:hover": {
-                backgroundColor: "var(--specialColor)",
+                bgcolor: "var(--specialColor)",
+                boxShadow: "0 4px 12px rgba(95, 41, 48, 0.3)",
               },
             }}
           >
@@ -165,97 +193,96 @@ export const SavedAddressesTab = () => {
           </Button>
         </Box>
       ) : (
-      <Grid container spacing={{ xs: 2, md: 3 }}>
-          {addresses.map((address) => {
-            const addressId = address._id || address.id;
-            const isDeleting = deletingId === addressId;
-
-            return (
-              <Grid size={{ xs: 12, md: 6 }} key={addressId}>
-            <Card
-              sx={{
-                borderRadius: 3,
-                boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
-                    border: address.isDefault ? "2px solid var(--themeColor)" : "1px solid #ddd",
-                transition: "all 0.3s ease",
-                "&:hover": {
-                  transform: "translateY(-3px)",
-                  boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
-                },
-              }}
-            >
-              <CardContent sx={{ p: { xs: 2, md: 3 } }}>
-                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 2 }}>
-                      <Box sx={{ flex: 1 }}>
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
-                      <CustomText variant="h6" sx={{ fontWeight: 700, color: "var(--themeColor)" }}>
-                            {address.addressType || "Address"}
-                      </CustomText>
-                      {address.isDefault && (
+        <TableContainer
+          component={Paper}
+          sx={{
+            borderRadius: 2,
+            boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
+            border: "1px solid #eee",
+            overflow: "auto",
+          }}
+        >
+          <Table size="small" sx={{ minWidth: { xs: 600, md: 720 } }}>
+            <TableHead>
+              <TableRow sx={{ backgroundColor: "#FFF8F2" }}>
+                <TableCell sx={{ fontWeight: 700, color: "var(--themeColor)" }}>Type</TableCell>
+                <TableCell sx={{ fontWeight: 700, color: "var(--themeColor)" }}>Address</TableCell>
+                <TableCell sx={{ fontWeight: 700, color: "var(--themeColor)", width: 100 }}>Default</TableCell>
+                <TableCell sx={{ fontWeight: 700, color: "var(--themeColor)", width: 120 }} align="right">
+                  Actions
+                </TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {addresses.map((address) => {
+                const addressId = address._id || address.id;
+                const isDeleting = deletingId === addressId;
+                return (
+                  <TableRow
+                    key={addressId}
+                    sx={{
+                      "&:hover": { backgroundColor: "rgba(255, 181, 161, 0.06)" },
+                      borderLeft: address.isDefault ? "3px solid var(--themeColor)" : "3px solid transparent",
+                    }}
+                  >
+                    <TableCell sx={{ fontWeight: 600, color: "#333" }}>
+                      {address.addressType || "Address"}
+                    </TableCell>
+                    <TableCell sx={{ color: "#666", lineHeight: 1.5 }}>
+                      {formatAddress(address)}
+                    </TableCell>
+                    <TableCell>
+                      {address.isDefault ? (
                         <Box
+                          component="span"
                           sx={{
                             px: 1.5,
-                            py: 0.3,
+                            py: 0.5,
                             borderRadius: 1,
                             backgroundColor: "#FFB5A1",
                             color: "#000",
-                            fontSize: 11,
+                            fontSize: 12,
                             fontWeight: 600,
                           }}
                         >
                           Default
                         </Box>
+                      ) : (
+                        "—"
                       )}
-                    </Box>
-                        <CustomText variant="body2" sx={{ color: "#666", lineHeight: 1.6, mb: 1 }}>
-                          {formatAddress(address)}
-                    </CustomText>
-                  </Box>
-                </Box>
-                <Box sx={{ display: "flex", gap: 1, mt: 2 }}>
-                  <Button
-                    startIcon={<EditIcon />}
-                    variant="outlined"
+                    </TableCell>
+                    <TableCell align="right">
+                      <IconButton
+                        size="small"
                         onClick={() => handleEdit(address)}
                         disabled={isDeleting}
-                    sx={{
-                      borderColor: "var(--themeColor)",
-                      color: "var(--themeColor)",
-                      textTransform: "none",
-                      borderRadius: 2,
-                      "&:hover": {
-                        borderColor: "var(--themeColor)",
-                        backgroundColor: "#fbeeee",
-                      },
-                    }}
-                  >
-                    Edit
-                  </Button>
-                  <Button
-                    startIcon={<DeleteIcon />}
-                    variant="outlined"
+                        sx={{
+                          color: "var(--themeColor)",
+                          "&:hover": { backgroundColor: "rgba(255, 148, 114, 0.12)" },
+                        }}
+                        aria-label="Edit"
+                      >
+                        <EditIcon fontSize="small" />
+                      </IconButton>
+                      <IconButton
+                        size="small"
                         onClick={() => handleDeleteClick(address)}
                         disabled={isDeleting}
-                    sx={{
-                      borderColor: "#f44336",
-                      color: "#f44336",
-                      textTransform: "none",
-                      borderRadius: 2,
-                      "&:hover": {
-                        borderColor: "#f44336",
-                        backgroundColor: "#ffebee",
-                      },
-                    }}
-                  >
-                        {isDeleting ? "Deleting..." : "Delete"}
-                  </Button>
-                </Box>
-              </CardContent>
-            </Card>
-          </Grid>
-            );
-          })}
-      </Grid>
+                        sx={{
+                          color: "#f44336",
+                          "&:hover": { backgroundColor: "rgba(244, 67, 54, 0.08)" },
+                        }}
+                        aria-label="Delete"
+                      >
+                        <DeleteIcon fontSize="small" />
+                      </IconButton>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </TableContainer>
       )}
 
       {/* Add/Edit Dialog */}

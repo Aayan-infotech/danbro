@@ -94,9 +94,9 @@ export const UserProfile = () => {
     fetchUserProfile();
   }, []);
 
-  // Fetch recent order for dashboard (single latest order)
+  // Fetch recent order for dashboard and Help & Support (single latest order)
   useEffect(() => {
-    if (activeTab !== "dashboard") return;
+    if (activeTab !== "dashboard" && activeTab !== "coupons") return;
     const fetchRecentOrder = async () => {
       setRecentOrderLoading(true);
       try {

@@ -305,6 +305,7 @@ export const NavbarDropdown = ({ category, categoryId, isOpen, onClose, anchorEl
       }}
     >
       <Box
+        data-navbar-dropdown
         sx={{
           py: { xs: 1.5, md: 2 },
           px: { xs: 2, sm: 2.5, md: 3 },

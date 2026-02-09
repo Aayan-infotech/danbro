@@ -405,10 +405,19 @@ export const OrderHistoryTab = ({
                     size="small"
                     sx={{
                       textTransform: "none",
-                      backgroundColor: "var(--themeColor)",
+                      bgcolor: "var(--themeColor)",
                       color: "#fff",
+                      fontWeight: 600,
                       width: "fit-content",
-                      "&:hover": { backgroundColor: "var(--specialColor)" },
+                      px: 2,
+                      py: 1,
+                      borderRadius: 2,
+                      boxShadow: "0 2px 8px rgba(95, 41, 48, 0.25)",
+                      transition: "all 0.2s ease",
+                      "&:hover": {
+                        bgcolor: "var(--specialColor)",
+                        boxShadow: "0 4px 12px rgba(95, 41, 48, 0.3)",
+                      },
                     }}
                   >
                     Download receipt (PDF)

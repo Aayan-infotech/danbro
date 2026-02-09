@@ -58,60 +58,27 @@ export const DashboardTab = ({ favoriteItems, setActiveTab, isMobile, userProfil
 
   return (
     <>
-      <Box sx={{ mb: 2 }}>
-        <CustomText
-          variant="h3"
-          sx={{
-            fontSize: { xs: 18, md: 26 },
-            fontWeight: 700,
-            color: "var(--themeColor)",
-            mb: 1,
-            mt: { xs: isMobile ? 0 : 0, md: 0 },
-          }}
-        >
+      <Box sx={{ mb: 1 }}>
+        <CustomText variant="h3" sx={{ fontSize: { xs: 18, md: 26 }, fontWeight: 700, color: "var(--themeColor)", mb: 1, mt: { xs: isMobile ? 0 : 0, md: 0 }, }}>
           Welcome back, {getUserName()}.
         </CustomText>
-        <CustomText
-          variant="body1"
-          sx={{
-            fontSize: { xs: 14, md: 16 },
-            color: "#333",
-          }}
-        >
+        <CustomText variant="body1" sx={{ fontSize: { xs: 14, md: 16 }, color: "#333", }}>
           Here's a quick look at your recent activity and rewards.
         </CustomText>
         <CustomText variant="body2" sx={{ fontSize: { xs: 13, md: 14 }, color: "#333", lineHeight: 1.8, }}>
           From your account dashboard you can view your{" "}
-          <Box
-            component="span"
-            onClick={() => setActiveTab("order-history")}
-            sx={{
-              color: "#FF9472",
-              textDecoration: "underline",
-              cursor: "pointer",
-              "&:hover": { color: "#F2709C" },
-            }}
-          >
+          <Box component="span" onClick={() => setActiveTab("order-history")} sx={{ color: "#FF9472", textDecoration: "underline", cursor: "pointer", "&:hover": { color: "#F2709C" }, }}>
             recent orders
           </Box>
           , manage your{" "}
-          <Box
-            component="span"
-            onClick={() => setActiveTab("addresses")}
-            sx={{
-              color: "#FF9472",
-              textDecoration: "underline",
-              cursor: "pointer",
-              "&:hover": { color: "#F2709C" },
-            }}
-          >
+          <Box component="span" onClick={() => setActiveTab("addresses")} sx={{ color: "#FF9472", textDecoration: "underline", cursor: "pointer", "&:hover": { color: "#F2709C" }, }}>
             shipping and billing addresses
           </Box>
           , and edit your password and account details.
         </CustomText>
       </Box>
 
-      <Box sx={{ width: "100%", mb: 3 }}>
+      <Box sx={{ width: "100%", mb: 1 }}>
         <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 1 }}>
           <Box sx={{ display: "flex", alignItems: "center" }}>
             <LocalShippingIcon sx={{ fontSize: { xs: 28, md: 32 }, color: "var(--themeColor)", mr: 1.5 }} />
@@ -131,28 +98,39 @@ export const DashboardTab = ({ favoriteItems, setActiveTab, isMobile, userProfil
               )}
             </Box>
           </Box>
+          <Box>
+            <CustomText variant="body2" sx={{ color: "#4caf50", fontWeight: 600, mb: 1, }}>
+          Order Status - {ordersLoading ? "Loading..." : (recentOrder?.status || "—")}
+        </CustomText>
           <Button
             onClick={() => setOrderDetailsOpen(true)}
             disabled={!recentOrderRaw}
             size="small"
             variant="contained"
             sx={{
-              backgroundColor: "#FFB5A1",
-              color: "black",
+              bgcolor: "var(--themeColor)",
+              color: "#fff",
               textTransform: "none",
               borderRadius: 2,
-              fontWeight: 'bold',
+              fontWeight: 600,
+              px: 2,
+              py: 1,
+              boxShadow: "0 2px 8px rgba(95, 41, 48, 0.25)",
+              transition: "all 0.2s ease",
+              "&:hover": {
+                bgcolor: "var(--specialColor)",
+                boxShadow: "0 4px 12px rgba(95, 41, 48, 0.3)",
+              },
+              "&:disabled": { bgcolor: "#ccc", color: "#888" },
             }}
           >
             View Details
           </Button>
+          </Box>
         </Box>
-        <CustomText variant="body2" sx={{ color: "#4caf50", fontWeight: 600, mb: 1, }}>
-          Order Status - {ordersLoading ? "Loading..." : (recentOrder?.status || "—")}
-        </CustomText>
       </Box>
 
-      <CustomText variant="h5" sx={{ fontWeight: 700, color: "var(--themeColor)", fontSize: { xs: 18, md: 24 }, mb: 2 }}>
+      <CustomText variant="h5" sx={{ fontWeight: 700, color: "var(--themeColor)", fontSize: { xs: 18, md: 24 }, mb: 1 }}>
         Your Recent Items
       </CustomText>
       {Array.isArray(favoriteItems) && favoriteItems.length > 0 ? (
@@ -166,18 +144,8 @@ export const DashboardTab = ({ favoriteItems, setActiveTab, isMobile, userProfil
               </TableRow>
             </TableHead>
             <TableBody>
-              {favoriteItems.map((item) => (
-                <TableRow
-                  key={item?.id}
-                  sx={{
-                    "&:hover": {
-                      backgroundColor: "#fafafa",
-                    },
-                    "&:last-child td, &:last-child th": {
-                      border: 0,
-                    },
-                  }}
-                >
+              {favoriteItems?.map((item) => (
+                <TableRow key={item?.id} sx={{ "&:hover": { backgroundColor: "#fafafa", }, "&:last-child td, &:last-child th": { border: 0, }, }}>
                   <TableCell>
                     <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
                       <Avatar
@@ -188,8 +156,8 @@ export const DashboardTab = ({ favoriteItems, setActiveTab, isMobile, userProfil
                           e.target.src = blankImage;
                         }}
                         sx={{
-                          width: { xs: 60, md: 80 },
-                          height: { xs: 60, md: 80 },
+                          width: { xs: 40, md: 60 },
+                          height: { xs: 40, md: 60 },
                           borderRadius: 1.5,
                           cursor: "pointer",
                           "&:hover": {
@@ -237,14 +205,18 @@ export const DashboardTab = ({ favoriteItems, setActiveTab, isMobile, userProfil
                       variant="contained"
                       size="small"
                       sx={{
-                        backgroundColor: "#FFB5A1",
-                        color: "black",
+                        bgcolor: "var(--themeColor)",
+                        color: "#fff",
                         textTransform: "none",
                         borderRadius: 2,
                         fontWeight: 600,
                         px: 2,
+                        py: 0.75,
+                        boxShadow: "0 2px 6px rgba(95, 41, 48, 0.2)",
+                        transition: "all 0.2s ease",
                         "&:hover": {
-                          backgroundColor: "#F2709C",
+                          bgcolor: "var(--specialColor)",
+                          boxShadow: "0 3px 10px rgba(95, 41, 48, 0.28)",
                         },
                       }}
                     >
@@ -421,10 +393,19 @@ export const DashboardTab = ({ favoriteItems, setActiveTab, isMobile, userProfil
                     size="small"
                     sx={{
                       textTransform: "none",
-                      backgroundColor: "var(--themeColor)",
+                      bgcolor: "var(--themeColor)",
                       color: "#fff",
+                      fontWeight: 600,
                       width: "fit-content",
-                      "&:hover": { backgroundColor: "var(--specialColor)" },
+                      px: 2,
+                      py: 1,
+                      borderRadius: 2,
+                      boxShadow: "0 2px 8px rgba(95, 41, 48, 0.25)",
+                      transition: "all 0.2s ease",
+                      "&:hover": {
+                        bgcolor: "var(--specialColor)",
+                        boxShadow: "0 4px 12px rgba(95, 41, 48, 0.3)",
+                      },
                     }}
                   >
                     Download receipt (PDF)

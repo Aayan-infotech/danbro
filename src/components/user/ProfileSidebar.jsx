@@ -27,14 +27,14 @@ const baseMenuItems = [
   { id: "logout", label: "Logout", icon: <LogoutIcon /> },
 ];
 
-export const ProfileSidebar = ({ 
-  activeTab, 
-  setActiveTab, 
-  userProfile, 
-  profileLoading, 
+export const ProfileSidebar = ({
+  activeTab,
+  setActiveTab,
+  userProfile,
+  profileLoading,
   accountData,
   isMobile,
-  setMobileDrawerOpen 
+  setMobileDrawerOpen
 }) => {
   const navigate = useNavigate();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -42,10 +42,10 @@ export const ProfileSidebar = ({
   // On mobile only: add Cart in menu (before Logout)
   const menuItems = isMobile
     ? [
-        ...baseMenuItems.filter((i) => i.id !== "logout"),
-        { id: "cart", label: "Cart", icon: <ShoppingCartIcon />, isLink: true, path: "/cart" },
-        ...baseMenuItems.filter((i) => i.id === "logout"),
-      ]
+      ...baseMenuItems.filter((i) => i.id !== "logout"),
+      { id: "cart", label: "Cart", icon: <ShoppingCartIcon />, isLink: true, path: "/cart" },
+      ...baseMenuItems.filter((i) => i.id === "logout"),
+    ]
     : baseMenuItems;
 
   const handleLogout = async () => {
@@ -76,22 +76,16 @@ export const ProfileSidebar = ({
       }}
     >
       {/* Profile Section */}
-      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 2 }}>
+      <Box sx={{ display: "flex", justifyContent: "start", alignItems: "center", gap: 2, px: 2 }}>
         <Avatar
-          sx={{
-            width: { xs: 50, md: 60 },
-            height: { xs: 50, md: 60 },
-            bgcolor: "var(--themeColor)",
-            fontSize: { xs: 20, md: 24 },
-            fontWeight: 600,
-          }}
+          sx={{ width: { xs: 40, md: 50 }, height: { xs: 40, md: 50 }, bgcolor: "var(--themeColor)", fontSize: { xs: 20, md: 24 }, fontWeight: 600, }}
           src={userProfile?.avatar || userProfile?.profilePicture}
         >
           {userProfile?.name
             ? userProfile.name.charAt(0).toUpperCase()
             : userProfile?.email
-            ? userProfile.email.charAt(0).toUpperCase()
-            : "U"}
+              ? userProfile.email.charAt(0).toUpperCase()
+              : "U"}
         </Avatar>
         <CustomText variant="h6" sx={{ fontWeight: 'bold', color: "#2c2c2c", fontSize: { xs: 16, md: 20 } }}>
           {profileLoading ? "Loading..." : (userProfile?.name || (accountData.firstName + " " + accountData.lastName).trim() || "User")}
@@ -139,8 +133,8 @@ export const ProfileSidebar = ({
                 primary={item?.id === "logout" && isLoggingOut ? "Logging out..." : item?.label}
                 primaryTypographyProps={{
                   sx: {
-                  fontSize: 14,
-                  fontWeight: activeTab === item?.id ? 600 : 400,
+                    fontSize: 14,
+                    fontWeight: activeTab === item?.id ? 600 : 400,
                   },
                 }}
               />

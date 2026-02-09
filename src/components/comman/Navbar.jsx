@@ -170,13 +170,11 @@ export const Navbar = ({ mobileMenuOpen, onMobileMenuClose }) => {
                                     }
                                 }}
                                 onMouseLeave={(e) => {
+                                    if (!showDropdown) return;
                                     const relatedTarget = e.relatedTarget;
-                                    // Check if cursor moved to popover
-                                    const isInsidePopover = relatedTarget && typeof relatedTarget.closest === "function" && relatedTarget.closest('[role="presentation"]');
-                                    // Check if cursor is still on the navbar item
-                                    const isOnNavbarItem = relatedTarget && e.currentTarget.contains(relatedTarget);
-                                    // Close menu if cursor left the navbar item and didn't go to popover
-                                    if (!isInsidePopover && !isOnNavbarItem && showDropdown) {
+                                    // Only keep open if cursor moved into THIS item's dropdown (not another item or navbar area)
+                                    const enteredDropdown = relatedTarget && typeof relatedTarget.closest === "function" && relatedTarget.closest("[data-navbar-dropdown]");
+                                    if (!enteredDropdown) {
                                         setHoveredItem(null);
                                         setAnchorEl(null);
                                     }

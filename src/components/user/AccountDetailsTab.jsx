@@ -79,7 +79,7 @@ export const AccountDetailsTab = ({
           />
         </Grid>
         <Grid size={{ xs: 12 }}>
-          <CustomText variant="h6" sx={{ fontWeight: 600, color: "var(--themeColor)", mb: 2 }}>
+          <CustomText variant="h6" sx={{ fontWeight: 600, color: "var(--themeColor)" }}>
             Change Password
           </CustomText>
         </Grid>
@@ -183,18 +183,23 @@ export const AccountDetailsTab = ({
               onClick={handleSaveChanges}
               disabled={isSaving}
               sx={{
-                backgroundColor: "#FFB5A1",
-                color: "black",
+                bgcolor: "var(--themeColor)",
+                color: "#fff",
                 textTransform: "none",
                 borderRadius: 2,
                 fontWeight: 600,
-                px: 4,
+                px: 3,
+                py: 1,
+                boxShadow: "0 2px 8px rgba(95, 41, 48, 0.25)",
+                transition: "all 0.2s ease",
                 "&:hover": {
-                  backgroundColor: "#F2709C",
+                  bgcolor: "var(--specialColor)",
+                  boxShadow: "0 4px 12px rgba(95, 41, 48, 0.3)",
                 },
                 "&:disabled": {
-                  backgroundColor: "rgba(255,181,161,0.5)",
-                  color: "rgba(0,0,0,0.3)",
+                  bgcolor: "#ccc",
+                  color: "#888",
+                  boxShadow: "none",
                 },
               }}
             >
