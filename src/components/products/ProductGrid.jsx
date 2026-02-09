@@ -200,8 +200,8 @@ export const ProductGrid = memo(({ products, isVisible }) => {
       const quantity = 1;
       // Create product snapshot for guest mode
       // Save price as object/array format, and also save rate/mrp directly for easy access
-      const priceObj = product?.price && typeof product.price === "object" && !Array.isArray(product.price) 
-        ? product.price 
+      const priceObj = product?.price && typeof product.price === "object" && !Array.isArray(product.price)
+        ? product.price
         : (Array.isArray(product?.price) ? product.price : null);
       const productSnapshot = {
         name: product?.name,
@@ -213,7 +213,7 @@ export const ProductGrid = memo(({ products, isVisible }) => {
         veg: product?.veg,
         courier: product?.courier,
       };
-      await addToCart(productId, quantity, { 
+      await addToCart(productId, quantity, {
         rate: effectiveRate,
         weight: product?.weight || null,
         productSnapshot: productSnapshot
@@ -513,14 +513,7 @@ export const ProductGrid = memo(({ products, isVisible }) => {
                     }}
                   >
                     {loadingWishlist.has(product?.productId) ? (
-                      <CircularProgress
-                        size={18}
-                        thickness={4}
-                        sx={{
-                          color: "#f44336",
-                          position: "absolute",
-                        }}
-                      />
+                      <CircularProgress size={18} thickness={4} sx={{ color: "#f44336", position: "absolute", }} />
                     ) : wishlistItems.has(product?.productId) ? (
                       <Favorite
                         sx={{
@@ -536,15 +529,7 @@ export const ProductGrid = memo(({ products, isVisible }) => {
                         }}
                       />
                     ) : (
-                      <FavoriteBorder
-                        sx={{
-                          fontSize: 18,
-                          transition: "all 0.3s ease",
-                          "&:hover": {
-                            color: "#f44336",
-                          },
-                        }}
-                      />
+                      <FavoriteBorder sx={{ fontSize: 18, transition: "all 0.3s ease", "&:hover": { color: "#f44336", }, }} />
                     )}
                   </IconButton>
                 </Box>
@@ -599,17 +584,7 @@ export const ProductGrid = memo(({ products, isVisible }) => {
                   )}
                 </Box>
 
-                <ProductDescription
-                  sx={{
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    display: "-webkit-box",
-                    WebkitLineClamp: 2,
-                    WebkitBoxOrient: "vertical",
-                    flex: 1,
-                    minHeight: 0,
-                  }}
-                >
+                <ProductDescription sx={{ overflow: "hidden", textOverflow: "ellipsis", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", flex: 1, minHeight: 0, }}>
                   {product?.subcategory}
                 </ProductDescription>
                 <Box sx={{ display: "flex", flexDirection: "column", gap: 0.25 }}>
@@ -711,26 +686,10 @@ export const ProductGrid = memo(({ products, isVisible }) => {
           </Box>
 
           <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-            <CustomText
-              variant="h5"
-              sx={{
-                color: "#2c2c2c",
-                fontSize: { xs: 20, sm: 24, md: 28 },
-                fontWeight: 700,
-                mb: 0.5,
-              }}
-            >
+            <CustomText variant="h5" sx={{ color: "#2c2c2c", fontSize: { xs: 20, sm: 24, md: 28 }, fontWeight: 700, mb: 0.5, }}>
               No Products Found
             </CustomText>
-            <CustomText
-              sx={{
-                color: "#666",
-                fontSize: { xs: 14, md: 16 },
-                maxWidth: { xs: "100%", md: "500px" },
-                mx: "auto",
-                lineHeight: 1.6,
-              }}
-            >
+            <CustomText sx={{ color: "#666", fontSize: { xs: 14, md: 16 }, maxWidth: { xs: "100%", md: "500px" }, mx: "auto", lineHeight: 1.6, }}>
               We couldn't find any products matching your search. Try adjusting your filters or browse our categories.
             </CustomText>
           </Box>

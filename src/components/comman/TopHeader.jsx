@@ -374,7 +374,7 @@ export const TopHeader = ({ onOpenMobileMenu }) => {
                 left: 0,
                 right: 0,
                 width: "100%",
-                zIndex: 1000,
+                zIndex: 1100,
                 transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
                 backdropFilter: isScrolled ? "blur(15px) saturate(180%)" : "none",
                 "&::before": isScrolled ? {

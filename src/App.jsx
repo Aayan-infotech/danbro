@@ -146,6 +146,16 @@ const AppContent = () => {
         onClose={handleCloseDeliveryDialog}
         initialLocationLabel={getStoredLocation().label || ""}
       />
+      {/* TopHeader + Navbar outside scrollable area so they stay fixed/sticky */}
+      <TopHeader
+        onOpenMobileMenu={!hideNavbar ? () => setMobileMenuOpen(true) : undefined}
+      />
+      {!hideNavbar && (
+        <Navbar
+          mobileMenuOpen={mobileMenuOpen}
+          onMobileMenuClose={() => setMobileMenuOpen(false)}
+        />
+      )}
       <Box
         sx={{
           width: "100%",
@@ -157,26 +167,15 @@ const AppContent = () => {
           flexDirection: "column",
         }}
       >
-        <TopHeader
-          onOpenMobileMenu={!hideNavbar ? () => setMobileMenuOpen(true) : undefined}
-        />
-        {!hideNavbar && (
-          <Navbar
-            mobileMenuOpen={mobileMenuOpen}
-            onMobileMenuClose={() => setMobileMenuOpen(false)}
-          />
-        )}
-        <Box 
-          sx={{ 
+        <Box
+          sx={{
             flex: 1,
             // Add padding-top to account for fixed TopHeader / Navbar on most pages.
-            // For auth pages (login/register/verify-otp) we remove this padding so the hero background
-            // can sit directly behind the header without extra blank space.
             pt: isAuthPage || isStorePage || isEventsPage || isNoPaddingPage
               ? { xs: "0px", sm: "0px", md: "0px", lg: "0px" }
-              : hideNavbar 
+              : hideNavbar
                 ? { xs: "65px", sm: "70px", md: "65px", lg: "70px" } // Profile page: only TopHeader
-                : { xs: "65px", sm: "70px", md: "107px", lg: "111px" } // Mobile: header only (menu in header); Desktop: header + navbar bar
+                : { xs: "65px", sm: "70px", md: "107px", lg: "111px" } // Mobile: header only; Desktop: header + navbar bar
           }}
         >
           <AppRoutes />

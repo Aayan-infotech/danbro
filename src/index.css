@@ -72,7 +72,7 @@ span,
   font-weight: 500;
 }
 .MuiContainer-root.MuiContainer-maxWidthFalse.css-935ve3-MuiContainer-root {
-  padding-top: 30px;
+  padding-top: 20px;
 }
 .MuiBox-root.css-1x6uh2p {
   padding: 12px;
@@ -147,7 +147,7 @@ span,
 /* Desktop/Laptop/Small laptop - keep 111px so content does not go under fixed navbar */
 @media (min-width: 1200px) {
   .css-awq9fn {
-      padding-top: 111px !important;
+      padding-top: 45px !important;
   }
 }
 
