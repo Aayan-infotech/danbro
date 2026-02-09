@@ -13,7 +13,6 @@ import { ProfileSidebar } from "../../components/user/ProfileSidebar";
 import { AccountDetailsTab } from "../../components/user/AccountDetailsTab";
 import { DashboardTab } from "../../components/user/DashboardTab";
 import { OrderHistoryTab } from "../../components/user/OrderHistoryTab";
-import { DownloadsTab } from "../../components/user/DownloadsTab";
 import { SavedAddressesTab } from "../../components/user/SavedAddressesTab";
 import { HelpSupportTab } from "../../components/user/HelpSupportTab";
 import { WishlistTab } from "../../components/user/WishlistTab";

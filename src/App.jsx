@@ -1,5 +1,5 @@
-import { Box, Fab } from "@mui/material";
-import { KeyboardArrowUp } from "@mui/icons-material";
+import { Box, Fab, IconButton } from "@mui/material";
+import { KeyboardArrowUp, Close } from "@mui/icons-material";
 import { BrowserRouter, useLocation } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
 import { Provider } from "react-redux";
@@ -44,7 +44,21 @@ const AppContent = () => {
   }, []);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const [showHelpBubble, setShowHelpBubble] = useState(() => {
+    try {
+      return sessionStorage.getItem("whatsappHelpBubbleDismissed") !== "true";
+    } catch {
+      return true;
+    }
+  });
   const hasCheckedDeliveryDialog = useRef(false);
+
+  const dismissHelpBubble = () => {
+    setShowHelpBubble(false);
+    try {
+      sessionStorage.setItem("whatsappHelpBubbleDismissed", "true");
+    } catch {}
+  };
 
   // Hide Navbar on profile page
   const hideNavbar = pathname === "/profile" || pathname === "/user-profile";
@@ -169,6 +183,47 @@ const AppContent = () => {
         </Box>
         {!hideNavbar && <Footer />}
       </Box>
+
+      {/* Help text bubble next to WhatsApp */}
+      {showHelpBubble && (
+        <Box
+          sx={{
+            position: "fixed",
+            bottom: { xs: 28, md: 38 },
+            right: { xs: 88, md: 100 },
+            zIndex: 9998,
+            maxWidth: 200,
+            backgroundColor: "#f8f8f8",
+            color: "#333",
+            borderRadius: 2,
+            pl: 1.5,
+            pr: 2.5,
+            py: 1.25,
+            boxShadow: "0 2px 12px rgba(0,0,0,0.12)",
+            border: "1px solid #eee",
+            fontSize: 14,
+            fontWeight: 500,
+            lineHeight: 1.4,
+          }}
+        >
+          <IconButton
+            size="small"
+            onClick={dismissHelpBubble}
+            sx={{
+              position: "absolute",
+              top: 4,
+              right: 4,
+              color: "#888",
+              p: 0.25,
+              "&:hover": { color: "#333", backgroundColor: "rgba(0,0,0,0.04)" },
+            }}
+            aria-label="Dismiss"
+          >
+            <Close sx={{ fontSize: 16 }} />
+          </IconButton>
+          Hey, need any help?
+        </Box>
+      )}
 
       {/* Floating WhatsApp Button - Always Visible (Outside main container) */}
       <Fab

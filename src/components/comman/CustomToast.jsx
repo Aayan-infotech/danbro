@@ -34,7 +34,7 @@ export const CustomToast = ({ open, onClose, message, severity = "success", load
       open={open}
       autoHideDuration={loading ? null : 3000}
       onClose={onClose}
-      anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      anchorOrigin={{ vertical: "top", horizontal: "center" }}
       sx={{
         "& .MuiSnackbarContent-root": {
           minWidth: "auto",
