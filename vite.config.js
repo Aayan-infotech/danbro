@@ -11,18 +11,8 @@ export default defineConfig({
     cssCodeSplit: true,
     rollupOptions: {
       output: {
-        manualChunks: (id) => {
-          if (id.includes('node_modules')) {
-            if (id.includes('react-dom') || id.includes('react/')) return 'react-vendor';
-            // Keep all MUI + Emotion in one chunk to avoid "Cannot access before initialization" (circular/order issues)
-            if (id.includes('@mui/') || id.includes('@emotion')) return 'mui-vendor';
-            if (id.includes('react-router')) return 'router';
-            if (id.includes('@reduxjs/toolkit') || id.includes('redux')) return 'redux-vendor';
-            if (id.includes('axios')) return 'axios';
-            if (id.includes('slick-carousel') || id.includes('react-slick')) return 'slick';
-            return 'vendor';
-          }
-        },
+        // No manualChunks: splitting into react/mui/router/vendor etc. was causing
+        // "Cannot access 'X' before initialization" at runtime. Let Vite do default chunking.
         chunkFileNames: 'assets/[name]-[hash].js',
         entryFileNames: 'assets/[name]-[hash].js',
         assetFileNames: 'assets/[name]-[hash][extname]',
