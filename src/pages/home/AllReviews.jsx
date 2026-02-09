@@ -61,7 +61,7 @@ export const AllReviews = () => {
 
   return (
     <Box sx={{ minHeight: "100vh", pb: 8, px: { xs: 1.5, md: 0 }, }}>
-      <Container maxWidth="xl" sx={{ px: { xs: 2, md: 3 } }}>
+      <Container maxWidth="lg" sx={{ px: { xs: 2, md: 3 } }}>
         <Box sx={{ mb: 2 }}>
           <Link to="/#testimonials" style={{ color: "var(--themeColor)", textDecoration: "none", fontWeight: 600, fontSize: 14 }}>
             ← Back to Home
