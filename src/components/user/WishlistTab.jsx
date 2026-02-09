@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
   Box, 
-  Grid, 
   Card, 
   CardContent, 
   Button, 
@@ -12,18 +11,12 @@ import {
   Typography, 
   useTheme, 
   useMediaQuery,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
   Avatar,
 } from "@mui/material";
 import { Favorite as FavoriteIcon, Visibility as VisibilityIcon } from "@mui/icons-material";
-import { CustomCarousel, CustomCarouselArrow } from "../comman/CustomCarousel";
+import { CustomCarousel } from "../comman/CustomCarousel";
 import { CustomText } from "../comman/CustomText";
+import { ProfileTable } from "./ProfileTable";
 import { getWishlist, removeFromWishlist } from "../../utils/wishlist";
 import { getAccessToken } from "../../utils/cookies";
 import { fetchProductById } from "../../utils/apiService";
@@ -275,16 +268,27 @@ export const WishlistTab = ({ onRemoveFromWishlist }) => {
   );
 
   return (
-    <Box sx={{ mb: 1}}>
-      <CustomText variant="h4" sx={{ fontSize: { xs: 20, md: 32 }, fontWeight: 700, color: "var(--themeColor)", mb: { xs: 2, md: 2 }, }}>
-        My Wishlist
-      </CustomText>
-
-      {error && (
-        <Alert severity="warning" sx={{ mb: 3, borderRadius: 2 }}>
-          {error}
-        </Alert>
-      )}
+    <Box sx={{ mb: 1, display: "flex", flexDirection: "column", minHeight: 0 }}>
+      <Box
+        sx={{
+          flexShrink: 0,
+          position: "sticky",
+          top: 0,
+          zIndex: 1,
+          backgroundColor: "background.paper",
+          pb: 2,
+          mb: 0,
+        }}
+      >
+        <CustomText variant="h4" sx={{ fontSize: { xs: 20, md: 32 }, fontWeight: 700, color: "var(--themeColor)", mb: { xs: 2, md: 2 }, }}>
+          My Wishlist
+        </CustomText>
+        {error && (
+          <Alert severity="warning" sx={{ mt: 1, mb: 0, borderRadius: 2 }}>
+            {error}
+          </Alert>
+        )}
+      </Box>
 
       {wishlistItems.length === 0 ? (
         <Box
@@ -324,151 +328,138 @@ export const WishlistTab = ({ onRemoveFromWishlist }) => {
           </CustomCarousel>
         </Box>
       ) : (
-        <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: "0 2px 8px rgba(0,0,0,0.08)", overflowX: "auto" }}>
-          <Table sx={{ minWidth: 650 }}>
-            <TableHead>
-              <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
-                <TableCell sx={{ fontWeight: 700, color: "#2c2c2c", fontSize: { xs: 13, md: 14 } }}>Product</TableCell>
-                <TableCell sx={{ fontWeight: 700, color: "#2c2c2c", fontSize: { xs: 13, md: 14 } }}>Price</TableCell>
-                <TableCell sx={{ fontWeight: 700, color: "#2c2c2c", fontSize: { xs: 13, md: 14 } }}>Weight</TableCell>
-                <TableCell align="center" sx={{ fontWeight: 700, color: "#2c2c2c", fontSize: { xs: 13, md: 14 } }}>Actions</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {wishlistItems.map((item) => (
-                <TableRow
-                  key={item?.id}
-                  sx={{
-                    "&:hover": {
-                      backgroundColor: "#fafafa",
-                    },
-                    "&:last-child td, &:last-child th": {
-                      border: 0,
-                    },
-                  }}
-                >
-                  <TableCell>
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                      <Avatar
-                        src={item?.image}
-                        alt={item?.name}
-                        variant="rounded"
-                        sx={{
-                          width: { xs: 60, md: 80 },
-                          height: { xs: 60, md: 80 },
-                          borderRadius: 1.5,
-                          cursor: "pointer",
-                          "&:hover": {
-                            opacity: 0.8,
-                          },
-                        }}
-                        onClick={() => {
-                          const productId = item?.productId || item?.id;
-                          if (productId) {
-                            navigate(`/products/${productId}`);
-                          }
-                        }}
-                      />
-                      <Box>
-                        <CustomText
-                          sx={{
-                            fontWeight: 600,
-                            fontSize: { xs: 13, md: 14 },
-                            color: "#2c2c2c",
-                            cursor: "pointer",
-                            "&:hover": {
-                              color: "var(--themeColor)",
-                            },
-                            textTransform: "none",
-                          }}
-                          onClick={() => {
-                            const productId = item?.productId || item?.id;
-                            if (productId) {
-                              navigate(`/products/${productId}`);
-                            }
-                          }}
-                        >
-                          {item?.name}
-                        </CustomText>
-                        {item?.category && (
-                          <CustomText sx={{ fontSize: { xs: 11, md: 12 }, color: "#666", mt: 0.5, textTransform: "none" }}>
-                            {item.category}
-                          </CustomText>
-                        )}
-                      </Box>
-                    </Box>
-                  </TableCell>
-                  <TableCell>
-                    <CustomText sx={{ fontWeight: 700, color: "var(--themeColor)", fontSize: { xs: 14, md: 16 }, textTransform: "none" }}>
-                      {item?.price}
+        <ProfileTable
+          data={wishlistItems}
+          getRowKey={(item) => item?.id || item?.productId}
+          containerSx={{
+            maxHeight: { xs: "55vh", md: "60vh" },
+            overflowY: "auto",
+            flex: "1 1 auto",
+            minHeight: 0,
+          }}
+          columns={[
+            {
+              id: "product",
+              label: "Product",
+              render: (item) => (
+                <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                  <Avatar
+                    src={item?.image}
+                    alt={item?.name}
+                    variant="rounded"
+                    sx={{
+                      width: { xs: 40, md: 60 },
+                      height: { xs: 40, md: 60 },
+                      borderRadius: 1.5,
+                      cursor: "pointer",
+                      "&:hover": { opacity: 0.8 },
+                    }}
+                    onClick={() => {
+                      const productId = item?.productId || item?.id;
+                      if (productId) navigate(`/products/${productId}`);
+                    }}
+                  />
+                  <Box>
+                    <CustomText
+                      sx={{
+                        fontWeight: 600,
+                        fontSize: { xs: 13, md: 14 },
+                        color: "#2c2c2c",
+                        cursor: "pointer",
+                        "&:hover": { color: "var(--themeColor)" },
+                        textTransform: "none",
+                      }}
+                      onClick={() => {
+                        const productId = item?.productId || item?.id;
+                        if (productId) navigate(`/products/${productId}`);
+                      }}
+                    >
+                      {item?.name}
                     </CustomText>
-                    {item?.mrp && item?.rate && Number(item.mrp) > Number(item.rate) && (
-                      <CustomText
-                        sx={{
-                          fontSize: { xs: 11, md: 12 },
-                          color: "#999",
-                          textDecoration: "line-through",
-                          display: "block",
-                          textTransform: "none",
-                        }}
-                      >
-                        ₹{Number(item.mrp).toFixed(2)}
+                    {item?.category && (
+                      <CustomText sx={{ fontSize: { xs: 11, md: 12 }, color: "#666", mt: 0.5, textTransform: "none" }}>
+                        {item.category}
                       </CustomText>
                     )}
-                  </TableCell>
-                  <TableCell>
-                    <CustomText sx={{ fontSize: { xs: 12, md: 13 }, color: "#666", textTransform: "none" }}>
-                      {item?.weight || "—"}
+                  </Box>
+                </Box>
+              ),
+            },
+            {
+              id: "price",
+              label: "Price",
+              render: (item) => (
+                <Box>
+                  <CustomText sx={{ fontWeight: 700, color: "var(--themeColor)", fontSize: { xs: 14, md: 16 }, textTransform: "none" }}>
+                    {item?.price}
+                  </CustomText>
+                  {item?.mrp && item?.rate && Number(item.mrp) > Number(item.rate) && (
+                    <CustomText
+                      sx={{
+                        fontSize: { xs: 11, md: 12 },
+                        color: "#999",
+                        textDecoration: "line-through",
+                        display: "block",
+                        textTransform: "none",
+                      }}
+                    >
+                      ₹{Number(item.mrp).toFixed(2)}
                     </CustomText>
-                  </TableCell>
-                  <TableCell align="center">
-                    <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 1 }}>
-                      <IconButton
-                        size="small"
-                        onClick={() => {
-                          const productId = item?.productId || item?.id;
-                          if (productId) {
-                            navigate(`/products/${productId}`);
-                          }
-                        }}
-                        sx={{
-                          color: "var(--themeColor)",
-                          "&:hover": {
-                            backgroundColor: "rgba(95, 41, 48, 0.1)",
-                          },
-                        }}
-                        title="View Product"
-                      >
-                        <VisibilityIcon sx={{ fontSize: { xs: 18, md: 20 } }} />
-                      </IconButton>
-                      <IconButton
-                        size="small"
-                        onClick={() => handleRemoveFromWishlist(item?.productId)}
-                        disabled={removingId === item?.productId}
-                        sx={{
-                          color: "#f44336",
-                          "&:hover": {
-                            backgroundColor: "rgba(244, 67, 54, 0.1)",
-                          },
-                          "&:disabled": {
-                            opacity: 0.6,
-                          },
-                        }}
-                        title="Remove from Wishlist"
-                      >
-                        {removingId === item?.productId ? (
-                          <CircularProgress size={18} sx={{ color: "#f44336" }} />
-                        ) : (
-                          <FavoriteIcon sx={{ fontSize: { xs: 18, md: 20 } }} />
-                        )}
-                      </IconButton>
-                    </Box>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
+                  )}
+                </Box>
+              ),
+            },
+            {
+              id: "weight",
+              label: "Weight",
+              render: (item) => (
+                <CustomText sx={{ fontSize: { xs: 12, md: 13 }, color: "#666", textTransform: "none" }}>
+                  {item?.weight || "—"}
+                </CustomText>
+              ),
+            },
+            {
+              id: "actions",
+              label: "Actions",
+              align: "center",
+              render: (item) => (
+                <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 1 }}>
+                  <IconButton
+                    size="small"
+                    onClick={() => {
+                      const productId = item?.productId || item?.id;
+                      if (productId) navigate(`/products/${productId}`);
+                    }}
+                    sx={{
+                      color: "var(--themeColor)",
+                      "&:hover": { backgroundColor: "rgba(95, 41, 48, 0.1)" },
+                    }}
+                    title="View Product"
+                  >
+                    <VisibilityIcon sx={{ fontSize: { xs: 18, md: 20 } }} />
+                  </IconButton>
+                  <IconButton
+                    size="small"
+                    onClick={() => handleRemoveFromWishlist(item?.productId)}
+                    disabled={removingId === item?.productId}
+                    sx={{
+                      color: "#f44336",
+                      "&:hover": { backgroundColor: "rgba(244, 67, 54, 0.1)" },
+                      "&:disabled": { opacity: 0.6 },
+                    }}
+                    title="Remove from Wishlist"
+                  >
+                    {removingId === item?.productId ? (
+                      <CircularProgress size={18} sx={{ color: "#f44336" }} />
+                    ) : (
+                      <FavoriteIcon sx={{ fontSize: { xs: 18, md: 20 } }} />
+                    )}
+                  </IconButton>
+                </Box>
+              ),
+            },
+          ]}
+        />
       )}
     </Box>
   );

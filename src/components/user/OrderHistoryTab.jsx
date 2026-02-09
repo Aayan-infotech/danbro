@@ -12,15 +12,9 @@ import {
   IconButton,
   Pagination,
   CircularProgress,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
 } from "@mui/material";
 import { CustomText } from "../comman/CustomText";
+import { ProfileTable } from "./ProfileTable";
 import CloseIcon from "@mui/icons-material/Close";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 
@@ -139,87 +133,87 @@ export const OrderHistoryTab = ({
         </Box>
       ) : (
         <>
-          <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: "0 2px 8px rgba(0,0,0,0.08)", maxHeight: { xs: "62vh", md: "60vh" }, overflowY: "auto" }}>
-            <Table sx={{ minWidth: 650 }}>
-              <TableHead>
-                <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
-                  <TableCell sx={{ fontWeight: 700, color: "#2c2c2c", fontSize: { xs: 13, md: 14 } }}>Order ID</TableCell>
-                  <TableCell sx={{ fontWeight: 700, color: "#2c2c2c", fontSize: { xs: 13, md: 14 } }}>Date</TableCell>
-                  <TableCell sx={{ fontWeight: 700, color: "#2c2c2c", fontSize: { xs: 13, md: 14 } }}>Items</TableCell>
-                  <TableCell sx={{ fontWeight: 700, color: "#2c2c2c", fontSize: { xs: 13, md: 14 } }}>Total</TableCell>
-                  <TableCell sx={{ fontWeight: 700, color: "#2c2c2c", fontSize: { xs: 13, md: 14 } }}>Status</TableCell>
-                  <TableCell align="center" sx={{ fontWeight: 700, color: "#2c2c2c", fontSize: { xs: 13, md: 14 } }}>Actions</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {normalizedOrders.map((o, idx) => (
-                  <TableRow
-                    key={`${o?.idLabel}-${idx}`}
+          <ProfileTable
+            data={normalizedOrders}
+            getRowKey={(o) => o?.raw?._id || o?.raw?.orderId || o?.raw?.id || `${o?.idLabel}-${o?.dateLabel}`}
+            containerSx={{ maxHeight: { xs: "62vh", md: "60vh" }, overflowY: "auto" }}
+            columns={[
+              {
+                id: "orderId",
+                label: "Order ID",
+                render: (o) => (
+                  <CustomText sx={{ fontWeight: 700, color: "var(--themeColor)", fontSize: { xs: 13, md: 14 } }}>
+                    {o?.idLabel}
+                  </CustomText>
+                ),
+              },
+              {
+                id: "date",
+                label: "Date",
+                render: (o) => (
+                  <CustomText sx={{ fontSize: { xs: 12, md: 13 }, color: "#666" }}>
+                    {o?.dateLabel}
+                  </CustomText>
+                ),
+              },
+              {
+                id: "items",
+                label: "Items",
+                render: (o) => (
+                  <CustomText sx={{ fontSize: { xs: 12, md: 13 }, color: "#666" }}>
+                    {o?.itemsCount || 0} item{o?.itemsCount !== 1 ? "s" : ""}
+                  </CustomText>
+                ),
+              },
+              {
+                id: "total",
+                label: "Total",
+                render: (o) => (
+                  <CustomText sx={{ fontWeight: 600, color: "#2c2c2c", fontSize: { xs: 13, md: 14 } }}>
+                    {o?.totalLabel}
+                  </CustomText>
+                ),
+              },
+              {
+                id: "status",
+                label: "Status",
+                render: (o) => (
+                  <Box
                     sx={{
-                      "&:hover": {
-                        backgroundColor: "#fafafa",
-                      },
-                      "&:last-child td, &:last-child th": {
-                        border: 0,
-                      },
+                      display: "inline-block",
+                      px: 1.5,
+                      py: 0.5,
+                      borderRadius: 2,
+                      backgroundColor: o?.statusColor,
+                      color: "#fff",
+                      fontWeight: 600,
+                      fontSize: { xs: 11, md: 12 },
                     }}
                   >
-                    <TableCell>
-                      <CustomText sx={{ fontWeight: 700, color: "var(--themeColor)", fontSize: { xs: 13, md: 14 } }}>
-                        {o?.idLabel}
-                      </CustomText>
-                    </TableCell>
-                    <TableCell>
-                      <CustomText sx={{ fontSize: { xs: 12, md: 13 }, color: "#666" }}>
-                        {o?.dateLabel}
-                      </CustomText>
-                    </TableCell>
-                    <TableCell>
-                      <CustomText sx={{ fontSize: { xs: 12, md: 13 }, color: "#666" }}>
-                        {o?.itemsCount || 0} item{o?.itemsCount !== 1 ? "s" : ""}
-                      </CustomText>
-                    </TableCell>
-                    <TableCell>
-                      <CustomText sx={{ fontWeight: 600, color: "#2c2c2c", fontSize: { xs: 13, md: 14 } }}>
-                        {o?.totalLabel}
-                      </CustomText>
-                    </TableCell>
-                    <TableCell>
-                      <Box
-                        sx={{
-                          display: "inline-block",
-                          px: 1.5,
-                          py: 0.5,
-                          borderRadius: 2,
-                          backgroundColor: o?.statusColor,
-                          color: "#fff",
-                          fontWeight: 600,
-                          fontSize: { xs: 11, md: 12 },
-                        }}
-                      >
-                        {o?.statusLabel}
-                      </Box>
-                    </TableCell>
-                    <TableCell align="center">
-                      <IconButton
-                        size="small"
-                        onClick={() => handleOpen(o?.raw)}
-                        sx={{
-                          color: "var(--themeColor)",
-                          "&:hover": {
-                            backgroundColor: "rgba(95, 41, 48, 0.1)",
-                          },
-                        }}
-                        title="View Details"
-                      >
-                        <VisibilityIcon sx={{ fontSize: { xs: 18, md: 20 } }} />
-                      </IconButton>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
+                    {o?.statusLabel}
+                  </Box>
+                ),
+              },
+              {
+                id: "actions",
+                label: "Actions",
+                align: "center",
+                render: (o) => (
+                  <IconButton
+                    size="small"
+                    onClick={() => handleOpen(o?.raw)}
+                    sx={{
+                      color: "var(--themeColor)",
+                      "&:hover": { backgroundColor: "rgba(95, 41, 48, 0.1)" },
+                    }}
+                    title="View Details"
+                  >
+                    <VisibilityIcon sx={{ fontSize: { xs: 18, md: 20 } }} />
+                  </IconButton>
+                ),
+              },
+            ]}
+          />
           {totalPages > 1 && (
             <Box sx={{ display: "flex", justifyContent: "center", mt: 3, pb: 2 }}>
               <Pagination

@@ -8,19 +8,13 @@ import {
   DialogContent,
   Divider,
   IconButton,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
   Avatar,
 } from "@mui/material";
 import { LocalShipping as LocalShippingIcon } from "@mui/icons-material";
 import CloseIcon from "@mui/icons-material/Close";
 import { Link } from "react-router-dom";
 import { CustomText } from "../comman/CustomText";
+import { ProfileTable } from "./ProfileTable";
 import blankImage from "../../assets/blankimage.png";
 
 const getStatusMeta = (status) => {
@@ -134,100 +128,88 @@ export const DashboardTab = ({ favoriteItems, setActiveTab, isMobile, userProfil
         Your Recent Items
       </CustomText>
       {Array.isArray(favoriteItems) && favoriteItems.length > 0 ? (
-        <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: "0 2px 8px rgba(0,0,0,0.08)", overflowX: "auto" }}>
-          <Table sx={{ minWidth: 650 }}>
-            <TableHead>
-              <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
-                <TableCell sx={{ fontWeight: 700, color: "#2c2c2c", fontSize: { xs: 13, md: 14 } }}>Product</TableCell>
-                <TableCell sx={{ fontWeight: 700, color: "#2c2c2c", fontSize: { xs: 13, md: 14 } }}>Price</TableCell>
-                <TableCell align="center" sx={{ fontWeight: 700, color: "#2c2c2c", fontSize: { xs: 13, md: 14 } }}>Action</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {favoriteItems?.map((item) => (
-                <TableRow key={item?.id} sx={{ "&:hover": { backgroundColor: "#fafafa", }, "&:last-child td, &:last-child th": { border: 0, }, }}>
-                  <TableCell>
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                      <Avatar
-                        src={item?.image || blankImage}
-                        alt={item?.name || "Product"}
-                        variant="rounded"
-                        onError={(e) => {
-                          e.target.src = blankImage;
-                        }}
-                        sx={{
-                          width: { xs: 40, md: 60 },
-                          height: { xs: 40, md: 60 },
-                          borderRadius: 1.5,
-                          cursor: "pointer",
-                          "&:hover": {
-                            opacity: 0.8,
-                          },
-                        }}
-                        onClick={() => {
-                          if (item?.id) {
-                            window.location.href = `/products/${item.id}`;
-                          }
-                        }}
-                      />
-                      <Box>
-                        <CustomText
-                          sx={{
-                            fontWeight: 600,
-                            fontSize: { xs: 13, md: 14 },
-                            color: "#2c2c2c",
-                            cursor: "pointer",
-                            "&:hover": {
-                              color: "var(--themeColor)",
-                            },
-                            textTransform: "none",
-                          }}
-                          onClick={() => {
-                            if (item?.id) {
-                              window.location.href = `/products/${item.id}`;
-                            }
-                          }}
-                        >
-                          {item?.name}
-                        </CustomText>
-                      </Box>
-                    </Box>
-                  </TableCell>
-                  <TableCell>
-                    <CustomText sx={{ fontWeight: 700, color: "var(--themeColor)", fontSize: { xs: 14, md: 16 }, textTransform: "none" }}>
-                      {item?.price}
-                    </CustomText>
-                  </TableCell>
-                  <TableCell align="center">
-                    <Button
-                      component={Link}
-                      to={item?.id ? `/products/${item.id}` : "/products"}
-                      variant="contained"
-                      size="small"
-                      sx={{
-                        bgcolor: "var(--themeColor)",
-                        color: "#fff",
-                        textTransform: "none",
-                        borderRadius: 2,
-                        fontWeight: 600,
-                        px: 2,
-                        py: 0.75,
-                        boxShadow: "0 2px 6px rgba(95, 41, 48, 0.2)",
-                        transition: "all 0.2s ease",
-                        "&:hover": {
-                          bgcolor: "var(--specialColor)",
-                          boxShadow: "0 3px 10px rgba(95, 41, 48, 0.28)",
-                        },
-                      }}
-                    >
-                      View
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
+        <ProfileTable
+          data={favoriteItems}
+          getRowKey={(item) => item?.id}
+          columns={[
+            {
+              id: "product",
+              label: "Product",
+              render: (item) => (
+                <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                  <Avatar
+                    src={item?.image || blankImage}
+                    alt={item?.name || "Product"}
+                    variant="rounded"
+                    onError={(e) => {
+                      e.target.src = blankImage;
+                    }}
+                    sx={{
+                      width: { xs: 40, md: 60 },
+                      height: { xs: 40, md: 60 },
+                      borderRadius: 1.5,
+                      cursor: "pointer",
+                      "&:hover": { opacity: 0.8 },
+                    }}
+                    onClick={() => item?.id && (window.location.href = `/products/${item.id}`)}
+                  />
+                  <CustomText
+                    sx={{
+                      fontWeight: 600,
+                      fontSize: { xs: 13, md: 14 },
+                      color: "#2c2c2c",
+                      cursor: "pointer",
+                      "&:hover": { color: "var(--themeColor)" },
+                      textTransform: "none",
+                    }}
+                    onClick={() => item?.id && (window.location.href = `/products/${item.id}`)}
+                  >
+                    {item?.name}
+                  </CustomText>
+                </Box>
+              ),
+            },
+            {
+              id: "price",
+              label: "Price",
+              render: (item) => (
+                <CustomText sx={{ fontWeight: 700, color: "var(--themeColor)", fontSize: { xs: 14, md: 16 }, textTransform: "none" }}>
+                  {item?.price}
+                </CustomText>
+              ),
+            },
+            {
+              id: "action",
+              label: "Action",
+              align: "center",
+              render: (item) => (
+                <Button
+                  component={Link}
+                  to={item?.id ? `/products/${item.id}` : "/products"}
+                  variant="contained"
+                  size="small"
+                  sx={{
+                    bgcolor: "var(--themeColor)",
+                    color: "#fff",
+                    textTransform: "none",
+                    borderRadius: 2,
+                    fontWeight: 600,
+                    px: 2,
+                    py: 0.75,
+                    boxShadow: "0 2px 6px rgba(95, 41, 48, 0.2)",
+                    transition: "all 0.2s ease",
+                    "&:hover": {
+                      bgcolor: "var(--specialColor)",
+                      boxShadow: "0 3px 10px rgba(95, 41, 48, 0.28)",
+                    },
+                  }}
+                >
+                  View
+                </Button>
+              ),
+            },
+          ]}
+        />
       ) : (
         <Box sx={{ border: '1px solid #BEBEBE', borderRadius: { xs: 3, md: 5 }, p: { xs: 0.5, sm: 1, md: 3 } }}>
           <CustomText sx={{ color: "#666", fontSize: 14, py: 2, textAlign: "center" }}>
