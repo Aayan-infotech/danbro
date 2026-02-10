@@ -1,0 +1,20 @@
+/* OrderSummary: ensure Payment Mode radios are visible on mobile */
+.order-summary-payment-mode {
+  overflow: visible !important;
+}
+
+.order-summary-payment-mode .MuiRadioGroup-root {
+  margin: 0 !important;
+}
+
+.order-summary-payment-mode .MuiFormControlLabel-root {
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+@media (max-width: 599.95px) {
+  .order-summary-payment-mode .MuiRadioGroup-root {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

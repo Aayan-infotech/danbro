@@ -2,7 +2,7 @@ import { useRef, useEffect } from "react";
 import "./HeroBanner.css";
 import { bannerSlides } from "../../utils/bannerSlides";
 
-const AUTO_SLIDE_INTERVAL_MS = 2000;
+// const AUTO_SLIDE_INTERVAL_MS = 2000;
 
 export const HeroBanner = () => {
   const slideRef = useRef(null);
@@ -19,10 +19,10 @@ export const HeroBanner = () => {
     if (items.length) slideRef.current.prepend(items[items.length - 1]);
   };
 
-  useEffect(() => {
-    const interval = setInterval(nextSlide, AUTO_SLIDE_INTERVAL_MS);
-    return () => clearInterval(interval);
-  }, []);
+  // useEffect(() => {
+  //   const interval = setInterval(nextSlide, AUTO_SLIDE_INTERVAL_MS);
+  //   return () => clearInterval(interval);
+  // }, []);
 
   // Preload LCP image (first slide) so it appears faster
   useEffect(() => {

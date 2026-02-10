@@ -232,3 +232,13 @@ button, a, [role="button"] {
     scroll-behavior: auto !important;
   }
 }
+
+/* Scroll to top FAB - desktop position/size */
+@media (min-width: 900px) {
+  .scroll-to-top-fab {
+    bottom: 90px !important;
+    right: 19px !important;
+    width: 58px !important;
+    height: 58px !important;
+  }
+}

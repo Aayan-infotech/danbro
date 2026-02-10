@@ -1,5 +1,5 @@
-import { Box, Fab, IconButton } from "@mui/material";
-import { KeyboardArrowUp, Close } from "@mui/icons-material";
+import { Box, Fab } from "@mui/material";
+import { KeyboardArrowUp } from "@mui/icons-material";
 import { BrowserRouter, useLocation } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
 import { Provider } from "react-redux";
@@ -48,21 +48,22 @@ const AppContent = () => {
   }, []);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showScrollTop, setShowScrollTop] = useState(false);
-  const [showHelpBubble, setShowHelpBubble] = useState(() => {
-    try {
-      return sessionStorage.getItem("whatsappHelpBubbleDismissed") !== "true";
-    } catch {
-      return true;
-    }
-  });
   const hasCheckedDeliveryDialog = useRef(false);
 
-  const dismissHelpBubble = () => {
-    setShowHelpBubble(false);
-    try {
-      sessionStorage.setItem("whatsappHelpBubbleDismissed", "true");
-    } catch {}
-  };
+  // Load Danbro chatbot widget (replaces WhatsApp floating icon)
+  useEffect(() => {
+    const src =
+      "http://34.206.193.218:5656/api/plugins/danbro/agent/emb_9cce4ed201ad5f7edaa03d59ae977919d519e5ce0244d305.js";
+
+    // Guard: React 18 StrictMode may run effects twice in dev
+    const alreadyLoaded = Array.from(document.scripts).some((s) => s?.src === src);
+    if (alreadyLoaded) return;
+
+    const script = document.createElement("script");
+    script.src = src;
+    script.async = true;
+    document.body.appendChild(script);
+  }, []);
 
   // Hide Navbar on profile page
   const hideNavbar = pathname === "/profile" || pathname === "/user-profile";
@@ -125,13 +126,6 @@ const AppContent = () => {
     localStorage.setItem("deliveryDialogShown", "true");
   };
 
-  const handleWhatsAppClick = () => {
-    const phoneNumber = "7309032618";
-    const message = encodeURIComponent("Hello! I'd like to know more about your products.");
-    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${message}`;
-    window.open(whatsappUrl, "_blank", "noopener,noreferrer");
-  };
-
   const handleScrollToTop = () => {
     window.scrollTo({
       top: 0,
@@ -187,98 +181,10 @@ const AppContent = () => {
         {!hideNavbar && <Footer />}
       </Box>
 
-      {/* Help text bubble next to WhatsApp */}
-      {showHelpBubble && (
-        <Box
-          sx={{
-            position: "fixed",
-            bottom: { xs: 28, md: 38 },
-            right: { xs: 88, md: 100 },
-            zIndex: 9998,
-            maxWidth: 200,
-            backgroundColor: "#f8f8f8",
-            color: "#333",
-            borderRadius: 2,
-            pl: 1.5,
-            pr: 2.5,
-            py: 1.25,
-            boxShadow: "0 2px 12px rgba(0,0,0,0.12)",
-            border: "1px solid #eee",
-            fontSize: 14,
-            fontWeight: 500,
-            lineHeight: 1.4,
-          }}
-        >
-          <IconButton
-            size="small"
-            onClick={dismissHelpBubble}
-            sx={{
-              position: "absolute",
-              top: 4,
-              right: 4,
-              color: "#888",
-              p: 0.25,
-              "&:hover": { color: "#333", backgroundColor: "rgba(0,0,0,0.04)" },
-            }}
-            aria-label="Dismiss"
-          >
-            <Close sx={{ fontSize: 16 }} />
-          </IconButton>
-          Hey, need any help?
-        </Box>
-      )}
-
-      {/* Floating WhatsApp Button - Always Visible (Outside main container) */}
-      <Fab
-        onClick={handleWhatsAppClick}
-        sx={{
-          position: "fixed",
-          bottom: { xs: 20, md: 30 },
-          right: { xs: 20, md: 30 },
-          backgroundColor: "#25D366",
-          color: "#fff",
-          width: { xs: 56, md: 64 },
-          height: { xs: 56, md: 64 },
-          zIndex: 9999,
-          boxShadow: "0 4px 20px rgba(37, 211, 102, 0.4)",
-          transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-          willChange: "transform",
-          "&:hover": {
-            backgroundColor: "#20BA5A",
-            transform: "scale(1.1)",
-            boxShadow: "0 6px 30px rgba(37, 211, 102, 0.6)",
-          },
-          "&:active": {
-            transform: "scale(0.95)",
-          },
-          animation: "pulse 2s ease-in-out infinite",
-          "@keyframes pulse": {
-            "0%, 100%": {
-              boxShadow: "0 4px 20px rgba(37, 211, 102, 0.4)",
-            },
-            "50%": {
-              boxShadow: "0 4px 30px rgba(37, 211, 102, 0.7)",
-            },
-          },
-        }}
-        aria-label="WhatsApp"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="currentColor"
-          style={{
-            width: "60%",
-            height: "60%",
-          }}
-        >
-          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" />
-        </svg>
-      </Fab>
-
       {/* Floating Scroll to Top Button - Shows on Scroll */}
       {showScrollTop && (
         <Fab
+          className="scroll-to-top-fab"
           onClick={handleScrollToTop}
           sx={{
             position: "fixed",
