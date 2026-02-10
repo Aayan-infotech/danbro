@@ -18,7 +18,7 @@ import MyLocationIcon from "@mui/icons-material/MyLocation";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import CloseIcon from "@mui/icons-material/Close";
 import { getCurrentLocation, storeLocation } from "../../utils/location";
-import { initGooglePlaces, getPlacePredictions, getPlaceDetails } from "../../utils/googlePlaces";
+import { initGooglePlaces, getPlacePredictions, getPlaceDetails, getShortAddressFromComponents } from "../../utils/googlePlaces";
 import { checkServiceAvailability } from "../../utils/apiService";
 
 export const DeliveryCheckDialog = ({ open, onClose, initialLocationLabel = "" }) => {
@@ -147,7 +147,7 @@ export const DeliveryCheckDialog = ({ open, onClose, initialLocationLabel = "" }
               { location: { lat: location.lat, lng: location.long } },
               (results, status) => {
                 const ok = status === (window.google.maps.GeocoderStatus?.OK || "OK");
-                if (ok && Array.isArray(results) && results[0]?.formatted_address) {
+                if (ok && Array.isArray(results) && results.length > 0) {
                   resolve({ results, status });
                 } else {
                   resolve({ results: [], status });
@@ -156,8 +156,10 @@ export const DeliveryCheckDialog = ({ open, onClose, initialLocationLabel = "" }
             );
           });
           const results = response?.results;
-          if (Array.isArray(results) && results[0]?.formatted_address) {
-            addressLabel = results[0].formatted_address;
+          if (Array.isArray(results) && results[0]) {
+            const first = results[0];
+            const shortAddr = getShortAddressFromComponents(first.address_components || []);
+            addressLabel = shortAddr || first.formatted_address || addressLabel;
           }
         }
       } catch (geoError) {

@@ -62,6 +62,35 @@ export const initGooglePlaces = () => {
   });
 };
 
+/**
+ * Build a short address from Google address_components (e.g. "C-84, Vibhuti Khand, Gomti Nagar").
+ * Uses premise, sublocality, locality so the label is concise instead of full postal formatted_address.
+ * @param {Array<{long_name: string, short_name: string, types: string[]}>} addressComponents
+ * @returns {string} Short address or empty if no components
+ */
+export const getShortAddressFromComponents = (addressComponents) => {
+  if (!Array.isArray(addressComponents) || addressComponents.length === 0) return '';
+
+  const get = (types) => {
+    const c = addressComponents.find((comp) => types.some((t) => comp.types && comp.types.includes(t)));
+    return c ? c.long_name : '';
+  };
+
+  const premise = get(['premise', 'subpremise']);
+  const sublocality = get(['sublocality_level_1', 'sublocality']);
+  const locality = get(['locality']);
+  const route = get(['route']);
+  const streetNumber = get(['street_number']);
+
+  const parts = [];
+  if (premise) parts.push(premise);
+  else if (streetNumber || route) parts.push([streetNumber, route].filter(Boolean).join(' '));
+  if (sublocality) parts.push(sublocality);
+  if (locality) parts.push(locality);
+
+  return parts.filter(Boolean).join(', ') || '';
+};
+
 // Get autocomplete predictions
 export const getPlacePredictions = (input, callback) => {
   if (!autocompleteService) {
@@ -117,14 +146,15 @@ export const getPlaceDetails = (placeId) => {
         service.getDetails(
           {
             placeId: placeId,
-            fields: ['geometry', 'formatted_address', 'name'],
+            fields: ['geometry', 'formatted_address', 'name', 'address_components'],
           },
           (place, status) => {
             if (status === window.google.maps.places.PlacesServiceStatus.OK && place) {
+              const shortAddr = getShortAddressFromComponents(place.address_components || []);
               resolve({
                 lat: place.geometry.location.lat(),
                 long: place.geometry.location.lng(),
-                address: place.formatted_address || place.name,
+                address: shortAddr || place.formatted_address || place.name,
               });
             } else {
               reject(new Error('Failed to get place details'));
@@ -139,14 +169,15 @@ export const getPlaceDetails = (placeId) => {
     service.getDetails(
       {
         placeId: placeId,
-        fields: ['geometry', 'formatted_address', 'name'],
+        fields: ['geometry', 'formatted_address', 'name', 'address_components'],
       },
       (place, status) => {
         if (status === window.google.maps.places.PlacesServiceStatus.OK && place) {
+          const shortAddr = getShortAddressFromComponents(place.address_components || []);
           resolve({
             lat: place.geometry.location.lat(),
             long: place.geometry.location.lng(),
-            address: place.formatted_address || place.name,
+            address: shortAddr || place.formatted_address || place.name,
           });
         } else {
           reject(new Error('Failed to get place details'));
