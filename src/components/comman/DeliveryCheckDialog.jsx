@@ -124,13 +124,6 @@ export const DeliveryCheckDialog = ({ open, onClose, initialLocationLabel = "" }
   };
 
   const handleUseCurrentLocation = async () => {
-    // NOTE: Current-location functionality is temporarily disabled as requested.
-    // Users can still search and select their delivery area manually above.
-    // To restore this feature, remove the `return;` below and uncomment the
-    // original implementation.
-    return;
-
-    /*
     try {
       setGettingLocation(true);
       setServiceMessage(null);
@@ -195,7 +188,6 @@ export const DeliveryCheckDialog = ({ open, onClose, initialLocationLabel = "" }
       setGettingLocation(false);
       setCheckingAvailability(false);
     }
-    */
   };
 
   return (
