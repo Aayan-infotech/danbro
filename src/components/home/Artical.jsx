@@ -4,12 +4,12 @@ import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import { useState, useRef } from "react";
 import { CustomCarousel, CustomCarouselArrow } from "../comman/CustomCarousel";
-import img1 from "../../assets/cakeimg.png";
-import img2 from "../../assets/cakeimg.png";
-import img3 from "../../assets/cakeimg.png";
-import img4 from "../../assets/cakeimg.png";
-import img5 from "../../assets/cakeimg.png";
-import img6 from "../../assets/cakeimg.png";
+import img1 from "../../assets/cakeimg.webp";
+import img2 from "../../assets/cakeimg.webp";
+import img3 from "../../assets/cakeimg.webp";
+import img4 from "../../assets/cakeimg.webp";
+import img5 from "../../assets/cakeimg.webp";
+import img6 from "../../assets/cakeimg.webp";
 // ⭐ Decorative Images
 import topLeftIcon from "../../assets/Groupartical.png";
 import bottomRightIcon from "../../assets/Groupartical.png";

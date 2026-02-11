@@ -4,7 +4,7 @@ import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
 import { Link, useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import { PrefetchLink } from "./PrefetchLink";
 import { useState, useEffect, useRef } from "react";
-import logo from "../../assets/logo.png";
+import logo from "../../assets/logo.webp";
 import { DeliveryCheckDialog } from "./DeliveryCheckDialog";
 import { BusinessDialog } from "./BusinessDialog";
 import { AnimatedButton } from "./AnimatedButton";

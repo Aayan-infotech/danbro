@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { API_BASE_URL } from './apiUrl';
-import { getAccessToken, getRefreshToken } from './cookies';
+import { getAccessToken, getRefreshToken, clearAuthCookies } from './cookies';
 import { getStoredLocation } from './location';
 import { refreshTokenApi } from './apiService';
 
@@ -57,7 +57,6 @@ api.interceptors.response.use(
 
     const refresh = getRefreshToken();
     if (!refresh) {
-      const { clearAuthCookies } = await import('./cookies');
       clearAuthCookies();
       window.location.href = '/login';
       return Promise.reject(error);
@@ -85,7 +84,6 @@ api.interceptors.response.use(
     } catch (refreshErr) {
       isRefreshing = false;
       onRefreshed(null);
-      const { clearAuthCookies } = await import('./cookies');
       clearAuthCookies();
       window.location.href = '/login';
       return Promise.reject(refreshErr);

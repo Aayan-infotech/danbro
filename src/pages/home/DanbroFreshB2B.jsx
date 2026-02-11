@@ -13,7 +13,7 @@ import {
   Paper,
 } from "@mui/material";
 import { CustomText } from "../../components/comman/CustomText";
-import blankImage from "../../assets/blankimage.png";
+import blankImage from "../../assets/blankimage.webp";
 
 const BORDER_COLOR = "#f8b4c4";
 const ACTIVE_TAB_BG = "#c62828";

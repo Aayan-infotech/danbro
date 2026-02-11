@@ -23,7 +23,7 @@ import { ProductListPageSkeleton, ProductListSkeleton } from "../../components/c
 import { ProductGrid } from "../../components/products/ProductGrid";
 import { RecommendedProducts } from "../../components/products/RecommendedProducts";
 import { CustomButton } from "../../components/comman/CustomButton";
-import blankImage from "../../assets/blankimage.png";
+import blankImage from "../../assets/blankimage.webp";
 
 // Price range options sent as minPrice/maxPrice to GET /product/search (lat/long in headers)
 const PRICE_RANGE_OPTIONS = [

@@ -6,8 +6,8 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import LocalDiningIcon from "@mui/icons-material/LocalDining";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import PeopleIcon from "@mui/icons-material/People";
-import planning from "../../assets/2f1c127d9f6293a74bd052f2c516c77a6713fa7f.webp";
-import logo from "../../assets/logo.png";
+import planning from "../../assets/09f1ee59e9d78cc206e6e867e1cda04c1887d8f8.webp";
+import logo from "../../assets/logo.webp";
 
 const features = [
   {

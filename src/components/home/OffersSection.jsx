@@ -8,7 +8,7 @@ import { CustomCarousel, CustomCarouselArrow } from "../comman/CustomCarousel";
 import { CakeSection } from "./Cake";
 import { PersonalisedInstant } from "./PersonalisedInstant";
 import { TestimonialsSection } from "./TestimonialsSection";
-import specialMomentslogo from "../../assets/SPECIALMOMENTS.png";
+import specialMomentslogo from "../../assets/SPECIALMOMENTS.webp";
 import { Artical } from "./Artical";
 import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";

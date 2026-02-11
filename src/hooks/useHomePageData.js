@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useItemCategories } from './useItemCategories';
 import { fetchProducts } from '../utils/apiService';
-import blankImage from '../assets/blankimage.png';
+import blankImage from '../assets/blankimage.webp';
 
 /**
  * Custom hook to fetch all category products for home page in parallel

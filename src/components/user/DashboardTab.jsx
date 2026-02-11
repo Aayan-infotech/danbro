@@ -15,7 +15,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import { Link } from "react-router-dom";
 import { CustomText } from "../comman/CustomText";
 import { ProfileTable } from "./ProfileTable";
-import blankImage from "../../assets/blankimage.png";
+import blankImage from "../../assets/blankimage.webp";
 
 const getStatusMeta = (status) => {
   const raw = (status || "").toString().trim();

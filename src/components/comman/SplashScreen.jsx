@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Box } from "@mui/material";
-import logo from "../../assets/logo.png";
+import logo from "../../assets/logo.webp";
 
 export const SplashScreen = ({ onFinish }) => {
   const [isVisible, setIsVisible] = useState(true);

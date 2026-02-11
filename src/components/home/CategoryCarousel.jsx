@@ -2,7 +2,7 @@ import { Box, CircularProgress, Alert } from "@mui/material";
 import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import { CustomCarousel, CustomCarouselArrow } from "../comman/CustomCarousel";
-import cat1 from "../../assets/09f1ee59e9d78cc206e6e867e1cda04c1887d8f8.png";
+import cat1 from "../../assets/09f1ee59e9d78cc206e6e867e1cda04c1887d8f8.webp";
 import cat2 from "../../assets/60be109ca830b1d8ab92f161cd0ca3083a16e4ca-B0hMvy0v.webp";
 import cat3 from "../../assets/43676d15934fc50bdda59d3e39fd8a4ceaadcb9e-Rpx5ZY2j.webp";
 import { useItemCategories } from "../../hooks/useItemCategories";

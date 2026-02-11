@@ -13,7 +13,7 @@ import {
   Add as AddIcon,
   Remove as RemoveIcon,
 } from "@mui/icons-material";
-import blankImage from "../../assets/blankimage.png";
+import blankImage from "../../assets/blankimage.webp";
 
 const getItemPrice = (item) => {
   if (item?.lineTotal != null && item.lineTotal > 0) return Number(item.lineTotal).toFixed(2);

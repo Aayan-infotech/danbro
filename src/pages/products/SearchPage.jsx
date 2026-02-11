@@ -17,7 +17,7 @@ import { useProducts } from "../../hooks/useProducts";
 import { ProductGrid } from "../../components/products/ProductGrid";
 import { ProductListSkeleton } from "../../components/comman/Skeletons";
 import { CustomButton } from "../../components/comman/CustomButton";
-import blankImage from "../../assets/blankimage.png";
+import blankImage from "../../assets/blankimage.webp";
 
 const PRICE_RANGE_OPTIONS = [
   { value: "", label: "Price range" },

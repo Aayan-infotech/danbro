@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { fetchHomeLayout, invalidateHomeLayoutFetch } from '../utils/apiService';
-import blankImage from '../assets/blankimage.png';
+import blankImage from '../assets/blankimage.webp';
 
 // Cache for home layout data to prevent multiple API calls
 const homeLayoutCache = {

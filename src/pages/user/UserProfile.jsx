@@ -16,7 +16,7 @@ import { OrderHistoryTab } from "../../components/user/OrderHistoryTab";
 import { SavedAddressesTab } from "../../components/user/SavedAddressesTab";
 import { HelpSupportTab } from "../../components/user/HelpSupportTab";
 import { WishlistTab } from "../../components/user/WishlistTab";
-import blankImage from "../../assets/blankimage.png";
+import blankImage from "../../assets/blankimage.webp";
 import { getMyOrders, getRecentlyViewed } from "../../utils/apiService";
 
 export const UserProfile = () => {

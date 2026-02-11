@@ -3,7 +3,7 @@ import { useItemCategories } from "../../hooks/useItemCategories";
 import { fetchProducts } from "../../utils/apiService";
 import { ProductSectionCarousel } from "./ProductSectionCarousel";
 import { Box, CircularProgress, Alert } from "@mui/material";
-import blankImage from "../../assets/blankimage.png";
+import blankImage from "../../assets/blankimage.webp";
 
 /**
  * Component that fetches products by category groupname and displays them

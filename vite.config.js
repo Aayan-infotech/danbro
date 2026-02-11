@@ -7,15 +7,19 @@ export default defineConfig({
   build: {
     chunkSizeWarningLimit: 1000,
     sourcemap: false,
-    target: 'es2015',
+    target: 'es2020',
     cssCodeSplit: true,
+    minify: 'esbuild',
     rollupOptions: {
       output: {
-        // No manualChunks: splitting into react/mui/router/vendor etc. was causing
-        // "Cannot access 'X' before initialization" at runtime. Let Vite do default chunking.
         chunkFileNames: 'assets/[name]-[hash].js',
         entryFileNames: 'assets/[name]-[hash].js',
         assetFileNames: 'assets/[name]-[hash][extname]',
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            return 'vendor';
+          }
+        },
       },
     },
   },

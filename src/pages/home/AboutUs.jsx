@@ -1,9 +1,9 @@
 import { Box, Container, Grid, Card, CardContent, Button, Avatar } from "@mui/material";
 import { CustomText } from "../../components/comman/CustomText";
-import logo from "../../assets/logo.png";
+import logo from "../../assets/logo.webp";
 import { useEffect, useRef, useState } from "react";
 import blogHero from "../../assets/blog.png";
-import planning from "../../assets/2f1c127d9f6293a74bd052f2c516c77a6713fa7f.webp";
+import planning from "../../assets/09f1ee59e9d78cc206e6e867e1cda04c1887d8f8.webp";
 import { YouTubeVideosSection } from "../../components/home/YouTubeVideosSection";
 import BusinessIcon from "@mui/icons-material/Business";
 import PersonIcon from "@mui/icons-material/Person";

@@ -7,7 +7,7 @@ import { useHomeLayout } from "../../hooks/useHomeLayout";
 import { addToCart, getCart, increaseItemCount, decreaseItemCount } from "../../utils/cart";
 import { addToWishlist, removeFromWishlist, isInWishlist } from "../../utils/wishlist";
 import { getStoredLocation } from "../../utils/location";
-import blankImage from "../../assets/blankimage.png";
+import blankImage from "../../assets/blankimage.webp";
 import "./ProductDetails.css";
 import {
   ProductDetailsLoading,

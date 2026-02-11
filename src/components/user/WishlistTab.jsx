@@ -21,7 +21,7 @@ import { ProfileTable } from "./ProfileTable";
 import { getWishlist, removeFromWishlist } from "../../utils/wishlist";
 import { getAccessToken } from "../../utils/cookies";
 import { fetchProductById } from "../../utils/apiService";
-import blankImage from "../../assets/blankimage.png";
+import blankImage from "../../assets/blankimage.webp";
 
 const responsivePadding = { xs: 1, sm: 2, md: 3 };
 

@@ -1,7 +1,7 @@
 import { Box,  Button } from "@mui/material";
 import { CustomText } from "../comman/CustomText";
 import { useEffect, useRef } from "react";
-import logo from "../../assets/logo.png";
+import logo from "../../assets/logo.webp";
 import mens from "../../assets/bbd53846cb92a734a26973d3c7cd83699addf233.png";
 
 export const PersonalisedInstant = () => {

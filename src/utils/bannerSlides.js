@@ -1,4 +1,4 @@
-import slider5 from "../assets/slider-5.png";
+import slider5 from "../assets/slider-5.webp";
 import bannerSlide2 from "../assets/banner-slide-2.webp";
 import bannerSlide3 from "../assets/banner-slide-3.webp";
 import bannerSlide4 from "../assets/banner-slide-4.jpg";

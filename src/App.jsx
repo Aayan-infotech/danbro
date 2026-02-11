@@ -1,7 +1,7 @@
 import { Box, Fab } from "@mui/material";
 import { KeyboardArrowUp } from "@mui/icons-material";
 import { BrowserRouter, useLocation } from "react-router-dom";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, lazy, Suspense } from "react";
 import { Provider } from "react-redux";
 import { store } from "./store/store";
 import { Footer } from "./components/comman/Footer";
@@ -9,9 +9,12 @@ import AppRoutes from "./routes/AppRoutes";
 import { Navbar } from "./components/comman/Navbar";
 import { TopHeader } from "./components/comman/TopHeader";
 import { DeliveryCheckDialog } from "./components/comman/DeliveryCheckDialog";
-import { SocialMediaIcons } from "./components/comman/SocialMediaIcons";
 import { getStoredLocation } from "./utils/location";
 import { prefetchRoute } from "./utils/routePrefetch";
+
+const SocialMediaIcons = lazy(() =>
+  import("./components/comman/SocialMediaIcons").then((m) => ({ default: m.SocialMediaIcons }))
+);
 
 const ScrollToTop = () => {
   const { pathname } = useLocation();
@@ -138,7 +141,11 @@ const AppContent = () => {
   return (
     <>
       <ScrollToTop />
-      {isHomePage && <SocialMediaIcons />}
+      {isHomePage && (
+        <Suspense fallback={null}>
+          <SocialMediaIcons />
+        </Suspense>
+      )}
       <DeliveryCheckDialog
         open={showDeliveryDialog}
         onClose={handleCloseDeliveryDialog}
