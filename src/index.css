@@ -159,7 +159,7 @@ span,
 /* Desktop/Laptop/Small laptop - keep 111px so content does not go under fixed navbar */
 @media (min-width: 1200px) {
   .css-awq9fn {
-    padding-top: 80px !important;
+    padding-top: 20px !important;
   }
 }
 

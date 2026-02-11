@@ -5,11 +5,39 @@ import { useNavigate } from "react-router-dom";
 import { getAllBlogs } from "../../utils/apiService";
 import blogHero from "../../assets/blog.png";
 
+// Strip HTML tags from text
+const stripHtmlTags = (html) => {
+  if (typeof html !== "string") return "";
+  // Remove HTML tags using regex
+  let text = html.replace(/<[^>]*>/g, "");
+  // Decode HTML entities using browser's built-in method
+  if (typeof document !== "undefined") {
+    const textarea = document.createElement("textarea");
+    textarea.innerHTML = text;
+    text = textarea.value;
+  } else {
+    // Fallback: decode common HTML entities manually
+    const entityMap = {
+      "&amp;": "&",
+      "&lt;": "<",
+      "&gt;": ">",
+      "&quot;": '"',
+      "&#39;": "'",
+      "&nbsp;": " ",
+    };
+    text = text.replace(/&[#\w]+;/g, (entity) => entityMap[entity] || entity);
+  }
+  // Clean up extra whitespace and newlines
+  return text.replace(/\s+/g, " ").trim();
+};
+
 // Normalize blog from API (supports _id, createdAt, category/categoryName, author/authorName, image string URL)
 const normalizeBlog = (raw) => {
   const id = raw?._id ?? raw?.id;
   const title = raw?.title ?? "";
-  const description = raw?.description ?? raw?.content ?? raw?.body ?? "";
+  const rawDescription = raw?.description ?? raw?.content ?? raw?.body ?? "";
+  // Strip HTML tags from description for list view
+  const description = stripHtmlTags(rawDescription);
   const image = raw?.image ?? raw?.thumbnail ?? raw?.featuredImage ?? raw?.bannerImage;
   const category = raw?.category ?? raw?.categoryName ?? raw?.categoryId ?? "Blog";
   const author = raw?.author ?? raw?.authorName ?? raw?.postedBy ?? "Danbro by Mr Brown Bakery";
@@ -46,7 +74,11 @@ export const Blog = () => {
         setError(null);
         const data = await getAllBlogs();
         if (!cancelled) {
-          setBlogs(Array.isArray(data) ? data.map(normalizeBlog) : []);
+          // Filter only published blogs if isPublished field exists
+          const blogsArray = Array.isArray(data) 
+            ? data.filter(blog => blog?.isPublished !== false) // Only show if isPublished is not false
+            : [];
+          setBlogs(blogsArray.map(normalizeBlog));
         }
       } catch (err) {
         if (!cancelled) {

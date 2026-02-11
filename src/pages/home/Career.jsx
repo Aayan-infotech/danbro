@@ -40,7 +40,7 @@ export const Career = () => {
   }, []);
 
   return (
-    <Box sx={{ width: "100%", overflowX: "hidden", backgroundColor: "#fff", pb: { xs: 12, sm: 8, md: 0 }, p: { xs: 1.25, sm: 1.5, md: 0 }, mb: 5 }}>
+    <Box sx={{ width: "100%", overflowX: "hidden", backgroundColor: "#fff", pb: { xs: 12, sm: 8, md: 0 }, p: { xs: 1.25, sm: 1.5, md: 0 }, pt: { xs: 0, md: 6 }, mb: 5 }}>
       <Container sx={{ py: { xs: 4, sm: 4, md: 4, lg: 0 }, px: { xs: 2, sm: 3, md: 4, lg: 4 } }}>
         <Box
           ref={sectionRefs.header}

@@ -486,7 +486,11 @@ export const ProductDetails = () => {
 
   return (
     <Box sx={{ overflowX: "hidden", maxWidth: "100%", mb: 4 }}>
-      <Container maxWidth="lg" sx={{ pb: { xs: 4, sm: 5, md: 6 }, p: { xs: 1.5, sm: 2, md: 3 }, maxWidth: "100%" }}>
+      <Container 
+        maxWidth="lg" 
+        className="productDetailsContainer" 
+        sx={{ pb: { xs: 4, sm: 5, md: 6 }, px: { xs: 1, sm: 2, md: 3 }, maxWidth: "100%" }}
+      >
         <ProductDetailsBreadcrumbs
           product={product}
           productData={productData}

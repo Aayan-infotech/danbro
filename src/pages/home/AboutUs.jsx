@@ -28,7 +28,7 @@ export const AboutUs = () => {
   }
   if (hasDynamicContent) {
     return (
-      <Box sx={{ pt: { xs: 0, md: 13 } }}>
+      <Box sx={{ pt: { xs: 0, md: 3 } }}>
         <StaticContentLayout
           pageTitle={data?.title ?? "About Us"}
           updatedAt={data?.updatedAt}
@@ -86,18 +86,8 @@ export const AboutUs = () => {
     },
   ];
 
-  const stats = [
-    { number: "500", label: "VENDORS ASSOCIATED", gold: true },
-    { number: "05", label: "OFFICES" },
-    { number: "500", label: "TEAM MEMBERS" },
-    { number: "300", label: "PRODUCTS" },
-    { number: "2006", label: "FOUNDING YEAR", gold: true },
-    { number: "200000", label: "HAPPY CUSTOMERS", gold: true },
-  ];
-
-
   return (
-    <Box sx={{ width: "100%", overflowX: "hidden", pb: { xs: 4, md: 0 }, p: { xs: 1.25, md: 0 }, pt: { xs: 0, md: 13 } }}>
+    <Box sx={{ width: "100%", overflowX: "hidden", pb: { xs: 4, md: 0 }, p: { xs: 1.25, md: 0 }, pt: { xs: 0, md: 3 } }}>
       <Box
         ref={sectionRefs.header}
         sx={{

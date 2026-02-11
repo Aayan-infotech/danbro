@@ -240,12 +240,12 @@ export const ProductList = () => {
   const recommendedProducts = [];
 
   return (
-    <Box sx={{ minHeight: "100vh", backgroundColor: "#fff", py: { xs: 3, md: 0 }, pb: { xs: 8, md: 0 }, p: { xs: 1.25, md: 0 }}}>
-      <Container maxWidth="false" sx={{ px: { xs: 2, md: 3, lg: 2 }, py: 2 }}>
+    <Box sx={{ minHeight: "100vh", backgroundColor: "#fff", pb: { xs: 8, md: 0 }}}>
+      <Container maxWidth="false" sx={{ px: { xs: 1, md: 3, lg: 2 }, py: { xs: 0, md: 2 } }}>
         <Box
           sx={{
             mb: { xs: 3, md: 4 },
-            px: { xs: 2, md: 3, lg: 2 },
+            px: { xs: 1, md: 3, lg: 2 },
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
@@ -358,11 +358,11 @@ export const ProductList = () => {
         </Box>
         <CategoryTabs categories={categories} selectedCategory={selectedCategory} onChange={handleCategoryChange} />
         {productsError && (
-          <Box sx={{ px: { xs: 2, md: 3, lg: 2 }, mb: 2 }}>
+          <Box sx={{ px: { xs: 1, md: 3, lg: 2 }, mb: 2 }}>
             <Alert severity="error" sx={{ borderRadius: 2 }}>{productsError}</Alert>
           </Box>
         )}
-        <Box ref={productRef} sx={{ px: { xs: 2, md: 3, lg: 2 } }}>
+        <Box ref={productRef} sx={{ px: { xs: 1, md: 3, lg: 2 } }}>
           {productsLoading && currentPage === 1 ? (
             <ProductListSkeleton count={8} />
           ) : (
@@ -414,7 +414,7 @@ export const ProductList = () => {
       </Container>
 
       {/* Promotional Banner */}
-      <Container maxWidth="false" sx={{ px: { xs: 2, md: 3, lg: 2 } }}>
+      <Container maxWidth="false" sx={{ px: { xs: 1, md: 3, lg: 2 } }}>
         <Box
           sx={{
             backgroundImage: `url(${Rectangle45})`,
@@ -512,7 +512,7 @@ export const ProductList = () => {
       {recommendedProducts && recommendedProducts.length > 0 ? (
         <RecommendedProducts recommendedProducts={recommendedProducts} />
       ) : (
-        <Container maxWidth="false" sx={{ py: 4, mb: 4, px: { xs: 2, md: 3, lg: 2 } }}>
+        <Container maxWidth="false" sx={{ py: 4, mb: 4, px: { xs: 1, md: 3, lg: 2 } }}>
           <Box
             sx={{
               textAlign: "center",

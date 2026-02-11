@@ -2,8 +2,17 @@
   background: #fff;
 }
 
-.productDetailsContainer {
-  max-width: 1200px;
+/* Force padding-top at all breakpoints with high specificity */
+.productDetailsContainer.MuiContainer-root,
+.MuiContainer-root.productDetailsContainer {
+  margin-top: 0px !important;
+}
+
+@media (min-width: 0px) {
+  .productDetailsContainer.MuiContainer-root,
+  .MuiContainer-root.productDetailsContainer {
+    margin-top: 0px !important;
+  }
 }
 
 .pdTopGrid {
