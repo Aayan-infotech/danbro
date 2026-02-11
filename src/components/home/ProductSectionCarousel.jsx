@@ -1,15 +1,17 @@
 import { Box, IconButton, CircularProgress, Rating } from "@mui/material";
 import { CustomText } from "../comman/CustomText";
-import { CustomCarousel, CustomCarouselArrow } from "../comman/CustomCarousel";
+import { CustomCarousel } from "../comman/CustomCarousel";
 import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
+import AddIcon from "@mui/icons-material/Add";
+import RemoveIcon from "@mui/icons-material/Remove";
 import { useRef, useEffect, useState, memo, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import { addToCart } from "../../utils/cart";
+import { addToCart, increaseItemCount, decreaseItemCount } from "../../utils/cart";
 import { addToWishlist, removeFromWishlist, getWishlist } from "../../utils/wishlist";
 import { CustomToast } from "../comman/CustomToast";
 import { useCartProductIds } from "../../hooks/useCartProductIds";
@@ -24,12 +26,14 @@ export const ProductSectionCarousel = memo(({
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { cartProductIds } = useCartProductIds();
+  const { cartProductIds, getCartQuantity, refreshCartIds } = useCartProductIds();
   const sliderRef = useRef(null);
   const [visible, setVisible] = useState(false);
   const [hoveredIndex, setHoveredIndex] = useState(null);
   const sectionRef = useRef(null);
   const [loadingCart, setLoadingCart] = useState(new Set());
+  const [quantityUpdatingKey, setQuantityUpdatingKey] = useState(null); // "itemKey|increase" | "itemKey|decrease"
+  const quantityUpdatingRef = useRef(null);
   const [toast, setToast] = useState({
     open: false,
     message: "",
@@ -83,9 +87,45 @@ export const ProductSectionCarousel = memo(({
 
   const isProductInCart = useCallback((product) => {
     const productId = product?.productId || product?.id || product?._id;
-    // Use isCart from product data first (faster), then check cartProductIds
+    // Use isCart from product data first (faster), then check cartProductIds (localStorage + API)
     return product?.isCart === true || (productId && cartProductIds.has(String(productId)));
   }, [cartProductIds]);
+
+  const getItemKey = useCallback((productId, weight) => {
+    const w = (weight == null ? "" : String(weight)).trim();
+    const normalized = w === "" || w.toLowerCase() === "n/a" ? "" : w;
+    return `${String(productId ?? "")}|${normalized}`;
+  }, []);
+
+  const handleQuantityChange = useCallback(async (product, change) => {
+    const productId = product?.productId || product?.id || product?._id;
+    if (!productId) return;
+    const weight = product?.weight ?? null;
+    const key = getItemKey(productId, weight);
+    const action = change > 0 ? "increase" : "decrease";
+    const stateKey = `${key}|${action}`;
+    if (quantityUpdatingRef.current != null) return;
+    quantityUpdatingRef.current = stateKey;
+    setQuantityUpdatingKey(stateKey);
+    try {
+      if (change > 0) {
+        await increaseItemCount(productId, weight);
+      } else {
+        await decreaseItemCount(productId, weight);
+      }
+      window.dispatchEvent(new CustomEvent("cartUpdated"));
+      if (location.pathname === "/" || location.pathname === "/home") {
+        window.dispatchEvent(new CustomEvent("cartUpdatedOnHomepage"));
+      }
+    } catch (err) {
+      console.error("Error updating quantity:", err);
+      setToast({ open: true, message: err?.response?.data?.message || "Failed to update quantity", severity: "error", loading: false });
+      setTimeout(() => setToast((prev) => ({ ...prev, open: false })), 3000);
+    } finally {
+      quantityUpdatingRef.current = null;
+      setQuantityUpdatingKey(null);
+    }
+  }, [getItemKey, location.pathname]);
 
   const handleCartAction = useCallback((e, product) => {
     e.stopPropagation();
@@ -143,8 +183,8 @@ export const ProductSectionCarousel = memo(({
       const quantity = 1;
       // Create product snapshot for guest mode
       // Save price as object/array format, and also save rate/mrp directly for easy access
-      const priceObj = product?.price && typeof product.price === "object" && !Array.isArray(product.price) 
-        ? product.price 
+      const priceObj = product?.price && typeof product.price === "object" && !Array.isArray(product.price)
+        ? product.price
         : (Array.isArray(product?.price) ? product.price : null);
       const productSnapshot = {
         name: product?.name || product?.title,
@@ -156,7 +196,7 @@ export const ProductSectionCarousel = memo(({
         veg: product?.veg,
         courier: product?.courier,
       };
-      await addToCart(productId, quantity, { 
+      await addToCart(productId, quantity, {
         rate: effectiveRate,
         weight: product?.weight || null,
         productSnapshot: productSnapshot
@@ -233,8 +273,11 @@ export const ProductSectionCarousel = memo(({
       ref={sectionRef}
       sx={{
         position: "relative",
+        width: "100%",
+        margin: "0 auto",
         background: bgColor,
-        mb:3,
+        mb: { xs: 2, md: 4 },
+        px: { xs: 1, md: 2 },
         borderRadius: { xs: 0, md: 3 },
         opacity: visible ? 1 : 0,
         transform: visible ? "translateY(0)" : "translateY(50px)",
@@ -258,88 +301,105 @@ export const ProductSectionCarousel = memo(({
         },
       }}
     >
-      {/* Section Header */}
-      <Box sx={{ textAlign: "center", mb: { xs: 5, md: 6 }, position: "relative", zIndex: 1 }}>
-        {Icon && (
-          <Box
-            sx={{
-              display: "inline-flex",
-              alignItems: "center",
-              justifyContent: "center",
-              width: 70,
-              height: 70,
-              borderRadius: "50%",
-              bgcolor: "rgba(255,181,161,0.15)",
-              animation: visible ? "pulseIcon 2s ease-in-out infinite" : "none",
-              "@keyframes pulseIcon": {
-                "0%, 100%": { transform: "scale(1)" },
-                "50%": { transform: "scale(1.1)" },
-              },
-            }}
-          >
-            <Icon sx={{ fontSize: 40, color: "#FF9472" }} />
-          </Box>
-        )}
-        <CustomText sx={{ fontSize: { xs: 12, md: 14 }, fontWeight: 600, color: "#FF9472", textTransform: "uppercase", letterSpacing: 2, }}>
-          {subtitle}
-        </CustomText>
-        <CustomText
+      {/* Section Header – same as category: title + arrows, same spacing */}
+      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 1, mb: 2.5, position: "relative", zIndex: 1, }}>
+        <Box
+          component="h2"
+          className="home-section-heading"
           sx={{
-            fontSize: { xs: 32, sm: 38, md: 48 },
+            fontFamily: "'Playfair Display', serif",
+            fontSize: { xs: "1.8rem", md: "2.2rem" },
             fontWeight: 800,
-            color: "var(--themeColor)",
-            position: "relative",
-            display: "inline-block",
-            fontFamily: "'Inter', sans-serif",
-            fontStyle: "italic",
-            "&::after": {
-              content: '""',
-              position: "absolute",
-              bottom: "-10px",
-              left: "50%",
-              transform: "translateX(-50%)",
-              width: visible ? "100px" : "0",
-              height: "4px",
-              background: "linear-gradient(90deg, transparent, #FF9472, transparent)",
-              borderRadius: "2px",
-              transition: "width 0.4s ease 0.15s",
-            },
+            color: "#2d1e1b",
+            letterSpacing: "-0.01em",
+            display: "flex",
+            alignItems: "center",
+            gap: 1.5,
+            m: 0,
           }}
         >
-          {title}
-        </CustomText>
+          {Icon && (
+            <Box
+              sx={{
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                width: { xs: 48, md: 56 },
+                height: { xs: 48, md: 56 },
+                borderRadius: "50%",
+                bgcolor: "rgba(95, 41, 48, 0.08)",
+              }}
+            >
+              <Icon sx={{ fontSize: { xs: 28, md: 32 }, color: "#5F2930", opacity: 0.9 }} />
+            </Box>
+          )}
+          <span>{title}</span>
+          {subtitle && (
+            <Box
+              component="span"
+              sx={{
+                background: "#5F2930",
+                color: "white",
+                py: 0.4,
+                px: 1.2,
+                borderRadius: "60px",
+                fontSize: "0.85rem",
+                fontWeight: 600,
+                letterSpacing: "1px",
+              }}
+            >
+              {subtitle}
+            </Box>
+          )}
+        </Box>
+        <Box sx={{ display: "flex", gap: 1.2 }}>
+          <IconButton
+            onClick={() => sliderRef.current?.handlePrev()}
+            sx={{
+              width: 48,
+              height: 48,
+              borderRadius: "60px",
+              bgcolor: "white",
+              border: "1px solid rgba(95, 41, 48, 0.2)",
+              color: "#5F2930",
+              boxShadow: "0 6px 14px rgba(0,0,0,0.02)",
+              "&:hover": {
+                bgcolor: "#5F2930",
+                color: "white",
+                borderColor: "#5F2930",
+                transform: "scale(1.06)",
+              },
+            }}
+            aria-label="Previous"
+          >
+            <ArrowBackIosNewIcon sx={{ fontSize: "1.2rem" }} />
+          </IconButton>
+          <IconButton
+            onClick={() => sliderRef.current?.handleNext()}
+            sx={{
+              width: 48,
+              height: 48,
+              borderRadius: "60px",
+              bgcolor: "white",
+              border: "1px solid rgba(95, 41, 48, 0.2)",
+              color: "#5F2930",
+              boxShadow: "0 6px 14px rgba(0,0,0,0.02)",
+              "&:hover": {
+                bgcolor: "#5F2930",
+                color: "white",
+                borderColor: "#5F2930",
+                transform: "scale(1.06)",
+              },
+            }}
+            aria-label="Next"
+          >
+            <ArrowForwardIosIcon sx={{ fontSize: "1.2rem" }} />
+          </IconButton>
+        </Box>
       </Box>
 
       {/* Products Carousel */}
       <Box sx={{ position: "relative", zIndex: 1 }}>
-        <CustomCarouselArrow
-          direction="prev"
-          onClick={() => sliderRef.current?.handlePrev()}
-          sx={{
-            position: "absolute",
-            left: { xs: -15, md: -25 },
-            top: "50%",
-            transform: "translateY(-50%)",
-            zIndex: 10,
-            backgroundColor: "#fff",
-            border: "2px solid rgba(255,181,161,0.3)",
-            width: { xs: 40, md: 50 },
-            height: { xs: 40, md: 50 },
-            transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-            boxShadow: "0 4px 15px rgba(0,0,0,0.1)",
-            "&:hover": {
-              backgroundColor: "var(--themeColor)",
-              borderColor: "var(--themeColor)",
-              transform: "translateY(-50%) scale(1.1)",
-              "& svg": {
-                color: "#fff",
-              },
-            },
-          }}
-        >
-          <ArrowBackIosNewIcon sx={{ fontSize: { xs: 20, md: 24 } }} />
-        </CustomCarouselArrow>
-
         <CustomCarousel
           ref={sliderRef}
           slidesToShow={4}
@@ -379,51 +439,64 @@ export const ProductSectionCarousel = memo(({
                   }
                 }}
                 sx={{
-                  bgcolor: "transparent",
-                  borderRadius: { xs: 2.5, md: 3 },
+                  bgcolor: "#ffffff",
+                  borderRadius: "48px",
                   overflow: "hidden",
                   cursor: "pointer",
                   position: "relative",
-                  boxShadow: "none",
-                  border: "none",
-                  transition: "all 0.35s cubic-bezier(0.4, 0, 0.2, 1)",
-                  willChange: "transform",
-                  "&::before": {
+                  boxShadow: "0 30px 50px -15px rgba(95, 41, 48, 0.14), 0 8px 20px rgba(95, 41, 48, 0.06)",
+                  border: "1px solid rgba(255, 226, 221, 0.5)",
+                  p: "2rem 1.8rem 2rem",
+                  display: "flex",
+                  flexDirection: "column",
+                  transition: "all 0.45s cubic-bezier(0.19, 1, 0.22, 1)",
+                  "&::after": {
                     content: '""',
                     position: "absolute",
-                    inset: 0,
-                    background:
-                      hoveredIndex === index
-                        ? `linear-gradient(
-                      135deg,
-                      ${product?.color || "#FF9472"}12 0%,
-                      ${product?.color || "#FF9472"}08 50%,
-                      transparent 100%
-                    )`
-                        : "transparent",
+                    top: "-30%",
+                    left: "-20%",
+                    width: "140%",
+                    height: "140%",
+                    background: "radial-gradient(circle at 30% 40%, rgba(95, 41, 48, 0.04) 0%, transparent 45%), radial-gradient(circle at 80% 70%, rgba(95, 41, 48, 0.03) 0%, transparent 50%)",
                     opacity: hoveredIndex === index ? 1 : 0,
-                    transition: "opacity 0.3s ease",
-                    zIndex: 1,
+                    transition: "opacity 0.7s ease",
                     pointerEvents: "none",
                   },
                   "&:hover": {
-                    backgroundColor: "#fff",       // ✅ hover pe card feel
-                    transform: "translateY(-15px) scale(1.03) rotateY(2deg)",
-                    boxShadow: `0 25px 60px ${product?.color || "#FF9472"}30`,
-                    borderRadius: { xs: 2.5, md: 3 },
-
+                    transform: "translateY(-10px) scale(1.01)",
+                    boxShadow: "0 48px 70px -18px rgba(95, 41, 48, 0.24)",
                     "& .product-image": {
-                      transform: "scale(1.1)",
+                      transform: "scale(1.05)",
                     },
-                    "& .add-cart-btn": {
-                      opacity: 1,
-                      transform: "translateY(0)",
+                    "& .modern-image-section": {
+                      borderColor: "rgba(95, 41, 48, 0.25)",
+                      boxShadow: "0 22px 36px -12px rgba(95, 41, 48, 0.22)",
+                    },
+                    "& .product-name-modern": {
+                      color: "#5F2930",
                     },
                   },
                 }}
               >
-                {/* Product Image */}
-                <Box sx={{ position: "relative", height: { xs: 200, md: 250 }, overflow: "hidden", background: "#f9f9f9", }}>
+                {/* Modern image section */}
+                <Box
+                  className="modern-image-section"
+                  sx={{
+                    position: "relative",
+                    width: "100%",
+                    height: 240,
+                    borderRadius: "32px",
+                    bgcolor: "#fdf5f2",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    mb: 1.6,
+                    overflow: "hidden",
+                    border: "2px solid rgba(95, 41, 48, 0.08)",
+                    boxShadow: "0 12px 26px -8px rgba(95, 41, 48, 0.12)",
+                    transition: "all 0.4s",
+                  }}
+                >
                   <Box
                     className="product-image"
                     component="img"
@@ -440,166 +513,121 @@ export const ProductSectionCarousel = memo(({
                     }}
                   />
 
-                  {/* Badge */}
+                  {/* Brand / Badge – top left */}
                   {showBadge && product?.badge && (
                     <Box
                       sx={{
                         position: "absolute",
-                        top: 12,
-                        left: 12,
-                        bgcolor: product?.badgeColor || "var(--themeColor)",
+                        top: 20,
+                        left: 22,
+                        bgcolor: "rgba(95, 41, 48, 0.92)",
                         color: "#fff",
-                        px: 1.5,
+                        px: 1.2,
                         py: 0.5,
-                        borderRadius: 2,
-                        fontSize: 10,
-                        fontWeight: 700,
-                        textTransform: "uppercase",
-                        letterSpacing: "0.5px",
-                        boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
-                        zIndex: 2,
-                        animation: hoveredIndex === index ? "badgePulse 1.5s ease-in-out infinite" : "none",
-                        "@keyframes badgePulse": {
-                          "0%, 100%": { transform: "scale(1)" },
-                          "50%": { transform: "scale(1.05)" },
-                        },
+                        borderRadius: "60px",
+                        fontSize: "0.8rem",
+                        fontWeight: 600,
+                        letterSpacing: "0.8px",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 0.5,
+                        border: "1px solid rgba(255,255,255,0.35)",
+                        boxShadow: "0 8px 20px rgba(95, 41, 48, 0.4)",
+                        zIndex: 10,
                       }}
                     >
                       {product?.badge}
                     </Box>
                   )}
 
-                  {/* Veg / Non-Veg dot - top left corner (when badge not present) */}
-                  {!product?.badge && product?.veg != null && product?.veg !== "" && (
+                  {/* Veg (Y) / Non-Veg (N) dot – top right: green / red */}
+                  {product?.veg != null && product?.veg !== "" && (
                     <Box
                       sx={{
                         position: "absolute",
-                        top: 12,
-                        left: 12,
-                        width: 12,
-                        height: 12,
+                        top: 20,
+                        right: 20,
+                        width: 14,
+                        height: 14,
                         borderRadius: "50%",
                         bgcolor: product?.veg === "Y" || product?.veg === "y" ? "#2e7d32" : "#d32f2f",
-                        boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
-                        zIndex: 2,
                         border: "2px solid #fff",
+                        boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
+                        zIndex: 11,
                       }}
                       aria-label={product?.veg === "Y" || product?.veg === "y" ? "Veg" : "Non-Veg"}
                     />
                   )}
-
-                  {/* Added to Cart Badge - top right corner */}
-                  {isProductInCart(product) && (
-                    <Box
-                      sx={{
-                        position: "absolute",
-                        top: 12,
-                        right: 12,
-                        bgcolor: "success.main",
-                        color: "#fff",
-                        px: 1.5,
-                        py: 0.5,
-                        borderRadius: 2,
-                        fontSize: 11,
-                        fontWeight: 700,
-                        textTransform: "uppercase",
-                        letterSpacing: "0.5px",
-                        boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
-                        zIndex: 2,
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 0.5,
-                      }}
-                    >
-                      ✓ Added
-                    </Box>
-                  )}
-
-                  {/* Courier - top right corner (when not in cart) */}
-                  {!isProductInCart(product) && product?.courier != null && product?.courier !== "" && (
-                    <Box
-                      sx={{
-                        position: "absolute",
-                        top: 12,
-                        right: 12,
-                        bgcolor:
-                          product.courier === "Y" || product.courier === "y"
-                            ? "#2e7d32"
-                            : "#d32f2f",
-                        color: "#fff",
-                        px: 1.25,
-                        py: 0.5,
-                        borderRadius: 2,
-                        fontSize: 10,
-                        fontWeight: 600,
-                        boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
-                        zIndex: 2,
-                      }}
-                    >
-                      Courier
-                    </Box>
-                  )}
-
-                  {/* Favorite Icon */}
-                  <IconButton
-                    onClick={(e) => handleWishlistToggle(e, product)}
-                    disabled={loadingWishlist.has(product?.productId || product?.id || product?._id)}
-                    sx={{
-                      position: "absolute",
-                      bottom: 12,
-                      right: 12,
-                      bgcolor: "rgba(255,255,255,0.95)",
-                      width: 38,
-                      height: 38,
-                      zIndex: 2,
-                      transition: "all 0.3s ease",
-                      "&:hover": {
-                        bgcolor: "#fff",
-                        transform: "scale(1.1)",
-                      },
-                    }}
-                  >
-                    {(product?.isWishlisted === true || wishlistIds.has(product?.productId || product?.id || product?._id)) ? (
-                      <FavoriteIcon sx={{ fontSize: 18, color: "#f44336" }} />
-                    ) : (
-                      <FavoriteBorderIcon sx={{ fontSize: 18, color: "var(--themeColor)" }} />
-                    )}
-                  </IconButton>
                 </Box>
 
-                {/* Product Info */}
-                <Box sx={{ p: { xs: 1, md: 1.5 }, position: "relative", zIndex: 2 }}>
-                  {/* Rating - 5 stars, dynamic from API */}
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 0.8 }}>
-                    <Rating
-                      value={Math.min(5, Math.max(0, Number(product?.avgRating ?? product?.rating) || 0))}
-                      readOnly
-                      precision={0.1}
-                      size="small"
-                      max={5}
-                      sx={{ color: "#FFB400", "& .MuiRating-iconFilled": { color: "#FFB400" }, "& .MuiRating-iconEmpty": { color: "rgba(255, 180, 0, 0.55)" } }}
-                    />
-                    <CustomText
-                      autoTitleCase={false}
-                      sx={{ fontSize: 12, fontWeight: 600, color: "#666", textTransform: "none" }}
+                {/* Product ID + courier micro */}
+                <Box
+                  sx={{
+                    fontSize: "0.65rem",
+                    fontWeight: 500,
+                    color: "#8f7a75",
+                    letterSpacing: "1px",
+                    textTransform: "uppercase",
+                    mb: 0.4,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 0.75,
+                    fontFamily: "'Space Grotesk', sans-serif",
+                  }}
+                >
+                  {product?.productId && (
+                    <span>
+                      ID · {String(product.productId).slice(-12)}
+                    </span>
+                  )}
+                  {product?.courier != null && product?.courier !== "" && (
+                    <Box
+                      component="span"
+                      sx={{
+                        fontSize: "0.75rem",
+                        bgcolor: "#f2eae7",
+                        px: 0.9,
+                        py: 0.25,
+                        borderRadius: "30px",
+                        fontWeight: 600,
+                        color: "#5F2930",
+                        border: "1px solid rgba(95, 41, 48, 0.1)",
+                      }}
                     >
-                      {(Number(product?.avgRating ?? product?.rating) || 0).toFixed(1)}
-                      {(Number(product?.totalReviews ?? product?.reviews) || 0) > 0 && ` (${Number(product?.totalReviews ?? product?.reviews)} reviews)`}
-                    </CustomText>
-                  </Box>
+                      Courier {product?.courier === "Y" || product?.courier === "y" ? "Y" : "N"}
+                    </Box>
+                  )}
+                </Box>
 
-                  {/* Title */}
+                {/* Product name + cart state */}
+                <Box
+                  className="product-name-modern"
+                  sx={{
+                    fontSize: { xs: "1.9rem", sm: "2.2rem" },
+                    fontWeight: 700,
+                    lineHeight: 1,
+                    color: "#221c1a",
+                    my: "0.2rem 0.4rem",
+                    fontFamily: "'Space Grotesk', sans-serif",
+                    letterSpacing: "-0.02em",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "baseline",
+                    gap: 1,
+                    flexWrap: "wrap",
+                  }}
+                >
                   <CustomText
                     autoTitleCase={false}
                     sx={{
                       fontWeight: 700,
-                      color: "var(--themeColor)",
-                      mb: 0,
+                      color: "inherit",
                       display: "-webkit-box",
                       WebkitLineClamp: 2,
                       WebkitBoxOrient: "vertical",
                       overflow: "hidden",
                       textTransform: "none !important",
+                      flex: "1 1 auto",
                     }}
                     style={{ textTransform: "none" }}
                   >
@@ -611,99 +639,316 @@ export const ProductSectionCarousel = memo(({
                       return text;
                     })()}
                   </CustomText>
+                  {isProductInCart(product) ? (
+                    <Box component="span" sx={{ fontSize: "0.75rem", color: "#1f8b4c", fontWeight: 600, display: "inline-flex", alignItems: "center", gap: 0.5 }}>
+                      <CheckCircleIcon sx={{ fontSize: "0.9rem" }} /> In cart
+                    </Box>
+                  ) : (
+                    <Box component="span" sx={{ fontSize: "0.75rem", py: 0.35, px: 0.9, bgcolor: "#fee9e5", borderRadius: "30px", color: "#5F2930", fontWeight: 600, display: "inline-flex", alignItems: "center", gap: 0.5 }}>
+                      not in cart
+                    </Box>
+                  )}
+                </Box>
 
-                  {/* Price and Add to Cart */}
-                  <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                    <Box>
-                      <CustomText
-                        autoTitleCase={false}
-                        sx={{ fontWeight: 800, color: "#d32f2f", textTransform: "none" }}
+                {/* Meta row: weight + rating */}
+                <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mt: 0.5, mb: 1.2 }}>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 0.5,
+                      bgcolor: "#f9f3f1",
+                      px: 1,
+                      py: 0.4,
+                      borderRadius: "40px",
+                      fontSize: "0.8rem",
+                      fontWeight: 500,
+                      color: "#4b3631",
+                    }}
+                  >
+                    {product?.weight ? (
+                      <span>{product.weight}</span>
+                    ) : (
+                      <span>—</span>
+                    )}
+                  </Box>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 0.5,
+                      bgcolor: "#fff7e5",
+                      px: 1.1,
+                      py: 0.4,
+                      borderRadius: "60px",
+                      fontSize: "0.8rem",
+                      fontWeight: 600,
+                    }}
+                  >
+                    <Rating
+                      value={Math.min(5, Math.max(0, Number(product?.avgRating ?? product?.rating) || 0))}
+                      readOnly
+                      precision={0.1}
+                      size="small"
+                      max={5}
+                      sx={{ "& .MuiRating-iconFilled": { color: "#ffb83b" }, "& .MuiRating-iconEmpty": { color: "rgba(255, 184, 59, 0.4)" } }}
+                    />
+                    <Box component="span" sx={{ color: "#63534e", fontWeight: 500 }}>
+                      {(Number(product?.avgRating ?? product?.rating) || 0).toFixed(1)} ({(Number(product?.totalReviews ?? product?.reviews) || 0)})
+                    </Box>
+                  </Box>
+                </Box>
+
+                {/* Price section */}
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "baseline",
+                    gap: 1.25,
+                    my: "0.8rem 1.6rem",
+                    py: 0.6,
+                    borderTop: "2px dashed rgba(95, 41, 48, 0.1)",
+                    borderBottom: "2px dashed rgba(95, 41, 48, 0.1)",
+                  }}
+                >
+                  <Box sx={{ display: "flex", flexDirection: "column" }}>
+                    {product?.mrp != null && (
+                      <Box component="span" sx={{ fontSize: "0.8rem", color: "#75605a" }}>
+                        MRP{" "}
+                        <Box component="span" sx={{ fontSize: "1rem", color: "#98837c", textDecoration: "line-through", fontWeight: 500 }}>
+                          ₹{Number(product.mrp).toLocaleString("en-IN", { minimumFractionDigits: 2 })}
+                        </Box>
+                      </Box>
+                    )}
+                    <Box sx={{ display: "flex", alignItems: "baseline", gap: 0.5, flexWrap: "wrap" }}>
+                      <Box
+                        component="span"
+                        sx={{
+                          fontSize: { xs: "1.8rem", sm: "2.3rem" },
+                          fontWeight: 750,
+                          color: "#5F2930",
+                          lineHeight: 1,
+                          letterSpacing: "-1px",
+                        }}
                       >
-                        Rate {product?.price}
-                      </CustomText>
-                      {(product?.mrp != null || product?.rate != null || product?.weight) && (
-                        <Box sx={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: 1 }}>
-                          <Box sx={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 1 }}>
-                            {product?.mrp != null && (
-                              <CustomText sx={{ fontSize: 12, color: "#444", fontWeight: 600, textTransform: "none" }}>
-                                MRP <Box component="span" sx={{ color: "#2c2c2c", textDecoration: "line-through" }}>₹{Number(product.mrp).toLocaleString("en-IN", { minimumFractionDigits: 2 })}</Box>
-                              </CustomText>
-                            )}
-                            {product?.mrp != null && product?.rate != null && (
-                              <Box component="span" sx={{ color: "#bbb", fontSize: 10 }}>•</Box>
-                            )}
-                          </Box>
-                          {product?.weight && (
-                            <CustomText sx={{ fontSize: 12, color: "#2c2c2c", fontWeight: 700, textTransform: "none", bgcolor: "rgba(23, 17, 15, 0.12)", px: 1, py: 0.25, borderRadius: 1, }}>
-                              Weight: {product?.weight}
-                            </CustomText>
-                          )}
+                        {product?.price || (product?.rate != null ? `₹${Number(product.rate).toLocaleString("en-IN", { minimumFractionDigits: 2 })}` : "—")}
+                      </Box>
+                      {product?.poscode && (
+                        <Box
+                          component="span"
+                          sx={{
+                            fontSize: "0.7rem",
+                            bgcolor: "#ede0db",
+                            py: 0.25,
+                            px: 0.8,
+                            borderRadius: "30px",
+                            fontWeight: 600,
+                            color: "#3a2c28",
+                            ml: 1,
+                          }}
+                        >
+                          {product.poscode}
                         </Box>
                       )}
                     </Box>
-                    <IconButton
+                  </Box>
+                </Box>
+
+                {/* Action row: Add to cart / quantity controls + wishlist */}
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mt: 0.4 }}>
+                  {isProductInCart(product) ? (
+                    /* Quantity UI – same as cart page (CartItem compact style) */
+                    <Box sx={{ flex: 1, display: "flex", alignItems: "center", gap: 1 }}>
+                      <Box
+                        sx={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          borderRadius: 999,
+                          border: "1px solid #ffd3c4",
+                          px: 0.6,
+                          py: 0.25,
+                          backgroundColor: "#fff8f4",
+                          boxShadow: "0 1px 3px rgba(220, 120, 80, 0.18)",
+                          gap: 0.5,
+                        }}
+                      >
+                        <Box
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (quantityUpdatingKey != null) return;
+                            handleQuantityChange(product, -1);
+                          }}
+                          sx={{
+                            cursor: quantityUpdatingKey != null ? "default" : "pointer",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            width: 22,
+                            height: 22,
+                            borderRadius: "999px",
+                            background: "linear-gradient(135deg, #fff0ea 0%, #ffe0d4 100%)",
+                            boxShadow: "0 1px 3px rgba(220, 120, 80, 0.22)",
+                            "&:hover": quantityUpdatingKey == null && {
+                              transform: "translateY(-1px)",
+                              boxShadow: "0 2px 5px rgba(220, 120, 80, 0.32)",
+                            },
+                          }}
+                        >
+                          {quantityUpdatingKey === `${getItemKey(product?.productId || product?.id || product?._id, product?.weight)}|decrease` ? (
+                            <CircularProgress size={12} sx={{ color: "#F31400" }} />
+                          ) : (
+                            <RemoveIcon sx={{ fontSize: 14, color: "#F31400" }} />
+                          )}
+                        </Box>
+                        <CustomText sx={{ minWidth: 20, textAlign: "center", fontSize: 12, fontWeight: 600, color: "#3d2914", letterSpacing: 0.3 }}>
+                          {getCartQuantity(product?.productId || product?.id || product?._id, product?.weight) || 0}
+                        </CustomText>
+                        <Box
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (quantityUpdatingKey != null) return;
+                            handleQuantityChange(product, 1);
+                          }}
+                          sx={{
+                            cursor: quantityUpdatingKey != null ? "default" : "pointer",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            width: 22,
+                            height: 22,
+                            borderRadius: "999px",
+                            background: "linear-gradient(135deg, #ff9472 0%, #f2709c 100%)",
+                            boxShadow: "0 1px 4px rgba(242, 112, 156, 0.45)",
+                            "&:hover": quantityUpdatingKey == null && {
+                              transform: "translateY(-1px)",
+                              boxShadow: "0 2px 7px rgba(242, 112, 156, 0.6)",
+                            },
+                          }}
+                        >
+                          {quantityUpdatingKey === `${getItemKey(product?.productId || product?.id || product?._id, product?.weight)}|increase` ? (
+                            <CircularProgress size={12} sx={{ color: "#fff" }} />
+                          ) : (
+                            <AddIcon sx={{ fontSize: 14, color: "#fff" }} />
+                          )}
+                        </Box>
+                      </Box>
+                      <Box
+                        component="span"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate("/cart");
+                        }}
+                        sx={{
+                          fontSize: "0.75rem",
+                          fontWeight: 600,
+                          color: "#5F2930",
+                          cursor: "pointer",
+                          textDecoration: "underline",
+                          flexShrink: 0,
+                        }}
+                      >
+                        View cart
+                      </Box>
+                    </Box>
+                  ) : (
+                    <Box
                       className="add-cart-btn"
+                      component="button"
+                      type="button"
                       onClick={(e) => handleCartAction(e, product)}
                       disabled={loadingCart.has(product?.productId || product?.id || product?._id)}
                       sx={{
-                        bgcolor: isProductInCart(product) ? "success.main" : "var(--themeColor)",
+                        flex: 1,
+                        bgcolor: "#5F2930",
+                        borderRadius: "100px",
+                        py: 1,
+                        px: 2,
                         color: "#fff",
-                        width: { xs: 36, md: 40 },
-                        height: { xs: 36, md: 40 },
-                        opacity: isProductInCart(product) ? 1 : 0,
-                        transform: isProductInCart(product) ? "translateY(0)" : "translateY(10px)",
-                        transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
-                        "&:hover": {
-                          bgcolor: isProductInCart(product) ? "success.dark" : "#7a2d3a",
-                          transform: "scale(1.1)",
+                        fontWeight: 700,
+                        fontSize: "1.1rem",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: 1.25,
+                        boxShadow: "0 12px 24px -6px rgba(95, 41, 48, 0.44)",
+                        border: "1px solid rgba(255, 215, 215, 0.2)",
+                        letterSpacing: "0.8px",
+                        cursor: "pointer",
+                        transition: "all 0.32s cubic-bezier(0.2, 0.9, 0.4, 1)",
+                        "&:hover:not(:disabled)": {
+                          bgcolor: "#7a3f48",
+                          boxShadow: "0 24px 36px -10px rgba(95, 41, 48, 0.5)",
+                          "& .cart-arrow": { transform: "translateX(7px) scale(1.1)" },
                         },
-                        "&:disabled": {
-                          opacity: 0.7,
-                        },
+                        "&:disabled": { opacity: 0.7 },
                       }}
                     >
                       {loadingCart.has(product?.productId || product?.id || product?._id) ? (
-                        <CircularProgress size={16} sx={{ color: "#fff", }} />
-                      ) : isProductInCart(product) ? (
-                        <CheckCircleIcon sx={{ fontSize: { xs: 16, md: 18 } }} />
+                        <CircularProgress size={22} sx={{ color: "#fff" }} />
                       ) : (
-                        <ShoppingCartIcon sx={{ fontSize: { xs: 16, md: 18 } }} />
+                        <>Add to cart <ShoppingCartIcon className="cart-arrow" sx={{ fontSize: "1.2rem", transition: "transform 0.22s" }} /></>
                       )}
-                    </IconButton>
+                    </Box>
+                  )}
+                  <IconButton
+                    onClick={(e) => handleWishlistToggle(e, product)}
+                    disabled={loadingWishlist.has(product?.productId || product?.id || product?._id)}
+                    sx={{
+                      width: 56,
+                      height: 56,
+                      flexShrink: 0,
+                      borderRadius: "60px",
+                      bgcolor: "#fff",
+                      color: "#5F2930",
+                      boxShadow: "0 10px 20px -8px rgba(95,41,48,0.2)",
+                      border: "1px solid rgba(95,41,48,0.1)",
+                      "&:hover": {
+                        bgcolor: "#5F2930",
+                        color: "#fff",
+                        transform: "scale(1.06)",
+                      },
+                    }}
+                  >
+                    {loadingWishlist.has(product?.productId || product?.id || product?._id) ? (
+                      <CircularProgress size={24} sx={{ color: "#5F2930" }} />
+                    ) : (product?.isWishlisted === true || wishlistIds.has(product?.productId || product?.id || product?._id)) ? (
+                      <FavoriteIcon sx={{ fontSize: "1.6rem" }} />
+                    ) : (
+                      <FavoriteBorderIcon sx={{ fontSize: "1.6rem" }} />
+                    )}
+                  </IconButton>
+                </Box>
+
+                {/* Bottom micro row */}
+                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mt: 1.2, fontSize: "0.75rem", color: "#6f5b55" }}>
+                  <Box sx={{ display: "flex", gap: 0.5 }}>
+                    {product?.courier === "Y" || product?.courier === "y" ? (
+                      <Box component="span" sx={{ bgcolor: "#f5efed", py: 0.3, px: 0.9, borderRadius: "30px" }}>
+                        ✓ Express courier
+                      </Box>
+                    ) : null}
+                    <Box component="span" sx={{ bgcolor: "#f5efed", py: 0.3, px: 0.9, borderRadius: "30px" }}>
+                      {(Number(product?.totalReviews ?? product?.reviews) || 0)} reviews
+                    </Box>
                   </Box>
                 </Box>
+
+                {/* Shine line */}
+                <Box
+                  sx={{
+                    position: "absolute",
+                    bottom: 0,
+                    left: 0,
+                    width: "100%",
+                    height: 4,
+                    background: "linear-gradient(90deg, #5F2930, #c79a91, #5F2930)",
+                    opacity: 0.3,
+                  }}
+                />
               </Box>
             </Box>
           ))}
         </CustomCarousel>
-
-        <CustomCarouselArrow
-          direction="next"
-          onClick={() => sliderRef.current?.handleNext()}
-          sx={{
-            position: "absolute",
-            right: { xs: -15, md: -25 },
-            top: "50%",
-            transform: "translateY(-50%)",
-            zIndex: 10,
-            backgroundColor: "#fff",
-            border: "2px solid rgba(255,181,161,0.3)",
-            width: { xs: 40, md: 50 },
-            height: { xs: 40, md: 50 },
-            transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-            boxShadow: "0 4px 15px rgba(0,0,0,0.1)",
-            "&:hover": {
-              backgroundColor: "var(--themeColor)",
-              borderColor: "var(--themeColor)",
-              transform: "translateY(-50%) scale(1.1)",
-              "& svg": {
-                color: "#fff",
-              },
-            },
-          }}
-        >
-          <ArrowForwardIosIcon sx={{ fontSize: { xs: 20, md: 24 } }} />
-        </CustomCarouselArrow>
 
         {/* Custom Dots */}
         <Box

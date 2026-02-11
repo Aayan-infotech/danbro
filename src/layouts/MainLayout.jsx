@@ -96,7 +96,6 @@ const Home = () => {
           title="Cakes"
           subtitle="Birthday Cakes, Beautiful Cakes"
           icon={CakeIcon}
-          bgColor="rgba(255,248,245,0.5)"
           limit={20}
           preloadedProducts={cakesProducts.slice(0, 20)}
         />
@@ -109,7 +108,6 @@ const Home = () => {
           title="Hunger Bites"
           subtitle="Quick Bites"
           icon={FastfoodIcon}
-          bgColor="rgba(255,248,245,0.5)"
           limit={10}
           preloadedProducts={getCategoryProducts(productsData, "FAST FOOD")}
         />
@@ -130,7 +128,6 @@ const Home = () => {
           title="Take me Along"
           subtitle="Gift Collection"
           icon={CardGiftcardIcon}
-          bgColor="rgba(255,248,245,0.5)"
           showBadge={false}
           limit={10}
           preloadedProducts={getCategoryProducts(productsData, "GIFT HAMPERS")}
@@ -152,7 +149,6 @@ const Home = () => {
           title="Pizza and Burgers"
           subtitle="Fast & Fresh"
           icon={LocalPizzaIcon}
-          bgColor="rgba(255,248,245,0.5)"
           limit={10}
           preloadedProducts={getCategoryProducts(productsData, "PIZZA AND BURGERS")}
         />
@@ -173,7 +169,6 @@ const Home = () => {
           title="Chocolates"
           subtitle="Sweet Indulgence"
           icon={CookieIcon}
-          bgColor="rgba(255,248,245,0.5)"
           limit={10}
           preloadedProducts={getCategoryProducts(productsData, "CHOCOLATES")}
         />
@@ -204,7 +199,6 @@ const Home = () => {
           title="Mithai"
           subtitle="Traditional Sweets"
           icon={LocalDiningIcon}
-          bgColor="rgba(255,248,245,0.5)"
           limit={10}
           preloadedProducts={getCategoryProducts(productsData, "MITHAI")}
         />
@@ -215,7 +209,6 @@ const Home = () => {
           title="Namkeen"
           subtitle="Crunchy Snacks & Premium Selection"
           icon={RestaurantIcon}
-          bgColor="rgba(255,248,245,0.5)"
           limit={15}
           preloadedProducts={namkeenProducts.slice(0, 15)}
         />

@@ -1,14 +1,17 @@
-import { Box, CircularProgress, Alert } from "@mui/material";
+import { Box, CircularProgress, Alert, IconButton } from "@mui/material";
 import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
-import { CustomCarousel, CustomCarouselArrow } from "../comman/CustomCarousel";
+import CategoryIcon from "@mui/icons-material/Category";
+import CookieIcon from "@mui/icons-material/Cookie";
+import TagIcon from "@mui/icons-material/Tag";
 import cat1 from "../../assets/09f1ee59e9d78cc206e6e867e1cda04c1887d8f8.webp";
 import cat2 from "../../assets/60be109ca830b1d8ab92f161cd0ca3083a16e4ca-B0hMvy0v.webp";
 import cat3 from "../../assets/43676d15934fc50bdda59d3e39fd8a4ceaadcb9e-Rpx5ZY2j.webp";
 import { useItemCategories } from "../../hooks/useItemCategories";
 import { useNavigate } from "react-router-dom";
-import { CustomText } from "../comman/CustomText";
 import { useEffect, useRef, useState } from "react";
+
+const BRAND_COLOR = "#5F2930";
 
 const getCategoryImage = (categoryName, index) => {
   const images = [cat1, cat2, cat3];
@@ -19,18 +22,10 @@ export const CategoryCarousel = ({ categories: propCategories }) => {
   const carouselRef = useRef(null);
   const { categories: hookCategories, loading, error } = useItemCategories();
   const navigate = useNavigate();
-  const [visible, setVisible] = useState(true); // Start visible immediately
   const sectionRef = useRef(null);
 
   const categories = propCategories || hookCategories;
   const isLoading = propCategories ? false : loading;
-
-  // Set visible immediately if categories are available
-  useEffect(() => {
-    if (categories && categories.length > 0) {
-      setVisible(true);
-    }
-  }, [categories]);
 
   const items = categories?.map((category, index) => ({
     id: category?.id ?? category?.categoryId,
@@ -46,233 +41,354 @@ export const CategoryCarousel = ({ categories: propCategories }) => {
     navigate(`/products?categoryId=${encodeURIComponent(String(categoryId))}`);
   };
 
-  return (
-    isLoading ? (
-      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
-        <CircularProgress sx={{ color: "var(--themeColor)" }} />
+  const scrollCarousel = (direction) => {
+    const el = carouselRef.current;
+    if (!el) return;
+    const scrollAmount = 300;
+    el.scrollBy({ left: direction === "left" ? -scrollAmount : scrollAmount, behavior: "smooth" });
+  };
+
+  if (isLoading) {
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", py: 4 }}>
+        <CircularProgress sx={{ color: BRAND_COLOR }} />
       </Box>
-    ) : error || !items || items.length === 0 ? (
-      <Box>
+    );
+  }
+
+  if (error || !items || items.length === 0) {
+    return (
+      <Box sx={{ mb: 3 }}>
         <Alert severity={error ? "error" : "info"} sx={{ borderRadius: 2 }}>
           {error ? `Failed to load categories: ${error}` : "No categories available at the moment."}
         </Alert>
       </Box>
-    ) : (
+    );
+  }
+
+  return (
+    <Box
+      ref={sectionRef}
+      sx={{
+        width: "100%",
+        margin: "0 auto",
+        mb: { xs: 2, md: 4 },
+        px: { xs: 1, md: 2 },
+      }}
+    >
+      {/* Section header – same as HTML */}
       <Box
-        ref={sectionRef}
         sx={{
-          mb: { xs: 2, md: 4 },
-          opacity: 1,
-          transform: "translateY(0)",
-          visibility: "visible",
-          minHeight: "200px",
+          display: "flex",
+          alignItems: "baseline",
+          justifyContent: "space-between",
+          mb: 2.5,
+          flexWrap: "wrap",
+          gap: 1,
         }}
       >
-        {/* Section Header */}
-        <Box sx={{ textAlign: "center", mb: { xs: 2, md: 4 } }}>
-          <CustomText sx={{ fontSize: { xs: 12, md: 14 }, fontWeight: 600, color: "#FF9472", textTransform: "uppercase", letterSpacing: 2 }}>
-            Browse Categories
-          </CustomText>
-          <CustomText sx={{ fontSize: { xs: 28, sm: 34, md: 42 }, fontWeight: 800, color: "var(--themeColor)" }}>
-            Shop by Category
-          </CustomText>
-          <CustomText sx={{ fontSize: { xs: 14, md: 16 }, color: "#666", maxWidth: 600, mx: "auto", }}>
-            Discover our wide range of delicious bakery products
-          </CustomText>
-        </Box>
-
-        <Box sx={{ px: { xs: 2, md: 3, lg: 2 }, position: "relative" }}>
-          <Box>
-            {[...Array(5)].map((_, i) => (
-              <Box
-                key={i}
-                sx={{
-                  position: "absolute",
-                  width: { xs: "30px", md: "50px" },
-                  height: { xs: "30px", md: "50px" },
-                  borderRadius: "50%",
-                  background: "radial-gradient(circle, rgba(255,181,161,0.3) 0%, transparent 70%)",
-                  top: `${15 + i * 20}%`,
-                  left: i % 2 === 0 ? "8%" : "auto",
-                  right: i % 2 === 1 ? "8%" : "auto",
-                  animation: `floatCategory ${8 + i * 2}s ease-in-out infinite`,
-                  animationDelay: `${i * 0.8}s`,
-                  zIndex: 0,
-                  pointerEvents: "none",
-                  filter: "blur(15px)",
-                  "@keyframes floatCategory": {
-                    "0%, 100%": { transform: "translateY(0px) scale(1)" },
-                    "50%": { transform: `translateY(${-20 - i * 5}px) scale(1.2)` },
-                  },
-                }}
-              />
-            ))}
-
-            {/* Left Arrow */}
-            <CustomCarouselArrow
-              direction="prev"
-              onClick={() => carouselRef.current?.handlePrev()}
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, flexWrap: "wrap" }}>
+          <Box
+            component="h2"
+            className="home-section-heading"
+            sx={{
+              fontFamily: "'Playfair Display', serif",
+              fontSize: { xs: "1.8rem", md: "2.2rem" },
+              fontWeight: 800,
+              color: "#2d1e1b",
+              letterSpacing: "-0.01em",
+              display: "flex",
+              alignItems: "center",
+              gap: 1.5,
+              m: 0,
+            }}
+          >
+            <CategoryIcon sx={{ color: BRAND_COLOR, fontSize: "2rem", opacity: 0.9 }} />
+            our sweet categories
+            <Box
+              component="span"
               sx={{
-                display: { xs: "none", md: "flex" }, // Hide on mobile
+                background: BRAND_COLOR,
+                color: "white",
+                py: 0.5,
+                px: 1.2,
+                borderRadius: "60px",
+                fontSize: "0.85rem",
+                fontWeight: 600,
+                letterSpacing: "1px",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 0.5,
               }}
             >
-              <ArrowBackIosNewIcon sx={{ color: "var(--themeColor)", fontSize: { xs: 20, md: 24 } }} />
-            </CustomCarouselArrow>
-
-            {/* Carousel */}
-            <Box sx={{ position: "relative", zIndex: 1 }}>
-              <CustomCarousel
-                ref={carouselRef}
-                slidesToShow={6}
-                slidesToScroll={1}
-                autoplay={true}
-                autoplaySpeed={3500}
-                pauseOnHover={true}
-                swipeToSlide={true}
-                infinite={true}
-                speed={0}
-                cssEase="none"
-                arrows={false}
-                responsive={[
-                  { breakpoint: 1200, settings: { slidesToShow: 5 } },
-                  { breakpoint: 992, settings: { slidesToShow: 4 } },
-                  { breakpoint: 768, settings: { slidesToShow: 3 } },
-                  { breakpoint: 600, settings: { slidesToShow: 2.2, autoplay: false } },
-                  { breakpoint: 480, settings: { slidesToShow: 1.8, autoplay: false } }
-                ]}
-              >
-                {items?.map((item, i) => (
-                  <Box
-                    key={item?.id || i}
-                    sx={{
-                      cursor: "pointer",
-                      transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-                      position: "relative",
-                      px: { xs: 0.5, md: 1 },
-                      opacity: 1,
-                      transform: "translateY(0)",
-                    }}
-                  >
-                    <Box
-                      className="category-card"
-                      onClick={() => handleToProductList(item?.categoryId)}
-                      sx={{
-                        backdropFilter: "blur(10px)",
-                        borderRadius: { xs: "20px", md: "25px" },
-                        transition: "all 0.5s cubic-bezier(0.4, 0, 0.2, 1)",
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "center",
-                        gap: { xs: 1, md: 1.5 },
-                        p: { xs: 1.5, md: 2 },
-                        boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
-                        border: "2px solid rgba(255,181,161,0.2)",
-                        position: "relative",
-                        overflow: "visible",
-                        "&::before": {
-                          content: '""',
-                          position: "absolute",
-                          top: "50%",
-                          left: "50%",
-                          transform: "translate(-50%, -50%)",
-                          width: "0",
-                          height: "0",
-                          borderRadius: "50%",
-                          transition: "all 0.5s ease",
-                          zIndex: -1,
-                        },
-                        "&:hover": {
-                          transform: "translateY(-10px) scale(1.08)",
-                          boxShadow: "0 12px 40px rgba(255,181,161,0.3)",
-                          borderColor: "rgba(255,181,161,0.5)",
-                          backgroundColor: "#fff",
-                          "&::before": {
-                            width: "150%",
-                            height: "150%",
-                          },
-                          "& img": {
-                            transform: "scale(1.15) rotate(3deg)",
-                            filter: "drop-shadow(0 12px 24px rgba(0,0,0,0.25)) brightness(1.1)",
-                          },
-                          "& .category-title": {
-                            color: "var(--themeColor)",
-                            transform: "scale(1.1)",
-                            fontWeight: 700,
-                          },
-                        },
-                      }}
-                    >
-                      <Box
-                        sx={{
-                          position: "relative",
-                          "&::after": {
-                            content: '""',
-                            position: "absolute",
-                            top: "-5px",
-                            left: "-5px",
-                            right: "-5px",
-                            bottom: "-5px",
-                            borderRadius: "50%",
-                            background: "linear-gradient(135deg, rgba(255,181,161,0.3), rgba(95,41,48,0.2))",
-                            opacity: 0,
-                            transition: "opacity 0.5s ease",
-                            zIndex: -1,
-                          },
-                        }}
-                      >
-                        <Box
-                          component="img"
-                          src={item?.img}
-                          alt={item?.title}
-                          loading="lazy"
-                          sx={{
-                            height: { xs: 70, sm: 80, md: 100, lg: 120 },
-                            width: { xs: 70, sm: 80, md: 100, lg: 120 },
-                            borderRadius: "50%",
-                            objectFit: "cover",
-                            transition: "all 0.5s cubic-bezier(0.4, 0, 0.2, 1)",
-                            filter: "drop-shadow(0 6px 16px rgba(0,0,0,0.15))",
-                            border: { xs: "3px solid #fff", md: "4px solid #fff" },
-                            boxShadow: "0 6px 20px rgba(0,0,0,0.12)",
-                            position: "relative",
-                            zIndex: 1,
-                          }}
-                        />
-                      </Box>
-                      <CustomText
-                        className="category-title"
-                        autoTitleCase={true}
-                        sx={{
-                          fontSize: { xs: 11, sm: 12, md: 14 },
-                          fontWeight: 600,
-                          color: "var(--themeColor)",
-                          textAlign: "center",
-                          transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
-                          lineHeight: 1.3,
-                          px: 1,
-                        }}
-                      >
-                        {item?.title}
-                      </CustomText>
-                    </Box>
-                  </Box>
-                ))}
-              </CustomCarousel>
+              <CookieIcon sx={{ fontSize: "1rem" }} />
+              {items.length} collections
             </Box>
-
-            {/* Right Arrow */}
-            <CustomCarouselArrow
-              direction="next"
-              onClick={() => carouselRef.current?.handleNext()}
-              sx={{
-                display: { xs: "none", md: "flex" }, // Hide on mobile
-              }}
-            >
-              <ArrowForwardIosIcon sx={{ color: "var(--themeColor)", fontSize: { xs: 20, md: 24 } }} />
-            </CustomCarouselArrow>
           </Box>
         </Box>
+        <Box sx={{ display: "flex", gap: 1.2 }}>
+          <IconButton
+            onClick={() => scrollCarousel("left")}
+            sx={{
+              width: 48,
+              height: 48,
+              borderRadius: "60px",
+              bgcolor: "white",
+              border: "1px solid rgba(95, 41, 48, 0.2)",
+              color: BRAND_COLOR,
+              boxShadow: "0 6px 14px rgba(0,0,0,0.02)",
+              "&:hover": {
+                bgcolor: BRAND_COLOR,
+                color: "white",
+                borderColor: BRAND_COLOR,
+                transform: "scale(1.06)",
+              },
+            }}
+            aria-label="Scroll left"
+          >
+            <ArrowBackIosNewIcon sx={{ fontSize: "1.2rem" }} />
+          </IconButton>
+          <IconButton
+            onClick={() => scrollCarousel("right")}
+            sx={{
+              width: 48,
+              height: 48,
+              borderRadius: "60px",
+              bgcolor: "white",
+              border: "1px solid rgba(95, 41, 48, 0.2)",
+              color: BRAND_COLOR,
+              boxShadow: "0 6px 14px rgba(0,0,0,0.02)",
+              "&:hover": {
+                bgcolor: BRAND_COLOR,
+                color: "white",
+                borderColor: BRAND_COLOR,
+                transform: "scale(1.06)",
+              },
+            }}
+            aria-label="Scroll right"
+          >
+            <ArrowForwardIosIcon sx={{ fontSize: "1.2rem" }} />
+          </IconButton>
+        </Box>
       </Box>
-    )
+
+      {/* Carousel – horizontal scroll, scrollbar hidden, full width */}
+      <Box
+        ref={carouselRef}
+        sx={{
+          display: "flex",
+          overflowX: "auto",
+          overflowY: "hidden",
+          gap: "1.8rem",
+          py: 1,
+          px: 0.8,
+          pb: 2,
+          scrollBehavior: "smooth",
+          WebkitOverflowScrolling: "touch",
+          width: "100%",
+          maxWidth: "100%",
+          scrollbarWidth: "none",
+          msOverflowStyle: "none",
+          "&::-webkit-scrollbar": { display: "none" },
+        }}
+      >
+        {items?.map((item, i) => (
+          <Box
+            key={item?.id ?? i}
+            onClick={() => handleToProductList(item?.categoryId)}
+            sx={{
+              flex: "0 0 auto",
+              width: { xs: 240, sm: 280 },
+              background: "white",
+              borderRadius: "42px",
+              boxShadow: "0 18px 30px -10px rgba(95, 41, 48, 0.12)",
+              p: "1.8rem 1.2rem",
+              transition: "all 0.35s cubic-bezier(0.2, 0.9, 0.4, 1)",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              textAlign: "center",
+              position: "relative",
+              border: "1px solid rgba(255, 230, 220, 0.6)",
+              cursor: "pointer",
+              "&:hover": {
+                transform: "translateY(-14px) scale(1.02)",
+                boxShadow: "0 32px 50px -16px rgba(95, 41, 48, 0.28)",
+                borderColor: "rgba(95, 41, 48, 0.25)",
+                bgcolor: "#fffdfc",
+                "& .card-img-category": {
+                  borderColor: BRAND_COLOR,
+                  boxShadow: "0 26px 36px -10px #5F2930",
+                  transform: "scale(1.02)",
+                  "& img": {
+                    transform: "scale(1.12)",
+                    filter: "brightness(1.06) saturate(1.1)",
+                  },
+                },
+                "& .card-accent": { width: 80, background: "#7a424a" },
+                "& .category-name": { color: BRAND_COLOR },
+              },
+            }}
+          >
+            {/* Floating dots – first two cards */}
+            {i < 2 && (
+              <>
+                <Box
+                  sx={{
+                    position: "absolute",
+                    width: 10,
+                    height: 10,
+                    borderRadius: "50%",
+                    bgcolor: "rgba(95, 41, 48, 0.2)",
+                    top: "15%",
+                    right: "12%",
+                    filter: "blur(3px)",
+                    animation: "floatCategory 6s infinite alternate",
+                    "@keyframes floatCategory": {
+                      "0%": { transform: "translate(0, 0) scale(1)", opacity: 0.3 },
+                      "100%": { transform: "translate(-10px, -15px) scale(1.5)", opacity: 0.8 },
+                    },
+                  }}
+                />
+                <Box
+                  sx={{
+                    position: "absolute",
+                    width: 14,
+                    height: 14,
+                    borderRadius: "50%",
+                    bgcolor: "rgba(230, 180, 140, 0.3)",
+                    left: "10%",
+                    bottom: "15%",
+                    filter: "blur(4px)",
+                    animation: "floatCategory2 8s infinite alternate",
+                    "@keyframes floatCategory2": {
+                      "0%": { transform: "translate(0, 0)" },
+                      "100%": { transform: "translate(15px, -10px) scale(1.4)" },
+                    },
+                  }}
+                />
+              </>
+            )}
+
+            {/* Image container */}
+            <Box
+              className="card-img-category"
+              sx={{
+                width: { xs: 130, sm: 160 },
+                height: { xs: 130, sm: 160 },
+                borderRadius: "50%",
+                overflow: "hidden",
+                mb: 1.5,
+                position: "relative",
+                boxShadow: "0 18px 26px -8px rgba(95, 41, 48, 0.2)",
+                border: "4px solid white",
+                transition: "all 0.4s",
+              }}
+            >
+              {item?.img ? (
+                <Box
+                  component="img"
+                  src={item.img}
+                  alt={item?.title}
+                  loading="lazy"
+                  sx={{
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
+                    display: "block",
+                    transition: "transform 0.55s ease, filter 0.5s ease",
+                  }}
+                />
+              ) : (
+                <Box
+                  sx={{
+                    width: "100%",
+                    height: "100%",
+                    background: "linear-gradient(145deg, #f8e4db, #f3dcd2)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: BRAND_COLOR,
+                    fontSize: "2.8rem",
+                  }}
+                >
+                  <CategoryIcon sx={{ fontSize: 48 }} />
+                </Box>
+              )}
+            </Box>
+
+            {/* Category name */}
+            <Box
+              className="category-name"
+              sx={{
+                fontSize: { xs: "1.4rem", sm: "1.6rem" },
+                fontWeight: 700,
+                fontFamily: "'Playfair Display', serif",
+                color: "#2f2421",
+                lineHeight: 1.2,
+                mb: 0.3,
+                transition: "color 0.2s",
+                letterSpacing: "-0.5px",
+              }}
+            >
+              {item?.title}
+            </Box>
+
+            {/* Accent line */}
+            <Box
+              className="card-accent"
+              sx={{
+                width: 50,
+                height: 4,
+                background: BRAND_COLOR,
+                borderRadius: "10px",
+                my: "0.8rem 1rem",
+                transition: "width 0.3s",
+              }}
+            />
+
+            {/* Category ID pill */}
+            <Box
+              sx={{
+                fontSize: "0.65rem",
+                fontWeight: 500,
+                color: "#a7867c",
+                letterSpacing: "1.5px",
+                textTransform: "uppercase",
+                bgcolor: "#f6efec",
+                py: 0.35,
+                px: 1,
+                borderRadius: "60px",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 0.75,
+                border: "1px solid #ead9d2",
+                mt: 0.5,
+              }}
+            >
+              <TagIcon sx={{ color: BRAND_COLOR, fontSize: "0.7rem" }} />
+              {item?.categoryId ? `${String(item.categoryId).slice(0, 12)}…` : "—"}
+            </Box>
+          </Box>
+        ))}
+      </Box>
+
+      {/* Footnote */}
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          mt: 1.2,
+          gap: 1.5,
+          fontSize: "0.75rem",
+          color: "#8c6e66",
+        }}
+      >
+        <Box component="span" sx={{ bgcolor: "#fff2ed", py: 0.3, px: 1.2, borderRadius: "40px", display: "inline-flex", alignItems: "center", gap: 0.5 }}>
+          <CategoryIcon sx={{ color: BRAND_COLOR, fontSize: "0.9rem" }} />
+          {items.length} categories loaded
+        </Box>
+      </Box>
+    </Box>
   );
 };
