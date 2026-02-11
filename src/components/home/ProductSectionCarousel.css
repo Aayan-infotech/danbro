@@ -1,0 +1,125 @@
+/* ProductSectionCarousel Section Styles */
+
+/* Home section heading - Playfair Display font */
+.home-section-heading,
+.home-section-heading h2,
+h2.home-section-heading {
+  font-family: 'Playfair Display', serif !important;
+}
+
+/* Responsive font sizes */
+@media (max-width: 599px) {
+  .home-section-heading {
+    font-size: 1.5rem !important;
+  }
+}
+
+@media (min-width: 600px) and (max-width: 899px) {
+  .home-section-heading {
+    font-size: 1.8rem !important;
+  }
+}
+
+@media (min-width: 900px) {
+  .home-section-heading {
+    font-size: 2.2rem !important;
+  }
+}
+
+/* Product card styles */
+.product-card {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.product-card:hover {
+  transform: translateY(-12px) scale(1.02);
+}
+
+/* Section header responsive */
+@media (max-width: 599px) {
+  .section-header-container {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 0.75rem !important;
+    justify-content: space-between !important;
+  }
+
+  .section-header-title {
+    width: 100% !important;
+    justify-content: space-between !important;
+  }
+
+  .home-section-heading {
+    justify-content: space-between !important;
+  }
+
+  /* Hide icon on mobile */
+  .product-section-icon {
+    display: none !important;
+  }
+
+  /* Badge and arrows row */
+  .product-badge-arrows-row {
+    width: 100% !important;
+    justify-content: space-between !important;
+  }
+
+  .product-items-badge {
+    font-size: 0.7rem !important;
+    padding: 0.4rem 0.9rem !important;
+  }
+
+  .product-items-badge svg {
+    font-size: 0.85rem !important;
+  }
+
+  .section-nav-buttons {
+    position: static !important;
+    margin-top: 0 !important;
+  }
+
+  /* Make icon buttons smaller on mobile */
+  .section-nav-buttons .carousel-nav-btn {
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+  }
+
+  .section-nav-buttons .carousel-nav-btn svg {
+    font-size: 1rem !important;
+  }
+}
+
+@media (min-width: 600px) and (max-width: 899px) {
+  .section-header-container {
+    justify-content: space-between !important;
+  }
+}
+
+@media (min-width: 900px) {
+  .section-header-container {
+    justify-content: space-between !important;
+  }
+}
+
+/* Carousel navigation buttons */
+.carousel-nav-btn {
+  transition: all 0.25s ease;
+}
+
+.carousel-nav-btn:hover {
+  transform: scale(1.06);
+}
+
+/* Mobile product card adjustments */
+@media (max-width: 599px) {
+  .product-card {
+    min-width: 200px !important;
+  }
+}
+
+@media (min-width: 600px) {
+  .product-card {
+    min-width: 250px !important;
+  }
+}

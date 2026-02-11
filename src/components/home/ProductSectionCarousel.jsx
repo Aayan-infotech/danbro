@@ -11,10 +11,14 @@ import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import CookieIcon from "@mui/icons-material/Cookie";
 import { addToCart, increaseItemCount, decreaseItemCount } from "../../utils/cart";
 import { addToWishlist, removeFromWishlist, getWishlist } from "../../utils/wishlist";
 import { CustomToast } from "../comman/CustomToast";
 import { useCartProductIds } from "../../hooks/useCartProductIds";
+import "./ProductSectionCarousel.css";
+
+const BRAND_COLOR = "#5F2930";
 
 export const ProductSectionCarousel = memo(({
   title,
@@ -276,7 +280,6 @@ export const ProductSectionCarousel = memo(({
         width: "100%",
         margin: "0 auto",
         background: bgColor,
-        mb: { xs: 2, md: 4 },
         px: { xs: 1, md: 2 },
         borderRadius: { xs: 0, md: 3 },
         opacity: visible ? 1 : 0,
@@ -302,58 +305,52 @@ export const ProductSectionCarousel = memo(({
       }}
     >
       {/* Section Header – same as category: title + arrows, same spacing */}
-      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 1, mb: 2.5, position: "relative", zIndex: 1, }}>
-        <Box
-          component="h2"
-          className="home-section-heading"
-          sx={{
-            fontFamily: "'Playfair Display', serif",
-            fontSize: { xs: "1.8rem", md: "2.2rem" },
-            fontWeight: 800,
-            color: "#2d1e1b",
-            letterSpacing: "-0.01em",
-            display: "flex",
-            alignItems: "center",
-            gap: 1.5,
-            m: 0,
-          }}
-        >
-          {Icon && (
-            <Box
-              sx={{
-                display: "inline-flex",
-                alignItems: "center",
-                justifyContent: "center",
-                width: { xs: 48, md: 56 },
-                height: { xs: 48, md: 56 },
-                borderRadius: "50%",
-                bgcolor: "rgba(95, 41, 48, 0.08)",
-              }}
-            >
-              <Icon sx={{ fontSize: { xs: 28, md: 32 }, color: "#5F2930", opacity: 0.9 }} />
-            </Box>
-          )}
-          <span>{title}</span>
-          {subtitle && (
-            <Box
-              component="span"
-              sx={{
-                background: "#5F2930",
-                color: "white",
-                py: 0.4,
-                px: 1.2,
-                borderRadius: "60px",
-                fontSize: "0.85rem",
+      <Box className="section-header-container" sx={{ display: "flex", flexDirection: { xs: "column", md: "row" }, alignItems: { xs: "stretch", md: "baseline" }, justifyContent: "space-between", mb: 2.5, flexWrap: "wrap", gap: 1, position: "relative", zIndex: 1, }}>
+        <Box className="section-header-title" sx={{ display: "flex", alignItems: "center", gap: 1.5, flexWrap: "wrap", flex: 1, justifyContent: { xs: "space-between", md: "center" }, minWidth: { xs: "100%", md: "auto" }, width: { xs: "100%", md: "auto" } }}>
+          <Box
+            component="h2"
+            className="home-section-heading"
+            sx={{
+              fontFamily: "'Playfair Display', serif",
+              fontSize: { xs: "1.5rem", sm: "1.8rem", md: "2rem", lg: "2.2rem" },
+              fontWeight: 800,
+              color: "#2d1e1b",
+              letterSpacing: "-0.01em",
+              display: "flex",
+              alignItems: "center",
+              gap: 1.5,
+              m: 0,
+              flex: 1,
+            }}
+          >
+            {Icon && <Icon className="product-section-icon" sx={{ color: BRAND_COLOR, fontSize: { xs: "1.5rem", sm: "1.8rem", md: "2rem" }, opacity: 0.9 }} />}
+            {title}
+          </Box>
+        </Box>
+        <Box className="product-badge-arrows-row" sx={{ display: "flex", gap: 1.2, alignItems: "center", justifyContent: "space-between", width: { xs: "100%", md: "auto" }, flexShrink: 0 }}>
+          <Box
+            component="span"
+            className="product-items-badge"
+            sx={{
+              background: BRAND_COLOR,
+              color: "white",
+              py: 0.5,
+              px: 1.2,
+              borderRadius: "60px",
+                fontSize: { xs: "0.7rem", sm: "0.75rem", md: "0.85rem" },
                 fontWeight: 600,
                 letterSpacing: "1px",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 0.5,
               }}
             >
-              {subtitle}
-            </Box>
-          )}
-        </Box>
-        <Box sx={{ display: "flex", gap: 1.2 }}>
+              <CookieIcon sx={{ fontSize: { xs: "0.85rem", sm: "0.9rem", md: "1rem" } }} />
+            {products?.length || 0} items
+          </Box>
+          <Box className="section-nav-buttons" sx={{ display: "flex", gap: 1.2, flexShrink: 0 }}>
           <IconButton
+            className="carousel-nav-btn"
             onClick={() => sliderRef.current?.handlePrev()}
             sx={{
               width: 48,
@@ -361,20 +358,21 @@ export const ProductSectionCarousel = memo(({
               borderRadius: "60px",
               bgcolor: "white",
               border: "1px solid rgba(95, 41, 48, 0.2)",
-              color: "#5F2930",
+              color: BRAND_COLOR,
               boxShadow: "0 6px 14px rgba(0,0,0,0.02)",
               "&:hover": {
-                bgcolor: "#5F2930",
+                bgcolor: BRAND_COLOR,
                 color: "white",
-                borderColor: "#5F2930",
+                borderColor: BRAND_COLOR,
                 transform: "scale(1.06)",
               },
             }}
             aria-label="Previous"
           >
-            <ArrowBackIosNewIcon sx={{ fontSize: "1.2rem" }} />
+            <ArrowBackIosNewIcon sx={{ fontSize: { xs: "1rem", sm: "1.1rem", md: "1.2rem" } }} />
           </IconButton>
           <IconButton
+            className="carousel-nav-btn"
             onClick={() => sliderRef.current?.handleNext()}
             sx={{
               width: 48,
@@ -382,19 +380,20 @@ export const ProductSectionCarousel = memo(({
               borderRadius: "60px",
               bgcolor: "white",
               border: "1px solid rgba(95, 41, 48, 0.2)",
-              color: "#5F2930",
+              color: BRAND_COLOR,
               boxShadow: "0 6px 14px rgba(0,0,0,0.02)",
               "&:hover": {
-                bgcolor: "#5F2930",
+                bgcolor: BRAND_COLOR,
                 color: "white",
-                borderColor: "#5F2930",
+                borderColor: BRAND_COLOR,
                 transform: "scale(1.06)",
               },
             }}
             aria-label="Next"
           >
-            <ArrowForwardIosIcon sx={{ fontSize: "1.2rem" }} />
+            <ArrowForwardIosIcon sx={{ fontSize: { xs: "1rem", sm: "1.1rem", md: "1.2rem" } }} />
           </IconButton>
+          </Box>
         </Box>
       </Box>
 
@@ -423,10 +422,11 @@ export const ProductSectionCarousel = memo(({
               onMouseEnter={() => setHoveredIndex(index)}
               onMouseLeave={() => setHoveredIndex(null)}
               sx={{
-                px: { xs: 1, md: 1.5 },
                 opacity: visible ? 1 : 0,
                 transform: visible ? "translateY(0) scale(1)" : "translateY(30px) scale(0.95)",
                 transition: `opacity 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) ${index * 0.1}s, transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) ${index * 0.1}s`,
+                height: "100%",
+                display: "flex",
               }}
             >
               <Box
@@ -444,11 +444,13 @@ export const ProductSectionCarousel = memo(({
                   overflow: "hidden",
                   cursor: "pointer",
                   position: "relative",
-                  boxShadow: "0 30px 50px -15px rgba(95, 41, 48, 0.14), 0 8px 20px rgba(95, 41, 48, 0.06)",
                   border: "1px solid rgba(255, 226, 221, 0.5)",
-                  p: "2rem 1.8rem 2rem",
+                  // p: { xs: "1.5rem 1.2rem", sm: "1.8rem 1.5rem", md: "2rem 1.8rem" },
+                  p: { xs: "1.2rem 1rem", sm: "1.5rem 1.2rem", md: "1.7rem 1.5rem" },
                   display: "flex",
                   flexDirection: "column",
+                  minHeight: { xs: "520px", sm: "560px", md: "600px", lg: "620px" },
+                  height: "100%",
                   transition: "all 0.45s cubic-bezier(0.19, 1, 0.22, 1)",
                   "&::after": {
                     content: '""',
@@ -484,7 +486,7 @@ export const ProductSectionCarousel = memo(({
                   sx={{
                     position: "relative",
                     width: "100%",
-                    height: 240,
+                    height: { xs: 180, sm: 200, md: 240 },
                     borderRadius: "32px",
                     bgcolor: "#fdf5f2",
                     display: "flex",
@@ -525,7 +527,7 @@ export const ProductSectionCarousel = memo(({
                         px: 1.2,
                         py: 0.5,
                         borderRadius: "60px",
-                        fontSize: "0.8rem",
+                        fontSize: { xs: "0.7rem", sm: "0.75rem", md: "0.8rem" },
                         fontWeight: 600,
                         letterSpacing: "0.8px",
                         display: "flex",
@@ -563,7 +565,7 @@ export const ProductSectionCarousel = memo(({
                 {/* Product ID + courier micro */}
                 <Box
                   sx={{
-                    fontSize: "0.65rem",
+                    fontSize: { xs: "0.6rem", sm: "0.65rem", md: "0.7rem" },
                     fontWeight: 500,
                     color: "#8f7a75",
                     letterSpacing: "1px",
@@ -584,7 +586,7 @@ export const ProductSectionCarousel = memo(({
                     <Box
                       component="span"
                       sx={{
-                        fontSize: "0.75rem",
+                        fontSize: { xs: "0.7rem", sm: "0.75rem", md: "0.8rem" },
                         bgcolor: "#f2eae7",
                         px: 0.9,
                         py: 0.25,
@@ -603,11 +605,12 @@ export const ProductSectionCarousel = memo(({
                 <Box
                   className="product-name-modern"
                   sx={{
-                    fontSize: { xs: "1.9rem", sm: "2.2rem" },
+                    fontSize: { xs: "1.5rem", sm: "1.7rem", md: "1.8rem", lg: "2rem", xl: "2.2rem" },
                     fontWeight: 700,
-                    lineHeight: 1,
+                    lineHeight: 1.2,
                     color: "#221c1a",
                     my: "0.2rem 0.4rem",
+                    minHeight: { xs: "3.6rem", sm: "4rem", md: "4.2rem", lg: "4.8rem" },
                     fontFamily: "'Space Grotesk', sans-serif",
                     letterSpacing: "-0.02em",
                     display: "flex",
@@ -640,11 +643,11 @@ export const ProductSectionCarousel = memo(({
                     })()}
                   </CustomText>
                   {isProductInCart(product) ? (
-                    <Box component="span" sx={{ fontSize: "0.75rem", color: "#1f8b4c", fontWeight: 600, display: "inline-flex", alignItems: "center", gap: 0.5 }}>
-                      <CheckCircleIcon sx={{ fontSize: "0.9rem" }} /> In cart
+                    <Box component="span" sx={{ fontSize: { xs: "0.65rem", sm: "0.7rem", md: "0.75rem" }, color: "#1f8b4c", fontWeight: 600, display: "inline-flex", alignItems: "center", gap: 0.5 }}>
+                      <CheckCircleIcon sx={{ fontSize: { xs: "0.8rem", sm: "0.85rem", md: "0.9rem" } }} /> In cart
                     </Box>
                   ) : (
-                    <Box component="span" sx={{ fontSize: "0.75rem", py: 0.35, px: 0.9, bgcolor: "#fee9e5", borderRadius: "30px", color: "#5F2930", fontWeight: 600, display: "inline-flex", alignItems: "center", gap: 0.5 }}>
+                    <Box component="span" sx={{ fontSize: { xs: "0.65rem", sm: "0.7rem", md: "0.75rem" }, py: 0.35, px: 0.9, bgcolor: "#fee9e5", borderRadius: "30px", color: "#5F2930", fontWeight: 600, display: "inline-flex", alignItems: "center", gap: 0.5 }}>
                       not in cart
                     </Box>
                   )}
@@ -661,7 +664,7 @@ export const ProductSectionCarousel = memo(({
                       px: 1,
                       py: 0.4,
                       borderRadius: "40px",
-                      fontSize: "0.8rem",
+                      fontSize: { xs: "0.7rem", sm: "0.75rem", md: "0.8rem" },
                       fontWeight: 500,
                       color: "#4b3631",
                     }}
@@ -681,7 +684,7 @@ export const ProductSectionCarousel = memo(({
                       px: 1.1,
                       py: 0.4,
                       borderRadius: "60px",
-                      fontSize: "0.8rem",
+                      fontSize: { xs: "0.7rem", sm: "0.75rem", md: "0.8rem" },
                       fontWeight: 600,
                     }}
                   >
@@ -705,17 +708,18 @@ export const ProductSectionCarousel = memo(({
                     display: "flex",
                     alignItems: "baseline",
                     gap: 1.25,
-                    my: "0.8rem 1.6rem",
-                    py: 0.6,
+                    my: { xs: "0.6rem", sm: "0.7rem", md: "0.8rem" },
+                    py: { xs: 0.5, sm: 0.55, md: 0.6 },
                     borderTop: "2px dashed rgba(95, 41, 48, 0.1)",
                     borderBottom: "2px dashed rgba(95, 41, 48, 0.1)",
+                    flexShrink: 0,
                   }}
                 >
                   <Box sx={{ display: "flex", flexDirection: "column" }}>
                     {product?.mrp != null && (
-                      <Box component="span" sx={{ fontSize: "0.8rem", color: "#75605a" }}>
+                      <Box component="span" sx={{ fontSize: { xs: "0.7rem", sm: "0.75rem", md: "0.8rem" }, color: "#75605a" }}>
                         MRP{" "}
-                        <Box component="span" sx={{ fontSize: "1rem", color: "#98837c", textDecoration: "line-through", fontWeight: 500 }}>
+                        <Box component="span" sx={{ fontSize: { xs: "0.85rem", sm: "0.9rem", md: "1rem" }, color: "#98837c", textDecoration: "line-through", fontWeight: 500 }}>
                           ₹{Number(product.mrp).toLocaleString("en-IN", { minimumFractionDigits: 2 })}
                         </Box>
                       </Box>
@@ -724,7 +728,7 @@ export const ProductSectionCarousel = memo(({
                       <Box
                         component="span"
                         sx={{
-                          fontSize: { xs: "1.8rem", sm: "2.3rem" },
+                          fontSize: { xs: "1.4rem", sm: "1.6rem", md: "1.7rem", lg: "2rem", xl: "2.3rem" },
                           fontWeight: 750,
                           color: "#5F2930",
                           lineHeight: 1,
@@ -737,7 +741,7 @@ export const ProductSectionCarousel = memo(({
                         <Box
                           component="span"
                           sx={{
-                            fontSize: "0.7rem",
+                            fontSize: { xs: "0.6rem", sm: "0.65rem", md: "0.7rem" },
                             bgcolor: "#ede0db",
                             py: 0.25,
                             px: 0.8,
@@ -755,7 +759,7 @@ export const ProductSectionCarousel = memo(({
                 </Box>
 
                 {/* Action row: Add to cart / quantity controls + wishlist */}
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mt: 0.4 }}>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mt: "auto", pt: 0.4 }}>
                   {isProductInCart(product) ? (
                     /* Quantity UI – same as cart page (CartItem compact style) */
                     <Box sx={{ flex: 1, display: "flex", alignItems: "center", gap: 1 }}>
@@ -783,8 +787,8 @@ export const ProductSectionCarousel = memo(({
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "center",
-                            width: 22,
-                            height: 22,
+                            width: { xs: 20, sm: 22 },
+                            height: { xs: 20, sm: 22 },
                             borderRadius: "999px",
                             background: "linear-gradient(135deg, #fff0ea 0%, #ffe0d4 100%)",
                             boxShadow: "0 1px 3px rgba(220, 120, 80, 0.22)",
@@ -797,10 +801,10 @@ export const ProductSectionCarousel = memo(({
                           {quantityUpdatingKey === `${getItemKey(product?.productId || product?.id || product?._id, product?.weight)}|decrease` ? (
                             <CircularProgress size={12} sx={{ color: "#F31400" }} />
                           ) : (
-                            <RemoveIcon sx={{ fontSize: 14, color: "#F31400" }} />
+                            <RemoveIcon sx={{ fontSize: { xs: 12, sm: 14 }, color: "#F31400" }} />
                           )}
                         </Box>
-                        <CustomText sx={{ minWidth: 20, textAlign: "center", fontSize: 12, fontWeight: 600, color: "#3d2914", letterSpacing: 0.3 }}>
+                        <CustomText sx={{ minWidth: 20, textAlign: "center", fontSize: { xs: 11, sm: 12 }, fontWeight: 600, color: "#3d2914", letterSpacing: 0.3 }}>
                           {getCartQuantity(product?.productId || product?.id || product?._id, product?.weight) || 0}
                         </CustomText>
                         <Box
@@ -814,8 +818,8 @@ export const ProductSectionCarousel = memo(({
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "center",
-                            width: 22,
-                            height: 22,
+                            width: { xs: 20, sm: 22 },
+                            height: { xs: 20, sm: 22 },
                             borderRadius: "999px",
                             background: "linear-gradient(135deg, #ff9472 0%, #f2709c 100%)",
                             boxShadow: "0 1px 4px rgba(242, 112, 156, 0.45)",
@@ -828,7 +832,7 @@ export const ProductSectionCarousel = memo(({
                           {quantityUpdatingKey === `${getItemKey(product?.productId || product?.id || product?._id, product?.weight)}|increase` ? (
                             <CircularProgress size={12} sx={{ color: "#fff" }} />
                           ) : (
-                            <AddIcon sx={{ fontSize: 14, color: "#fff" }} />
+                            <AddIcon sx={{ fontSize: { xs: 12, sm: 14 }, color: "#fff" }} />
                           )}
                         </Box>
                       </Box>
@@ -839,7 +843,7 @@ export const ProductSectionCarousel = memo(({
                           navigate("/cart");
                         }}
                         sx={{
-                          fontSize: "0.75rem",
+                          fontSize: { xs: "0.65rem", sm: "0.7rem", md: "0.75rem" },
                           fontWeight: 600,
                           color: "#5F2930",
                           cursor: "pointer",
@@ -861,11 +865,11 @@ export const ProductSectionCarousel = memo(({
                         flex: 1,
                         bgcolor: "#5F2930",
                         borderRadius: "100px",
-                        py: 1,
-                        px: 2,
+                        py: { xs: 0.8, sm: 0.9, md: 0.95, lg: 1 },
+                        px: { xs: 1.5, sm: 1.8, md: 1.9, lg: 2 },
                         color: "#fff",
                         fontWeight: 700,
-                        fontSize: "1.1rem",
+                        fontSize: { xs: "0.95rem", sm: "0.98rem", md: "1rem", lg: "1.05rem", xl: "1.1rem" },
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
@@ -886,7 +890,7 @@ export const ProductSectionCarousel = memo(({
                       {loadingCart.has(product?.productId || product?.id || product?._id) ? (
                         <CircularProgress size={22} sx={{ color: "#fff" }} />
                       ) : (
-                        <>Add to cart <ShoppingCartIcon className="cart-arrow" sx={{ fontSize: "1.2rem", transition: "transform 0.22s" }} /></>
+                        <>Add to cart <ShoppingCartIcon className="cart-arrow" sx={{ fontSize: { xs: "1rem", sm: "1.05rem", md: "1.1rem", lg: "1.15rem", xl: "1.2rem" }, transition: "transform 0.22s" }} /></>
                       )}
                     </Box>
                   )}
@@ -894,8 +898,8 @@ export const ProductSectionCarousel = memo(({
                     onClick={(e) => handleWishlistToggle(e, product)}
                     disabled={loadingWishlist.has(product?.productId || product?.id || product?._id)}
                     sx={{
-                      width: 56,
-                      height: 56,
+                      width: { xs: 48, sm: 52, md: 56 },
+                      height: { xs: 48, sm: 52, md: 56 },
                       flexShrink: 0,
                       borderRadius: "60px",
                       bgcolor: "#fff",
@@ -912,15 +916,15 @@ export const ProductSectionCarousel = memo(({
                     {loadingWishlist.has(product?.productId || product?.id || product?._id) ? (
                       <CircularProgress size={24} sx={{ color: "#5F2930" }} />
                     ) : (product?.isWishlisted === true || wishlistIds.has(product?.productId || product?.id || product?._id)) ? (
-                      <FavoriteIcon sx={{ fontSize: "1.6rem" }} />
+                      <FavoriteIcon sx={{ fontSize: { xs: "1.4rem", sm: "1.5rem", md: "1.6rem" } }} />
                     ) : (
-                      <FavoriteBorderIcon sx={{ fontSize: "1.6rem" }} />
+                      <FavoriteBorderIcon sx={{ fontSize: { xs: "1.4rem", sm: "1.5rem", md: "1.6rem" } }} />
                     )}
                   </IconButton>
                 </Box>
 
                 {/* Bottom micro row */}
-                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mt: 1.2, fontSize: "0.75rem", color: "#6f5b55" }}>
+                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mt: 1.2, fontSize: { xs: "0.7rem", sm: "0.75rem", md: "0.8rem" }, color: "#6f5b55" }}>
                   <Box sx={{ display: "flex", gap: 0.5 }}>
                     {product?.courier === "Y" || product?.courier === "y" ? (
                       <Box component="span" sx={{ bgcolor: "#f5efed", py: 0.3, px: 0.9, borderRadius: "30px" }}>

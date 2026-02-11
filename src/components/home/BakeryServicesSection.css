@@ -1,0 +1,132 @@
+/* BakeryServicesSection Section Styles */
+
+/* Section container responsive */
+@media (max-width: 599px) {
+  .bakery-services-section {
+    padding: 2rem 1rem !important;
+  }
+}
+
+@media (min-width: 600px) {
+  .bakery-services-section {
+    padding: 4rem 1.5rem !important;
+  }
+}
+
+/* Header responsive - Simple text for Android */
+@media (max-width: 599px) {
+  .services-header {
+    padding: 1rem 1.2rem !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 0.75rem !important;
+    width: 100% !important;
+    justify-content: space-between !important;
+  }
+
+  .services-header > div:first-child {
+    width: 100% !important;
+    justify-content: space-between !important;
+  }
+
+  .services-header-title {
+    font-size: 1.5rem !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+  }
+
+  /* Hide icons and badges on mobile - show simple text only */
+  .services-header-icon,
+  .services-header-badge {
+    display: none !important;
+  }
+
+  .services-header > div:last-child {
+    display: none !important;
+  }
+}
+
+@media (min-width: 600px) and (max-width: 899px) {
+  .services-header {
+    padding: 1rem 1.8rem !important;
+  }
+
+  .services-header h2 {
+    font-size: 1.9rem !important;
+  }
+}
+
+@media (min-width: 900px) {
+  .services-header {
+    padding: 1.2rem 2.2rem !important;
+  }
+}
+
+/* Service card responsive */
+@media (max-width: 599px) {
+  .service-card {
+    padding: 1.5rem 1.2rem !important;
+    margin-bottom: 1.5rem !important;
+  }
+
+  .service-card-title {
+    font-size: 1.2rem !important;
+  }
+
+  .service-card-description {
+    font-size: 0.9rem !important;
+  }
+
+  .service-card-icon {
+    width: 50px !important;
+    height: 50px !important;
+    font-size: 24px !important;
+  }
+}
+
+@media (min-width: 600px) and (max-width: 899px) {
+  .service-card {
+    padding: 2rem 1.5rem !important;
+  }
+
+  .service-card-title {
+    font-size: 1.4rem !important;
+  }
+}
+
+@media (min-width: 900px) {
+  .service-card {
+    padding: 2.4rem 2rem !important;
+  }
+
+  .service-card-title {
+    font-size: 1.6rem !important;
+  }
+}
+
+/* Service card hover effects */
+.service-card:hover {
+  transform: translateY(-12px) scale(1.02);
+}
+
+/* Grid responsive */
+@media (max-width: 599px) {
+  .services-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1.5rem !important;
+  }
+}
+
+@media (min-width: 600px) and (max-width: 899px) {
+  .services-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 2rem !important;
+  }
+}
+
+@media (min-width: 900px) {
+  .services-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 2.5rem !important;
+  }
+}

@@ -5,17 +5,6 @@ import { ProductSectionCarousel } from "./ProductSectionCarousel";
 import { Box, CircularProgress, Alert } from "@mui/material";
 import blankImage from "../../assets/blankimage.webp";
 
-/**
- * Component that fetches products by category groupname and displays them
- * @param {string} categoryGroupname - The groupname of the category (e.g., "CAKES", "COOKIES")
- * @param {string} title - Display title for the section
- * @param {string} subtitle - Display subtitle for the section
- * @param {React.Component} icon - Icon component to display
- * @param {string} bgColor - Background color for the section
- * @param {boolean} showBadge - Whether to show product badges
- * @param {number} limit - Number of products to fetch (default: 10)
- * @param {Array} preloadedProducts - Pre-loaded products array (optional, if provided, skips API call)
- */
 export const CategoryProductSection = memo(({
   categoryGroupname,
   title,

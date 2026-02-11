@@ -12,6 +12,7 @@ import WorkspacePremiumIcon from "@mui/icons-material/WorkspacePremium";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import VerifiedIcon from "@mui/icons-material/Verified";
 import StarIcon from "@mui/icons-material/Star";
+import "./BakeryServicesSection.css";
 
 const services = [
   {
@@ -61,8 +62,10 @@ const services = [
 export const BakeryServicesSection = () => {
   return (
     <Box
+      className="bakery-services-section"
       sx={{
-        py: { xs: 4, md: 8 },
+        py: { xs: 2, md: 8 },
+        px: { xs: 2, md: 3 },
         minHeight: "auto",
         background: "#fcf9f7",
         backgroundImage: `
@@ -73,9 +76,10 @@ export const BakeryServicesSection = () => {
         fontFamily: "'Satoshi', sans-serif",
       }}
     >
-      <Container maxWidth={false} sx={{ maxWidth: 1440, px: { xs: 2, md: 3 } }}>
+      <Container maxWidth={false} sx={{ px: { xs: 2, md: 3 } }}>
         {/* Glass header */}
         <Box
+          className="services-header"
           sx={{
             display: "flex",
             alignItems: "baseline",
@@ -95,9 +99,10 @@ export const BakeryServicesSection = () => {
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
             <Box
               component="h2"
+              className="services-header-title"
               sx={{
                 fontFamily: "'Clash Display', sans-serif",
-                fontSize: { xs: "1.6rem", md: "2.3rem" },
+                fontSize: { xs: "1.4rem", sm: "1.6rem", md: "2rem", lg: "2.3rem" },
                 fontWeight: 700,
                 color: "#2d1e1b",
                 letterSpacing: "-0.02em",
@@ -108,30 +113,32 @@ export const BakeryServicesSection = () => {
               }}
             >
               <Box
+                className="services-header-icon"
                 sx={{
                   color: "#5F2930",
                   bgcolor: "white",
                   p: 0.7,
                   borderRadius: "100px",
-                  fontSize: "1.8rem",
+                  fontSize: { xs: "1.4rem", sm: "1.6rem", md: "1.8rem" },
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                   boxShadow: "0 10px 20px rgba(95,41,48,0.08)",
                 }}
               >
-                <AutoAwesomeIcon sx={{ fontSize: "1.4rem" }} />
+                <AutoAwesomeIcon sx={{ fontSize: { xs: "1.2rem", sm: "1.3rem", md: "1.4rem" } }} />
               </Box>
               our premium services
             </Box>
             <Box
+              className="services-header-badge"
               sx={{
                 background: "#5F2930",
                 color: "white",
                 py: 0.6,
                 px: 1.8,
                 borderRadius: "60px",
-                fontSize: "0.9rem",
+                fontSize: { xs: "0.75rem", sm: "0.85rem", md: "0.9rem" },
                 fontWeight: 600,
                 letterSpacing: 0.5,
                 display: "flex",
@@ -141,7 +148,7 @@ export const BakeryServicesSection = () => {
                 backdropFilter: "blur(8px)",
               }}
             >
-              <CheckCircleIcon sx={{ fontSize: "1.1rem" }} />
+              <CheckCircleIcon sx={{ fontSize: { xs: "0.95rem", sm: "1rem", md: "1.1rem" } }} />
               6 specialties
             </Box>
           </Box>
@@ -153,14 +160,14 @@ export const BakeryServicesSection = () => {
                 py: 0.5,
                 px: 1.5,
                 borderRadius: "60px",
-                fontSize: "0.85rem",
+                fontSize: { xs: "0.75rem", sm: "0.8rem", md: "0.85rem" },
                 fontWeight: 500,
                 display: "flex",
                 alignItems: "center",
                 gap: 0.75,
               }}
             >
-              <WorkspacePremiumIcon sx={{ color: "#5F2930", fontSize: "1rem" }} />
+              <WorkspacePremiumIcon sx={{ color: "#5F2930", fontSize: { xs: "0.9rem", sm: "0.95rem", md: "1rem" } }} />
               artisan bakery
             </Box>
           </Box>
@@ -283,9 +290,9 @@ export const BakeryServicesSection = () => {
                   <Box
                     component="h3"
                     sx={{
-                      fontFamily: "'Clash Display', sans-serif",
-                      fontSize: { xs: "1.4rem", md: "1.7rem" },
-                      fontWeight: 700,
+                    fontFamily: "'Clash Display', sans-serif",
+                    fontSize: { xs: "1.2rem", sm: "1.4rem", md: "1.6rem", lg: "1.7rem" },
+                    fontWeight: 700,
                       color: "#1f1614",
                       lineHeight: 1.2,
                       mb: 0.8,
@@ -297,7 +304,7 @@ export const BakeryServicesSection = () => {
                   </Box>
                   <Box
                     sx={{
-                      fontSize: "0.98rem",
+                      fontSize: { xs: "0.85rem", sm: "0.9rem", md: "0.98rem" },
                       lineHeight: 1.55,
                       color: "#6a5650",
                       fontWeight: 450,
@@ -315,12 +322,12 @@ export const BakeryServicesSection = () => {
                       gap: 1,
                       fontWeight: 600,
                       color: "#5F2930",
-                      fontSize: "0.9rem",
+                      fontSize: { xs: "0.8rem", sm: "0.85rem", md: "0.9rem" },
                       letterSpacing: 0.8,
                       textTransform: "uppercase",
                       borderBottom: "2px solid transparent",
                       transition: "gap 0.25s, border-color 0.2s",
-                      "& svg": { fontSize: "0.8rem", transition: "transform 0.2s" },
+                      "& svg": { fontSize: { xs: "0.7rem", sm: "0.75rem", md: "0.8rem" }, transition: "transform 0.2s" },
                     }}
                   >
                     discover
@@ -333,15 +340,7 @@ export const BakeryServicesSection = () => {
         </Grid>
 
         {/* Footer pills */}
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "center",
-            mt: 3.5,
-            gap: 2,
-            flexWrap: "wrap",
-          }}
-        >
+        <Box sx={{ display: "flex", justifyContent: "center", mt: 3.5, gap: 2, flexWrap: "wrap", }}>
           <Box
             sx={{
               background: "white",
@@ -356,10 +355,10 @@ export const BakeryServicesSection = () => {
               display: "flex",
               alignItems: "center",
               gap: 0.75,
-              fontSize: "0.9rem",
+              fontSize: { xs: "0.8rem", sm: "0.85rem", md: "0.9rem" },
             }}
           >
-            <VerifiedIcon sx={{ color: "#5F2930", fontSize: "1.1rem" }} />
+            <VerifiedIcon sx={{ color: "#5F2930", fontSize: { xs: "0.95rem", sm: "1rem", md: "1.1rem" } }} />
             150+ custom cakes monthly
           </Box>
           <Box
@@ -376,10 +375,10 @@ export const BakeryServicesSection = () => {
               display: "flex",
               alignItems: "center",
               gap: 0.75,
-              fontSize: "0.9rem",
+              fontSize: { xs: "0.8rem", sm: "0.85rem", md: "0.9rem" },
             }}
           >
-            <StarIcon sx={{ color: "#5F2930", fontSize: "1.1rem" }} />
+            <StarIcon sx={{ color: "#5F2930", fontSize: { xs: "0.95rem", sm: "1rem", md: "1.1rem" } }} />
             4.9 ★ (2.8k reviews)
           </Box>
           <Box
@@ -394,10 +393,10 @@ export const BakeryServicesSection = () => {
               display: "flex",
               alignItems: "center",
               gap: 0.75,
-              fontSize: "0.9rem",
+              fontSize: { xs: "0.8rem", sm: "0.85rem", md: "0.9rem" },
             }}
           >
-            <WorkspacePremiumIcon sx={{ fontSize: "1.1rem" }} />
+            <WorkspacePremiumIcon sx={{ fontSize: { xs: "0.95rem", sm: "1rem", md: "1.1rem" } }} />
             danbro signature
           </Box>
         </Box>

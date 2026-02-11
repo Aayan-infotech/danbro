@@ -1,122 +1,442 @@
-import { Box, Container, Avatar, Button } from "@mui/material";
-import { CustomText } from "../comman/CustomText";
-import { CustomCarousel, CustomCarouselArrow } from "../comman/CustomCarousel";
+import { Box, IconButton, CircularProgress } from "@mui/material";
+import { useState, useEffect, useRef } from "react";
 import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
-import { useState, useEffect, useRef } from "react";
 import StarIcon from "@mui/icons-material/Star";
-import user1 from "../../assets/174fadede8628f65c914092552741f716b9b8039.jpg";
+import StarHalfIcon from "@mui/icons-material/StarHalf";
+import MessageIcon from "@mui/icons-material/Message";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import EmailIcon from "@mui/icons-material/Email";
+import CakeIcon from "@mui/icons-material/Cake";
+import ShieldIcon from "@mui/icons-material/Shield";
+import AccessTimeIcon from "@mui/icons-material/AccessTime";
+import TagIcon from "@mui/icons-material/Tag";
+import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import { getAllReviews } from "../../utils/apiService";
-import { Link } from "react-router-dom";
+import "./TestimonialsCarousel.css";
+import GradientBg from "../../assets/Group_906.webp";
 
+const BRAND_COLOR = "#5F2930";
+
+// Helper function to get initials from name
+const getInitials = (name) => {
+  if (!name) return "CU";
+  const parts = name.trim().split(/\s+/);
+  if (parts.length >= 2) {
+    return (parts[0][0] + parts[1][0]).toUpperCase();
+  }
+  return name.substring(0, 2).toUpperCase();
+};
+
+// Helper function to format date
+const formatDate = (dateString) => {
+  if (!dateString) return "Recently";
+  try {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+  } catch {
+    return "Recently";
+  }
+};
+
+// Helper function to truncate ID
+const truncateId = (id) => {
+  if (!id) return "—";
+  const str = String(id);
+  if (str.length <= 12) return str;
+  return `${str.substring(0, 8)}…${str.substring(str.length - 4)}`;
+};
+
+// Map review data to testimonial format
 const mapReviewToTestimonial = (r) => ({
-  id: r?._id,
-  name: r?.user?.name ?? "Customer",
-  role: r?.product?.name ?? "Customer",
+  id: r?._id || r?.id,
+  name: r?.user?.name || "Customer",
+  email: r?.user?.email || r?.email || "customer@example.com",
   rating: typeof r?.rating === "number" ? Math.min(5, Math.max(1, r.rating)) : 5,
-  comment: r?.review ?? "",
-  image: user1,
+  comment: r?.review || r?.comment || "",
+  productName: r?.product?.name || r?.productName || "Product",
+  date: r?.createdAt || r?.date || new Date().toISOString(),
+  verified: true,
 });
 
-const TestimonialCard = ({ item }) => (
-  <Box
-    className="testimonial-card"
-    sx={{
-      borderRadius: "40px",
-      padding: "30px 23px",
-      background: "var(--themeColor)",
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      justifyContent: "center",
-      textAlign: "center",
-      minHeight: 320,
-      height: "100%",
-      transition: "transform 0.3s ease, box-shadow 0.3s ease",
-      "&:hover": {
-        transform: "translateY(-6px)",
-        boxShadow: "0 12px 40px rgba(95, 41, 48, 0.35)",
-      },
-    }}
-  >
+// Testimonial Card Component
+const TestimonialCard = ({ item }) => {
+  const rating = item?.rating || 5;
+  const fullStars = Math.floor(rating);
+  const hasHalfStar = rating % 1 >= 0.5;
+
+  return (
     <Box
-      className="testimonial-avatar-wrap"
+      className="testimonial-card-modern"
       sx={{
-        width: 100,
-        height: 70,
+        flex: "0 0 auto",
+        width: { xs: 320, sm: 400 },
+        background: "rgba(255, 255, 255, 0.75)",
+        backdropFilter: "blur(24px)",
+        WebkitBackdropFilter: "blur(24px)",
+        borderRadius: "56px",
+        padding: "2.4rem 2rem 2rem",
         position: "relative",
-        mb: 2,
-      }}
-    >
-      <Avatar
-        src={item?.image}
-        alt={item?.name}
-        sx={{
-          position: "absolute",
-          left: "50%",
-          top: "50%",
-          transform: "translate(-50%, -50%)",
-          width: 100,
-          height: 100,
-          border: "3px solid rgba(255,255,255,0.3)",
-          boxShadow: "0 4px 20px rgba(0,0,0,0.2)",
-        }}
-      />
-    </Box>
-    <CustomText
-      className="testimonial-text"
-      sx={{
-        color: "#fff",
-        fontSize: 16,
-        fontWeight: 400,
-        maxWidth: 330,
-        mx: "auto",
-        mb: 3,
-        overflow: "hidden",
-        display: "-webkit-box",
-        WebkitLineClamp: 4,
-        WebkitBoxOrient: "vertical",
-        lineHeight: 1.6,
-      }}
-    >
-      {item?.comment || "Great experience with Danbro!"}
-    </CustomText>
-    <CustomText
-      className="testimonial-name"
-      sx={{
-        color: "#fff",
-        fontSize: 16,
-        fontWeight: 700,
-        mb: 2.5,
-        position: "relative",
+        transition: "all 0.4s cubic-bezier(0.2, 0.9, 0.4, 1)",
+        border: "1px solid rgba(255, 255, 255, 0.6)",
+        boxShadow: "0 30px 50px -25px rgba(95, 41, 48, 0.15)",
+        display: "flex",
+        flexDirection: "column",
+        transformOrigin: "center",
+        "&:hover": {
+          background: "rgba(255, 255, 255, 0.9)",
+          border: "1px solid rgba(95, 41, 48, 0.25)",
+          boxShadow: "0 50px 70px -25px rgba(95, 41, 48, 0.3), inset 0 0 0 2px rgba(255,255,255,0.8)",
+          transform: "translateY(-16px) scale(1.01)",
+          "& .quote-icon-3d": {
+            WebkitTextStroke: "2px rgba(95,41,48,0.3)",
+            transform: "scale(1.08) rotate(2deg)",
+          },
+          "& .avatar-liquid": {
+            background: BRAND_COLOR,
+            color: "white",
+            borderRadius: "48% 52% 38% 62% / 44% 52% 48% 56%",
+            transform: "scale(0.96) rotate(4deg)",
+          },
+          "& .product-tag-modern": {
+            background: BRAND_COLOR,
+            color: "white",
+            borderColor: BRAND_COLOR,
+            boxShadow: "6px 6px 0 #281c19",
+            "& .tag-icon": {
+              color: "white",
+            },
+          },
+          "& .card-glow": {
+            opacity: 1,
+          },
+        },
         "&::before": {
           content: '""',
           position: "absolute",
-          left: -23,
-          top: "50%",
-          transform: "translateY(-50%)",
-          width: 20,
-          height: 1,
-          backgroundColor: "#fff",
+          inset: 0,
+          borderRadius: "56px",
+          background: "radial-gradient(circle at 80% 0%, rgba(95, 41, 48, 0.08) 0%, transparent 60%)",
+          opacity: 0,
+          transition: "opacity 0.5s",
+          pointerEvents: "none",
+        },
+        "&:hover::before": {
+          opacity: 1,
         },
       }}
     >
-      {item?.name}
-    </CustomText>
-    <Box sx={{ display: "flex", gap: 0.5, justifyContent: "center" }}>
-      {[...Array(item?.rating || 5)].map((_, i) => (
-        <StarIcon key={i} sx={{ fontSize: 20, color: "#D4B754" }} />
-      ))}
-    </Box>
+      {/* Floating orbs */}
+      <Box
+        className="card-glow"
+        sx={{
+          position: "absolute",
+          top: "-30px",
+          right: "-20px",
+          width: "150px",
+          height: "150px",
+          background: "radial-gradient(circle at 30% 30%, rgba(95,41,48,0.1), transparent 80%)",
+          borderRadius: "50%",
+          filter: "blur(45px)",
+          zIndex: 0,
+          pointerEvents: "none",
+          opacity: 0,
+          transition: "opacity 0.5s",
+        }}
+      />
+
+      {/* Kinetic dots */}
+      <Box
+      sx={{
+          position: "absolute",
+          top: "15%",
+          left: "8%",
+          width: "8px",
+          height: "8px",
+          background: BRAND_COLOR,
+          opacity: 0.2,
+          borderRadius: "50%",
+          filter: "blur(2px)",
+          animation: "kineticMove 8s infinite alternate",
+          "@keyframes kineticMove": {
+            "0%": { transform: "translate(0, 0) scale(1)" },
+            "100%": { transform: "translate(-18px, -22px) scale(1.8)" },
+          },
+        }}
+      />
+      <Box
+      sx={{
+          position: "absolute",
+          bottom: "15%",
+          right: "12%",
+          width: "14px",
+          height: "14px",
+          background: BRAND_COLOR,
+          opacity: 0.15,
+          borderRadius: "50%",
+          filter: "blur(2px)",
+          animation: "kineticMove2 8s infinite alternate",
+          "@keyframes kineticMove2": {
+            "0%": { transform: "translate(0, 0) scale(1)" },
+            "100%": { transform: "translate(18px, -22px) scale(1.8)" },
+          },
+        }}
+      />
+
+      {/* Quote icon */}
+      <Box
+        className="quote-icon-3d"
+        sx={{
+          position: "absolute",
+          top: "24px",
+          right: "28px",
+          fontSize: "4.8rem",
+          fontWeight: 800,
+          fontFamily: "'Playfair Display', serif",
+          lineHeight: 1,
+          WebkitTextStroke: "2px rgba(95,41,48,0.15)",
+          color: "transparent",
+          textShadow: "0 8px 18px rgba(95,41,48,0.05)",
+          transition: "all 0.2s",
+          zIndex: 1,
+        }}
+      >
+        ''
+      </Box>
+
+      {/* User section */}
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: "16px",
+          marginBottom: "1.6rem",
+          position: "relative",
+          zIndex: 2,
+        }}
+      >
+        {/* Avatar */}
+        <Box
+          className="avatar-liquid testimonial-avatar"
+          sx={{
+            width: "72px",
+            height: "72px",
+            background: "linear-gradient(145deg, #f7eae6, #f0dbd2)",
+            borderRadius: "38% 62% 42% 58% / 56% 44% 56% 44%",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            color: BRAND_COLOR,
+            fontSize: "1.8rem",
+            fontWeight: 600,
+            transition: "all 0.4s",
+            boxShadow: "0 18px 28px -14px rgba(95,41,48,0.3)",
+            border: "2px solid rgba(255,255,255,0.9)",
+            flexShrink: 0,
+          }}
+        >
+          {getInitials(item.name)}
+        </Box>
+
+        {/* User details */}
+        <Box sx={{ display: "flex", flexDirection: "column", flex: 1, minWidth: 0 }}>
+          <Box
+            sx={{
+              fontSize: { xs: "1.1rem", sm: "1.25rem", md: "1.35rem" },
+              fontWeight: 700,
+              fontFamily: "'Playfair Display', serif",
+              color: "#1f1614",
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              flexWrap: "wrap",
+            }}
+          >
+            {item.name}
+            {item.verified && (
+              <Box
+                sx={{
+                  background: BRAND_COLOR,
+                  color: "white",
+                  borderRadius: "100px",
+                  padding: "0.2rem 0.5rem",
+                  fontSize: { xs: "0.6rem", sm: "0.65rem", md: "0.7rem" },
+                  fontWeight: 700,
+                  display: "inline-flex",
+                  gap: "4px",
+                  alignItems: "center",
+                }}
+              >
+                <CheckCircleIcon sx={{ fontSize: { xs: "0.6rem", sm: "0.65rem", md: "0.7rem" } }} />
+                VERIFIED
+              </Box>
+            )}
+          </Box>
+          <Box
+            sx={{
+              fontSize: { xs: "0.7rem", sm: "0.75rem", md: "0.8rem" },
+              color: "#9a7d74",
+              display: "flex",
+              alignItems: "center",
+              gap: "6px",
+              marginTop: "4px",
+              background: "rgba(255,255,255,0.5)",
+              padding: "0.25rem 0.9rem",
+              borderRadius: "60px",
+              width: "fit-content",
+              backdropFilter: "blur(4px)",
+            }}
+          >
+            <EmailIcon sx={{ fontSize: { xs: "0.7rem", sm: "0.75rem", md: "0.8rem" } }} />
+            {item.email}
+          </Box>
+        </Box>
+      </Box>
+
+      {/* Product tag */}
+      <Box
+        className="product-tag-modern"
+        sx={{
+          background: "#ffffff",
+          border: "1.8px solid #281c19",
+          padding: "0.7rem 1.5rem",
+          borderRadius: "40px 40px 40px 8px",
+          fontSize: { xs: "0.7rem", sm: "0.75rem", md: "0.8rem" },
+          fontWeight: 700,
+          color: "#281c19",
+          display: "inline-flex",
+          alignItems: "center",
+          gap: "10px",
+          marginBottom: "1.6rem",
+          width: "fit-content",
+          transition: "all 0.25s",
+          boxShadow: "4px 4px 0 #5F2930",
+        }}
+      >
+        <CakeIcon className="tag-icon" sx={{ fontSize: { xs: "0.8rem", sm: "0.85rem", md: "0.9rem" }, color: BRAND_COLOR, transition: "color 0.2s" }} />
+        (ORD) {item.productName.toUpperCase()}
+      </Box>
+
+      {/* Rating */}
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: "12px",
+          background: "rgba(255, 255, 255, 0.7)",
+          backdropFilter: "blur(8px)",
+          padding: "0.4rem 1rem 0.4rem 1.2rem",
+          borderRadius: "80px",
+          width: "fit-content",
+          marginBottom: "1.4rem",
+          border: "1px solid rgba(95,41,48,0.1)",
+        }}
+      >
+        <Box sx={{ display: "flex", gap: "5px", color: "#ffb83b", fontSize: "1rem" }}>
+          {[...Array(fullStars)].map((_, i) => (
+            <StarIcon key={i} sx={{ fontSize: "1rem" }} />
+          ))}
+          {hasHalfStar && <StarHalfIcon sx={{ fontSize: "1rem" }} />}
+          {[...Array(5 - fullStars - (hasHalfStar ? 1 : 0))].map((_, i) => (
+            <StarIcon key={`empty-${i}`} sx={{ fontSize: "1rem", color: "#ddd" }} />
+          ))}
+        </Box>
+        <Box
+          sx={{
+            fontWeight: 800,
+            background: "white",
+            padding: "0.2rem 0.7rem",
+            borderRadius: "60px",
+            fontSize: "0.8rem",
+            color: BRAND_COLOR,
+            border: "1px solid rgba(95,41,48,0.2)",
+          }}
+        >
+          {rating.toFixed(1)}
+        </Box>
+      </Box>
+
+      {/* Review text */}
+      <Box
+        className="review-text-scrollable"
+        sx={{
+          fontSize: { xs: "0.95rem", sm: "1rem", md: "1.1rem" },
+          lineHeight: 1.5,
+          fontWeight: 450,
+          color: "#2d2623",
+          marginBottom: "1.8rem",
+          position: "relative",
+          zIndex: 2,
+          fontStyle: "italic",
+          letterSpacing: "-0.01em",
+          paddingRight: "0.5rem",
+          maxHeight: "130px",
+          overflowY: "auto",
+          transition: "color 0.2s",
+          borderLeft: "4px solid #5F2930",
+          paddingLeft: "1.2rem",
+        }}
+      >
+        "{item.comment}"
+      </Box>
+
+      {/* Meta info */}
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginTop: "0.6rem",
+          paddingTop: "1rem",
+          borderTop: "2px dotted rgba(95,41,48,0.15)",
+          fontSize: { xs: "0.65rem", sm: "0.7rem", md: "0.75rem" },
+          fontWeight: 600,
+          color: "#6c4e46",
+          textTransform: "uppercase",
+          flexWrap: "wrap",
+          gap: "0.5rem",
+        }}
+      >
+        <Box
+          sx={{
+            background: "#f3eae7",
+            padding: "0.4rem 1.1rem",
+            borderRadius: "60px",
+            display: "flex",
+            alignItems: "center",
+            gap: "6px",
+            letterSpacing: "0.5px",
+          }}
+        >
+          <TagIcon sx={{ fontSize: { xs: "0.65rem", sm: "0.7rem", md: "0.75rem" } }} />
+          {truncateId(item.id)}
+        </Box>
+        <Box
+          sx={{
+            background: "#f3eae7",
+            padding: "0.4rem 1.1rem",
+            borderRadius: "60px",
+            display: "flex",
+            alignItems: "center",
+            gap: "6px",
+          }}
+        >
+          <CalendarTodayIcon sx={{ fontSize: { xs: "0.65rem", sm: "0.7rem", md: "0.75rem" } }} />
+          {formatDate(item.date)}
+        </Box>
+      </Box>
   </Box>
 );
+};
 
 export const TestimonialsCarousel = () => {
   const carouselRef = useRef(null);
   const [testimonials, setTestimonials] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
+    setLoading(true);
     getAllReviews()
       .then((data) => {
         if (cancelled) return;
@@ -126,125 +446,250 @@ export const TestimonialsCarousel = () => {
           .filter((t) => t.comment?.trim());
         setTestimonials(list);
       })
-      .catch(() => setTestimonials([]));
-    return () => { cancelled = true; };
+      .catch(() => setTestimonials([]))
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
-  const hasMore = testimonials.length > 4;
+  const scrollCarousel = (direction) => {
+    const el = carouselRef.current;
+    if (!el) return;
+    const scrollAmount = 430;
+    el.scrollBy({ left: direction === "left" ? -scrollAmount : scrollAmount, behavior: "smooth" });
+  };
+
+  if (loading) {
+    return (
+      <Box
+        sx={{
+          py: { xs: 2, md: 6 },
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: "300px",
+        }}
+      >
+        <CircularProgress sx={{ color: BRAND_COLOR }} />
+      </Box>
+    );
+  }
+
+  if (testimonials?.length === 0) {
+    return null;
+  }
 
   return (
-    <Box id="testimonials" sx={{ py: { xs: 4, md: 6 }, position: "relative" }}>
-      <Container maxWidth="lg" sx={{ px: { xs: 2, md: 3 } }}>
+    <Box
+      id="testimonials"
+      sx={{
+        py: { xs: 2, md: 6 },
+        mb: 0,
+        backgroundImage: `url(${GradientBg})`,
+        position: "relative",
+      }}
+    >
+      <Box sx={{ width: "100%", margin: "0 auto", px: { xs: 2, md: 3 }, }}>
+        {/* Header */}
         <Box
+          className="testimonials-header"
           sx={{
-            textAlign: "center",
-            position: "relative",
-            mb: { xs: 2, md: 4 },
-            "&::before": {
-              content: '""',
-              position: "absolute",
-              left: { xs: "15%", md: "18%" },
-              top: 22,
-              width: { xs: 45, md: 141 },
-              height: 2,
-              backgroundColor: "#D4B754",
-            },
-            "&::after": {
-              content: '""',
-              position: "absolute",
-              right: { xs: "15%", md: "18%" },
-              top: 22,
-              width: { xs: 45, md: 141 },
-              height: 2,
-              backgroundColor: "#D4B754",
+            display: "flex",
+            flexDirection: { xs: "column", md: "row" },
+            alignItems: { xs: "stretch", md: "center" },
+            justifyContent: "space-between",
+            marginBottom: "3.5rem",
+            flexWrap: "wrap",
+            gap: "1.2rem",
+            mb: 1,
+            backdropFilter: "blur(16px)",
+            background: "rgba(255, 255, 255, 0.4)",
+            padding: "1rem 2rem",
+            borderRadius: "120px",
+            border: "1px solid rgba(95, 41, 48, 0.1)",
+            boxShadow: "0 15px 35px rgba(0,0,0,0.02)",
+          }}
+        >
+          <Box className="testimonials-title-wrapper" sx={{ display: "flex", alignItems: "center", gap: "14px", flexWrap: "wrap", flex: 1, justifyContent: { xs: "space-between", md: "flex-start" }, width: { xs: "100%", md: "auto" } }}>
+            <Box
+              component="h2"
+              className="testimonials-title"
+              sx={{
+                fontFamily: "'Playfair Display', serif",
+                fontSize: { xs: "1.5rem", sm: "1.7rem", md: "2rem", lg: "2.2rem" },
+                fontWeight: 700,
+                color: "#281c19",
+                letterSpacing: "-0.03em",
+                display: "flex",
+                alignItems: "center",
+                gap: "12px",
+                margin: 0,
+                flex: 1,
+              }}
+            >
+              <Box
+                className="testimonials-title-icon"
+                sx={{
+                  color: BRAND_COLOR,
+                  fontSize: { xs: "1.6rem", sm: "1.8rem", md: "2.2rem", lg: "2.4rem" },
+                  background: "white",
+                  padding: "0.6rem",
+                  borderRadius: "100px",
+                  boxShadow: "0 8px 18px rgba(95,41,48,0.1)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <MessageIcon sx={{ fontSize: "inherit" }} />
+              </Box>
+              What Our Customers Say
+            </Box>
+          </Box>
+          <Box className="testimonials-badge-arrows-row" sx={{ display: "flex", gap: "1.5rem", alignItems: "center", justifyContent: "space-between", width: { xs: "100%", md: "auto" } }}>
+            <Box
+              className="testimonials-badge"
+              sx={{
+                background: BRAND_COLOR,
+                color: "white",
+                padding: "0.65rem 1.8rem",
+                borderRadius: "100px",
+                fontSize: { xs: "0.75rem", sm: "0.85rem", md: "0.9rem" },
+                fontWeight: 600,
+                letterSpacing: "0.3px",
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                border: "1px solid rgba(255,255,255,0.2)",
+                backdropFilter: "blur(8px)",
+                boxShadow: "0 12px 28px -8px #5F2930",
+              }}
+            >
+              <CheckCircleIcon sx={{ fontSize: { xs: "0.8rem", sm: "0.85rem", md: "0.9rem" } }} />
+              {testimonials?.length} reviews
+            </Box>
+            <Box sx={{ display: "flex", gap: "1.5rem" }}>
+            <IconButton
+              className="testimonials-nav-btn"
+              onClick={() => scrollCarousel("left")}
+              sx={{
+                width: "58px",
+                height: "58px",
+                borderRadius: "100px",
+                background: "rgba(255,255,255,0.6)",
+                backdropFilter: "blur(16px)",
+                border: "1px solid rgba(255,255,255,0.8)",
+                color: BRAND_COLOR,
+                boxShadow: "0 10px 20px rgba(0,0,0,0.02)",
+                transition: "all 0.25s",
+                "&:hover": {
+                  background: BRAND_COLOR,
+                  color: "white",
+                  borderColor: BRAND_COLOR,
+                  transform: "scale(1.1) rotate(360deg)",
+                },
+              }}
+            >
+              <ArrowBackIosNewIcon />
+            </IconButton>
+            <IconButton
+              className="testimonials-nav-btn"
+              onClick={() => scrollCarousel("right")}
+              sx={{
+                width: "58px",
+                height: "58px",
+                borderRadius: "100px",
+                background: "rgba(255,255,255,0.6)",
+                backdropFilter: "blur(16px)",
+                border: "1px solid rgba(255,255,255,0.8)",
+                color: BRAND_COLOR,
+                boxShadow: "0 10px 20px rgba(0,0,0,0.02)",
+                transition: "all 0.25s",
+                "&:hover": {
+                  background: BRAND_COLOR,
+                  color: "white",
+                  borderColor: BRAND_COLOR,
+                  transform: "scale(1.1) rotate(360deg)",
+                },
+              }}
+            >
+              <ArrowForwardIosIcon />
+            </IconButton>
+            </Box>
+          </Box>
+        </Box>
+
+        {/* Carousel */}
+        <Box
+          ref={carouselRef}
+          className="testimonials-carousel"
+          sx={{
+            display: "flex",
+            overflowX: "auto",
+            gap: "2.4rem",
+            padding: "1.2rem 0.6rem 2.8rem 0.6rem",
+            scrollBehavior: "smooth",
+            scrollbarWidth: "none",
+            WebkitOverflowScrolling: "touch",
+            "&::-webkit-scrollbar": {
+              display: "none",
             },
           }}
         >
-          <CustomText
-            sx={{
-              fontSize: { xs: 32, md: 40 },
-              fontFamily: "'Cormorant Garamond', Georgia, serif",
-              fontWeight: 700,
-              color: "var(--themeColor)",
-              lineHeight: 1.2,
-              position: "relative",
-            }}
-          >
-            What Our Customers Say
-          </CustomText>
+          {testimonials?.map((item) => (
+            <TestimonialCard key={item.id} item={item} />
+          ))}
         </Box>
 
-        {testimonials.length === 0 ? (
-          <Box sx={{ textAlign: "center", py: 8, color: "#666" }}>
-            <CustomText>Loading testimonials...</CustomText>
+        {/* Stats */}
+        <Box
+          className="testimonials-stats"
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            marginTop: "2rem",
+            gap: "16px",
+            fontSize: { xs: "0.7rem", sm: "0.75rem", md: "0.8rem" },
+            flexWrap: "wrap",
+          }}
+        >
+          <Box
+            className="testimonials-stat-badge"
+            sx={{
+              background: "rgba(255,255,255,0.55)",
+              backdropFilter: "blur(8px)",
+              padding: { xs: "0.4rem 1.5rem", sm: "0.45rem 1.8rem", md: "0.5rem 2rem" },
+              borderRadius: "60px",
+              border: "1px solid rgba(255,255,255,0.7)",
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+            }}
+          >
+            <ShieldIcon sx={{ color: BRAND_COLOR, fontSize: { xs: "0.8rem", sm: "0.85rem", md: "0.9rem" } }} />
+            100% verified purchases
           </Box>
-        ) : (
-          <>
-            <Box sx={{ position: "relative", mb: hasMore ? 4 : 0 }}>
-              {testimonials.length > 4 && (
-                <>
-                  <CustomCarouselArrow direction="prev" onClick={() => carouselRef.current?.handlePrev()} sx={{ left: { xs: -8, md: -24 } }}>
-                    <ArrowBackIosNewIcon sx={{ fontSize: { xs: 20, md: 24 } }} />
-                  </CustomCarouselArrow>
-                  <CustomCarouselArrow direction="next" onClick={() => carouselRef.current?.handleNext()} sx={{ right: { xs: -8, md: -24 } }}>
-                    <ArrowForwardIosIcon sx={{ fontSize: { xs: 20, md: 24 } }} />
-                  </CustomCarouselArrow>
-                </>
-              )}
-              <CustomCarousel
-                ref={carouselRef}
-                slidesToShow={4}
-                slidesToScroll={1}
-                infinite={testimonials.length > 4}
-                speed={500}
-                arrows={false}
-                dots={true}
-                autoplay={true}
-                autoplaySpeed={4000}
-                pauseOnHover={true}
-                responsive={[
-                  { breakpoint: 1200, settings: { slidesToShow: 3 } },
-                  { breakpoint: 900, settings: { slidesToShow: 2 } },
-                  { breakpoint: 600, settings: { slidesToShow: 1 } },
-                ]}
-              >
-                {testimonials.map((item) => (
-                  <Box key={item?.id} sx={{ px: 1.5 }}>
-                    <TestimonialCard item={item} />
-                  </Box>
-                ))}
-              </CustomCarousel>
-            </Box>
-
-            {hasMore && (
-              <Box sx={{ textAlign: "center", mt: 2 }}>
-                <Button
-                  component={Link}
-                  to="/reviews"
-                  variant="contained"
-                  size="small"
-                  sx={{
-                    bgcolor: "var(--themeColor)",
-                    color: "#fff",
-                    textTransform: "none",
-                    fontWeight: 600,
-                    px: 4,
-                    py: 1.5,
-                    borderRadius: 2,
-                    boxShadow: "0 4px 14px rgba(95, 41, 48, 0.3)",
-                    "&:hover": {
-                      bgcolor: "var(--specialColor)",
-                      boxShadow: "0 6px 20px rgba(95, 41, 48, 0.4)",
-                    },
-                  }}
-                >
-                  View All ({testimonials.length} reviews)
-                </Button>
+          <Box
+            className="testimonials-stat-badge"
+            sx={{
+              background: "rgba(255,255,255,0.55)",
+              backdropFilter: "blur(8px)",
+              padding: { xs: "0.4rem 1.5rem", sm: "0.45rem 1.8rem", md: "0.5rem 2rem" },
+              borderRadius: "60px",
+              border: "1px solid rgba(255,255,255,0.7)",
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+            }}
+          >
+            <AccessTimeIcon sx={{ color: BRAND_COLOR, fontSize: { xs: "0.8rem", sm: "0.85rem", md: "0.9rem" } }} />
+            live from bakery
+          </Box>
+        </Box>
               </Box>
-            )}
-          </>
-        )}
-      </Container>
     </Box>
   );
 };

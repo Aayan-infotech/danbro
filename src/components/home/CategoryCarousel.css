@@ -1,0 +1,130 @@
+/* CategoryCarousel Section Styles */
+
+/* Home section heading - Playfair Display font */
+.home-section-heading,
+.home-section-heading h2,
+h2.home-section-heading {
+  font-family: 'Playfair Display', serif !important;
+}
+
+/* Responsive font sizes */
+@media (max-width: 599px) {
+  .home-section-heading {
+    font-size: 1.5rem !important;
+  }
+
+  /* Hide icon on mobile - show simple text */
+  .category-header-icon {
+    display: none !important;
+  }
+
+  /* Keep badge visible but move it to same row as arrows */
+  .category-collections-badge {
+    font-size: 0.7rem !important;
+    padding: 0.4rem 0.9rem !important;
+  }
+
+  .category-collections-badge svg {
+    font-size: 0.85rem !important;
+  }
+}
+
+@media (min-width: 600px) and (max-width: 899px) {
+  .home-section-heading {
+    font-size: 1.8rem !important;
+  }
+}
+
+@media (min-width: 900px) {
+  .home-section-heading {
+    font-size: 2.2rem !important;
+  }
+}
+
+/* Category header container responsive */
+@media (max-width: 599px) {
+  .category-header-container {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 0.75rem !important;
+    justify-content: space-between !important;
+  }
+
+  .category-header-title-wrapper {
+    width: 100% !important;
+    display: flex !important;
+    justify-content: space-between !important;
+  }
+
+  .home-section-heading {
+    width: 100% !important;
+    justify-content: space-between !important;
+  }
+
+  /* Badge and arrows row - keep them together with space-between */
+  .category-badge-arrows-row {
+    width: 100% !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    gap: 0.75rem !important;
+  }
+
+  .category-collections-badge {
+    font-size: 0.7rem !important;
+    padding: 0.4rem 0.9rem !important;
+  }
+
+  .category-collections-badge svg {
+    font-size: 0.85rem !important;
+  }
+
+  /* Make icon buttons smaller on mobile */
+  .category-nav-buttons .carousel-nav-btn {
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+  }
+
+  .category-nav-buttons .carousel-nav-btn svg {
+    font-size: 1rem !important;
+  }
+}
+
+/* Category card hover effects */
+.category-card {
+  transition: all 0.35s cubic-bezier(0.2, 0.9, 0.4, 1);
+}
+
+.category-card:hover {
+  transform: translateY(-14px) scale(1.02);
+}
+
+/* Mobile optimizations */
+@media (max-width: 599px) {
+  .category-card {
+    width: 240px !important;
+  }
+}
+
+@media (min-width: 600px) {
+  .category-card {
+    width: 280px !important;
+  }
+}
+
+/* Carousel navigation buttons */
+.carousel-nav-btn {
+  transition: all 0.25s ease;
+}
+
+.carousel-nav-btn:hover {
+  transform: scale(1.06);
+}
+
+/* Mobile carousel adjustments */
+@media (max-width: 599px) {
+  .carousel-container {
+    padding: 0.5rem 0.4rem !important;
+  }
+}

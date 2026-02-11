@@ -8,6 +8,7 @@ import PeopleIcon from "@mui/icons-material/People";
 import planning from "../../assets/09f1ee59e9d78cc206e6e867e1cda04c1887d8f8.webp";
 import logo from "../../assets/logo.webp";
 import GradientBg from "../../assets/Group_906.webp";
+import "./AboutBakerySection.css";
 
 const features = [
   {
@@ -57,6 +58,7 @@ export const AboutBakerySection = () => {
   return (
     <Box
       ref={sectionRef}
+      className="about-bakery-section"
       sx={{
         py: { xs: 2, md: 6 },
         position: "relative",
@@ -73,6 +75,7 @@ export const AboutBakerySection = () => {
           <Grid size={{ xs: 12, md: 6 }}>
             <Box
               ref={imageRef}
+              className="about-image-container"
               sx={{
                 position: "relative",
                 borderRadius: 4,
@@ -129,19 +132,19 @@ export const AboutBakerySection = () => {
               }}
             >
               {/* Logo & Badge */}
-              <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 3 }}>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 1 }}>
                 <CustomText sx={{ fontSize: { xs: 10, md: 12 }, fontWeight: 'bold', color: "#FF9472", textTransform: "uppercase", letterSpacing: 2, }}>
                   About Danbro
                 </CustomText>
               </Box>
 
               {/* Title */}
-              <CustomText sx={{ fontSize: { xs: 28, sm: 32, md: 42 }, fontWeight: 800, color: "var(--themeColor)", lineHeight: 1.2, }}>
+              <CustomText className="about-content-title" sx={{ fontSize: { xs: "1.75rem", sm: "2rem", md: "2.5rem", lg: "2.625rem" }, fontWeight: 800, color: "var(--themeColor)", lineHeight: 1.2, }}>
                 Crafting Sweet Memories Since 2006
               </CustomText>
 
               {/* Description */}
-              <CustomText sx={{ fontSize: { xs: 15, md: 17 }, color: "#666", mb: 1, }}>
+              <CustomText className="about-content-description" sx={{ fontSize: { xs: "0.9rem", sm: "0.95rem", md: "1rem", lg: "1.0625rem" }, color: "#666", mb: 1, }}>
                 A gourmet family-owned pastry shop in Lucknow, now expanded to Kanpur & Delhi. We blend Asian traditions with modern flavors, creating premium desserts, mousse cakes, artisan tarts, and innovative baked mithai.
               </CustomText>
 
@@ -150,6 +153,7 @@ export const AboutBakerySection = () => {
                 {features?.map((feature, index) => (
                   <Box
                     key={index}
+                    className="about-feature-item"
                     sx={{
                       display: "flex",
                       alignItems: "flex-start",
@@ -163,6 +167,7 @@ export const AboutBakerySection = () => {
                     }}
                   >
                     <Box
+                      className="about-feature-icon"
                       sx={{
                         bgcolor: "#fff",
                         borderRadius: "50%",
@@ -184,10 +189,10 @@ export const AboutBakerySection = () => {
                       {feature.icon}
                     </Box>
                     <Box>
-                      <CustomText sx={{ fontSize: { xs: 18, md: 20 }, fontWeight: 700, color: "var(--themeColor)", mb: 0.5, }}>
+                      <CustomText className="about-feature-title" sx={{ fontSize: { xs: "1.1rem", sm: "1.2rem", md: "1.25rem", lg: "1.25rem" }, fontWeight: 700, color: "var(--themeColor)", mb: 0.5, }}>
                         {feature.title}
                       </CustomText>
-                      <CustomText sx={{ fontSize: { xs: 14, md: 15 }, color: "#666", lineHeight: 1.6, }}>
+                      <CustomText className="about-feature-description" sx={{ fontSize: { xs: "0.85rem", sm: "0.9rem", md: "0.9375rem", lg: "0.9375rem" }, color: "#666", lineHeight: 1.6, }}>
                         {feature.description}
                       </CustomText>
                     </Box>
@@ -196,6 +201,7 @@ export const AboutBakerySection = () => {
               </Box>
 
               <Button
+                className="about-learn-more-btn"
                 onClick={() => navigate("/about-us")}
                 sx={{
                   bgcolor: "var(--themeColor)",
@@ -204,7 +210,7 @@ export const AboutBakerySection = () => {
                   py: { xs: 1.2, md: 1.5 },
                   borderRadius: { xs: 2, md: 3 },
                   fontWeight: 700,
-                  fontSize: { xs: 15, md: 16 },
+                  fontSize: { xs: "0.9rem", sm: "0.9375rem", md: "1rem", lg: "1rem" },
                   textTransform: "none",
                   boxShadow: "0 8px 25px rgba(95,41,48,0.3)",
                   "&:hover": {

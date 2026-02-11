@@ -10,6 +10,7 @@ import cat3 from "../../assets/43676d15934fc50bdda59d3e39fd8a4ceaadcb9e-Rpx5ZY2j
 import { useItemCategories } from "../../hooks/useItemCategories";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
+import "./CategoryCarousel.css";
 
 const BRAND_COLOR = "#5F2930";
 
@@ -56,7 +57,7 @@ export const CategoryCarousel = ({ categories: propCategories }) => {
     );
   }
 
-  if (error || !items || items.length === 0) {
+  if (error || !items || items?.length === 0) {
     return (
       <Box sx={{ mb: 3 }}>
         <Alert severity={error ? "error" : "info"} sx={{ borderRadius: 2 }}>
@@ -72,12 +73,14 @@ export const CategoryCarousel = ({ categories: propCategories }) => {
       sx={{
         width: "100%",
         margin: "0 auto",
+        py: { xs: 2, md: 4 },
         mb: { xs: 2, md: 4 },
         px: { xs: 1, md: 2 },
       }}
     >
       {/* Section header – same as HTML */}
       <Box
+        className="category-header-container"
         sx={{
           display: "flex",
           alignItems: "baseline",
@@ -87,13 +90,13 @@ export const CategoryCarousel = ({ categories: propCategories }) => {
           gap: 1,
         }}
       >
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, flexWrap: "wrap" }}>
+        <Box className="category-header-title-wrapper" sx={{ display: "flex", alignItems: "center", gap: 1.5, flexWrap: "wrap", flex: 1 }}>
           <Box
             component="h2"
             className="home-section-heading"
             sx={{
               fontFamily: "'Playfair Display', serif",
-              fontSize: { xs: "1.8rem", md: "2.2rem" },
+              fontSize: { xs: "1.5rem", sm: "1.8rem", md: "2rem", lg: "2.2rem" },
               fontWeight: 800,
               color: "#2d1e1b",
               letterSpacing: "-0.01em",
@@ -101,19 +104,24 @@ export const CategoryCarousel = ({ categories: propCategories }) => {
               alignItems: "center",
               gap: 1.5,
               m: 0,
+              flex: 1,
             }}
           >
-            <CategoryIcon sx={{ color: BRAND_COLOR, fontSize: "2rem", opacity: 0.9 }} />
+            <CategoryIcon className="category-header-icon" sx={{ color: BRAND_COLOR, fontSize: { xs: "1.5rem", sm: "1.8rem", md: "2rem" }, opacity: 0.9 }} />
             our sweet categories
+          </Box>
+        </Box>
+        <Box className="category-badge-arrows-row" sx={{ display: "flex", gap: 1.2, alignItems: "center", flexShrink: 0 }}>
             <Box
               component="span"
+            className="category-collections-badge"
               sx={{
                 background: BRAND_COLOR,
                 color: "white",
                 py: 0.5,
                 px: 1.2,
                 borderRadius: "60px",
-                fontSize: "0.85rem",
+                fontSize: { xs: "0.7rem", sm: "0.75rem", md: "0.85rem" },
                 fontWeight: 600,
                 letterSpacing: "1px",
                 display: "inline-flex",
@@ -121,13 +129,12 @@ export const CategoryCarousel = ({ categories: propCategories }) => {
                 gap: 0.5,
               }}
             >
-              <CookieIcon sx={{ fontSize: "1rem" }} />
-              {items.length} collections
-            </Box>
+              <CookieIcon sx={{ fontSize: { xs: "0.85rem", sm: "0.9rem", md: "1rem" } }} />
+            {items?.length} collections
           </Box>
-        </Box>
-        <Box sx={{ display: "flex", gap: 1.2 }}>
+          <Box className="category-nav-buttons" sx={{ display: "flex", gap: 1.2, alignItems: "center" }}>
           <IconButton
+            className="carousel-nav-btn"
             onClick={() => scrollCarousel("left")}
             sx={{
               width: 48,
@@ -146,9 +153,10 @@ export const CategoryCarousel = ({ categories: propCategories }) => {
             }}
             aria-label="Scroll left"
           >
-            <ArrowBackIosNewIcon sx={{ fontSize: "1.2rem" }} />
+            <ArrowBackIosNewIcon sx={{ fontSize: { xs: "1rem", sm: "1.1rem", md: "1.2rem" } }} />
           </IconButton>
           <IconButton
+            className="carousel-nav-btn"
             onClick={() => scrollCarousel("right")}
             sx={{
               width: 48,
@@ -167,8 +175,9 @@ export const CategoryCarousel = ({ categories: propCategories }) => {
             }}
             aria-label="Scroll right"
           >
-            <ArrowForwardIosIcon sx={{ fontSize: "1.2rem" }} />
+            <ArrowForwardIosIcon sx={{ fontSize: { xs: "1rem", sm: "1.1rem", md: "1.2rem" } }} />
           </IconButton>
+          </Box>
         </Box>
       </Box>
 
@@ -198,7 +207,7 @@ export const CategoryCarousel = ({ categories: propCategories }) => {
             onClick={() => handleToProductList(item?.categoryId)}
             sx={{
               flex: "0 0 auto",
-              width: { xs: 240, sm: 280 },
+              width: { xs: 200, sm: 240, md: 280 },
               background: "white",
               borderRadius: "42px",
               boxShadow: "0 18px 30px -10px rgba(95, 41, 48, 0.12)",
@@ -274,8 +283,8 @@ export const CategoryCarousel = ({ categories: propCategories }) => {
             <Box
               className="card-img-category"
               sx={{
-                width: { xs: 130, sm: 160 },
-                height: { xs: 130, sm: 160 },
+                width: { xs: 110, sm: 130, md: 160 },
+                height: { xs: 110, sm: 130, md: 160 },
                 borderRadius: "50%",
                 overflow: "hidden",
                 mb: 1.5,
@@ -321,7 +330,7 @@ export const CategoryCarousel = ({ categories: propCategories }) => {
             <Box
               className="category-name"
               sx={{
-                fontSize: { xs: "1.4rem", sm: "1.6rem" },
+                fontSize: { xs: "1.2rem", sm: "1.4rem", md: "1.6rem" },
                 fontWeight: 700,
                 fontFamily: "'Playfair Display', serif",
                 color: "#2f2421",
@@ -350,7 +359,7 @@ export const CategoryCarousel = ({ categories: propCategories }) => {
             {/* Category ID pill */}
             <Box
               sx={{
-                fontSize: "0.65rem",
+                fontSize: { xs: "0.6rem", sm: "0.65rem", md: "0.7rem" },
                 fontWeight: 500,
                 color: "#a7867c",
                 letterSpacing: "1.5px",
@@ -380,13 +389,13 @@ export const CategoryCarousel = ({ categories: propCategories }) => {
           justifyContent: "center",
           mt: 1.2,
           gap: 1.5,
-          fontSize: "0.75rem",
+          fontSize: { xs: "0.7rem", sm: "0.75rem", md: "0.8rem" },
           color: "#8c6e66",
         }}
       >
         <Box component="span" sx={{ bgcolor: "#fff2ed", py: 0.3, px: 1.2, borderRadius: "40px", display: "inline-flex", alignItems: "center", gap: 0.5 }}>
-          <CategoryIcon sx={{ color: BRAND_COLOR, fontSize: "0.9rem" }} />
-          {items.length} categories loaded
+          <CategoryIcon sx={{ color: BRAND_COLOR, fontSize: { xs: "0.8rem", sm: "0.9rem", md: "1rem" } }} />
+          {items?.length} categories loaded
         </Box>
       </Box>
     </Box>

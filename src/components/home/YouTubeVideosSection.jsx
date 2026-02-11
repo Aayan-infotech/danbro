@@ -1,10 +1,13 @@
-import { Box, Container, Grid, IconButton } from "@mui/material";
+import { Box, Container, IconButton } from "@mui/material";
 import { CustomText } from "../comman/CustomText";
 import { useEffect, useRef, useState } from "react";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import YouTubeIcon from "@mui/icons-material/YouTube";
 import ScheduleIcon from "@mui/icons-material/Schedule";
 import MovieIcon from "@mui/icons-material/Movie";
+import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
+import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
+import "./YouTubeVideosSection.css";
 
 const BRAND_COLOR = "#5F2930";
 const GOLD_ACCENT = "#fcd34d";
@@ -20,6 +23,7 @@ export const YouTubeVideosSection = () => {
   const [visible, setVisible] = useState(false);
   const [selectedVideo, setSelectedVideo] = useState(null);
   const sectionRef = useRef(null);
+  const videoGridRef = useRef(null);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -34,13 +38,50 @@ export const YouTubeVideosSection = () => {
     return () => observer.disconnect();
   }, []);
 
+  const scrollVideos = (direction) => {
+    const el = videoGridRef.current;
+    if (!el) return;
+    const scrollAmount = 350;
+    el.scrollBy({ left: direction === "left" ? -scrollAmount : scrollAmount, behavior: "smooth" });
+  };
+
   const openVideo = (videoId) => {
     setSelectedVideo(videoId);
+    // Prevent body scroll when modal is open
+    const scrollY = window.scrollY;
+    document.body.style.position = "fixed";
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.width = "100%";
+    document.body.style.overflow = "hidden";
+    document.body.classList.add("modal-open");
+    // Prevent touch scrolling on mobile
+    document.body.style.touchAction = "none";
   };
 
   const closeVideo = () => {
     setSelectedVideo(null);
+    // Restore body scroll when modal is closed
+    const scrollY = document.body.style.top;
+    document.body.style.position = "";
+    document.body.style.top = "";
+    document.body.style.width = "";
+    document.body.style.overflow = "";
+    document.body.style.touchAction = "";
+    document.body.classList.remove("modal-open");
+    if (scrollY) {
+      window.scrollTo(0, parseInt(scrollY || "0") * -1);
+    }
   };
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      document.body.style.position = "";
+      document.body.style.top = "";
+      document.body.style.width = "";
+      document.body.style.overflow = "";
+    };
+  }, []);
 
   return (
     <>
@@ -54,7 +95,7 @@ export const YouTubeVideosSection = () => {
             radial-gradient(circle at 20% 30%, rgba(95, 41, 48, 0.25) 0%, transparent 40%),
             radial-gradient(circle at 80% 70%, rgba(190, 130, 100, 0.12) 0%, transparent 45%)
           `,
-          py: { xs: 4, md: 6 },
+          py: { xs: 2, md: 6 },
           opacity: visible ? 1 : 0,
           transform: visible ? "translateY(0)" : "translateY(50px)",
           transition: "opacity 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94), transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
@@ -63,9 +104,11 @@ export const YouTubeVideosSection = () => {
         <Container maxWidth="lg" sx={{ px: { xs: 2, md: 3 } }}>
           {/* Header: Discover Danbro Bakery – Playfair Display */}
           <Box
+            className="youtube-header"
             sx={{
               display: "flex",
-              alignItems: "baseline",
+              flexDirection: { xs: "column", md: "row" },
+              alignItems: { xs: "stretch", md: "baseline" },
               justifyContent: "space-between",
               flexWrap: "wrap",
               gap: 1.5,
@@ -78,13 +121,13 @@ export const YouTubeVideosSection = () => {
               boxShadow: "0 25px 45px -12px rgba(0,0,0,0.4)",
             }}
           >
-            <Box sx={{ display: "flex", alignItems: "center", gap: 2, flexWrap: "wrap" }}>
+            <Box className="youtube-title-wrapper" sx={{ display: "flex", alignItems: "center", gap: 2, flexWrap: "wrap", flex: 1, justifyContent: { xs: "space-between", md: "flex-start" }, width: { xs: "100%", md: "auto" } }}>
               <Box
                 component="h1"
-                className="home-section-heading"
+                className="home-section-heading youtube-header-title"
                 sx={{
                   fontFamily: "'Playfair Display', serif",
-                  fontSize: { xs: "1.8rem", md: "2.4rem" },
+                  fontSize: { xs: "1.5rem", sm: "1.8rem", md: "2.2rem", lg: "2.4rem" },
                   fontWeight: 700,
                   color: "#fffcf5",
                   letterSpacing: "-0.02em",
@@ -92,9 +135,11 @@ export const YouTubeVideosSection = () => {
                   alignItems: "center",
                   gap: 1.5,
                   m: 0,
+                  flex: 1,
                 }}
               >
                 <Box
+                  className="youtube-title-icon"
                   sx={{
                     color: GOLD_ACCENT,
                     background: "rgba(95, 41, 48, 0.7)",
@@ -107,18 +152,22 @@ export const YouTubeVideosSection = () => {
                     boxShadow: "0 12px 28px rgba(252,211,77,0.2)",
                   }}
                 >
-                  <PlayArrowIcon sx={{ fontSize: "1.8rem" }} />
+                  <PlayArrowIcon sx={{ fontSize: { xs: "1.4rem", sm: "1.6rem", md: "1.8rem" } }} />
                 </Box>
                 Discover Danbro Bakery
+              </Box>
+            </Box>
+            <Box className="youtube-badge-row" sx={{ display: "flex", gap: 1.5, alignItems: "center", justifyContent: "space-between", width: { xs: "100%", md: "auto" } }}>
                 <Box
                   component="span"
+                className="youtube-badge"
                   sx={{
                     background: BRAND_COLOR,
                     color: "white",
                     py: 0.6,
                     px: 1.8,
                     borderRadius: "100px",
-                    fontSize: "0.9rem",
+                    fontSize: { xs: "0.75rem", sm: "0.85rem", md: "0.9rem" },
                     fontWeight: 600,
                     letterSpacing: "1px",
                     display: "inline-flex",
@@ -128,14 +177,13 @@ export const YouTubeVideosSection = () => {
                     boxShadow: "0 15px 30px -10px #5F2930",
                   }}
                 >
-                  <YouTubeIcon sx={{ fontSize: "1.1rem" }} />
+                  <YouTubeIcon sx={{ fontSize: { xs: "0.95rem", sm: "1rem", md: "1.1rem" } }} />
                   4K CINEMATIC
-                </Box>
-              </Box>
             </Box>
             <Box sx={{ display: "flex", gap: 1.5, alignItems: "center", color: "rgba(255,235,220,0.7)", letterSpacing: "1px", fontSize: "0.9rem", bgcolor: "rgba(0,0,0,0.25)", py: 0.5, px: 1.5, borderRadius: "60px" }}>
               <MovieIcon sx={{ color: GOLD_ACCENT, fontSize: "1.1rem" }} />
               {youtubeVideos.length} stories
+              </Box>
             </Box>
           </Box>
 
@@ -154,12 +202,31 @@ export const YouTubeVideosSection = () => {
           </CustomText>
 
           {/* Video Grid – cinematic cards */}
-          <Grid container spacing={{ xs: 2, md: 2.5 }} sx={{ mt: 1.5 }}>
+          <Box
+            ref={videoGridRef}
+            sx={{
+              display: "flex",
+              overflowX: "auto",
+              overflowY: "hidden",
+              gap: { xs: 2, md: 2.5 },
+              mt: 1.5,
+              scrollBehavior: "smooth",
+              scrollbarWidth: "none",
+              WebkitOverflowScrolling: "touch",
+              "&::-webkit-scrollbar": { display: "none" },
+            }}
+          >
             {youtubeVideos.map((video, index) => (
-              <Grid size={{ xs: 12, sm: 6, md: 3 }} key={video.id}>
                 <Box
-                  onClick={() => openVideo(video.videoId)}
+                key={video.id}
+                className="video-card video-grid-item"
+                  component="a"
+                  href={`https://www.youtube.com/watch?v=${video.videoId}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   sx={{
+                  flex: "0 0 auto",
+                  width: { xs: "85%", sm: "48%", md: "23%" },
                     position: "relative",
                     borderRadius: "48px",
                     background: "rgba(25, 18, 17, 0.6)",
@@ -168,6 +235,8 @@ export const YouTubeVideosSection = () => {
                     overflow: "hidden",
                     transition: "all 0.45s cubic-bezier(0.23, 1, 0.32, 1)",
                     cursor: "pointer",
+                    textDecoration: "none",
+                    color: "inherit",
                     boxShadow: "0 30px 50px -25px rgba(0,0,0,0.5)",
                     opacity: visible ? 1 : 0,
                     transform: visible ? "translateY(0)" : "translateY(30px)",
@@ -308,9 +377,9 @@ export const YouTubeVideosSection = () => {
                     <CustomText
                       className="video-title"
                       sx={{
-                        fontFamily: "'Playfair Display', serif",
-                        fontSize: "1.45rem",
-                        fontWeight: 700,
+                      fontFamily: "'Playfair Display', serif",
+                      fontSize: { xs: "1.2rem", sm: "1.35rem", md: "1.45rem" },
+                      fontWeight: 700,
                         color: "#fffbf5",
                         lineHeight: 1.2,
                         mb: 0.6,
@@ -320,7 +389,7 @@ export const YouTubeVideosSection = () => {
                     >
                       {video.title}
                     </CustomText>
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, fontSize: "0.75rem", color: "rgba(255, 235, 220, 0.7)", fontWeight: 500, textTransform: "uppercase", letterSpacing: "1px" }}>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, fontSize: { xs: "0.7rem", sm: "0.75rem", md: "0.8rem" }, color: "rgba(255, 235, 220, 0.7)", fontWeight: 500, textTransform: "uppercase", letterSpacing: "1px" }}>
                       <Box component="span" sx={{ display: "inline-flex", alignItems: "center", gap: 0.75, bgcolor: "rgba(255,255,255,0.05)", py: 0.35, px: 1, borderRadius: "60px", border: "1px solid rgba(255,215,200,0.1)" }}>
                         #{video.videoId}
                       </Box>
@@ -328,30 +397,31 @@ export const YouTubeVideosSection = () => {
                     <Box
                       className="accent-bar"
                       sx={{
-                        width: 60,
-                        height: 4,
+                        width: { xs: 50, sm: 55, md: 60 },
+                        height: { xs: 3, sm: 3.5, md: 4 },
                         background: BRAND_COLOR,
                         borderRadius: "10px",
                         my: "1rem 0.2rem",
                         transition: "width 0.3s",
                       }}
                     />
-                    <Box sx={{ color: "rgba(255,255,255,0.5)", fontSize: "0.75rem", mt: 0.7, display: "flex", gap: 1.5, alignItems: "center" }}>
-                      <YouTubeIcon sx={{ color: "#ff0000", fontSize: "1rem" }} />
+                    <Box sx={{ color: "rgba(255,255,255,0.5)", fontSize: { xs: "0.7rem", sm: "0.75rem", md: "0.8rem" }, mt: 0.7, display: "flex", gap: 1.5, alignItems: "center" }}>
+                      <YouTubeIcon sx={{ color: "#ff0000", fontSize: { xs: "0.9rem", sm: "0.95rem", md: "1rem" } }} />
                       YouTube
                     </Box>
                   </Box>
                 </Box>
-              </Grid>
             ))}
-          </Grid>
+          </Box>
 
           {/* Footer: nav orbs + subscribe */}
           <Box sx={{ display: "flex", justifyContent: "flex-end", alignItems: "center", mt: 3, gap: 1.5, flexWrap: "wrap" }}>
-            <Box
+            <IconButton
+              className="youtube-nav-btn"
+              onClick={() => scrollVideos("left")}
               sx={{
-                width: 58,
-                height: 58,
+                width: { xs: 36, md: 58 },
+                height: { xs: 36, md: 58 },
                 borderRadius: "100px",
                 bgcolor: "rgba(255,255,255,0.05)",
                 border: "1px solid rgba(252,211,77,0.2)",
@@ -362,13 +432,16 @@ export const YouTubeVideosSection = () => {
                 "&:hover": { bgcolor: GOLD_ACCENT, color: "#1e1513", borderColor: GOLD_ACCENT, transform: "scale(1.1)" },
                 transition: "all 0.25s",
               }}
+              aria-label="Scroll left"
             >
-              ←
-            </Box>
-            <Box
+              <ArrowBackIosNewIcon sx={{ fontSize: { xs: "1rem", md: "1.5rem" } }} />
+            </IconButton>
+            <IconButton
+              className="youtube-nav-btn"
+              onClick={() => scrollVideos("right")}
               sx={{
-                width: 58,
-                height: 58,
+                width: { xs: 36, md: 58 },
+                height: { xs: 36, md: 58 },
                 borderRadius: "100px",
                 bgcolor: "rgba(255,255,255,0.05)",
                 border: "1px solid rgba(252,211,77,0.2)",
@@ -379,31 +452,33 @@ export const YouTubeVideosSection = () => {
                 "&:hover": { bgcolor: GOLD_ACCENT, color: "#1e1513", borderColor: GOLD_ACCENT, transform: "scale(1.1)" },
                 transition: "all 0.25s",
               }}
+              aria-label="Scroll right"
             >
-              →
-            </Box>
+              <ArrowForwardIosIcon sx={{ fontSize: { xs: "1rem", md: "1.5rem" } }} />
+            </IconButton>
             <Box sx={{ display: "flex", alignItems: "center", gap: 1, bgcolor: "rgba(255,255,255,0.03)", py: 0.2, px: 1.5, borderRadius: "100px", border: "1px solid rgba(255,215,200,0.1)" }}>
-              <YouTubeIcon sx={{ color: "#ff0000", fontSize: "1.3rem" }} />
-              <Box component="span" sx={{ color: "white", fontSize: "0.85rem", fontWeight: 500 }}>subscribe</Box>
+              <YouTubeIcon sx={{ color: "#ff0000", fontSize: { xs: "1.1rem", sm: "1.2rem", md: "1.3rem" } }} />
+              <Box component="span" sx={{ color: "white", fontSize: { xs: "0.75rem", sm: "0.8rem", md: "0.85rem" }, fontWeight: 500 }}>subscribe</Box>
             </Box>
           </Box>
 
           {/* Micro footer */}
           <Box sx={{ display: "flex", justifyContent: "center", mt: 2.5, gap: 2, flexWrap: "wrap" }}>
-            <Box component="span" sx={{ bgcolor: "rgba(255,255,255,0.02)", py: 0.5, px: 2, borderRadius: "60px", border: "1px solid rgba(252,211,77,0.2)", color: "rgba(255,255,255,0.8)", fontSize: "0.85rem", display: "inline-flex", alignItems: "center", gap: 0.75 }}>
-              <PlayArrowIcon sx={{ color: GOLD_ACCENT, fontSize: "1.1rem" }} />
+            <Box component="span" sx={{ bgcolor: "rgba(255,255,255,0.02)", py: 0.5, px: 2, borderRadius: "60px", border: "1px solid rgba(252,211,77,0.2)", color: "rgba(255,255,255,0.8)", fontSize: { xs: "0.75rem", sm: "0.8rem", md: "0.85rem" }, display: "inline-flex", alignItems: "center", gap: 0.75 }}>
+              <PlayArrowIcon sx={{ color: GOLD_ACCENT, fontSize: { xs: "0.95rem", sm: "1rem", md: "1.1rem" } }} />
               {youtubeVideos.length} cinematic stories
             </Box>
-            <Box component="span" sx={{ bgcolor: "rgba(95, 41, 48, 0.3)", py: 0.5, px: 2, borderRadius: "60px", border: "1px solid rgba(252,211,77,0.25)", color: "#fff3e0", fontSize: "0.85rem" }}>
+            <Box component="span" sx={{ bgcolor: "rgba(95, 41, 48, 0.3)", py: 0.5, px: 2, borderRadius: "60px", border: "1px solid rgba(252,211,77,0.25)", color: "#fff3e0", fontSize: { xs: "0.75rem", sm: "0.8rem", md: "0.85rem" } }}>
               DANBRO BAKERY
             </Box>
           </Box>
         </Container>
       </Box>
 
-      {/* Video Modal – unchanged */}
+      {/* Video Modal */}
       {selectedVideo && (
         <Box
+            className="video-modal"
           onClick={closeVideo}
           sx={{
             position: "fixed",
@@ -416,23 +491,30 @@ export const YouTubeVideosSection = () => {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            p: { xs: 2, md: 4 },
+              p: { xs: 1, md: 4 },
             animation: "fadeIn 0.3s ease",
             "@keyframes fadeIn": { "0%": { opacity: 0 }, "100%": { opacity: 1 } },
+              overflow: "hidden",
+              overscrollBehavior: "contain",
+              touchAction: "none",
           }}
         >
           <Box
+              className="video-modal-content"
             onClick={(e) => e.stopPropagation()}
             sx={{
               position: "relative",
               width: "100%",
               maxWidth: { xs: "100%", md: "900px" },
               aspectRatio: "16/9",
-              borderRadius: 2,
+                borderRadius: { xs: 1, md: 2 },
               overflow: "hidden",
               boxShadow: "0 20px 60px rgba(0,0,0,0.5)",
               animation: "scaleIn 0.3s ease",
               "@keyframes scaleIn": { "0%": { transform: "scale(0.9)", opacity: 0 }, "100%": { transform: "scale(1)", opacity: 1 } },
+                margin: "auto",
+                flexShrink: 0,
+                maxHeight: { xs: "90vh", md: "auto" },
             }}
           >
             <iframe

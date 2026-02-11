@@ -64,12 +64,6 @@ h6,
   font-weight: 600;
 }
 
-/* Home page section headings (our sweet categories, Cakes, Chocolates, Danbrew Mocktails, etc.) – override to Playfair Display */
-.home-section-heading,
-.home-section-heading h2,
-h2.home-section-heading {
-  font-family: 'Playfair Display', serif !important;
-}
 
 p,
 span,
