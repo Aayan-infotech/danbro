@@ -557,11 +557,6 @@ export const ProductSectionCarousel = memo(({
                     fontFamily: "'Space Grotesk', sans-serif",
                   }}
                 >
-                  {product?.productId && (
-                    <span>
-                      ID · {String(product.productId).slice(-12)}
-                    </span>
-                  )}
                   {(product?.courier === "Y" || product?.courier === "y") && (
                     <Box
                       component="span"

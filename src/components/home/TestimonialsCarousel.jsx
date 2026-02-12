@@ -10,7 +10,6 @@ import EmailIcon from "@mui/icons-material/Email";
 import CakeIcon from "@mui/icons-material/Cake";
 import ShieldIcon from "@mui/icons-material/Shield";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
-import TagIcon from "@mui/icons-material/Tag";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import { Link, useNavigate } from "react-router-dom";
 import { getAllReviews } from "../../utils/apiService";
@@ -38,14 +37,6 @@ const formatDate = (dateString) => {
   } catch {
     return "Recently";
   }
-};
-
-// Helper function to truncate ID
-const truncateId = (id) => {
-  if (!id) return "—";
-  const str = String(id);
-  if (str.length <= 12) return str;
-  return `${str.substring(0, 8)}…${str.substring(str.length - 4)}`;
 };
 
 // Map review data to testimonial format
@@ -398,20 +389,6 @@ const TestimonialCard = ({ item }) => {
           gap: "0.5rem",
         }}
       >
-        <Box
-          sx={{
-            background: "#f3eae7",
-            padding: "0.4rem 1.1rem",
-            borderRadius: "60px",
-            display: "flex",
-            alignItems: "center",
-            gap: "6px",
-            letterSpacing: "0.5px",
-          }}
-        >
-          <TagIcon sx={{ fontSize: { xs: "0.65rem", sm: "0.7rem", md: "0.75rem" } }} />
-          {truncateId(item.id)}
-        </Box>
         <Box
           sx={{
             background: "#f3eae7",

@@ -346,7 +346,7 @@ export const TestimonialsSection = () => {
                     px: { xs: 2, md: 0 },
                 }}
             >
-                {testimonialsList.map((t, i) => (
+                {testimonialsList?.map((t, i) => (
                     <Box
                         key={i}
                         onClick={() => setActive(i)}
@@ -397,7 +397,7 @@ export const TestimonialsSection = () => {
                     color: "var(--themeColor)",
                 }}
             >
-                {testimonialsList[safeActive]?.name}
+                {testimonialsList[safeActive]?.name}ffdsfsdfsdf
             </CustomText>
         </Box >
     );
